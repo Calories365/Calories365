@@ -209,7 +209,7 @@ const actions = {
                 })
                 .catch(result => {
                     context.commit(mutationTypes.registerFailure, result.response.data.errors);
-                    console.log('result my errors', result.response.data.errors);
+                    console.log('result1 errors', result.response.data.errors);
                 })
         })
     },
