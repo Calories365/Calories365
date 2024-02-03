@@ -54,7 +54,7 @@ export default {
          :class="{ 'hide': isSybmiting }">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm">
 
-
+            <h1>test</h1>
             <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
                 {{ $t('message.signInToYourAccount') }}</h2>
         </div>
