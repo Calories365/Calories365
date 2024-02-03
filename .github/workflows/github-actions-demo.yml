@@ -25,7 +25,7 @@ jobs:
         with:
           host: sc527094.ftp.tools
           username: sc527094
-          password: ${{ secrets.SSH_PASSWORD }}
+          password: VkC3L5r74m
           port: 22
           script: |
             export GIT_ASKPASS=echo && export GIT_USERNAME=maxim.kubichka@gmail.com && export GIT_PASSWORD=${{ secrets.PAT }}
