@@ -6,7 +6,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT }} # Используйте PAT для аутентификации
 
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-scripts --no-progress --no-suggest
@@ -22,14 +25,18 @@ jobs:
         with:
           host: sc527094.ftp.tools
           username: sc527094
-          password: VkC3L5r74m
+          password: ${{ secrets.SSH_PASSWORD }} # Используйте секрет для пароля
           port: 22
           script: |
             cd /home/sc527094/calories365.space/calculator
+            # Убедитесь, что вы предварительно добавили ваш публичный SSH ключ в разрешенные на сервере
+            # И что на сервере у вас настроен git репозиторий
             git pull origin main
-            composer install --no-dev --prefer-dist
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            # Другие команды, если они необходимы
+            # Добавьте здесь дополнительные команды для деплоя, если это необходимо
+
+#            composer install --no-dev --prefer-dist
+#            php artisan migrate --force
+#            php artisan config:cache
+#            php artisan route:cache
+#            php artisan view:cache
+#            # Другие команды, если они необходимы
