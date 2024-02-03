@@ -17,13 +17,19 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@master
         with:
-            server: sc527094.ftp.tools
-            username: ${{ secrets.FTP_USERNAME }} # Убедитесь, что этот секрет правильно установлен в настройках репозитория
-            password: ${{ secrets.FTP_PASSWORD }} # То же самое для этого секрета
-            port: 21 # Порт по умолчанию sxsдля FTP, вы можете опустить эту строку, так как 21 - это стандартный порт
-            protocol: ftp # Используйте протокол FTP
-            local-dir: ./ # Каталог, из которого будут загружаться файлы
-            dangerous-clean-slate: false # Не удалять файлы на сервере, которых нет в репозитории
+          host: sc527094.ftp.tools
+          username: sc527094
+          password: u589Z3KiSt
+          port: 22
+          script: |
+            cd /путь/к/директории/на/сервере/calories365.space/calculator
+            git pull origin main
+            composer install --no-dev --prefer-dist
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            # Другие команды, если они необходимы
