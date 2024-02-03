@@ -25,14 +25,12 @@ jobs:
         with:
           host: sc527094.ftp.tools
           username: sc527094
-          password: VkC3L5r74m # Используйте секрет для пароля
+          password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
+            export GIT_ASKPASS=echo && export GIT_USERNAME=maxim.kubichka@gmail.com && export GIT_PASSWORD=${{ secrets.PAT }}
             cd /home/sc527094/calories365.space/calculator
-            # Убедитесь, что вы предварительно добавили ваш публичный SSH ключ в разрешенные на сервере
-            # И что на сервере у вас настроен git репозиторий
             git pull origin main
-            # Добавьте здесь дополнительные команды для деплоя, если это необходимо
 
 #            composer install --no-dev --prefer-dist
 #            php artisan migrate --force
