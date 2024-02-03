@@ -28,7 +28,7 @@ jobs:
           password: VkC3L5r74m
           port: 22
           script: |
-            export GIT_ASKPASS=echo && export GIT_USERNAME=maxim.kubichka@gmail.com && export GIT_PASSWORD=${{ secrets.PAT }}
+            export GIT_ASKPASS=echo && export GIT_USERNAME=maxim.kubichka@gmail.com && export GIT_PASSWORD=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
             cd /home/sc527094/calories365.space/calculator
             git pull origin main
 
