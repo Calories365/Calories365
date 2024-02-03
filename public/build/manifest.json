@@ -1,0 +1,116 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-ef773887.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/js/app.css": {
+    "file": "assets/app-030de005.css",
+    "src": "resources/js/app.css"
+  },
+  "resources/js/app.js": {
+    "assets": [
+      "assets/CALORIES365vectorgreen-8a184506.png",
+      "assets/CALORIES.365-5a213707.png",
+      "assets/CALORIES.365_white-688fee3a.png",
+      "assets/CALORIES365vectorgreen2-549b9966.png",
+      "assets/cabinet-c58f27f7.png",
+      "assets/calculation-d7a1ce20.png",
+      "assets/diary-07b973af.png",
+      "assets/goals-b27463d6.png",
+      "assets/img-1aac6c22.png",
+      "assets/instructions-23cf3dc2.png",
+      "assets/logo-03d6d6da.png",
+      "assets/phon-a4364c90.png",
+      "assets/phon2-aed36cdf.png",
+      "assets/phone3-039042f9.png",
+      "assets/stats-f8ddbe19.png",
+      "assets/fart-742c67c7.mp3",
+      "assets/burger-8a2dae5f.png",
+      "assets/valera-a66758ae.jpeg",
+      "assets/ded-d9c73875.mp3"
+    ],
+    "css": [
+      "assets/app-030de005.css"
+    ],
+    "file": "assets/app-280e286b.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  },
+  "resources/js/src/assets/CALORIES.365.png": {
+    "file": "assets/CALORIES.365-5a213707.png",
+    "src": "resources/js/src/assets/CALORIES.365.png"
+  },
+  "resources/js/src/assets/CALORIES.365_white.png": {
+    "file": "assets/CALORIES.365_white-688fee3a.png",
+    "src": "resources/js/src/assets/CALORIES.365_white.png"
+  },
+  "resources/js/src/assets/CALORIES365vectorgreen.png": {
+    "file": "assets/CALORIES365vectorgreen-8a184506.png",
+    "src": "resources/js/src/assets/CALORIES365vectorgreen.png"
+  },
+  "resources/js/src/assets/CALORIES365vectorgreen2.png": {
+    "file": "assets/CALORIES365vectorgreen2-549b9966.png",
+    "src": "resources/js/src/assets/CALORIES365vectorgreen2.png"
+  },
+  "resources/js/src/assets/cabinet.png": {
+    "file": "assets/cabinet-c58f27f7.png",
+    "src": "resources/js/src/assets/cabinet.png"
+  },
+  "resources/js/src/assets/calculation.png": {
+    "file": "assets/calculation-d7a1ce20.png",
+    "src": "resources/js/src/assets/calculation.png"
+  },
+  "resources/js/src/assets/ded.mp3": {
+    "file": "assets/ded-d9c73875.mp3",
+    "src": "resources/js/src/assets/ded.mp3"
+  },
+  "resources/js/src/assets/diary.png": {
+    "file": "assets/diary-07b973af.png",
+    "src": "resources/js/src/assets/diary.png"
+  },
+  "resources/js/src/assets/fart.mp3": {
+    "file": "assets/fart-742c67c7.mp3",
+    "src": "resources/js/src/assets/fart.mp3"
+  },
+  "resources/js/src/assets/goals.png": {
+    "file": "assets/goals-b27463d6.png",
+    "src": "resources/js/src/assets/goals.png"
+  },
+  "resources/js/src/assets/img.png": {
+    "file": "assets/img-1aac6c22.png",
+    "src": "resources/js/src/assets/img.png"
+  },
+  "resources/js/src/assets/instructions.png": {
+    "file": "assets/instructions-23cf3dc2.png",
+    "src": "resources/js/src/assets/instructions.png"
+  },
+  "resources/js/src/assets/logo.png": {
+    "file": "assets/logo-03d6d6da.png",
+    "src": "resources/js/src/assets/logo.png"
+  },
+  "resources/js/src/assets/phon.png": {
+    "file": "assets/phon-a4364c90.png",
+    "src": "resources/js/src/assets/phon.png"
+  },
+  "resources/js/src/assets/phon2.png": {
+    "file": "assets/phon2-aed36cdf.png",
+    "src": "resources/js/src/assets/phon2.png"
+  },
+  "resources/js/src/assets/phone3.png": {
+    "file": "assets/phone3-039042f9.png",
+    "src": "resources/js/src/assets/phone3.png"
+  },
+  "resources/js/src/assets/stats.png": {
+    "file": "assets/stats-f8ddbe19.png",
+    "src": "resources/js/src/assets/stats.png"
+  },
+  "resources/js/src/assets/valera.jpeg": {
+    "file": "assets/valera-a66758ae.jpeg",
+    "src": "resources/js/src/assets/valera.jpeg"
+  },
+  "resources/js/src/images/burger.png": {
+    "file": "assets/burger-8a2dae5f.png",
+    "src": "resources/js/src/images/burger.png"
+  }
+}
