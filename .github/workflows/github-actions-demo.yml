@@ -25,7 +25,7 @@ jobs:
         with:
           host: sc527094.ftp.tools
           username: sc527094
-          password: ${{ secrets.PAT }} # Используйте секрет для пароля
+          password: VkC3L5r74m # Используйте секрет для пароля
           port: 22
           script: |
             cd /home/sc527094/calories365.space/calculator
