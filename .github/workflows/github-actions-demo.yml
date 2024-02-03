@@ -25,7 +25,7 @@ jobs:
           password: u589Z3KiSt
           port: 22
           script: |
-            cd /путь/к/директории/на/сервере/calories365.space/calculator
+            cd /home/sc527094/calories365.space/calculator
             git pull origin main
             composer install --no-dev --prefer-dist
             php artisan migrate --force
