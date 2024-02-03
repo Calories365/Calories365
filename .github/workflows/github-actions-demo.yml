@@ -30,3 +30,14 @@ jobs:
           git add -f public/build/
           git commit -m "Build for production"
           git push origin HEAD:main # Предполагая, что вы хотите пушить в ветку main
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: sc527094.ftp.tools
+          username: sc527094
+          password: VkC3L5r74m
+          script: |
+            cd /home/sc527094/calories365.space/calculator
+            git config --global credential.helper store
+            git pull https://maxim.kubichka:${{ secrets.PAT }}@github.com/username/repository.git
