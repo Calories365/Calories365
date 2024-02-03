@@ -201,9 +201,9 @@ const actions = {
     [actionTypes.register](context, credentials) {
         return new Promise(resolve => {
             context.commit(mutationTypes.registerStart)
+            console.log(111);
             authApi.register(credentials)
                 .then(response => {
-                    console.log(response)
                     context.commit(mutationTypes.registerSuccess, response.data.user);
                     resolve(response.data.user);
                 })
