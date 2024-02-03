@@ -2,8 +2,8 @@ import axios from "axios";
 import getCookie from "@/helpers/getCookie.js";
 // import {getItem} from "@/helpers/persistanceStorage";
 
-axios.defaults.baseURL = 'https://calories-working.test'
-// axios.defaults.baseURL = 'https://calculator.calories365.space'
+// axios.defaults.baseURL = 'https://calories-working.test'
+axios.defaults.baseURL = 'https://calculator.calories365.space'
 
 axios.defaults.withCredentials = true;
 
