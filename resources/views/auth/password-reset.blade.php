@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <form method="POST" action="{{ route('password.update') }}">
+        <input type="text" name="email" placeholder="Email">
+        <!-- Assuming there is a token field that is populated with a server-side variable -->
+        <input type="hidden" name="token" value="{{ $token }}">
+        <input type="password" name="password" placeholder="Password">
+        <input type="password" name="password_confirmation" placeholder="Password Again">
+        <!-- Submit button might be needed -->
+        <button type="submit">Reset Password</button>
+    </form>
+</body>
+</html>
+

@@ -1,0 +1,60 @@
+/*scss variables*/
+
+/*colors*/
+//$main-color: #73ae37;
+$default-font-size: 20px;
+$default-head-font-size: 35px;
+
+$mobile-default-font-size: 15px;
+$mobile-default-head-font-size: 20px;
+
+
+$main-color: #73ae37;;
+$header-bg-color: white;
+$header_boxshadow_color: #006646;
+$header-color: white;
+$pink_color: #ff00a8;
+$dark-green: #006646;
+$background-light-green: #f5f6ea;
+$background-light-green2: #EAF6EB;
+$background-light-blue: #EAF5F6;
+$background-light-purple: #EBEAF6;
+$background-light-gray: #f7f7f7;
+$background-hex: #e4f1ef;
+$lightgray: #c0c0c0;
+$darkgray: #a7a7a7;
+$contrastgray: #c4c4c4;
+$purple: #C9C6E7;
+$purple-contrast: #A7A2D8;
+$light-orange: #fce586;
+$background-pink: #F7847C;
+$burgundy: rgb(178,55,88);
+
+$product-counter-shadow: -5px 0px 5px -4px rgba(0, 0, 0, 0.24);
+$border-color: #dbd9d9;
+$background-color: #f0efef;
+
+/*screen sizes*/
+$bp-xsmall: 23.75em; //  380px
+/*iphone 14pro max*/
+$bp-xxsmall: 26.875em; //  430px
+$bp-small: 48em; // 768px
+$bp-medium: 64em; // 1024px
+$bp-large: 85.375em; // 1366px
+$bp-xlarge: 120em; // 1920px
+$bp-xxlarge: 160em; // 2560px
+
+/*media queries*/
+$mq-small: "(min-width: #{$bp-small})";
+$mq-medium: "(min-width: #{$bp-medium})";
+$mq-large: "(min-width: #{$bp-large})";
+$mq-xlarge: "(min-width: #{$bp-xlarge})";
+$mq-xxlarge: "(min-width: #{$bp-xxlarge})";
+$mq-retina: "(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)";
+
+/*Example:
+ @media #{$mq-medium} {
+    font-size: $base-font-size*1.2;
+    line-height: $base-line-height*1.2;
+  }
+*/
