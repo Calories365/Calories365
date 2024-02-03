@@ -19,22 +19,22 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: sc527094.ftp.tools
-          username: sc527094
-          password: VkC3L5r74m
-          port: 22
-          script: |
-            export GIT_ASKPASS=echo && export GIT_USERNAME=maxim.kubichka@gmail.com && export GIT_PASSWORD=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
-            cd /home/sc527094/calories365.space/calculator
-            git pull origin main
-
-#            composer install --no-dev --prefer-dist
-#            php artisan migrate --force
-#            php artisan config:cache
-#            php artisan route:cache
-#            php artisan view:cache
-#            # Другие команды, если они необходимы
+#
+#      - name: Deploy to server via SSH
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: sc527094.ftp.tools
+#          username: sc527094
+#          password: VkC3L5r74m
+#          port: 22
+#          script: |
+#            export GIT_ASKPASS=echo && export GIT_USERNAME=maxim.kubichka@gmail.com && export GIT_PASSWORD=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
+#            cd /home/sc527094/calories365.space/calculator
+#            git pull origin main
+#
+##            composer install --no-dev --prefer-dist
+##            php artisan migrate --force
+##            php artisan config:cache
+##            php artisan route:cache
+##            php artisan view:cache
+##            # Другие команды, если они необходимы
