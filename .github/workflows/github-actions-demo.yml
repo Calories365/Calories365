@@ -20,10 +20,10 @@ jobs:
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
-          ftp-server: ${{ secrets.FTP_SERVER }}
-          ftp-username: ${{ secrets.FTP_USERNAME }}
-          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./ # Указывает на каталог с файлами для загрузки
-          remote-dir: ${{ secrets.FTP_PATH }} # Путь на FTP сервере, куда будут загружаться файлы
+          server-dir: ${{ secrets.FTP_PATH }} # Путь на FTP сервере, куда будут загружаться файлы
           # Включаем удаление файлов в целевом каталоге, которых нет в репозитории
           dangerous-clean-slate: false
