@@ -39,5 +39,7 @@ jobs:
           password: VkC3L5r74m
           script: |
             cd /home/sc527094/calories365.space/calculator
+            git config --global user.name "Maaaaxim"
+            git config --global user.email "maxim.kubichka@gmail.com"
             git config --global credential.helper store
-            git pull https://maxim.kubichka:${{ secrets.PAT }}@github.com/username/repository.git
+            git pull https://Maaaaxim:${{ secrets.PAT }}@github.com/Maaaaxim/Calories365.git
