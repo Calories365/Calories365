@@ -24,7 +24,7 @@
         "confirmPassword": "Confirm Password",
         "registerYourAccount": "Register Your Account",
         "forgotPassword": "Forgot Password",
-        "calculatorSectionHead": "Calorie Calculator",
+        "calculatorSectionHead": "Calorie and Body Weight Calculator",
         "calculatorSectionDescription": "The number of calories you need to consume to lose weight, build muscle mass, or maintain your current weight depends on many factors, such as your gender, age, height, current weight, activity level, and others. Our calculator can take these data into account and calculate the optimal number of calories for you. It can also determine your basal metabolic rate, i.e., the number of calories your body needs to maintain basic functions. The Body Mass Index (BMI) calculator will help determine your current weight as underweight, normal, overweight, or indicate the presence of obesity, according to your BMI. Based on these calculations, an approximate daily calorie norm will be determined, which will help you achieve your weight goals.",
         "calculatorSectionHeadBodyWeight": "Body Weight Calculator",
         "calculatorSectionGenderButtonFemale": "Female",

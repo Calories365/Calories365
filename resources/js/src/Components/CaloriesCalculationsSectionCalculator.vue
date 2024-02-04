@@ -85,13 +85,6 @@ export default {
 <template>
     <section class="calculator-section">
         <p class="calculator-section_head">{{ $t('message.calculatorSectionHead') }}</p>
-
-        <p class="calculator-section_description">
-            {{ $t('message.calculatorSectionDescription') }}
-        </p>
-
-        <p class="calculator-section_head">{{ $t('message.calculatorSectionHeadBodyWeight') }}</p>
-
         <div class="calculator-section_gender-buttons-container">
             <button
                 class="calculator-section_gender-button"
@@ -155,6 +148,15 @@ export default {
                 />
             </div>
         </div>
+
+
+        <p class="calculator-section_description">
+            {{ $t('message.calculatorSectionDescription') }}
+        </p>
+
+<!--        <p class="calculator-section_head">{{ $t('message.calculatorSectionHeadBodyWeight') }}</p>-->
+
+
     </section>
 </template>
 
