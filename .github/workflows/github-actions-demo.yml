@@ -9,7 +9,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PAT }} # Используйте PAT для аутентификации
+          token: ${{ secrets.PAT }} # Используйте PAT для аутентификациио
 
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-scripts --no-progress --no-suggest
