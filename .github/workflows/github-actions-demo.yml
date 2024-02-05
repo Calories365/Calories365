@@ -4,7 +4,6 @@ on: [push]
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-#    if: github.actor == 'Maaaaxim'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
