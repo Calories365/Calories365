@@ -118,6 +118,7 @@ const actions = {
                     localStorage.setItem('calculationData', currentData);
                     const message = i18n.global.t('Notification.Success.ResultWasSaved');
                     context.dispatch('setSuccess', message, { root: true });
+
                     resolve();
                 })
                 .catch(error => {
@@ -133,24 +134,93 @@ const actions = {
     [actionTypes.countResults](context, data) {
         return new Promise((resolve, reject) => {
 
-            let result = {};
 
-            if (data.checkboxActive) {
-                result.bmr = Math.round(KatchMcArdleBMR(data.weight, data.height, data.fat));
+            validation(data)
+                .then(() => {
 
-            } else {
-                result.bmr = Math.round(HarrisBenedictBMR(data.gender, data.birthYear, data.weight, data.height));
+                    let result = {};
+
+                    if (data.checkboxActive) {
+                        result.bmr = Math.round(KatchMcArdleBMR(data.weight, data.height, data.fat));
+
+                    } else {
+                        result.bmr = Math.round(HarrisBenedictBMR(data.gender, data.birthYear, data.weight, data.height));
+                    }
+
+                    let goal = determineGoal(data.weight, data.goalWeight);
+
+                    result.bmi = parseFloat(calculateBMI(data.weight, data.height).toFixed(2));
+
+                    result.humanWeightClassifications = determineBMICategory(result.bmi);
+
+                    result.dailyCalories = Math.round(calculateDailyCalories(result.bmr, Number(data.activity), Number(goal)));
+
+                    result.PFC = determineMacronutrientPercentages(data.fat, Number(data.activity), Number(goal));
+
+                    result.daysRequired = Math.round(calculateWeightLossTime(data.weight, data.goalWeight, result.dailyCalories, result.bmr, Number(data.activity)));
+
+                    context.commit(mutationTypes.countResults, {results: result, data: data});
+
+                    const message = i18n.global.t('Notification.Success.Result');
+
+                    context.dispatch('setSuccess', message, {root: true});
+
+                    resolve(result);
+                })
+                .catch(error => {
+                    // If validation fails, log the error and resolve the main promise with false
+                    console.error('Validation error:', error.message);
+                    resolve(false);  // resolve with false instead of reject to indicate validation failure
+                });
+
+            function validation(data) {
+                return new Promise((resolve, reject) => {
+                    let messageKey = "";
+
+                    // Validate birthYear (reasonable age)
+                    const currentYear = new Date().getFullYear();
+                    if (data.birthYear < 1900 || data.birthYear > currentYear) {
+                        messageKey = "Notification.Error.invalidBirthYear";
+                    }
+
+                    // Validate fat percentage (reasonable range)
+                    if (data.fat < 0 || data.fat > 80) {
+                        messageKey = "Notification.Error.invalidFatPercentage";
+                    }
+
+                    // Validate gender
+                    if (!["male", "female"].includes(data.gender)) {
+                        messageKey = "Notification.Error.invalidGender";
+                    }
+
+                    // Validate goalWeight (reasonable weight)
+                    if (data.goalWeight < 10 || data.goalWeight > 300) {
+                        messageKey = "Notification.Error.invalidGoalWeight";
+                    }
+
+                    // Validate height (reasonable height in cm)
+                    if (data.height < 30 || data.height > 300) {
+                        messageKey = "Notification.Error.invalidHeight";
+                    }
+
+                    // Validate weight (reasonable weight in kg)
+                    if (data.weight < 20 || data.weight > 300) {
+                        messageKey = "Notification.Error.invalidWeight";
+                    }
+
+                    if (messageKey !== "") {
+                        const message = i18n.global.t("Notification.Error.invalidData");
+                        context.dispatch('setError', message, {root: true});
+                        reject(new Error(message));  // reject validation promise if there's an error
+                    } else {
+                        resolve();  // resolve validation promise if all checks pass
+                    }
+                });
             }
 
-            result.bmi = parseFloat(calculateBMI(data.weight, data.height).toFixed(2));
 
-            result.humanWeightClassifications = determineBMICategory(result.bmi);
 
-            result.dailyCalories = Math.round(calculateDailyCalories(result.bmr, Number(data.activity), Number(data.goal)));
 
-            result.PFC = determineMacronutrientPercentages(data.fat, Number(data.activity), Number(data.goal));
-
-            result.daysRequired = Math.round(calculateWeightLossTime(data.weight, data.goalWeight, result.dailyCalories, result.bmr, Number(data.activity)));
 
             function HarrisBenedictBMR(gender, birthYear, weight, height) {
                 const currentYear = new Date().getFullYear();
@@ -199,6 +269,18 @@ const actions = {
                 }
             }
 
+            function determineGoal(weight, goalWeight) {
+                if (weight > goalWeight) {
+                    return 1;
+                }
+                if (weight === goalWeight) {
+                    return 2;
+                }
+                if (weight < goalWeight) {
+                    return 3;
+                }
+            }
+
             function calculateDailyCalories(bmr, activityLevel, goal) {
 
                 let dailyCalories = calculateMaintenanceCalories(bmr, activityLevel);
@@ -240,7 +322,7 @@ const actions = {
                         activityMultiplier = 1.725;
                         break;
                     default:
-                        throw new Error('Invalid activity level');
+                        activityMultiplier = 1;
                 }
 
                 return bmr * activityMultiplier;
@@ -283,9 +365,7 @@ const actions = {
                 return Math.abs(daysRequired);
             }
 
-            context.commit(mutationTypes.countResults, {results: result, data: data});
 
-            resolve(result);
         })
     }
 }

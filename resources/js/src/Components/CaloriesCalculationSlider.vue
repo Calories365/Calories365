@@ -73,8 +73,9 @@ export default {
 
         <div class="input-container">
 
-            <input :class="{ 'inactive': !isCheckboxActive && checkBox }" type="text" class="styled-input"
+            <input :class="{ 'inactive': !isCheckboxActive && checkBox }" type="number" class="styled-input"
                    :value="variable"
+                   :min="from" :max="to"
                    @input="updateVariable">
 
             <input class="calories-checkBox" v-if="checkBox" type="checkbox" id="scales" name="scales"
@@ -88,6 +89,7 @@ export default {
 </template>
 
 <style scoped lang="scss">
+
 .inactive {
     opacity: 0.5; /* делает содержимое полупрозрачным */
     pointer-events: none; /* предотвращает взаимодействие с элементами */

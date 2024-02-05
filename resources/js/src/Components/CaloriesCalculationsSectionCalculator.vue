@@ -13,10 +13,10 @@ export default {
         return {
             isActive: false,
             gender: "female",
-            birthYear: 0,
-            weight: 0,
-            height: 0,
-            goalWeight: 0,
+            birthYear: 1900,
+            weight: 30,
+            height: 100,
+            goalWeight: 60,
             fat: 0,
             activity: 0,
             goal: 0,
@@ -140,12 +140,12 @@ export default {
                                                :value="activity"
                                                @update="activity = $event"
                 />
-                <calories-calculation-dropdown class="calculator-section_dropdown"
-                                               :name="$t('message.caloriesCalculationDropdownGoal')"
-                                               :options="translatedGoals"
-                                               :value="goal"
-                                               @update="goal = $event"
-                />
+<!--                <calories-calculation-dropdown class="calculator-section_dropdown"-->
+<!--                                               :name="$t('message.caloriesCalculationDropdownGoal')"-->
+<!--                                               :options="translatedGoals"-->
+<!--                                               :value="goal"-->
+<!--                                               @update="goal = $event"-->
+<!--                />-->
             </div>
         </div>
 

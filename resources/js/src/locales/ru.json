@@ -107,7 +107,8 @@
             "ResultWasSaved": "Результат сохранен",
             "PasswordWasUpdated": "Пароль был обновлен",
             "NameWasUpdated": "Имя было обновлено",
-            "PasswordUpdated": "Пароль обновлен"
+            "PasswordUpdated": "Пароль обновлен",
+            "Result": "Ваш результат ниже"
         },
         "Error": {
             "ProductAdditionFailed": "Не удалось добавить продукт",
@@ -117,7 +118,16 @@
             "PasswordUpdatedFailed": "Не удалось обновить пароль",
             "NameUpdationFiled": "Не удалось обновить имя",
             "NeedAuth": "Вы должны быть авторизованы",
-            "Errors": "Ошибки"
+            "Errors": "Ошибки",
+            "invalidActivity": "Недопустимый уровень активности.",
+            "invalidBirthYear": "Недопустимый год рождения.",
+            "invalidFatPercentage": "Недопустимый процент жира.",
+            "invalidGender": "Недопустимый пол.",
+            "invalidGoal": "Недопустимая цель.",
+            "invalidGoalWeight": "Недопустимый целевой вес.",
+            "invalidHeight": "Недопустимый рост.",
+            "invalidWeight": "Недопустимый вес.",
+            "invalidData": "Недопустимые данные."
         }
     },
     "Cabinet": {

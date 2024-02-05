@@ -107,7 +107,8 @@
             "ResultWasSaved": "Result was saved",
             "PasswordWasUpdated": "Password was updated",
             "NameWasUpdated": "Name was updated",
-            "PasswordUpdated": "Password updated"
+            "PasswordUpdated": "Password updated",
+            "Result": "Your result below"
 
         },
         "Error": {
@@ -118,7 +119,16 @@
             "PasswordUpdatedFailed": "Failed to update password",
             "NameUpdationFailed": "Failed to update name",
             "NeedAuth": "You need to be authenticated",
-            "Errors": "Errors"
+            "Errors": "Errors",
+            "invalidActivity": "Invalid activity level.",
+            "invalidBirthYear": "Invalid birth year.",
+            "invalidFatPercentage": "Invalid fat percentage.",
+            "invalidGender": "Invalid gender.",
+            "invalidGoal": "Invalid goal.",
+            "invalidGoalWeight": "Invalid goal weight.",
+            "invalidHeight": "Invalid height.",
+            "invalidWeight": "Invalid weight.",
+            "invalidData": "Invalid data."
         }
     },
     "Cabinet": {

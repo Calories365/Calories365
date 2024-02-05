@@ -27,6 +27,7 @@ export default {
         return {
             isOpen: false,
             isActive: false,
+            isActiveArrow: false,
             isHiding: false,
         }
     },
@@ -40,12 +41,15 @@ export default {
         toggleActive() {
             if (!this.isActive) {
                 this.isActive = true;
+                this.isActiveArrow = true;
             } else {
                 this.startHideAnimation();
             }
         },
         startHideAnimation() {
             this.isHiding = true; // Новая переменная данных для контроля анимации
+            this.isActiveArrow = false;
+
             setTimeout(() => {
                 this.isActive = false;
                 this.isHiding = false;
@@ -86,8 +90,8 @@ export default {
             </div>
 
             <div class="calculation-select_arrow">
-                <!--                <font-awesome-icon :icon="['fas', 'angle-down']"/>-->
-                <span class="dropdown-arrow"></span>
+                <span class="dropdown-arrow"
+                      :class="{ 'active': isActiveArrow}"></span>
             </div>
         </div>
 
@@ -99,18 +103,21 @@ export default {
 <style scoped lang="scss">
 .dropdown-arrow {
     display: inline-block;
-    //position: absolute;
-    //top: 26%;
-    transform: translateY(-50%);
+    //position: absolute;ч
+    transform: translateY(-15%) rotate(-45deg);
     content: "";
     margin-left: 6px;
     width: 10px;
     height: 10px;
     border-left: 2px solid #666666;
     border-bottom: 2px solid #666666;
-    transform: rotate(-45deg);
+    //transform: rotate(-45deg);
     transition: 0.3s ease;
     padding: 7px;
+
+    &.active {
+        transform: translateY(45%) rotate(135deg);
+    }
 }
 
 .dropdown-section {

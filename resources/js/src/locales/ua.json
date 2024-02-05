@@ -107,7 +107,8 @@
             "ResultWasSaved": "Результат збережено",
             "PasswordWasUpdated": "Пароль був оновлений",
             "NameWasUpdated": "Ім'я було оновлено",
-            "PasswordUpdated": "Пароль оновлено"
+            "PasswordUpdated": "Пароль оновлено",
+            "Result": "Ваш результат нижче"
         },
         "Error": {
             "ProductAdditionFailed": "Не вдалося додати продукт",
@@ -117,7 +118,16 @@
             "PasswordUpdatedFailed": "Не вдалося оновити пароль",
             "NameUpdationFailed": "Не вдалося оновити ім'я",
             "NeedAuth": "Вам потрібно авторизуватися",
-            "Errors": "Помилки"
+            "Errors": "Помилки",
+            "invalidActivity": "Неприпустимий рівень активності.",
+            "invalidBirthYear": "Неприпустимий рік народження.",
+            "invalidFatPercentage": "Неприпустимий відсоток жиру.",
+            "invalidGender": "Неприпустима стать.",
+            "invalidGoal": "Неприпустима мета.",
+            "invalidGoalWeight": "Неприпустима цільова вага.",
+            "invalidHeight": "Неприпустимий зріст.",
+            "invalidWeight": "Неприпустима вага.",
+            "invalidData": "Неприпустимi данi."
         }
     },
     "Cabinet": {
