@@ -5,7 +5,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-e02a8209.css",
+    "file": "assets/app-4a0b69d5.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -31,9 +31,9 @@
       "assets/ded-d9c73875.mp3"
     ],
     "css": [
-      "assets/app-e02a8209.css"
+      "assets/app-4a0b69d5.css"
     ],
-    "file": "assets/app-cd44a62b.js",
+    "file": "assets/app-d31dc8c9.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },

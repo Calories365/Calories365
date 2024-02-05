@@ -4,7 +4,7 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "build-and-push": "npm run build && git add -A && git commit -m 'Build for production' && git push"
+        "build-and-push": "npm run build && git add -A && git commit -m \"$COMMIT_MSG\" && git push"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.16",
