@@ -149,7 +149,6 @@ export default {
             </div>
         </div>
 
-<h1>444</h1>
         <p class="calculator-section_description">
             {{ $t('message.calculatorSectionDescription') }}
         </p>

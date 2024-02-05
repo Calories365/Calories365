@@ -63,8 +63,6 @@ export default {
 
                 <calories-errors :validation-errors=validationErrors v-if="validationErrors"></calories-errors>
 
-                <h1>333</h1>
-
                 <div>
                     <label for="email" class="block text-sm font-medium leading-6 text-gray-900">{{
                             $t('message.emailAddress')
