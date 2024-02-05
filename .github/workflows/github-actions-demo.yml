@@ -19,10 +19,10 @@ jobs:
 #      - name: Build
 #        run: npm run build
 #
-#      - name: Configure Git
-#        run: |
-#          git config user.name Maaaaxim
-#          git config user.email maxim.kubichka@gmail.com
+      - name: Configure Git
+        run: |
+          git config user.name Maaaaxim
+          git config user.email maxim.kubichka@gmail.com
 #
 #      - name: Commit and Push
 #        run: |
