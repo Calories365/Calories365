@@ -4,9 +4,11 @@ import getCookie from "@/helpers/getCookie.js";
 
 const APP_DEBUG = import.meta.env.VITE_APP_DEBUG;
 
-if (APP_DEBUG) {
+if (APP_DEBUG === "true") {
+    console.log(111)
     axios.defaults.baseURL = 'https://calories-working.test'
 } else {
+    console.log(222)
     axios.defaults.baseURL = 'https://calculator.calories365.space'
 }
 
