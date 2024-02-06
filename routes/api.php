@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user()->only(['email', 'name', 'email_verified_at', 'calories_limit']);
+    return $request->user()->only(['email', 'name', 'email_verified_at', 'calories_limit', 'id']);
 });
 
 //Route::group(['namespace' => 'App\Http\Controllers'], function () {

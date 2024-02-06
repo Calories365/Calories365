@@ -27,10 +27,18 @@ export default createStore({
             state.isSuccess = null;
             state.isError = null;
         },
+        RESET_ERROR(state) {
+            state.isError = null;
+        },
+        RESET_SUCCESS(state) {
+            state.isSuccess = null;
+        },
     },
     actions: {
         setSuccess({commit}, payload) {
             commit('SET_SUCCESS', payload);
+            commit('RESET_ERROR');
+
             if (payload !== null) {
                 setTimeout(() => {
                     commit('RESET_NOTIFICATION');
@@ -39,6 +47,7 @@ export default createStore({
         },
         setError({commit}, payload) {
             commit('SET_ERROR', payload);
+            commit('RESET_SUCCESS');
             if (payload !== null) {
                 setTimeout(() => {
                     commit('RESET_NOTIFICATION');

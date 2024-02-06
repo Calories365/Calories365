@@ -41,7 +41,7 @@ export default {
         },
         calculateResults: debounce(function () {
             this.$store.dispatch(actionTypes.countResults, this.transformData());
-        }, 500),
+        }, 1000),
     },
     computed: {
         ...mapState({
@@ -68,6 +68,14 @@ export default {
     mounted() {
         if (this.currentUser) {
             this.$store.dispatch(actionTypes.getCalculationData)
+                .then((data) => {
+                    for (const key in data) {
+                        this[key] = data[key]
+                    }
+                    this.$store.dispatch(actionTypes.countResults, data)
+                });
+        } else {
+            this.$store.dispatch(actionTypes.getCalculationDataNotAuth)
                 .then((data) => {
                     for (const key in data) {
                         this[key] = data[key]

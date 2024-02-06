@@ -72,7 +72,7 @@ class CalculationController extends Controller
         User::where('id', $userId)->update(['calories_limit' => $validatedData['dailyCalories']]);
 
         // Удаление поля dailyCalories из массива, так как оно уже сохранено в таблице users
-        unset($validatedData['dailyCalories']);
+//        unset($validatedData['dailyCalories']);
 
         // Добавление user_id текущего пользователя в массив для сохранения
         $validatedData['user_id'] = $userId;
@@ -102,7 +102,7 @@ class CalculationController extends Controller
 
         // Проверка, существует ли запись
         if (!$userResult) {
-            return response()->json(['message' => 'Record not found'], 404);
+            return response()->json(['message' => 'Record not found']);
         }
 
         // Возвращение данных с использованием CalculationResource

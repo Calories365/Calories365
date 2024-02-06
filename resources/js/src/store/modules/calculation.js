@@ -20,6 +20,20 @@ const state = {
 
     },
 }
+export const getterTypes = {
+    dataKey: '[calculation] dataKey',
+}
+
+//геттеры глобальные, но в данном случае они получают локальное состояние
+const getters = {
+    [getterTypes.dataKey]: (state, getters, rootState) => {
+        if (rootState.auth.currentUser) {
+            return `calculationData${rootState.auth.currentUser.id}`
+        } else {
+            return false;
+        }
+    },
+}
 
 export const mutationTypes = {
     getCalculationDataStart: '[calculation] get calculation data Start',
@@ -35,6 +49,7 @@ export const mutationTypes = {
 }
 export const actionTypes = {
     getCalculationData: '[calculation] Get calculation data',
+    getCalculationDataNotAuth: '[calculation] Get calculation data not auth',
     saveCalculationData: '[calculation] Save calculation data',
     countResults: '[calculation] count results',
 }
@@ -70,8 +85,14 @@ const actions = {
         return new Promise((resolve, reject) => {
             context.commit(mutationTypes.getCalculationDataStart);
 
-            const savedData = localStorage.getItem('calculationData');
-            // const savedData = false;
+
+            const key = context.getters[getterTypes.dataKey];
+            let savedData;
+            if (key) {
+                savedData = localStorage.getItem(key);
+            } else {
+                savedData = false;
+            }
             if (savedData) {
                 console.log('Данные взяты из локального хранилища. Запрос не отправлен.');
                 const parsedData = JSON.parse(savedData);
@@ -82,10 +103,19 @@ const actions = {
 
             calculationApi.getCalculationData()
                 .then(response => {
-                    context.commit(mutationTypes.getCalculationDataSuccess, response.data);
-                    console.log('Ответ сервера:', response.data);
-                    localStorage.setItem('calculationData', JSON.stringify(response.data));
-                    resolve(response.data);
+                    if (response.data.message === 'Record not found') {
+                        savedData = localStorage.getItem('calculationData');
+                        if (savedData) {
+                            const parsedData = JSON.parse(savedData);
+                            context.commit(mutationTypes.getCalculationDataSuccess, parsedData);
+                            resolve(parsedData);
+                        }
+                    } else {
+                        context.commit(mutationTypes.getCalculationDataSuccess, response.data);
+                        console.log('Ответ сервера:', response.data);
+                        localStorage.setItem(key, JSON.stringify(response.data));
+                        resolve(response.data);
+                    }
                 })
                 .catch(error => {
                     console.log('Ошибка при получении данных:', error);
@@ -94,11 +124,26 @@ const actions = {
                 });
         });
     },
+    [actionTypes.getCalculationDataNotAuth](context) {
+        return new Promise((resolve, reject) => {
+            context.commit(mutationTypes.getCalculationDataStart);
 
+
+            const savedData = localStorage.getItem('calculationData');
+
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                context.commit(mutationTypes.getCalculationDataSuccess, parsedData);
+                resolve(parsedData);
+            }
+        });
+    },
     [actionTypes.saveCalculationData](context) {
         return new Promise((resolve, reject) => {
             const data = context.state.userData;
-            const savedData = localStorage.getItem('calculationData');
+            const key = context.getters[getterTypes.dataKey];
+
+            const savedData = localStorage.getItem(key);
             const currentData = JSON.stringify(data);
 
             if (savedData === currentData) {
@@ -110,12 +155,15 @@ const actions = {
             context.commit(mutationTypes.saveCalculationDataStart);
 
             data.dailyCalories = context.state.userResults.dailyCalories;
-
+            console.log('111: ', data.dailyCalories);
+            console.log('222: ', data);
             calculationApi.saveCalculationData(data)
                 .then(response => {
                     context.commit(mutationTypes.saveCalculationDataSuccess);
                     console.log('Ответ сервера:', response);
-                    localStorage.setItem('calculationData', currentData);
+                    const key = context.getters[getterTypes.dataKey];
+
+                    localStorage.setItem(key, currentData);
                     const message = i18n.global.t('Notification.Success.ResultWasSaved');
                     context.dispatch('setSuccess', message, { root: true });
 
@@ -124,16 +172,14 @@ const actions = {
                 .catch(error => {
                     console.log('Ошибка при сохранении данных:', error);
                     context.commit(mutationTypes.saveCalculationDataFailure);
-                    const message = i18n.global.t('Notification.Success.ResultSaveFailed');
+                    const message = i18n.global.t('Notification.Error.ResultSaveFailed');
                     context.dispatch('setError', message, { root: true });
                     reject(error);
                 });
         });
     },
-
     [actionTypes.countResults](context, data) {
         return new Promise((resolve, reject) => {
-
 
             validation(data)
                 .then(() => {
@@ -164,6 +210,12 @@ const actions = {
                     const message = i18n.global.t('Notification.Success.Result');
 
                     context.dispatch('setSuccess', message, {root: true});
+
+                    const key = context.getters[getterTypes.dataKey];
+
+                    if (!localStorage.getItem(key)) {
+                        localStorage.setItem('calculationData', JSON.stringify(data));
+                    }
 
                     resolve(result);
                 })
@@ -375,4 +427,5 @@ export default {
     state,
     actions,
     mutations,
+    getters
 }

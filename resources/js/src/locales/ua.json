@@ -108,7 +108,7 @@
             "PasswordWasUpdated": "Пароль був оновлений",
             "NameWasUpdated": "Ім'я було оновлено",
             "PasswordUpdated": "Пароль оновлено",
-            "Result": "Ваш результат нижче"
+            "Result": "Дані враховано, Ваш результат нижче"
         },
         "Error": {
             "ProductAdditionFailed": "Не вдалося додати продукт",
