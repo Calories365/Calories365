@@ -79,7 +79,6 @@ export default {
                     @update="isOpen = $event"
                 />
 
-
                 <calories-add-btn class="dairy-section__addBtn" @click="toggleMenu"/>
 
             </div>

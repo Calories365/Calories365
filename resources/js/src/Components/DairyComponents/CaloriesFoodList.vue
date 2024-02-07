@@ -227,10 +227,6 @@ export default {
         align-items: center;
         gap: 10px;
         pointer-events: none;
-        //// У &__right другой gap
-        //@if (& == &__right) {
-        //    gap: 20px;
-        //}
     }
 
     &__close {

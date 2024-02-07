@@ -103,7 +103,7 @@ export default {
             </svg>
         </div>
 
-        <form action="" class="slide-menu__form">
+        <form @submit.prevent="" class="slide-menu__form">
 
             <input
                 class="slide-menu__input"
