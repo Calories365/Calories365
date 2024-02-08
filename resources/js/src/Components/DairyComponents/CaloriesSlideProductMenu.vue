@@ -105,7 +105,9 @@ export default {
                                 </div>
                                 <div class="input-container">
                                     <input type="text" class="styled-input" v-model="quantity">
+                                    <span class="input_description">{{ $t('Diary.Grams') }}</span>
                                 </div>
+
                             </div>
                             <ul class="product-counter__portions desktop">
                                 <li class="product-counter__one-portion">
@@ -482,6 +484,24 @@ export default {
 
 .input-container {
     position: relative;
+}
+
+.input_description {
+    position: absolute;
+    top: 15%;
+    left: -70%;
+
+    padding: 10px;
+    font-family: "Roboto", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 22px;
+    text-transform: uppercase;
+
+    @media (max-width: 768px) {
+        left: 110%;
+        font-size: 12px;
+    }
 }
 
 .users-data-section {

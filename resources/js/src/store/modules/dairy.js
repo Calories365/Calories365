@@ -412,8 +412,9 @@ const actions = {
 
             context.commit(mutationTypes.getSearchedProductsStart);
 
+            const trimedQuery = payload.query.trim()
 
-            authApi.getSearchedProducts(payload.query, payload.page)
+            authApi.getSearchedProducts(trimedQuery, payload.page)
                 .then(response => {
 
                     const products = response.data.products.data;
