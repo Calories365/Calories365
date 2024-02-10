@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cc11c5acf4da65f2fa9ca4e1c9f12aea",
+    "content-hash": "33393bca950faac934a78913b6c51817",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2396,6 +2396,44 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v4.17.1"
             },
             "time": "2023-08-13T19:53:39+00:00"
+        },
+        {
+            "name": "noodlesnz/double-metaphone",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/NoodlesNZ/double-metaphone.git",
+                "reference": "6c310f65650472efef10fde994dff69787fb1b06"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/NoodlesNZ/double-metaphone/zipball/6c310f65650472efef10fde994dff69787fb1b06",
+                "reference": "6c310f65650472efef10fde994dff69787fb1b06",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Nick Le Mouton",
+                    "email": "nick@noodles.net.nz"
+                }
+            ],
+            "description": "This class implements a \"sounds like\" algorithm developed by Lawrence Philips which he published in the June, 2000 issue of C/C++ Users Journal. Double Metaphone is an improved version of Philips' original Metaphone algorithm.",
+            "homepage": "https://github.com/NoodlesNZ/double-metaphone",
+            "support": {
+                "issues": "https://github.com/NoodlesNZ/double-metaphone/issues",
+                "source": "https://github.com/NoodlesNZ/double-metaphone/tree/master"
+            },
+            "time": "2016-04-08T23:31:47+00:00"
         },
         {
             "name": "nunomaduro/termwind",

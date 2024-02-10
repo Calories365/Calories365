@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ProductCollection;
 use App\Models\FoodConsumption;
 use App\Models\Product;
+use DoubleMetaphone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use voku\helper\ASCII;
 
 
 class DairyController extends Controller
@@ -157,16 +159,20 @@ class DairyController extends Controller
     public function getSearchedMeal(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = $request->input('query'); // Получение поисковой строки из параметров запроса
+        $query = ASCII::to_transliterate($query);
         $locale = app()->getLocale();
 
         Log::info('Request data received in getSearchedMeal:', $request->all());
 
+        // Преобразование запроса в DoubleMetaphone
+        $doubleMetaphone = new DoubleMetaphone($query);
+        $encodedQuery = $doubleMetaphone->primary; // Используем первичное кодирование для поиска
 
         try {
             $products = DB::table('products')
                 ->join('product_translations', 'products.id', '=', 'product_translations.product_id')
                 ->where('product_translations.locale', '=', $locale)
-                ->where('product_translations.name', 'LIKE', '%' . $query . '%')
+                ->where('product_translations.double_metaphoned_name', 'LIKE', "%{$encodedQuery}%")
                 ->select(
                     'products.id',
                     'products.calories',
@@ -176,12 +182,21 @@ class DairyController extends Controller
                     'products.fibers',
                     'product_translations.name as name'
                 )
+                ->orderByRaw("
+                    CASE
+                        WHEN double_metaphoned_name = ? THEN 1
+                        WHEN double_metaphoned_name LIKE ? THEN 2
+                        WHEN double_metaphoned_name LIKE ? THEN 4
+                        ELSE 3
+                    END, double_metaphoned_name ASC
+                ", [$encodedQuery, "{$encodedQuery}%", "%{$encodedQuery}"])
                 ->paginate(10); // Пагинация для 10 записей на страницу
+
 
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
+            Log::error('Failed to search for meals with DoubleMetaphone', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to search for meals'], 500);
         }
     }
-
 }
