@@ -82,6 +82,8 @@ export default {
 }
 
 .navbar {
+    width: 75%;
+    margin: 0 auto;
     padding: 0;
     cursor: pointer;
 

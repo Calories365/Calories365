@@ -31,7 +31,7 @@ export default {
             this.quantity = 1;
         },
         addProduct() {
-
+            if (this.quantity > 0 && this.quantity < 1250) {
             if (this.action === 'add') {
                 this.$store.dispatch(actionTypes.saveCurrentProducts,
                     {
@@ -45,6 +45,9 @@ export default {
             }
             this.$emit('update', !this.isOpen);
             this.quantity = 1;
+            } else {
+                this.$store.dispatch('setError', this.$t('Notification.Error.invalidData'));
+            }
         },
     },
     watch: {

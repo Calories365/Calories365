@@ -41,6 +41,7 @@ export default {
         searchProducts() {
             if (this.query) {
                 this.$store.commit(diaryMutations.clearProducts);
+                this.page = 1;
                 this.$store.dispatch(actionTypes.getSearchedProducts, {query: this.query, page: this.page})
                     .then((total) => {
                         this.totalPage = Math.ceil(total / 10);
@@ -48,6 +49,12 @@ export default {
                     })
             }
         },
+        searchProductsViaObserverClick() {
+            if (this.page >= 1 && this.query && this.page < this.totalPage) {
+                this.$store.dispatch(actionTypes.getSearchedProducts, {query: this.query, page: this.page})
+                this.page++;
+            }
+        }
     },
     watch: {
         query: debounce(function (newQuery) {
@@ -139,6 +146,13 @@ export default {
                     v-if="products"
                     ref="calories-observer"
                     class="calories-observer">
+                    <div
+                        class="calories-observer__text"
+                        @click="searchProductsViaObserverClick">
+                    <span>
+                        еще товары
+                    </span>
+                    </div>
                 </div>
 
             </ul>
@@ -165,11 +179,6 @@ export default {
         right: 0;
     }
 
-    &.slide-menu_inactive {
-        //display: none;
-    }
-
-
     &__wrapper {
         padding: 15px 0 0 0;
         align-items: center;
@@ -185,7 +194,6 @@ export default {
 
         @media (max-width: 768px) {
             width: 20px;
-            //height: 15px;
         }
     }
 
@@ -230,7 +238,6 @@ export default {
             font-size: 15px;
             line-height: 22px;
             letter-spacing: 0.05rem;
-            //text-transform: uppercase;
         }
     }
 
@@ -301,6 +308,17 @@ export default {
 }
 
 .calories-observer {
+    cursor: pointer;
     height: 30px;
+
+    &__text {
+        text-align: center;
+        margin-top: 30px;
+        font-family: "Roboto", sans-serif;
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 22px;
+        letter-spacing: 0.05rem;
+    }
 }
 </style>
