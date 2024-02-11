@@ -136,6 +136,8 @@ export default {
     padding: 50px;
 
     &_wrapper {
+        width: 90%;
+        margin: 0 auto;
         display: grid;
         justify-content: space-between;
         grid-template-columns: minmax(300px, 1fr)  minmax(300px, 1fr)  minmax(300px, 1fr);
