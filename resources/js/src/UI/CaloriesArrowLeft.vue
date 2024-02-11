@@ -11,6 +11,7 @@ export default {
 
 <style scoped lang="scss">
 .arrow-left {
+    cursor: pointer;
     width: 0;
     height: 0;
     border-top: 10px solid transparent;
