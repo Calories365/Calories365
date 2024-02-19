@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('food_consumptions', function (Blueprint $table) {
-            $table->renameColumn('day_part', 'part_of_day');
+            // Проверка на существование столбца перед переименованием
+            if (Schema::hasColumn('food_consumptions', 'day_part')) {
+                $table->renameColumn('day_part', 'part_of_day');
+            }
         });
     }
 
@@ -22,7 +25,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('food_consumptions', function (Blueprint $table) {
-            $table->renameColumn('part_of_day', 'day_part');
+            // Проверка на существование столбца перед переименованием обратно
+            if (Schema::hasColumn('food_consumptions', 'part_of_day')) {
+                $table->renameColumn('part_of_day', 'day_part');
+            }
         });
     }
 };
