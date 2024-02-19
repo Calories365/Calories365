@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('food_consumptions', function (Blueprint $table) {
-            $table->string('day_part')->after('quantity')->nullable();
+            $table->string('part_of_day')->after('quantity')->nullable();
         });
     }
 
