@@ -1,35 +1,29 @@
 import axios from "@/api/axios";
 
-// const getPopularProducts = () => {
-//     return axios.get('/api/getPopularProducts')
-// }
-
 const getPopularProducts = () => {
-    const response = axios.get('/api/getPopularProducts');
-    console.log('response ', response);
-    return response;
+    return axios.get('/api/products/popular');
 }
 const saveCurrentProducts = credentials => {
-    return axios.post('/api/saveMeal', credentials)
+    return axios.post('/api/meals', credentials)
 }
-const getCurrentProducts = credentials => {
-    return axios.post('/api/getMeal', credentials)
+const getCurrentProducts = date => {
+    return axios.get(`/api/meals/${date}`)// /meals/{date}
 }
 const deleteCurrentProducts = id => {
-    return axios.delete(`/api/deleteMeal/${id}`);
+    return axios.delete(`/api/meals/${id}`);// /meals/{id}
 }
-const updateCurrentProducts = credentials => {
-    return axios.post('/api/updateMeal', credentials)
+const updateCurrentProducts = (id, quantity) => {
+    return axios.put(`/api/meals/${id}`, {quantity});
 }
+
 const getSearchedProducts = (query, page = 1) => {
-    return axios.get(`/api/getSearchedMeal`, {
+    return axios.get(`/api/products/search`, {
         params: {
             query: query,
             page: page
         }
     });
 }
-
 
 export default {
     getPopularProducts,

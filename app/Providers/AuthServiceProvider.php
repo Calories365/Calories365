@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -14,7 +14,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        \App\Models\FoodConsumption::class => \App\Policies\FoodConsumptionPolicy::class,
     ];
 
     /**
@@ -25,5 +25,6 @@ class AuthServiceProvider extends ServiceProvider
 //        VerifyEmail::toMailUsing(function ($notifiable, $url) {
 //            return new VerifyEmail($notifiable, $url);
 //        });
+
     }
 }

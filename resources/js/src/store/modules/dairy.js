@@ -212,13 +212,14 @@ const actions = {
             const cachedData = JSON.parse(localStorage.getItem(cachedDataKey));
             const currentTime = new Date().getTime();
 
-            if (cachedData && (currentTime - cachedData.timestamp < 3600000)) {
-                context.commit(mutationTypes.getPopularSuccess, cachedData.popularProducts);
-                resolve(cachedData.popularProducts);
-                return;
-            }
+            // if (cachedData.popularProducts && (currentTime - cachedData.timestamp < 36000)) {
+            //     context.commit(mutationTypes.getPopularSuccess, cachedData.popularProducts);
+            //     resolve(cachedData.popularProducts);
+            //     return;
+            // }
 
             context.commit(mutationTypes.getPopularStart);
+            console.log()
             authApi.getPopularProducts(currentLocale)
                 .then(response => {
                     const popularProducts = response.data.popularProducts;
@@ -245,6 +246,7 @@ const actions = {
 
             const food_id = product.id;
 
+
             authApi.saveCurrentProducts({food_id, quantity, consumed_at, part_of_day})
                 .then(response => {
                     const id = response.data.id;
@@ -253,7 +255,7 @@ const actions = {
                         ...product,
                         quantity: quantity,
                         consumed_at: consumed_at,
-                        day_part: part_of_day,
+                        part_of_day: part_of_day,
                         id: id,
                     }
 
@@ -343,12 +345,11 @@ const actions = {
             context.commit(mutationTypes.getCurrentProductsStart);
 
             const date = state.currentDate;
-            authApi.getCurrentProducts({date})
+            authApi.getCurrentProducts(date)
                 .then(response => {
-                    console.log('products: ', response.data.products);
-                    context.commit(mutationTypes.getCurrentProductsSuccess, response.data.products);
-                    console.log('getCurrentProducts.products: ', response.data.products);
-                    resolve(response.data.products);
+                    context.commit(mutationTypes.getCurrentProductsSuccess, response.data);
+                    console.log('getCurrentProducts.products: ', response.data);
+                    resolve(response.data);
                 })
                 .catch(error => {
                     context.commit(mutationTypes.getCurrentProductsFailure, error);
@@ -388,7 +389,7 @@ const actions = {
 
             const id = product.id;
 
-            authApi.updateCurrentProducts({id, quantity})
+            authApi.updateCurrentProducts(id, quantity)
                 .then(response => {
                     context.commit(mutationTypes.updateCurrentProductsSuccess, {id, quantity});
                     resolve(response);

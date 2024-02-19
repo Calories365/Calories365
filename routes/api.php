@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Controllers\ApiController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,34 +12,23 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-//Route::get('/getPopularProducts', [\App\Http\Controllers\DairyController::class, 'getPopularProducts'])->name('getPopularProducts');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::group(['namespace' => 'App\Http\Controllers'], function () {
-        Route::get('/test', function () {
-            return \App\Models\User::all();
-        });
-        Route::post('/save-calculation-data', [\App\Http\Controllers\CalculationController::class, 'store'])->name('save-calculation-data');
-        Route::get('/get-calculation-data', [\App\Http\Controllers\CalculationController::class, 'get'])->name('get-calculation-data');
-        Route::get('/getWithCache', [ApiController::class, 'getWithCache'])->name('getWithCache');
-        Route::get('/all', [ApiController::class, 'all'])->name('all');
 
-        Route::get('/getPopularProducts', [\App\Http\Controllers\DairyController::class, 'getPopularProducts'])->name('getPopularProducts');
-        Route::post('/saveMeal', [\App\Http\Controllers\DairyController::class, 'saveMeal'])->name('saveMeal');
-        Route::post('/getMeal', [\App\Http\Controllers\DairyController::class, 'getMeal'])->name('getMeal');
-        Route::post('/updateMeal', [\App\Http\Controllers\DairyController::class, 'updateMeal'])->name('updateMeal');
-        Route::delete('/deleteMeal/{id}', [\App\Http\Controllers\DairyController::class, 'deleteMeal'])->name('deleteMeal');
-        Route::get('/getSearchedMeal', [\App\Http\Controllers\DairyController::class, 'getSearchedMeal'])->name('getSearchedMeal');
+        Route::post('/calculations', [\App\Http\Controllers\CalculationController::class, 'store'])->name('calculations.store');
+        Route::get('/calculations', [\App\Http\Controllers\CalculationController::class, 'index'])->name('calculations.index');
 
+        Route::get('/products/popular', [\App\Http\Controllers\PopularProductController::class, 'index'])->name('products.popular');
+
+        Route::post('/meals', [\App\Http\Controllers\MealController::class, 'store'])->name('meals.store');
+        Route::get('/meals/{date}', [\App\Http\Controllers\MealController::class, 'index'])->name('meals.index');
+        Route::put('/meals/{meal}', [\App\Http\Controllers\MealController::class, 'update'])->name('meals.update');
+        Route::delete('/meals/{meal}', [\App\Http\Controllers\MealController::class, 'destroy'])->name('meals.destroy');
+
+        Route::get('/products/search', [\App\Http\Controllers\SearchProductController::class, 'search'])->name('meals.search');
+        Route::get('/user', [\App\Http\Controllers\UserController::class, 'show'])->name('show');
     });
 });
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user()->only(['email', 'name', 'email_verified_at', 'calories_limit', 'id']);
-});
 
-//Route::group(['namespace' => 'App\Http\Controllers'], function () {
-//    Route::get(' / get', 'ApiController@get')->name('get');
-//    Route::get(' / getWithCache', 'ApiController@getWithCache')->name('getWithCache');
-//    Route::get(' / all', 'ApiController@all')->name('all');
-//});

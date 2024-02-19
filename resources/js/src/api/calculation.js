@@ -1,10 +1,10 @@
 import axios from "@/api/axios";
 
 const getCalculationData = credentials => {
-    return axios.get('/api/get-calculation-data', credentials)
+    return axios.get('/api/calculations', credentials)
 }
 const saveCalculationData = credentials => {
-    return axios.post('/api/save-calculation-data', credentials)
+    return axios.post('/api/calculations', credentials)
 }
 
 export default {

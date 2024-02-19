@@ -35,7 +35,8 @@ export default {
             part_of_day: dairyGetterTypes.part_of_day,
         }),
         filteredProducts() {
-            return this.currentProducts.filter(product => product.day_part === this.part_of_day);
+            console.log('this.currentProducts: ', this.currentProducts);
+            return this.currentProducts.filter(product => product.part_of_day === this.part_of_day);
         },
     },
 }
