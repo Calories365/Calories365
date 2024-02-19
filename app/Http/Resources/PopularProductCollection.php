@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class PopularProductCollection extends ResourceCollection
@@ -12,19 +11,22 @@ class PopularProductCollection extends ResourceCollection
      *
      * @return array<int|string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
-        // Получаем первый перевод, соответствующий заданной локали
-        $translation = $this->translations->first();
+        return $this->collection->map(function ($product) {
+            $translation = $product->translations->first();
 
-        return [
-            'id' => $this->id,
-            'calories' => $this->calories,
-            'proteins' => $this->proteins,
-            'carbohydrates' => $this->carbohydrates,
-            'fats' => $this->fats,
-            'fibers' => $this->fibers,
-            'name' => $translation ? $translation->name : null,
-        ];
+            return [
+                'id' => $product->id,
+                'calories' => $product->calories,
+                'proteins' => $product->proteins,
+                'carbohydrates' => $product->carbohydrates,
+                'fats' => $product->fats,
+                'fibers' => $product->fibers,
+                'name' => $translation ? $translation->name : null,
+            ];
+        })->toArray(); // Преобразование коллекции в массив
     }
+
 }
+

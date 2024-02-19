@@ -219,10 +219,9 @@ const actions = {
             // }
 
             context.commit(mutationTypes.getPopularStart);
-            console.log()
             authApi.getPopularProducts(currentLocale)
                 .then(response => {
-                    const popularProducts = response.data.popularProducts;
+                    const popularProducts = response.data;
                     context.commit(mutationTypes.getPopularSuccess, popularProducts);
                     localStorage.setItem(cachedDataKey, JSON.stringify({
                         popularProducts: popularProducts,
