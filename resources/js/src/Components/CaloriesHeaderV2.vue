@@ -15,7 +15,7 @@ export default {
             isBurgerOpen: false,
             // menuItems: ['home', 'calculation', 'diary', 'stats', 'recipes', 'instructions', 'cabinet', 'goals'],
             // menuItems: ['home', 'calculation', 'diary', 'cabinet', 'stats'],
-            menuItems: ['home', 'calculation', 'diary', 'cabinet'],
+             menuItems: ['home', 'calculation', 'diary', 'cabinet'],
         };
     },
     computed: {
