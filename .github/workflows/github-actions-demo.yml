@@ -7,7 +7,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PAT }} # Убедитесь, что PAT правильно сохранен в Secrets
+          token: ${{ secrets.PAT }}
 
       - name: Configure Git
         run: |
@@ -24,6 +24,6 @@ jobs:
             cd /home/sc527094/calories365.space/calculator
             git config user.name "Maaaaxim"
             git config user.email "maxim.kubichka@gmail.com"
-            git pull origin main # Предполагается, что используется PAT из Secrets
+            git pull origin main
             composer install
             php artisan migrate
