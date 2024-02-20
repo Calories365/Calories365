@@ -174,6 +174,7 @@ const mutations = {
     },
     [mutationTypes.updateUsersDataSuccess](state) {
         state.isSybmiting = false;
+        state.isLoggedIn = false;
     },
     [mutationTypes.updateUsersDataFailure](state, payload) {
         state.isSybmiting = false;
@@ -361,7 +362,9 @@ const actions = {
                     context.commit(mutationTypes.updateUsersPasswordSuccess, user)
 
                     const message = i18n.global.t('Notification.Success.NameWasUpdated');
-                    context.dispatch('setSuccess', message, {root: true});
+                    context.dispatch('setSuccess', message, {root: true}).then(() => {
+                        context.dispatch(actionTypes.logout);
+                    });
 
                     resolve(user)
                 })

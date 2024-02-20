@@ -136,7 +136,6 @@ export default {
         font-size: 30px;
         text-align: center;
         letter-spacing: 0.0625rem;
-        //text-transform: uppercase;
         font-weight: 700;
         color: black;
         padding: 30px 0;
@@ -294,11 +293,13 @@ export default {
 
     &_login, &_email {
         background-color: white;
+        //border: 1px solid black;
         width: 80%;
         display: flex;
         //gap: 25px;
         border-radius: 5px;
-        padding: 10px 10px 55px 10px;
+        //padding: 10px 10px 55px 10px;
+        padding: 20px 10px 20px 10px;
         flex-wrap: wrap;
         overflow-y: hidden;
         overflow-x: scroll;
@@ -306,6 +307,7 @@ export default {
 
         @media (max-width: 768px) {
             //flex-direction: column;
+            padding: 10px 10px 55px 10px;
             width: 100%;
         }
     }
@@ -330,8 +332,6 @@ export default {
         display: flex;
         border-radius: 5px;
         flex-wrap: wrap;
-        //overflow-y: hidden;
-        //overflow-x: scroll;
         gap: 50px;
         justify-content: center;
         margin-top: 30px;
@@ -355,6 +355,7 @@ export default {
 
     &_credentials {
         flex: 1;
+        border: 1px solid #eeb82c;;
     }
 
     &_link {

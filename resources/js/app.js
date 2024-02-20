@@ -7,6 +7,8 @@ import store from '@/store/store.js';
 import axios from 'axios';
 import {actionTypes} from '@/store/modules/auth';
 import i18n from "@/i18n.js";
+import VCalendar from 'v-calendar';
+import 'v-calendar/style.css';
 // Сначала выполняем запрос на получение CSRF-токена
 axios.get('/sanctum/csrf-cookie').then(() => {
     store.dispatch(actionTypes.getCurrentUser)
@@ -21,5 +23,6 @@ axios.get('/sanctum/csrf-cookie').then(() => {
         .use(router)
         .use(store)
         .use(i18n)
+        .use(VCalendar, {})
         .mount('#app');
 });

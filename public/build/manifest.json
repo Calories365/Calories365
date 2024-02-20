@@ -1,11 +1,11 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-2addcf41.css",
+    "file": "assets/app-58e4602a.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-06dbf067.css",
+    "file": "assets/app-03255f30.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -31,9 +31,9 @@
       "assets/ded-d9c73875.mp3"
     ],
     "css": [
-      "assets/app-06dbf067.css"
+      "assets/app-03255f30.css"
     ],
-    "file": "assets/app-56c131e5.js",
+    "file": "assets/app-972b5c6c.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },

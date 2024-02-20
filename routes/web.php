@@ -21,9 +21,7 @@ Route::any('/{any?}', function () {
     return view('app');
 })->where('any', '.*')->name('login');
 
-Route::get('/test', function () {
-    return ('test');
-});
+
 
 Route::get('/reset-password/{token}', function ($token) {
     return view('auth.password-reset', ['token' => $token]);
@@ -31,4 +29,3 @@ Route::get('/reset-password/{token}', function ($token) {
     ->middleware(['guest:' . config('fortify.guard')])
     ->name('password.reset');
 
-Route::get('translate', 'RoflController@tranlate')->name('closeOrder');

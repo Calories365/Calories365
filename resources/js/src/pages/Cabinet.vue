@@ -3,6 +3,7 @@ import {mapState} from "vuex";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import {actionTypes} from "@/store/modules/auth.js";
 import dedSound from '@/assets/ded.mp3';
+import router from "@/router/router.js";
 
 export default {
     name: "Cabinet",
@@ -25,11 +26,13 @@ export default {
                 {
                     name: this.name,
                     email: this.email,
-                })
+                }).then(() => {
+                router.push({name: 'login'});
+            })
         },
         logout() {
             this.$store.dispatch(actionTypes.logout).then((errors) => {
-                this.$router.push({name: 'login'})
+                router.push({name: 'login'});
             })
         }
     },
@@ -260,7 +263,7 @@ export default {
         width: 80%;
         display: flex;
         border-radius: 5px;
-        padding: 10px 10px 10px 10px;
+        padding: 20px 10px 20px 10px;
         flex-wrap: wrap;
         overflow-y: hidden;
         overflow-x: scroll;
@@ -276,7 +279,8 @@ export default {
         width: 80%;
         display: flex;
         border-radius: 5px;
-        padding: 10px 10px 10px 10px;
+        //padding: 10px 10px 10px 10px;
+        padding: 20px 10px 20px 10px;
         flex-wrap: wrap;
         overflow-y: hidden;
         overflow-x: scroll;
@@ -313,6 +317,7 @@ export default {
 
     &_credentials {
         flex: 1;
+        //border: 1px solid #eeb82c;
     }
 
     &_button {
