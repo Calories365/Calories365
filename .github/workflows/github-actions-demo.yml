@@ -21,7 +21,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           script: |
-            cd /path/to/your/directory
+            cd /home/sc527094/calories365.space/calculator
             git config user.name "Maaaaxim"
             git config user.email "maxim.kubichka@gmail.com"
             git pull origin main # Предполагается, что используется PAT из Secrets
