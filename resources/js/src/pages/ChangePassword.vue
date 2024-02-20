@@ -355,7 +355,7 @@ export default {
 
     &_credentials {
         flex: 1;
-        border: 1px solid #eeb82c;;
+        border: 1px solid #eeb82c;
     }
 
     &_link {
