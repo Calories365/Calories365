@@ -10,32 +10,17 @@ jobs:
         with:
           token: ${{ secrets.PAT }} # Используйте PAT для аутентификациио
 
-#      - name: Install PHP dependencies
-#        run: composer install --prefer-dist --no-scripts --no-progress --no-suggest
-#
-#      - name: Install Node.js dependencies
-#        run: npm install
-#
-#      - name: Build
-#        run: npm run build
-#
       - name: Configure Git
         run: |
           git config user.name Maaaaxim
           git config user.email maxim.kubichka@gmail.com
-#
-#      - name: Commit and Push
-#        run: |
-#          git add -f public/build/
-#          git commit -m "Build for production"
-#          git push origin HEAD:main # Предполагая, что вы хотите пушить в ветку main
 
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: sc527094.ftp.tools
-          username: sc527094
-          password: VkC3L5r74m
+          host: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME}}
+          password: ${{ secrets.FTP_PASSWORD }}
           script: |
             cd /home/sc527094/calories365.space/calculator
             git config --global user.name "Maaaaxim"
