@@ -1,5 +1,4 @@
 name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
   build-and-deploy:
@@ -8,25 +7,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PAT }} # Используйте PAT для аутентификациио
+          token: ${{ secrets.PAT }} # Убедитесь, что PAT правильно сохранен в Secrets
 
       - name: Configure Git
         run: |
-          git config user.name Maaaaxim
-          git config user.email maxim.kubichka@gmail.com
+          git config user.name "Maaaaxim"
+          git config user.email "maxim.kubichka@gmail.com"
 
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME}}
+          username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           script: |
-            cd /home/sc527094/calories365.space/calculator
-            git config --global user.name "Maaaaxim"
-            git config --global user.email "maxim.kubichka@gmail.com"
-            git config --global credential.helper store
-            git pull https://Maaaaxim:${{ secrets.NEWPAT }}@github.com/Maaaaxim/Calories365.git
+            cd /path/to/your/directory
+            git config user.name "Maaaaxim"
+            git config user.email "maxim.kubichka@gmail.com"
+            git pull origin main # Предполагается, что используется PAT из Secrets
             composer install
             php artisan migrate
-
