@@ -19,7 +19,7 @@ function addPerson(person) {
 </script>
 
 <template>
-    <VCalendar class="calories-calendar" :rows="2" :columns="2"/>1
+    <VCalendar class="calories-calendar" :rows="2" :columns="2"/>123
 </template>
 
 
