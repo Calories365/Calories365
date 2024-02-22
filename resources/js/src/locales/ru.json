@@ -162,6 +162,15 @@
             "Saturday": "Суббота",
             "Sunday": "Воскресенье"
         },
+        "DaysOfWeekShort": {
+            "Monday": "Пн",
+            "Tuesday": "Вт",
+            "Wednesday": "Ср",
+            "Thursday": "Чт",
+            "Friday": "Пт",
+            "Saturday": "Сб",
+            "Sunday": "Вс"
+        },
         "Months": {
             "January": "Январь",
             "February": "Февраль",

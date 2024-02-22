@@ -23,14 +23,28 @@ const currentUser = computed(() => store.getters[`${authGetterTypes.currentUser}
 <template>
     <div class="calendar">
         <div class="calendar-head">
-            <div class="dayname">{{ $t('Stats.DaysOfWeek.Monday') }}</div>
-            <div class="dayname">{{ $t('Stats.DaysOfWeek.Tuesday') }}</div>
-            <div class="dayname">{{ $t('Stats.DaysOfWeek.Wednesday') }}</div>
-            <div class="dayname">{{ $t('Stats.DaysOfWeek.Thursday') }}</div>
-            <div class="dayname">{{ $t('Stats.DaysOfWeek.Friday') }}</div>
-            <div class="dayname">{{ $t('Stats.DaysOfWeek.Saturday') }}</div>
-            <div class="dayname">{{ $t('Stats.DaysOfWeek.Sunday') }}</div>
+            <div class="dayname full">{{ $t('Stats.DaysOfWeek.Monday') }}</div>
+            <div class="dayname short">{{ $t('Stats.DaysOfWeekShort.Monday') }}</div>
+
+            <div class="dayname full">{{ $t('Stats.DaysOfWeek.Tuesday') }}</div>
+            <div class="dayname short">{{ $t('Stats.DaysOfWeekShort.Tuesday') }}</div>
+
+            <div class="dayname full">{{ $t('Stats.DaysOfWeek.Wednesday') }}</div>
+            <div class="dayname short">{{ $t('Stats.DaysOfWeekShort.Wednesday') }}</div>
+
+            <div class="dayname full">{{ $t('Stats.DaysOfWeek.Thursday') }}</div>
+            <div class="dayname short">{{ $t('Stats.DaysOfWeekShort.Thursday') }}</div>
+
+            <div class="dayname full">{{ $t('Stats.DaysOfWeek.Friday') }}</div>
+            <div class="dayname short">{{ $t('Stats.DaysOfWeekShort.Friday') }}</div>
+
+            <div class="dayname full">{{ $t('Stats.DaysOfWeek.Saturday') }}</div>
+            <div class="dayname short">{{ $t('Stats.DaysOfWeekShort.Saturday') }}</div>
+
+            <div class="dayname full">{{ $t('Stats.DaysOfWeek.Sunday') }}</div>
+            <div class="dayname short">{{ $t('Stats.DaysOfWeekShort.Sunday') }}</div>
         </div>
+
 
 
 
@@ -80,7 +94,24 @@ body {
     font-weight: bold;
     text-align: center;
     line-height: 1;
-    @media (max-width: 768px) {
+    //@media (max-width: 768px) {
+    //    display: none;
+    //}
+}
+
+.dayname.full {
+    display: none;
+}
+
+.dayname.short {
+    display: block;
+}
+
+@media (min-width: 600px) {
+    .dayname.full {
+        display: block;
+    }
+    .dayname.short {
         display: none;
     }
 }
