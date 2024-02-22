@@ -32,8 +32,7 @@ export default {
             <calories-card link="calculation" :sectionName="$t('message.calorieCalculation')"/>
             <calories-card link="diary" :sectionName="$t('message.calorieDiary')"/>
             <calories-card link="cabinet" :sectionName="$t('message.personalCabinet')"/>
-
-            <!--            <calories-card link="stats" :sectionName="$t('message.statistics')"/>-->
+            <calories-card link="stats" :sectionName="$t('message.statistics')"/>
             <!--            <calories-card link="instructions" :sectionName="$t('message.instructions')"/>-->
             <!--            <calories-card link="goals" :sectionName="$t('message.myRecipes')"/>-->
 
