@@ -115,11 +115,10 @@ const actions = {
             context.commit(mutationTypes.getDailyCaloriesStart);
             statsApi.getCurrentData(state.currentDate)
                 .then(response => {
-                    console.log('response::: ', response);
                     const currentData = response.data.dailyCalories;
                     context.commit(mutationTypes.getDailyCaloriesSuccess, currentData);
 
-                    context.dispatch(actionTypes.setCalendar)
+                    context.dispatch(actionTypes.setCalendar);
 
                     resolve(currentData);
                 })
@@ -130,8 +129,6 @@ const actions = {
     },
     [actionTypes.setCalendar](context) {
         return new Promise(resolve => {
-
-            console.log('инициализация')
 
             const daysInMonth = context.state.calendarInfo.daysInMonth;
             const startDayOfWeek = context.state.calendarInfo.startDayOfWeek;
@@ -152,13 +149,12 @@ const actions = {
 
             for (let i = 0; i <= week; i++) {
                 calendar[i] = new Array(7).fill('');
-                for (let j = 0; j < 7; j++) { // Начинаем с 0
+                for (let j = 0; j < 7; j++) {
                     if (i === 0 && j < startDayOfWeek - 1) {
                     } else if (dateIndex >= daysInMonth) {
 
                     } else {
                         dateIndex++;
-
                         let calories = arrayWithData[dateIndex - 1];
                         let caloriesLimit = context.rootState.auth.currentUser.calories_limit;
                         let classToAdd = '';
@@ -174,7 +170,6 @@ const actions = {
                                 classToAdd = 'significant-overreach';
                             }
                         }
-
                         calendar[i][j] = {
                             day: dateIndex,
                             calories: calories,
@@ -183,11 +178,8 @@ const actions = {
                     }
                 }
             }
-            // const currentUser = context.rootState.auth.currentUser.calories_limit;
-            //
-            // console.log('currentUser: ', currentUser);
             context.commit(mutationTypes.setCalendar, calendar);
-            console.log(calendar)
+            resolve(calendar)
         })
     },
 }
