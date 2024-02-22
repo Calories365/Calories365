@@ -163,6 +163,15 @@
             "Saturday": "Saturday",
             "Sunday": "Sunday"
         },
+        "DaysOfWeekShort": {
+            "Monday": "Mon",
+            "Tuesday": "Tue",
+            "Wednesday": "Wed",
+            "Thursday": "Thu",
+            "Friday": "Fri",
+            "Saturday": "Sat",
+            "Sunday": "Sun"
+        },
         "Months": {
             "January": "January",
             "February": "February",
