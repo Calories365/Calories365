@@ -34,7 +34,7 @@ function dateToggle(direction) {
             <calories-arrow-right class="stats_arrow-right" @click="dateToggle('next')"/>
 
         </div>
-        <CaloriesCalendar class="stats_calendar" :currentData="currentData" :calendarInfo="calendarInfo"/>
+        <CaloriesCalendar class="stats_calendar" :currentDate="currentDate"/>
 
     </section>
 </template>

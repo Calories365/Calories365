@@ -12,6 +12,7 @@ const state = {
     counter: 0,
     caloriesPerDay: 0,
     caloriesPerDayPart: 0,
+    dateFromCalendar: 0,
 }
 
 export const getterTypes = {
@@ -72,6 +73,10 @@ export const mutationTypes = {
     setCaloriesPerDayPart: '[dairy] setCaloriesPerDayPart',
 
     clearCaloriesCounter: '[dairy] clearCaloriesCounter',
+
+    setDateFromCalendar: '[dairy] setDateFromCalendar',
+
+    deleteDateFromCalendar: '[dairy] deleteDateFromCalendar',
 }
 
 const mutations = {
@@ -110,8 +115,6 @@ const mutations = {
 
 
     [mutationTypes.getCurrentProductsStart](state) {
-        // state.caloriesPerDayPart = 0;
-        // state.caloriesPerDay = 0;
         state.currentProducts = [];
         state.isSybmiting = true;
     },
@@ -188,6 +191,14 @@ const mutations = {
     [mutationTypes.setCaloriesPerDayPart](state, payload) {
         state.caloriesPerDayPart = payload;
     },
+
+    [mutationTypes.setDateFromCalendar](state, payload) {
+        state.dateFromCalendar = payload;
+    },
+
+    [mutationTypes.deleteDateFromCalendar](state) {
+        state.dateFromCalendar = null;
+    },
 }
 
 export const actionTypes = {
@@ -202,6 +213,7 @@ export const actionTypes = {
     calculateCaloriesPerDay: '[dairy] calculateCaloriesPerDay',
     calculateCaloriesPerDayPart: '[dairy] calculateCaloriesPerDayPart',
     setPartOfDay: '[dairy] setPartOfDay',
+    setDateFromCalendar: '[dairy] setDateFromCalendar',
 }
 
 const actions = {
@@ -279,7 +291,13 @@ const actions = {
     },
     [actionTypes.initialization](context) {
         return new Promise(resolve => {
-            const currentTime = new Date();
+            let currentTime;
+            if (context.state.dateFromCalendar) {
+                console.log(context.state.dateFromCalendar);
+                currentTime = new Date(context.state.dateFromCalendar);
+            } else {
+                currentTime = new Date();
+            }
             const hours = currentTime.getHours();
 
             const currentDate = currentTime.toISOString().split('T')[0]; // Формат YYYY-MM-DD
@@ -310,6 +328,7 @@ const actions = {
     },
     [actionTypes.dateToggle](context, direction) {
         return new Promise(resolve => {
+
             const currentDateStr = context.state.currentDate;
             const currentDate = new Date(currentDateStr);
 
@@ -474,6 +493,15 @@ const actions = {
             context.commit(mutationTypes.setPartOfDay, payload);
 
             context.dispatch(actionTypes.calculateCaloriesPerDayPart);
+
+            resolve(payload);
+
+        });
+    },
+    [actionTypes.setDateFromCalendar](context, payload) {
+        return new Promise(resolve => {
+
+            context.commit(mutationTypes.setDateFromCalendar, payload);
 
             resolve(payload);
 

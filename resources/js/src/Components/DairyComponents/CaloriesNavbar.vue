@@ -1,7 +1,7 @@
 <script>
 import CaloriesArrowLeft from "@/UI/CaloriesArrowLeft.vue";
 import CaloriesArrowRight from "@/UI/CaloriesArrowRight.vue";
-import {actionTypes, getterTypes as diaryGetterTypes} from "@/store/modules/dairy.js";
+import {actionTypes, getterTypes as diaryGetterTypes, mutationTypes} from "@/store/modules/dairy.js";
 import {mapGetters} from "vuex";
 
 
@@ -26,6 +26,9 @@ export default {
     mounted() {
         this.$store.dispatch(actionTypes.initialization);
     },
+    beforeUnmount() {
+        this.$store.commit(mutationTypes.deleteDateFromCalendar);
+    }
 }
 </script>
 

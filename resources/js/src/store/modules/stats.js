@@ -172,7 +172,7 @@ const actions = {
                         calendar[i][j] = {
                             day: dateIndex,
                             calories: calories,
-                            class: classToAdd
+                            class: classToAdd,
                         };
                     }
                 }

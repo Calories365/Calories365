@@ -1,22 +1,32 @@
 <script setup>
-import {computed, defineProps} from 'vue';
+import {computed, defineProps, toRaw} from 'vue';
 import CaloriesCalendarIndication from "@/Components/StatsComponents/CaloriesCalendarIndication.vue";
 import {getterTypes} from "@/store/modules/stats.js";
 import {getterTypes as authGetterTypes} from "@/store/modules/auth.js";
 import store from "@/store/store.js";
+import router from "@/router/router.js";
+import {actionTypes} from "@/store/modules/dairy.js";
 
 const props = defineProps({
-    currentData: {
+    currentDate: {
         type: Object,
         required: true,
     },
-    calendarInfo: {
-        type: Object,
-        required: true,
-    }
 });
 const calendar = computed(() => store.getters[`${getterTypes.calendar}`]);
 const currentUser = computed(() => store.getters[`${authGetterTypes.currentUser}`]);
+const calendarDate = computed(() => store.getters[`${getterTypes.currentDate}`]);
+
+function moveToDairy(day) {
+    console.log(calendarDate.value)
+    let date = new Date(calendarDate.value);
+    date.setDate(day);
+
+    const updatedDate = date.toISOString().split('T')[0];
+    store.dispatch(actionTypes.setDateFromCalendar, updatedDate).then(() => {
+        router.push({name: 'diary'});
+    })
+}
 
 </script>
 
@@ -46,10 +56,8 @@ const currentUser = computed(() => store.getters[`${authGetterTypes.currentUser}
         </div>
 
 
-
-
         <div class="row" v-for="week in calendar" :key="week[0]?.day">
-            <div v-for="day in week" :key="day?.day" class="day" :class="day?.class">
+            <div v-for="day in week" :key="day?.day" class="day" :class="day?.class" @click="moveToDairy(day.day)">
                 <div v-if="day?.day" class="day-number">{{ day.day }}</div>
                 <div v-if="day?.day" class="day-calories">
                     {{ day.calories !== null ? day.calories : '0' }}/{{ currentUser.calories_limit }}
@@ -57,8 +65,6 @@ const currentUser = computed(() => store.getters[`${authGetterTypes.currentUser}
                 <div v-else class="day-calories"> </div>
             </div>
         </div>
-
-
 
     </div>
     <CaloriesCalendarIndication/>
