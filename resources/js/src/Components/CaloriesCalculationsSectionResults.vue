@@ -6,6 +6,7 @@ import CalorieChart from "@/Components/CalorieChart.vue";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import {mapState} from "vuex";
 import {actionTypes} from "@/store/modules/calculation.js";
+import {actionTypes as userActionTypes} from "@/store/modules/auth.js";
 import i18n from "@/i18n.js";
 import store from "@/store/store.js";
 
@@ -31,7 +32,9 @@ export default {
         },
         saveData() {
             if (this.currentUser) {
-                this.$store.dispatch(actionTypes.saveCalculationData);
+                this.$store.dispatch(actionTypes.saveCalculationData).then(() => {
+                    this.$store.dispatch(userActionTypes.getCurrentUser);
+                })
             } else {
                 const message = i18n.global.t('Notification.Error.NeedAuth');
                 store.dispatch('setError', message, {root: true});

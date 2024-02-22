@@ -1,11 +1,10 @@
-// store/index.js
-
 import {createStore} from 'vuex';
 
 import auth from '@/store/modules/auth';
 import calculation from "@/store/modules/calculation.js";
 import dairy from "@/store/modules/dairy.js";
 import changeLocale from "@/store/modules/changeLocale.js";
+import stats from "@/store/modules/stats.js";
 
 export default createStore({
     state: {
@@ -56,6 +55,6 @@ export default createStore({
         },
     },
     modules: {
-        auth, calculation, dairy, changeLocale
+        auth, calculation, dairy, changeLocale, stats
     }
 });

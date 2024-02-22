@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class FoodConsumption extends Model
 {
@@ -43,4 +44,20 @@ class FoodConsumption extends Model
             ->whereDate('consumed_at', $date)
             ->get();
     }
+
+    public static function getDailyCaloriesSum($userId, $date): \Illuminate\Database\Eloquent\Collection|array
+    {
+        $year = date('Y', strtotime($date));
+        $month = date('m', strtotime($date));
+
+        return self::where('user_id', $userId)
+            ->join('products', 'food_consumptions.food_id', '=', 'products.id')
+            ->whereYear('consumed_at', $year)
+            ->whereMonth('consumed_at', $month)
+            ->groupBy(DB::raw('Date(consumed_at)'))
+            ->select(DB::raw('Date(consumed_at) as date'), DB::raw('ROUND(SUM(food_consumptions.quantity * products.calories / 100)) as total_calories'))
+            ->get()
+            ->toArray();
+    }
+
 }

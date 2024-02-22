@@ -150,5 +150,36 @@
         "RecoverPassword": "Відновити пароль",
         "Password": "Пароль",
         "ConfirmPassword": "Підтвердіть пароль"
+    },
+    "Stats": {
+        "Stats": "Статисика",
+        "DaysOfWeek": {
+            "Monday": "Понеділок",
+            "Tuesday": "Вівторок",
+            "Wednesday": "Середа",
+            "Thursday": "Четвер",
+            "Friday": "П'ятниця",
+            "Saturday": "Субота",
+            "Sunday": "Неділя"
+        },
+        "Months": {
+            "January": "Січень",
+            "February": "Лютий",
+            "March": "Березень",
+            "April": "Квітень",
+            "May": "Травень",
+            "June": "Червень",
+            "July": "Липень",
+            "August": "Серпень",
+            "September": "Вересень",
+            "October": "Жовтень",
+            "November": "Листопад",
+            "December": "Грудень"
+        },
+        "ColorDescriptions": {
+            "Overreach": "Трохи перебрав",
+            "SignificantOverreach": "Значно перебрав",
+            "Nice": "Все в порядку"
+        }
     }
 }

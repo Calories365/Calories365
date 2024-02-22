@@ -155,11 +155,14 @@ const actions = {
             context.commit(mutationTypes.saveCalculationDataStart);
 
             data.dailyCalories = context.state.userResults.dailyCalories;
-            console.log('111: ', data.dailyCalories);
-            console.log('222: ', data);
             calculationApi.saveCalculationData(data)
                 .then(response => {
                     context.commit(mutationTypes.saveCalculationDataSuccess);
+
+
+
+
+
                     console.log('Ответ сервера:', response);
                     const key = context.getters[getterTypes.dataKey];
 

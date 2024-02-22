@@ -59,8 +59,6 @@ export default {
 <template>
     <section class="dairy-section">
 
-
-
         <div class="dairy-section__parent">
             <calories-navbar/>
 
