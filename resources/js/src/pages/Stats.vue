@@ -42,7 +42,6 @@ function dateToggle(direction) {
 
 <style scoped lang="scss">
 .stats {
-
     width: 90%;
     margin: 0 auto;
 

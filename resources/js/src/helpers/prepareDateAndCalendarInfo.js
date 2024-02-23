@@ -1,9 +1,7 @@
 function prepareDateAndCalendarInfo(currentTime) {
-    // Проверка, является ли переданный аргумент строкой, и если да, то преобразование в объект Date
     if (typeof currentTime === 'string') {
         currentTime = new Date(currentTime);
     }
-    // В случае, если аргумент не передан, используется текущая дата
     else if (!currentTime) {
         currentTime = new Date();
     }

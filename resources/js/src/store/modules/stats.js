@@ -138,6 +138,7 @@ const actions = {
 
             const normalArray = toRaw(context.state.currentData);
             let arrayWithData = new Array(31).fill(null);
+
             arrayWithData = arrayWithData.map((item, index) => {
                 const foundItem = normalArray.find((obj) => {
                     const day = new Date(obj.date).getDate();

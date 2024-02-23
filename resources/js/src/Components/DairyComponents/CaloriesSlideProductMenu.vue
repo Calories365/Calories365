@@ -103,8 +103,6 @@ export default {
                                     <form @submit.prevent="addProduct">
                                         <input type="range" :min="1" :max="1250" class="slider" id="myRange" v-model="quantity">
                                     </form>
-<!--                                    <input type="range" :min="1" :max="1250" class="slider" id="myRange"-->
-<!--                                           v-model="quantity">-->
                                 </div>
                                 <div class="input-container">
                                     <input type="text" class="styled-input" v-model="quantity">

@@ -13,6 +13,7 @@ const props = defineProps({
         required: true,
     },
 });
+
 const calendar = computed(() => store.getters[`${getterTypes.calendar}`]);
 const currentUser = computed(() => store.getters[`${authGetterTypes.currentUser}`]);
 const calendarDate = computed(() => store.getters[`${getterTypes.currentDate}`]);

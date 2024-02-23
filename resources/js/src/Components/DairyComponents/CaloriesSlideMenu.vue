@@ -5,11 +5,12 @@ import {mapState} from "vuex";
 import CaloriesSlideProductMenu from "@/Components/DairyComponents/CaloriesSlideProductMenu.vue";
 import {actionTypes, mutationTypes as diaryMutations} from "@/store/modules/dairy.js";
 import {debounce} from "lodash";
+import CaloriesAddProduct from "@/Components/DairyComponents/CaloriesAddProduct.vue";
 
 
 export default {
     name: "CaloriesSlideMenu",
-    components: {CaloriesSlideProductMenu, CaloriesProduct, FontAwesomeIcon},
+    components: {CaloriesAddProduct, CaloriesSlideProductMenu, CaloriesProduct, FontAwesomeIcon},
     data() {
         return {
             ProductMenuisOpen: false,
@@ -134,6 +135,9 @@ export default {
                 </h2>
             </div>
             <ul class="slide-menu__list">
+
+<!--                <calories-add-product/>-->
+
 
                 <calories-product
                     v-for="product in products"

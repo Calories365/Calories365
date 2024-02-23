@@ -23,7 +23,6 @@ class Product extends Model
         'is_popular'
     ];
 
-    // Указываем связь с моделью ProductTranslation
     public function translations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ProductTranslation::class);
