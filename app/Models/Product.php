@@ -58,13 +58,18 @@ class Product extends Model
                 'product_translations.name as name'
             )
             ->orderByRaw("
-                    CASE
-                        WHEN double_metaphoned_name = ? THEN 1
-                        WHEN double_metaphoned_name LIKE ? THEN 2
-                        WHEN double_metaphoned_name LIKE ? THEN 4
-                        ELSE 3
-                    END, double_metaphoned_name ASC
-                ", [$encodedQuery, "{$encodedQuery}%", "%{$encodedQuery}"])
+    CASE
+        WHEN double_metaphoned_name = ? THEN 1
+        WHEN double_metaphoned_name LIKE ? THEN 2
+        ELSE 3
+    END,
+    CASE
+        WHEN double_metaphoned_name LIKE ? THEN ABS(LENGTH(double_metaphoned_name) - LENGTH(?))
+        ELSE 9999
+    END,
+    double_metaphoned_name ASC
+", [$encodedQuery, "%{$encodedQuery}%", "%{$encodedQuery}%", $encodedQuery])
             ->paginate(10);
     }
 }
+

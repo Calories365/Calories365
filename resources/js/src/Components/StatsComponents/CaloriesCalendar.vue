@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineProps, toRaw} from 'vue';
+import {computed, defineProps} from 'vue';
 import CaloriesCalendarIndication from "@/Components/StatsComponents/CaloriesCalendarIndication.vue";
 import {getterTypes} from "@/store/modules/stats.js";
 import {getterTypes as authGetterTypes} from "@/store/modules/auth.js";
@@ -18,7 +18,6 @@ const currentUser = computed(() => store.getters[`${authGetterTypes.currentUser}
 const calendarDate = computed(() => store.getters[`${getterTypes.currentDate}`]);
 
 function moveToDairy(day) {
-    console.log(calendarDate.value)
     let date = new Date(calendarDate.value);
     date.setDate(day);
 

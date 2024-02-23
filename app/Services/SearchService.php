@@ -11,8 +11,17 @@ class SearchService
     public function search($query): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = ASCII::to_transliterate($query);
-        $doubleMetaphone = new DoubleMetaphone($query);
-        $encodedQuery = $doubleMetaphone->primary;
+
+        $words = explode(' ', $query);
+        $encodedWords = [];
+
+        foreach ($words as $word) {
+            $doubleMetaphone = new DoubleMetaphone($word);
+            $encodedWords[] = $doubleMetaphone->primary;
+        }
+
+        $encodedQuery = implode(' ', $encodedWords);
         return Product::getSearchedProducts($encodedQuery);
     }
+
 }
