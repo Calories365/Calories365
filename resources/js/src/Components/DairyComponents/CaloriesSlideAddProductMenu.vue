@@ -1,76 +1,55 @@
-<script>
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import CaloriesCalculationSlider from "@/Components/CaloriesCalculationSlider.vue";
+<script setup>
+import {defineEmits, defineProps, reactive, ref, watchEffect} from 'vue';
 import {actionTypes} from "@/store/modules/dairy.js";
+import CaloriesInput from "@/Components/DairyComponents/CaloriesInput.vue";
+import {useStore} from 'vuex';
 
-export default {
-    name: "CaloriesSlideProductMenu",
-    components: {CaloriesCalculationSlider, FontAwesomeIcon},
-    data() {
-        return {
-            quantity: 1,
-        }
+const props = defineProps({
+    isOpen: {
+        type: Boolean,
+        required: true,
     },
-    props: {
-        isOpen: {
-            type: Boolean,
-            required: true,
-        },
-        product: {
-            type: Object,
-            required: true,
-        },
-        action: {
-            type: String,
-            required: true,
-        }
+    name: {
+        type: String,
+        required: true,
     },
-    methods: {
-        toggleProduct() {
-            this.$emit('update', !this.isOpen);
-            this.quantity = 1;
-        },
-        addProduct() {
-            if (this.quantity > 0 && this.quantity < 1250) {
-                if (this.action === 'add') {
-                    this.$store.dispatch(actionTypes.saveCurrentProducts,
-                        {
-                            product: this.product, quantity: this.quantity,
-                        });
-                } else if (this.action === 'update') {
-                    this.$store.dispatch(actionTypes.updateCurrentProducts,
-                        {
-                            product: this.product, quantity: this.quantity,
-                        })
-                }
-                this.$emit('update', !this.isOpen);
-                // this.quantity = 1;
-            } else {
-                this.$store.dispatch('setError', this.$t('Notification.Error.invalidData'));
-            }
-        },
-    },
-    watch: {
-        product(newProduct) {
-            if (newProduct && 'quantity' in newProduct) {
-                this.quantity = newProduct.quantity;
-            }
-        },
-        // quantity(newQuantity, oldQuantity) {
-        //     if (newQuantity !== oldQuantity && this.product.quantity) {
-        //         this.quantity = this.product.quantity;
-        //     }
-        // },
-    },
-    // mounted() {
-    //     if (this.product && 'quantity' in this.product) {
-    //         this.quantity = this.product.quantity;
-    //     }
-    // }
-}
+});
+
+const emits = defineEmits(['update']);
+
+const store = useStore();
+const quantity = ref(1);
+const product = reactive({
+    calories: 0,
+    carbohydrates: 0,
+    fats: 0,
+    fibers: 0,
+    name: '',
+    proteins: 0,
+    quantity: 0,
+});
+watchEffect(() => {
+    product.name = props.name;
+});
+const toggleProduct = () => {
+    emits('update', !props.isOpen);
+    quantity.value = 1;
+};
+
+const addProduct = () => {
+    if (quantity.value > 0 && quantity.value < 1250) {
+        store.dispatch(actionTypes.saveUsersCurrentProducts, {
+            product: product, quantity: quantity.value,
+        });
+        emits('update', !props.isOpen);
+        quantity.value = 1;
+    } else {
+        store.dispatch('setError', this.$t('Notification.Error.invalidData'));
+    }
+};
+
+
 </script>
-
-
 <template>
     <div :class="{ 'product-counter': true, 'product-counter_active': isOpen}">
         <div v-if="product" class="product-counter__body">
@@ -85,10 +64,9 @@ export default {
                 <div class="product-counter__card" data-id="1">
                     <div class="product-counter__wrapper1">
                         <div class="product-counter__img">
-                            <!-- <img src="@/images/img.png" alt=""> -->
                         </div>
                         <h2 class="product-counter__title">
-                            {{ product.name }}
+                            {{ name }}
                         </h2>
                     </div>
                     <div class="product-counter__wrapper2">
@@ -97,16 +75,17 @@ export default {
                                 {{ $t('Diary.Portion') }}
                             </div>
                             <div class="product-counter__portion mobile">
-                                {{ product.name }}
+                                {{ name }}
                             </div>
                             <div class="users-data-section">
                                 <div class="slider-container">
                                     <form @submit.prevent="addProduct">
-                                        <input type="range" :min="1" :max="1250" class="slider" id="myRange" v-model="quantity">
+                                        <input type="range" :min="1" :max="1250" class="slider" id="myRange"
+                                               v-model="quantity">
                                     </form>
                                 </div>
                                 <div class="input-container">
-                                    <input type="number" class="styled-input" v-model="quantity">
+                                    <input type="text" class="styled-input" v-model="quantity">
                                     <span class="input_description">{{ $t('Diary.Grams') }}</span>
                                 </div>
 
@@ -117,10 +96,22 @@ export default {
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
-                                        {{ product.calories }} {{ $t('Diary.KCAL') }} {{ product.proteins }}
-                                        {{ $t('Diary.Protein') }}
-                                        {{ product.carbohydrates }} {{ $t('Diary.Carbohydrates') }} {{ product.fats }}
-                                        {{ $t('Diary.Fats') }}
+                                        <div>
+                                            <calories-input v-model="product.calories"/>
+                                            {{ $t('Diary.KCAL') }}
+                                        </div>
+                                        <div>
+                                            <calories-input v-model="product.proteins"/>
+                                            {{ $t('Diary.Protein') }}
+                                        </div>
+                                        <div>
+                                            <calories-input v-model="product.carbohydrates"/>
+                                            {{ $t('Diary.Carbohydrates') }}
+                                        </div>
+                                        <div>
+                                            <calories-input v-model="product.fats"/>
+                                            {{ $t('Diary.Fats') }}
+                                        </div>
                                     </div>
                                 </li>
                                 <li class="product-counter__one-portion">
@@ -136,6 +127,7 @@ export default {
                                     </div>
                                 </li>
                             </ul>
+
                             <ul class="product-counter__portions mobile">
                                 <li class="product-counter__one-portion">
                                     <span class="product-counter__portion-title">
@@ -144,14 +136,25 @@ export default {
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
-                                        <span>{{ product.calories }} {{ $t('Diary.KCAL') }}</span>
-                                        <span> {{ product.proteins }} {{ $t('Diary.Protein') }}</span>
+                                        <div class="product-counter__span">
+                                            <calories-input v-model="product.calories"/>
+                                            <span> {{ $t('Diary.KCAL') }}</span>
+                                        </div>
+                                        <div class="product-counter__span">
+                                            <calories-input v-model="product.proteins"/>
+                                            <span>{{ $t('Diary.Protein') }}</span></div>
                                     </div>
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
-                                        <span>   {{ product.carbohydrates }} {{ $t('Diary.Carbohydrates') }}</span>
-                                        <span>   {{ product.fats }} {{ $t('Diary.Fats') }}</span>
+                                        <div class="product-counter__span">
+                                            <calories-input v-model="product.carbohydrates"/>
+                                            <span>{{
+                                                    $t('Diary.Carbohydrates')
+                                                }}</span></div>
+                                        <div class="product-counter__span">
+                                            <calories-input v-model="product.fats"/>
+                                            <span> {{ $t('Diary.Fats') }}</span></div>
                                     </div>
                                 </li>
                                 <li class="product-counter__one-portion">
@@ -180,7 +183,7 @@ export default {
                                 </li>
                             </ul>
                             <button class="product-counter__btn button-addProduct" @click="addProduct">
-                                <slot></slot>
+                                {{ $t('Diary.AddProduct') }}
                             </button>
                         </div>
                     </div>
@@ -333,6 +336,10 @@ export default {
         line-height: 22px;
         letter-spacing: 0.0625rem;
         text-transform: uppercase;
+        @media (max-width: 500px) {
+            padding: 5px;
+            font-size: 12px;
+        }
 
         &.mobile {
             @media (min-width: 768px) {
@@ -344,8 +351,19 @@ export default {
             @media (max-width: 767px) {
                 display: none;
             }
+
         }
     }
+
+    &__span {
+        display: flex;
+        flex-direction: column;
+
+        & span {
+            text-align: center;
+        }
+    }
+
 
     &__range {
         display: flex;
@@ -387,7 +405,7 @@ export default {
     }
 
     &__one-portion {
-        display: flex;
+        //display: flex;
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid $border-color;
@@ -396,7 +414,13 @@ export default {
         padding: 20px;
 
         @media (max-width: 768px) {
-
+            display: block;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid $border-color;
+            width: 100%;
+            position: relative;
+            padding: 20px;
         }
         @media (max-width: 500px) {
             word-wrap: break-word;
@@ -406,10 +430,16 @@ export default {
     }
 
     &__gramm {
-        padding: 0 10px 0 10px;
         display: flex;
-        justify-content: space-between;
-        width: 100%;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        @media (max-width: 500px) {
+            justify-content: space-between;
+        }
+
+        & div {
+            padding-bottom: 5px;
+        }
     }
 
     &__btn {
@@ -423,6 +453,9 @@ export default {
 
         @media (max-width: 768px) {
             font-size: 14px;
+        }
+        @media (max-width: 500px) {
+            margin-top: 10px;
         }
 
         &:hover {
@@ -514,6 +547,9 @@ export default {
     @media (max-width: 768px) {
         justify-content: center;
     }
+    @media (max-width: 500px) {
+        padding: 5px 10px 5px 10px;
+    }
 
     .slider-container {
         flex: 4;
@@ -562,12 +598,17 @@ export default {
     .styled-input {
         border: 2px solid lightgray; /* Цвет рамки */
         border-radius: 20px; /* Радиус скругления углов */
-        font-size: $default-font-size; /* Размер шрифта */
+        //font-size: $default-font-size; /* Размер шрифта */
         padding: 10px 20px; /* Внутренние отступы */
         //box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень */
         outline: none; /* Убираем стандартный фокус */
         text-align: center; /* Текст по центру */
         width: 100px;
+
+        @media (max-width: 500px) {
+            height: 40px;
+        }
+
 
         &:focus {
             border-color: #3e8e41; /* Цвет рамки при фокусе */

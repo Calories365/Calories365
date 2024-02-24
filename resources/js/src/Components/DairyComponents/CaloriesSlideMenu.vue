@@ -6,14 +6,22 @@ import CaloriesSlideProductMenu from "@/Components/DairyComponents/CaloriesSlide
 import {actionTypes, mutationTypes as diaryMutations} from "@/store/modules/dairy.js";
 import {debounce} from "lodash";
 import CaloriesAddProduct from "@/Components/DairyComponents/CaloriesAddProduct.vue";
+import CaloriesSlideAddProductMenu from "@/Components/DairyComponents/CaloriesSlideAddProductMenu.vue";
 
 
 export default {
     name: "CaloriesSlideMenu",
-    components: {CaloriesAddProduct, CaloriesSlideProductMenu, CaloriesProduct, FontAwesomeIcon},
+    components: {
+        CaloriesAddProduct,
+        CaloriesSlideProductMenu,
+        CaloriesProduct,
+        FontAwesomeIcon,
+        CaloriesSlideAddProductMenu
+    },
     data() {
         return {
             ProductMenuisOpen: false,
+            ProductAddMenuisOpen: false,
             product: null,
             action: 'add',
             query: null,
@@ -38,6 +46,9 @@ export default {
         toggleProduct(product) {
             this.ProductMenuisOpen = !this.ProductMenuisOpen;
             this.product = product;
+        },
+        toggleAddProduct() {
+            this.ProductAddMenuisOpen = !this.ProductAddMenuisOpen;
         },
         searchProducts() {
             if (this.query) {
@@ -91,6 +102,7 @@ export default {
 <template>
 
     <calories-slide-product-menu
+        v-if="!ProductAddMenuisOpen"
         :isOpen="ProductMenuisOpen"
         :product="product"
         @update="ProductMenuisOpen = $event"
@@ -99,6 +111,12 @@ export default {
         {{ $t('Diary.AddProduct') }}
     </calories-slide-product-menu>
 
+    <calories-slide-add-product-menu
+        v-if="!ProductMenuisOpen"
+        :isOpen="ProductAddMenuisOpen"
+        :name="query"
+        @update="ProductAddMenuisOpen = $event"
+    />
 
     <div :class="{ 'slide-menu': true, 'slide-menu_active': isOpen, 'slide-menu_inactive': !isOpen }">
 
@@ -136,8 +154,12 @@ export default {
             </div>
             <ul class="slide-menu__list">
 
-<!--                <calories-add-product/>-->
-
+                <calories-add-product
+                    v-if="query"
+                    @click="toggleAddProduct(product)"
+                >
+                    {{ query }}
+                </calories-add-product>
 
                 <calories-product
                     v-for="product in products"

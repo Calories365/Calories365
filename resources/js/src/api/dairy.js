@@ -25,11 +25,17 @@ const getSearchedProducts = (query, page = 1) => {
     });
 }
 
+const saveUsersCurrentProducts = (product) => {
+    return axios.post(`/api/user-meals`, product);
+}
+
+
 export default {
     getPopularProducts,
     saveCurrentProducts,
     getCurrentProducts,
     deleteCurrentProducts,
     updateCurrentProducts,
-    getSearchedProducts
+    getSearchedProducts,
+    saveUsersCurrentProducts
 }

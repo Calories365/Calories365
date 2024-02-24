@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/meals/{meal}', [\App\Http\Controllers\MealController::class, 'update'])->name('meals.update');
         Route::delete('/meals/{meal}', [\App\Http\Controllers\MealController::class, 'destroy'])->name('meals.destroy');
 
+        Route::post('/user-meals', [\App\Http\Controllers\UsersMealController::class, 'store'])->name('user-meals.store');
+
         Route::get('/calendar/{date}', [\App\Http\Controllers\CalendarController::class, 'showRange'])->name('calendar.showRange');
 
         Route::get('/products/search', [\App\Http\Controllers\SearchProductController::class, 'search'])->name('meals.search');

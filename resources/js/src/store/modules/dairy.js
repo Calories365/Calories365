@@ -204,6 +204,7 @@ const mutations = {
 export const actionTypes = {
     getPopularProducts: '[dairy] getPopularProducts',
     saveCurrentProducts: '[dairy] saveCurrentProducts',
+    saveUsersCurrentProducts: '[dairy] saveUsersCurrentProducts',
     initialization: '[dairy] initialization',
     dateToggle: '[dairy] dateToggle',
     getCurrentProducts: '[dairy] getCurrentProducts',
@@ -257,7 +258,6 @@ const actions = {
 
             const food_id = product.id;
 
-
             authApi.saveCurrentProducts({food_id, quantity, consumed_at, part_of_day})
                 .then(response => {
                     const id = response.data.id;
@@ -285,6 +285,49 @@ const actions = {
                 .catch(error => {
                     const message = i18n.global.t('Notification.Error.ProductAdditionFailed');
                     context.dispatch('setError', message, { root: true });
+                    context.commit(mutationTypes.saveCurrentProductsFailure, error);
+                });
+        })
+    },
+    [actionTypes.saveUsersCurrentProducts](context, payload) {
+        return new Promise(resolve => {
+            context.commit(mutationTypes.saveCurrentProductsStart);
+            const {product, quantity} = payload;
+
+            product.quantity = quantity;
+
+            product.consumed_at = state.currentDate;
+
+            product.part_of_day = state.part_of_day;
+
+            authApi.saveUsersCurrentProducts(product)
+                .then(response => {
+                    console.log(response)
+
+                    const fullProduct = {
+                        ...product,
+                        quantity: quantity,
+                        consumed_at: product.consumed_at,
+                        part_of_day: product.part_of_day,
+                        id: response.data.consumption_id,
+                        food_id: response.data.food_id
+                    }
+
+                    context.commit(mutationTypes.saveCurrentProductsSuccess, fullProduct);
+
+                    context.dispatch(actionTypes.calculateCaloriesPerDay)
+                        .then(() => {
+                            const message = i18n.global.t('Notification.Success.ProductWasAdded');
+                            context.dispatch('setSuccess', message, {root: true});
+                            return context.dispatch(actionTypes.calculateCaloriesPerDayPart);
+                        })
+
+                    resolve(response);
+
+                })
+                .catch(error => {
+                    const message = i18n.global.t('Notification.Error.ProductAdditionFailed');
+                    context.dispatch('setError', message, {root: true});
                     context.commit(mutationTypes.saveCurrentProductsFailure, error);
                 });
         })
