@@ -117,13 +117,13 @@ const addProduct = () => {
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
                                         {{ $t('Diary.YouAte') }}
-                                        {{ Math.ceil(product.calories / 100 * this.quantity) }} {{ $t('Diary.KCAL') }}
-                                        {{ Math.ceil(this.quantity / 100 * product.proteins) }}г {{
+                                        {{ Math.ceil(product.calories / 100 * quantity) }} {{ $t('Diary.KCAL') }}
+                                        {{ Math.ceil(quantity / 100 * product.proteins) }}г {{
                                             $t('Diary.Protein')
                                         }}
-                                        {{ Math.ceil(this.quantity / 100 * product.carbohydrates) }}г
+                                        {{ Math.ceil(quantity / 100 * product.carbohydrates) }}г
                                         {{ $t('Diary.Carbohydrates') }}
-                                        {{ Math.ceil(this.quantity / 100 * product.fats) }}г {{ $t('Diary.Fats') }}
+                                        {{ Math.ceil(quantity / 100 * product.fats) }}г {{ $t('Diary.Fats') }}
                                     </div>
                                 </li>
                             </ul>
@@ -166,17 +166,17 @@ const addProduct = () => {
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
                                         <span> {{
-                                                Math.ceil(product.calories / 100 * this.quantity)
+                                                Math.ceil(product.calories / 100 * quantity)
                                             }} {{ $t('Diary.KCAL') }}</span>
-                                        <span> {{ Math.ceil(this.quantity / 100 * product.proteins) }}
+                                        <span> {{ Math.ceil(quantity / 100 * product.proteins) }}
                                         {{ $t('Diary.Protein') }}</span>
                                     </div>
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
-                                        <span> {{ Math.ceil(this.quantity / 100 * product.carbohydrates) }}
+                                        <span> {{ Math.ceil(quantity / 100 * product.carbohydrates) }}
                                         {{ $t('Diary.Carbohydrates') }}</span>
-                                        <span> {{ Math.ceil(this.quantity / 100 * product.fats) }}{{
+                                        <span> {{ Math.ceil(quantity / 100 * product.fats) }}{{
                                                 $t('Diary.Fats')
                                             }}</span>
                                     </div>
