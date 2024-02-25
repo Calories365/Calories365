@@ -18,7 +18,7 @@ class ProductService
         try {
             $product = Product::createProduct($validatedData);
             ProductTranslation::createProductTranslation($product, $validatedData);
-            $consumption = FoodConsumption::createFoodConsumption($product, $validatedData);
+            $consumption = FoodConsumption::createFoodConsumption($validatedData, $product);
 
             DB::commit();
             return ['consumption_id' => $consumption->id, 'food_id' => $product->id];

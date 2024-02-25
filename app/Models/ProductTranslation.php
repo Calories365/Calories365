@@ -23,17 +23,15 @@ class ProductTranslation extends Model
     {
         $transiltedData = ASCII::to_transliterate($validatedData['name']);
         $doubleMetaphoneName = new DoubleMetaphone($transiltedData);
-        $translation = new ProductTranslation([
+
+        $dataForTranslation = [
             'product_id' => $product->id,
             'locale' => app()->getLocale(),
             'name' => $validatedData['name'],
             'transliterated_name' => $transiltedData,
             'double_metaphoned_name' => $doubleMetaphoneName->primary,
-        ]);
+        ];
 
-        $translation->save();
-
-        return $translation;
+        return ProductTranslation::create($dataForTranslation);
     }
-
 }

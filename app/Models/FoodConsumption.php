@@ -16,16 +16,13 @@ class FoodConsumption extends Model
      */
     protected $fillable = [
         'user_id', 'food_id', 'quantity', 'consumed_at', 'part_of_day'
-    ]; // Указание полей, которые можно массово назначать
-
-    // Определение связи с моделью User
+    ];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // Определение связи с моделью Product (еда)
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Product::class, 'food_id');
@@ -60,19 +57,16 @@ class FoodConsumption extends Model
             ->toArray();
     }
 
-    public static function createFoodConsumption($product, $validatedData): FoodConsumption
+    public static function createFoodConsumption($validatedData, $product = null): FoodConsumption
     {
-        $consumption = new FoodConsumption([
-            'user_id' => auth()->id(),
-            'food_id' => $product->id,
-            'quantity' => $validatedData['quantity'],
-            'part_of_day' => $validatedData['part_of_day'],
-            'consumed_at' => $validatedData['consumed_at'],
-        ]);
+        $validatedData['user_id'] = auth()->id();
 
-        $consumption->save();
+        if ($product !== null) {
+            $validatedData['food_id'] = $product->id;
+        }
 
-        return $consumption;
+        return FoodConsumption::create($validatedData);
     }
+
 
 }

@@ -8,15 +8,13 @@ use App\Http\Requests\StoreFoodConsumptionRequest;
 use App\Http\Resources\MealCollection;
 use App\Models\FoodConsumption;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Log;
 
 class MealController extends Controller
 {
     public function store(StoreFoodConsumptionRequest $request): \Illuminate\Http\JsonResponse
     {
-        Log::info('Request data received in store method:', $request->all());
-        $validatedData = $request->validated() + ['user_id' => auth()->id()];
-        $foodConsumption = FoodConsumption::create($validatedData);
+        $validatedData = $request->validated();
+        $foodConsumption = FoodConsumption::createFoodConsumption($validatedData);
         return response()->json(['id' => $foodConsumption->id]);
     }
 

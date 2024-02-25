@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use voku\helper\ASCII;
 
 class Product extends Model
 {
@@ -82,18 +81,11 @@ class Product extends Model
 
     public static function createProduct($validatedData): Product
     {
-        $product = new Product([
-            'user' => auth()->id(),
-            'calories' => $validatedData['calories'],
-            'proteins' => $validatedData['proteins'],
-            'carbohydrates' => $validatedData['carbohydrates'],
-            'fats' => $validatedData['fats'],
-            'fibers' => $validatedData['fibers'],
-        ]);
-        $product->save();
+        $validatedData['user_id'] = auth()->id();
 
-        return $product;
+        return Product::create($validatedData);
     }
+
 
 }
 

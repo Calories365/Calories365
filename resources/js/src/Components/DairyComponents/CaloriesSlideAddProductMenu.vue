@@ -40,14 +40,18 @@ const addProduct = () => {
     if (quantity.value > 0 && quantity.value < 1250) {
         store.dispatch(actionTypes.saveUsersCurrentProducts, {
             product: product, quantity: quantity.value,
+        }).then(() => {
+            quantity.value = 1;
+            product.calories = 0;
+            product.carbohydrates = 0;
+            product.fats = 0;
+            product.proteins = 0;
+            emits('update', !props.isOpen);
         });
-        emits('update', !props.isOpen);
-        quantity.value = 1;
     } else {
         store.dispatch('setError', this.$t('Notification.Error.invalidData'));
     }
 };
-
 
 </script>
 <template>
