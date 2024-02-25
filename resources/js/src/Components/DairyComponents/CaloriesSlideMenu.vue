@@ -162,6 +162,7 @@ export default {
                 </calories-add-product>
 
                 <calories-product
+                    v-if="products"
                     v-for="product in products"
                     :key="product.id"
                     :product="product"

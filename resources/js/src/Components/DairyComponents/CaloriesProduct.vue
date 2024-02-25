@@ -7,20 +7,21 @@ export default {
             required: true
         }
     },
-    computed: {
-        imageSrc() {
-            const basePath = new URL('../../assets/', import.meta.url).href;
-            return `${basePath}/${this.product.id}.png`;
-        }
-    }
+
+    // computed: {
+    //     imageSrc() {
+    //         const basePath = new URL('../../assets/', import.meta.url).href;
+    //         return `${basePath}/${this.product.id}.png`;
+    //     }
+    // }
 }
 </script>
 
 <template>
     <li class="product-card">
         <div class="product-card__body">
-            <img v-if="product.is_popular"
-                 :src="imageSrc" style="height: 40px" alt=""/>
+<!--            <img v-if="product.is_popular"-->
+<!--                 :src="imageSrc" style="height: 40px" alt=""/>-->
             <h2 class="product-card__title">{{ product.name }}</h2>
             <span class="product-card__user" v-if="product.user">({{ $t('Diary.YourProduct') }})</span>
         </div>
