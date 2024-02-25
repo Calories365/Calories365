@@ -5,12 +5,17 @@
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-8289f50b.css",
+    "file": "assets/app-a38831ca.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
     "assets": [
       "assets/CALORIES365vectorgreen-8a184506.png",
+      "assets/1-90770dc6.png",
+      "assets/2-8057c750.png",
+      "assets/3-84c3982c.png",
+      "assets/4-84a7de74.png",
+      "assets/5-4d33bc29.png",
       "assets/CALORIES.365-5a213707.png",
       "assets/CALORIES.365_white-688fee3a.png",
       "assets/CALORIES365vectorgreen2-549b9966.png",
@@ -31,11 +36,31 @@
       "assets/ded-d9c73875.mp3"
     ],
     "css": [
-      "assets/app-8289f50b.css"
+      "assets/app-a38831ca.css"
     ],
-    "file": "assets/app-4526de08.js",
+    "file": "assets/app-393f11d7.js",
     "isEntry": true,
     "src": "resources/js/app.js"
+  },
+  "resources/js/src/assets/1.png": {
+    "file": "assets/1-90770dc6.png",
+    "src": "resources/js/src/assets/1.png"
+  },
+  "resources/js/src/assets/2.png": {
+    "file": "assets/2-8057c750.png",
+    "src": "resources/js/src/assets/2.png"
+  },
+  "resources/js/src/assets/3.png": {
+    "file": "assets/3-84c3982c.png",
+    "src": "resources/js/src/assets/3.png"
+  },
+  "resources/js/src/assets/4.png": {
+    "file": "assets/4-84a7de74.png",
+    "src": "resources/js/src/assets/4.png"
+  },
+  "resources/js/src/assets/5.png": {
+    "file": "assets/5-4d33bc29.png",
+    "src": "resources/js/src/assets/5.png"
   },
   "resources/js/src/assets/CALORIES.365.png": {
     "file": "assets/CALORIES.365-5a213707.png",

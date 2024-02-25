@@ -24,6 +24,7 @@ class PopularProductCollection extends ResourceCollection
                 'fats' => $product->fats,
                 'fibers' => $product->fibers,
                 'name' => $translation ? $translation->name : null,
+                'is_popular' => $product->is_popular
             ];
         })->toArray(); // Преобразование коллекции в массив
     }

@@ -302,7 +302,6 @@ const actions = {
 
             authApi.saveUsersCurrentProducts(product)
                 .then(response => {
-                    console.log(response)
 
                     const fullProduct = {
                         ...product,
@@ -336,7 +335,6 @@ const actions = {
         return new Promise(resolve => {
             let currentTime;
             if (context.state.dateFromCalendar) {
-                console.log(context.state.dateFromCalendar);
                 currentTime = new Date(context.state.dateFromCalendar);
             } else {
                 currentTime = new Date();
@@ -402,14 +400,12 @@ const actions = {
     },
     [actionTypes.getCurrentProducts](context) {
         return new Promise(resolve => {
-            console.log('ЗАПУСК!!!')
             context.commit(mutationTypes.getCurrentProductsStart);
 
             const date = state.currentDate;
             authApi.getCurrentProducts(date)
                 .then(response => {
                     context.commit(mutationTypes.getCurrentProductsSuccess, response.data);
-                    console.log('getCurrentProducts.products: ', response.data);
                     resolve(response.data);
                 })
                 .catch(error => {
@@ -491,7 +487,6 @@ const actions = {
     [actionTypes.calculateCaloriesPerDay](context) {
         return new Promise(resolve => {
             const products = context.state.currentProducts;
-            products.forEach((element) => console.log(element));
 
             let totalCalories = products.reduce((total, product) => {
                 const quantity = parseFloat((product.quantity));

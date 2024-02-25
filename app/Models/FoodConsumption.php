@@ -60,4 +60,19 @@ class FoodConsumption extends Model
             ->toArray();
     }
 
+    public static function createFoodConsumption($product, $validatedData): FoodConsumption
+    {
+        $consumption = new FoodConsumption([
+            'user_id' => auth()->id(),
+            'food_id' => $product->id,
+            'quantity' => $validatedData['quantity'],
+            'part_of_day' => $validatedData['part_of_day'],
+            'consumed_at' => $validatedData['consumed_at'],
+        ]);
+
+        $consumption->save();
+
+        return $consumption;
+    }
+
 }

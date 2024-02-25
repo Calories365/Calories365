@@ -97,7 +97,8 @@
         "Grams": "Grams",
         "morning": "Breakfast",
         "dinner": "Lunch",
-        "supper": "Dinner"
+        "supper": "Dinner",
+        "YourProduct": "Your product"
     },
     "Notification": {
         "Success": {

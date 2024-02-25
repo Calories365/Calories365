@@ -97,7 +97,8 @@
         "Grams": "Грами",
         "morning": "Сніданок",
         "dinner": "Обід",
-        "supper": "Вечеря"
+        "supper": "Вечеря",
+        "YourProduct": "Ваш продукт"
     },
     "Notification": {
         "Success": {

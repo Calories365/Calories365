@@ -3,18 +3,26 @@ export default {
     name: "CaloriesProduct",
     props: {
         product: {
-            type: Array,
+            type: Object,
             required: true
         }
     },
+    computed: {
+        imageSrc() {
+            const basePath = new URL('../../assets/', import.meta.url).href;
+            return `${basePath}/${this.product.id}.png`;
+        }
+    }
 }
 </script>
 
 <template>
     <li class="product-card">
         <div class="product-card__body">
-            <!--            <img src="@/images/img.png" style="height: 40px" alt=""/>-->
+            <img v-if="product.is_popular"
+                 :src="imageSrc" style="height: 40px" alt=""/>
             <h2 class="product-card__title">{{ product.name }}</h2>
+            <span class="product-card__user" v-if="product.user">({{ $t('Diary.YourProduct') }})</span>
         </div>
     </li>
 </template>
@@ -51,6 +59,19 @@ export default {
         pointer-events: none;
         @media (max-width: 768px) {
             font-size: 12px;
+        }
+    }
+
+    &__user {
+        font-family: "Roboto", sans-serif;
+        font-weight: 600;
+        font-size: 10px;
+        line-height: 22px;
+        //letter-spacing: 0.0625rem;
+        text-transform: uppercase;
+        pointer-events: none;
+        @media (max-width: 768px) {
+            font-size: 10px;
         }
     }
 }
