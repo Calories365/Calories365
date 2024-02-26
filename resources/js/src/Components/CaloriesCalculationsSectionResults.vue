@@ -54,9 +54,8 @@ export default {
 
         <calories-button
             @click="saveData()" class="calculator-section_head-button">
-            Сохранить
+            {{ $t('calculationResult.Save') }}
         </calories-button>
-
 
         <p class="calculator-section_description">
             {{ $t('calculationResult.calculatorSectionDescriptionOne') }}
@@ -213,16 +212,15 @@ export default {
 .nutrient-item {
     display: flex;
     align-items: center;
-    font-size: 16px; /* Размер шрифта можно настроить */
+    font-size: 16px;
 
     &_text {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: $default-font-size; /* Размер шрифта можно настроить по вашему усмотрению */
-        line-height: 1.5; /* Межстрочный интервал */
-        text-align: justify; /* Выравнивание текста по ширине для лучшего вида; можно заменить на 'left' */
-        //color: #333; /* Темно-серый цвет для лучшего контраста, можно настроить */
-        margin: 1.5vh 0; /* Отступы сверху и снизу */
-        padding: 0 2vh; /* Внутренние поля справа и слева */
+        font-size: $default-font-size;
+        line-height: 1.5;
+        text-align: justify;
+        margin: 1.5vh 0;
+        padding: 0 2vh;
         color: #666666;
     }
 }
@@ -244,12 +242,6 @@ export default {
 }
 
 .calculator-section {
-    //width: 85%;
-    //margin: 2vh auto;
-    //padding: 2vh; /* Внутренние отступы по всем сторонам */
-    ////box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    //background-color: white;
-    //.calculator-section {
     width: 85%;
     margin: 0 auto;
     background-color: white;
@@ -261,11 +253,8 @@ export default {
 
     &_head {
         font-size: $default-head-font-size;
-        //padding-bottom: 30px;
-        //padding-top: 30px;
-        text-align: center; /* Центрирование текста */
-        margin: auto; /* Горизонтальное центрирование блока, если необходимо */
-        /* Дополнительные стили, если они нужны */
+        text-align: center;
+        margin: auto;
     }
 
     &_head-button {
@@ -274,24 +263,23 @@ export default {
     }
 
     &_head-button.inactive {
-        opacity: 0.5; /* делает содержимое полупрозрачным */
-        pointer-events: none; /* предотвращает взаимодействие с элементами */
+        opacity: 0.5;
+        pointer-events: none;
     }
 
     &_head-two {
         font-size: 28px;
-        text-align: center; /* Центрирование текста */
-        margin: auto; /* Горизонтальное центрирование блока, если необходимо */
-        /* Дополнительные стили, если они нужны */
+        text-align: center;
+        margin: auto;
     }
 
     &_description {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: $default-font-size; /* Размер шрифта можно настроить по вашему усмотрению */
-        line-height: 1.5; /* Межстрочный интервал */
-        text-align: justify; /* Выравнивание текста по ширине для лучшего вида; можно заменить на 'left' */
-        margin: 1.5vh 0; /* Отступы сверху и снизу */
-        padding: 0 2vh; /* Внутренние поля справа и слева */
+        font-size: $default-font-size;
+        line-height: 1.5;
+        text-align: justify;
+        margin: 1.5vh 0;
+        padding: 0 2vh;
         color: #666666;
     }
 
@@ -329,7 +317,7 @@ export default {
         margin-top: 30px;
         display: flex;
         align-items: center;
-        background: #FFFFFF; // Используйте реальный цвет фона из вашего дизайна
+        background: #FFFFFF;
         border: 1px solid #aaa;
         border-radius: 20px;
         padding-top: 20px;
@@ -338,16 +326,16 @@ export default {
         padding-left: 15px;
 
         .info-icon {
-            font-size: 100px; // Регулируйте размер иконки по необходимости
+            font-size: 100px;
             color: #aaa;
             padding-left: 5vh;
             padding-right: 5vh;
-            margin-right: 10px; // Регулируйте расстояние между иконкой и текстом по необходимости
+            margin-right: 10px;
         }
 
         .info-text {
-            font-size: $default-font-size; // Регулируйте размер шрифта по необходимости
-            line-height: 1.5; // Регулируйте межстрочный интервал по необходимости
+            font-size: $default-font-size;
+            line-height: 1.5;
             color: #aaa;
         }
 
@@ -431,20 +419,6 @@ export default {
                 padding: 2vh;
             }
         }
-
-
-        .active-block {
-            //@media (max-width: 768px) {
-            //    font-size: 13px;
-            //    display: block;
-            //    position: absolute;
-            //    z-index: 999;
-            //    top: 35px; // Позиционировать от верхней границы родителя на 50% высоты родителя
-            //    left: 50%; // Позиционировать от левой границы родителя на 50% ширины родителя
-            //    transform: translate(-50%, -50%); // Сдвинуть список назад на 50% его собственной ширины и высоты
-            //}
-        }
-
     }
 
     &_chart {

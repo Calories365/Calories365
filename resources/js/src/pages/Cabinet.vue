@@ -12,6 +12,7 @@ export default {
         return {
             name: null,
             email: null,
+            caloriesLimit: null,
         }
 
     },
@@ -21,11 +22,11 @@ export default {
             audio.play().catch(e => console.error('Playback failed:', e));
         },
         changeName() {
-            console.log('start')
             this.$store.dispatch(actionTypes.updateUsersData,
                 {
                     name: this.name,
                     email: this.email,
+                    calories_limit: this.caloriesLimit,
                 }).then(() => {
                 router.push({name: 'login'});
             })
@@ -44,6 +45,7 @@ export default {
     mounted() {
         this.name = this.currentUser.name;
         this.email = this.currentUser.email;
+        this.caloriesLimit = this.currentUser.calories_limit;
     }
 }
 </script>
@@ -79,6 +81,12 @@ export default {
                         <div class="mid-info_text">{{ $t("Cabinet.Name") }}:</div>
                         <input
                             v-model="name"
+                            class="mid-info_credentials">
+                    </div>
+                    <div class="mid-info_login">
+                        <div class="mid-info_text">{{ $t("Cabinet.CaloriesLimit") }}:</div>
+                        <input
+                            v-model="caloriesLimit"
                             class="mid-info_credentials">
                     </div>
                     <div class="mid-info_link">

@@ -159,11 +159,6 @@ const actions = {
                 .then(response => {
                     context.commit(mutationTypes.saveCalculationDataSuccess);
 
-
-
-
-
-                    console.log('Ответ сервера:', response);
                     const key = context.getters[getterTypes.dataKey];
 
                     localStorage.setItem(key, currentData);
@@ -173,7 +168,6 @@ const actions = {
                     resolve();
                 })
                 .catch(error => {
-                    console.log('Ошибка при сохранении данных:', error);
                     context.commit(mutationTypes.saveCalculationDataFailure);
                     const message = i18n.global.t('Notification.Error.ResultSaveFailed');
                     context.dispatch('setError', message, { root: true });
@@ -223,8 +217,6 @@ const actions = {
                     resolve(result);
                 })
                 .catch(error => {
-                    // If validation fails, log the error and resolve the main promise with false
-                    console.error('Validation error:', error.message);
                     resolve(false);  // resolve with false instead of reject to indicate validation failure
                 });
 
@@ -345,7 +337,6 @@ const actions = {
                         dailyCalories *= 0.8; // Уменьшение на 20%
                         break;
                     case 2:
-                        // Никаких изменений
                         break;
                     case 3:
                         dailyCalories *= 1.2; // Увеличение на 20%

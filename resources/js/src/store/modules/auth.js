@@ -210,7 +210,6 @@ const actions = {
                 })
                 .catch(result => {
                     context.commit(mutationTypes.registerFailure, result.response.data.errors);
-                    console.log('resusdlt1 errors', result.response.data.errors);
                 })
         })
     },
@@ -227,20 +226,15 @@ const actions = {
                 })
                 .catch(result => {
                     context.commit(mutationTypes.loginFailure, result.response.data.errors);
-                    console.log('result errors', result);
                 })
         })
     },
     [actionTypes.getCurrentUser](context) {
         return new Promise(resolve => {
             context.commit(mutationTypes.getCurrentUserStart)
-            console.log('getCurrentUser')
             authApi.getCurrentUser()
                 .then(response => {
-                    console.log('response', response);
                     context.commit(mutationTypes.getCurrentUserSuccess, response.data)
-                    //сигнализирование тем, кто ожидает окончания работы промиса с передачей
-                    // response.data.user для .then
                     resolve(response.data)
                 })
                 .catch(() => {
@@ -254,8 +248,6 @@ const actions = {
             authApi.updateCurrentUser(currentUserInput)
                 .then(user => {
                     context.commit(mutationTypes.updateCurrentUserSuccess, user)
-                    //сигнализирование тем, кто ожидает окончания работы промиса с передачей
-                    // response.data.user для .then
                     resolve(user)
                 })
                 .catch((result) => {
@@ -285,7 +277,6 @@ const actions = {
                     resolve(response.data)
                 })
                 .catch((result) => {
-                    console.log('111')
                     context.commit(mutationTypes.recoverySuccess, result.data);
                 })
         })
@@ -301,7 +292,6 @@ const actions = {
                     resolve(response.data)
                 })
                 .catch((result) => {
-                    console.log(result.response.data.errors)
                     const message = i18n.global.t('Notification.Error.PasswordUpdatedFailed');
                     context.dispatch('setError', message, {root: true});
                     context.commit(mutationTypes.recoveryWithTokenFailure, result.response.data.errors);
@@ -322,7 +312,6 @@ const actions = {
                     resolve(response.data)
                 })
                 .catch((result) => {
-                    console.log(result.response.data.errors)
                     context.commit(mutationTypes.resendVerificationEmailFailure, result.response.data.errors);
                 })
         })
@@ -330,8 +319,6 @@ const actions = {
     [actionTypes.updateUsersPassword](context, currentUserInput) {
         return new Promise(resolve => {
             context.commit(mutationTypes.updateUsersPasswordStart)
-
-            console.log(currentUserInput);
 
             authApi.updateUsersPassword(currentUserInput)
                 .then(user => {

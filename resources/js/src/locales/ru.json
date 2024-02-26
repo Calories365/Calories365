@@ -98,8 +98,8 @@
         "morning": "Завтрак",
         "dinner": "Обед",
         "supper": "Ужин",
-        "YourProduct": "Ваш продукт"
-
+        "YourProduct": "Ваш продукт",
+        "MoreProducts": "Еще продукты"
     },
     "Notification": {
         "Success": {
@@ -144,7 +144,8 @@
         "ChangePassword": "Изменить пароль",
         "RepeatPassword": "Повторите пароль",
         "ChangingPassword": "Изменение пароля",
-        "Update": "Обновить"
+        "Update": "Обновить",
+        "CaloriesLimit": "Лимит калорий"
     },
     "Recovery": {
         "RecoveryYourPassword": "Восстановление вашего пароля",

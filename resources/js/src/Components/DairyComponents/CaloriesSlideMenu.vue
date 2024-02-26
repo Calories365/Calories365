@@ -177,7 +177,7 @@ export default {
                         class="calories-observer__text"
                         @click="searchProductsViaObserverClick">
                     <span>
-                        еще товары
+                       {{ $t('Diary.MoreProducts') }}
                     </span>
                     </div>
                 </div>

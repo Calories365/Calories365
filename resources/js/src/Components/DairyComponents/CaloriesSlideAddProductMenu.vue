@@ -437,7 +437,7 @@ const addProduct = () => {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-around;
-        @media (max-width: 500px) {
+        @media (max-width: 375px) {
             justify-content: space-between;
         }
 

@@ -79,7 +79,8 @@
         "fats": "Fats",
         "fibers": "Fibers",
         "goalWeight": "You will reach your desired weight in about:",
-        "days": "days"
+        "days": "days",
+        "Save": "Save"
     },
     "Diary": {
         "summary": "Total",
@@ -96,9 +97,10 @@
         "Search": "Search",
         "Grams": "Grams",
         "morning": "Breakfast",
-        "dinner": "Lunch",
-        "supper": "Dinner",
-        "YourProduct": "Your product"
+        "dinner": "Dinner",
+        "supper": "Supper",
+        "YourProduct": "Your product",
+        "MoreProducts": "More products"
     },
     "Notification": {
         "Success": {
@@ -144,7 +146,8 @@
         "ChangePassword": "Change Password",
         "RepeatPassword": "Repeat Password",
         "ChangingPassword": "Changing Password",
-        "Update": "Update"
+        "Update": "Update",
+        "CaloriesLimit": "Calories limit"
     },
     "Recovery": {
         "RecoveryYourPassword": "Recovery your password",

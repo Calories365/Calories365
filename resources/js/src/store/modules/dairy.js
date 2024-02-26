@@ -225,11 +225,11 @@ const actions = {
             const cachedData = JSON.parse(localStorage.getItem(cachedDataKey));
             const currentTime = new Date().getTime();
 
-            // if (cachedData.popularProducts && (currentTime - cachedData.timestamp < 36000)) {
-            //     context.commit(mutationTypes.getPopularSuccess, cachedData.popularProducts);
-            //     resolve(cachedData.popularProducts);
-            //     return;
-            // }
+            if (cachedData && (currentTime - cachedData.timestamp < 36000)) {
+                context.commit(mutationTypes.getPopularSuccess, cachedData.popularProducts);
+                resolve(cachedData.popularProducts);
+                return;
+            }
 
             context.commit(mutationTypes.getPopularStart);
             authApi.getPopularProducts(currentLocale)
@@ -496,7 +496,7 @@ const actions = {
 
             totalCalories = parseFloat(totalCalories.toFixed(0));
 
-            // Math.ceil(totalCalories);
+            // Math.ceil(totalCalories);x
 
             context.commit(mutationTypes.setCaloriesPerDay, totalCalories);
 
