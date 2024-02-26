@@ -426,7 +426,8 @@ const addProduct = () => {
             position: relative;
             padding: 20px;
         }
-        @media (max-width: 500px) {
+        @media (max-width: 375px) {
+        //@media (max-width: 500px) {
             word-wrap: break-word;
             white-space: normal;
             padding: 10px;
@@ -458,7 +459,8 @@ const addProduct = () => {
         @media (max-width: 768px) {
             font-size: 14px;
         }
-        @media (max-width: 500px) {
+        @media (max-width: 375px) {
+        //@media (max-width: 500px) {
             margin-top: 10px;
         }
 
@@ -551,7 +553,8 @@ const addProduct = () => {
     @media (max-width: 768px) {
         justify-content: center;
     }
-    @media (max-width: 500px) {
+    @media (max-width: 375px) {
+    //@media (max-width: 500px) {
         padding: 5px 10px 5px 10px;
     }
 
@@ -609,7 +612,8 @@ const addProduct = () => {
         text-align: center; /* Текст по центру */
         width: 100px;
 
-        @media (max-width: 500px) {
+        //@media (max-width: 500px) {
+        @media (max-width: 375px) {
             height: 40px;
         }
 

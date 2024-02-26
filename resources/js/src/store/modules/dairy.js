@@ -170,6 +170,7 @@ const mutations = {
         state.isSybmiting = true;
     },
     [mutationTypes.getSearchedProductsSuccess](state, payload) {
+        state.productsInMenu = [];
         payload.products.forEach(product => {
             state.productsInMenu.push(product);
         });
@@ -474,7 +475,7 @@ const actions = {
 
             authApi.getSearchedProducts(trimedQuery, payload.page)
                 .then(response => {
-
+                    console.log(response.data.products.data);
                     const products = response.data.products.data;
                     context.commit(mutationTypes.getSearchedProductsSuccess, {products});
                     resolve(response.data.products.total);

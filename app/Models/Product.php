@@ -21,7 +21,7 @@ class Product extends Model
         'fats',
         'fibers',
         'is_popular',
-        'user'
+        'user_id'
     ];
 
     public function translations(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -51,8 +51,8 @@ class Product extends Model
             ->where('product_translations.locale', '=', $locale)
             ->where('product_translations.double_metaphoned_name', 'LIKE', "%{$encodedQuery}%")
             ->where(function ($query) use ($user_id) {
-                $query->where('products.user', '=', $user_id)
-                    ->orWhereNull('products.user');
+                $query->where('products.user_id', '=', $user_id)
+                    ->orWhereNull('products.user_id');
             })
             ->select(
                 'products.id',
@@ -61,7 +61,7 @@ class Product extends Model
                 'products.carbohydrates',
                 'products.fats',
                 'products.fibers',
-                'products.user',
+                'products.user_id',
                 'product_translations.name as name'
             )
             ->orderByRaw("

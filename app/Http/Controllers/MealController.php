@@ -8,6 +8,7 @@ use App\Http\Requests\StoreFoodConsumptionRequest;
 use App\Http\Resources\MealCollection;
 use App\Models\FoodConsumption;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Log;
 
 class MealController extends Controller
 {
@@ -24,6 +25,7 @@ class MealController extends Controller
         $locale = app()->getLocale();
         $userId = auth()->id();
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale);
+        Log::info('Request data received in store method:', ['data' => $meals]);
         return new MealCollection($meals);
     }
 

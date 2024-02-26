@@ -23,7 +23,7 @@ export default {
 <!--            <img v-if="product.is_popular"-->
 <!--                 :src="imageSrc" style="height: 40px" alt=""/>-->
             <h2 class="product-card__title">{{ product.name }}</h2>
-            <span class="product-card__user" v-if="product.user">({{ $t('Diary.YourProduct') }})</span>
+            <span class="product-card__user" v-if="product.user_id">({{ $t('Diary.YourProduct') }})</span>
         </div>
     </li>
 </template>

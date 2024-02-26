@@ -39,8 +39,8 @@ export default {
                 }
             ).then(user => {
 
-                const audio = new Audio(fart);
-                audio.play().catch(e => console.error('Playback failed:', e));
+                // const audio = new Audio(fart);
+                // audio.play().catch(e => console.error('Playback failed:', e));
 
                 this.$router.push({name: 'home'})
                 this.email = '';

@@ -5,10 +5,13 @@ namespace App\Services;
 use App\Models\FoodConsumption;
 use App\Models\Product;
 use App\Models\ProductTranslation;
+use App\Traits\DoubleMetaphoneTrait;
 use Illuminate\Support\Facades\DB;
+
 
 class ProductService
 {
+    use DoubleMetaphoneTrait;
     /**
      * @throws \Exception
      */
@@ -17,7 +20,8 @@ class ProductService
         DB::beginTransaction();
         try {
             $product = Product::createProduct($validatedData);
-            ProductTranslation::createProductTranslation($product, $validatedData);
+            $doubleMetaphoneName = $this->customDoubleMetaphone($validatedData['name']);
+            ProductTranslation::createProductTranslations($product, $validatedData, $doubleMetaphoneName);
             $consumption = FoodConsumption::createFoodConsumption($validatedData, $product);
 
             DB::commit();

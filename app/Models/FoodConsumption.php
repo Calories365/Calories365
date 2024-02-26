@@ -42,6 +42,7 @@ class FoodConsumption extends Model
             ->get();
     }
 
+
     public static function getDailyCaloriesSum($userId, $date): \Illuminate\Database\Eloquent\Collection|array
     {
         $year = date('Y', strtotime($date));

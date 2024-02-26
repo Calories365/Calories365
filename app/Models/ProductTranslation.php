@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use DoubleMetaphone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use voku\helper\ASCII;
 
 class ProductTranslation extends Model
 {
@@ -19,19 +17,23 @@ class ProductTranslation extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public static function createProductTranslation($product, $validatedData): ProductTranslation
+    public static function createProductTranslations($product, $validatedData, $doubleMetaphoneName): bool
     {
-        $transiltedData = ASCII::to_transliterate($validatedData['name']);
-        $doubleMetaphoneName = new DoubleMetaphone($transiltedData);
+        $supportedLocales = config('app.supported_locales', []);
 
-        $dataForTranslation = [
-            'product_id' => $product->id,
-            'locale' => app()->getLocale(),
-            'name' => $validatedData['name'],
-            'transliterated_name' => $transiltedData,
-            'double_metaphoned_name' => $doubleMetaphoneName->primary,
-        ];
+        foreach ($supportedLocales as $locale) {
+            $dataForTranslation = [
+                'product_id' => $product->id,
+                'locale' => $locale,
+                'name' => $validatedData['name'],
+                'transliterated_name' => null,
+                'double_metaphoned_name' => $doubleMetaphoneName,
+            ];
 
-        return ProductTranslation::create($dataForTranslation);
+            ProductTranslation::create($dataForTranslation);
+        }
+
+        return true;
     }
+
 }

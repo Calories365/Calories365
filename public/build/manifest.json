@@ -5,7 +5,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-5cce489a.css",
+    "file": "assets/app-8266454d.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -30,15 +30,14 @@
       "assets/phon2-aed36cdf.png",
       "assets/phone3-039042f9.png",
       "assets/stats-f8ddbe19.png",
-      "assets/fart-742c67c7.mp3",
       "assets/burger-8a2dae5f.png",
       "assets/valera-a66758ae.jpeg",
       "assets/ded-d9c73875.mp3"
     ],
     "css": [
-      "assets/app-5cce489a.css"
+      "assets/app-8266454d.css"
     ],
-    "file": "assets/app-e93716ee.js",
+    "file": "assets/app-f6eb656b.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },
