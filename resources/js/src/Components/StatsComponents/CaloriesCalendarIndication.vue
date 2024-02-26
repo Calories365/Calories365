@@ -4,7 +4,6 @@ import {useI18n} from 'vue-i18n';
 
 const {t} = useI18n();
 
-// Используйте computed для динамического обновления описаний
 const colors = computed(() => [
     {class: 'overreach', description: t('Stats.ColorDescriptions.Overreach')},
     {class: 'significant-overreach', description: t('Stats.ColorDescriptions.SignificantOverreach')},

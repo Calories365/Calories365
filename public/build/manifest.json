@@ -1,11 +1,11 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-40db94a2.css",
+    "file": "assets/app-73764c6a.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-3f41bef2.css",
+    "file": "assets/app-3e6afaa3.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -31,13 +31,13 @@
       "assets/phone3-039042f9.png",
       "assets/stats-f8ddbe19.png",
       "assets/burger-8a2dae5f.png",
-      "assets/valera-a66758ae.jpeg",
-      "assets/ded-d9c73875.mp3"
+      "assets/ded-d9c73875.mp3",
+      "assets/valera-a66758ae.jpeg"
     ],
     "css": [
-      "assets/app-3f41bef2.css"
+      "assets/app-3e6afaa3.css"
     ],
-    "file": "assets/app-21f70d8c.js",
+    "file": "assets/app-bf68bceb.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },

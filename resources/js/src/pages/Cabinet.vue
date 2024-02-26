@@ -216,22 +216,21 @@ export default {
     }
 
     &_avatar {
-        width: 150px; /* Ширина */
-        height: 150px; /* Высота */
-        border-radius: 50%; /* Делаем круг */
-        overflow: hidden; /* Скрываем лишнее */
-        display: flex; /* Используем Flexbox для центрирования изображения */
-        justify-content: center; /* Центрирование по горизонтали */
-        align-items: center; /* Центрирование по вертикали */
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         @media (max-width: 768px) {
-            width: 100px; /* Ширина */
-            height: 100px; /* Высота */
+            width: 100px;
+            height: 100px;
         }
 
         img {
-            width: 100%; /* Задаем ширину изображения 100% от родителя */
-            height: 100%; /* Высота изменяется автоматически */
-            /* Если изображение не квадратное, вы можете добавить object-fit для корректного заполнения пространства */
+            width: 100%;
+            height: 100%;
             object-fit: cover;
         }
     }

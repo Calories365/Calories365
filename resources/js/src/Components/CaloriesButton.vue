@@ -21,53 +21,51 @@ export default {
 
 <style scoped lang="scss">
 .calories-button {
-    //width: 500px;
     height: 50px;
-    //background-color: #4CAF50; /* Основной зелёный цвет кнопки */
-    background-color: $main-color; /* Основной зелёный цвет кнопки */
-    color: white; /* Цвет текста */
-    border: none; /* Убрать границу */
-    padding: 1vh 8vh; /* Внутренние отступы для увеличения размера кнопки */
+    background-color: $main-color;
+    color: white;
+    border: none;
+    padding: 1vh 8vh;
     //margin-bottom: 20px;
-    font-size: $default-font-size; /* Размер шрифта */
-    cursor: pointer; /* Курсор в виде руки при наведении на кнопку */
-    border-radius: 5px; /* Скругление углов кнопки */
-    transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s; /* Плавные переходы для анимации */
+    font-size: $default-font-size;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
     text-align: center;
 
     @media (max-width: 768px) {
-        padding: 1vh 4vh; /* Уменьшенные внутренние отступы для мобильных устройств */
-        font-size: 15px; /* Немного уменьшаем размер шрифта */
-    }
+        padding: 1vh 4vh;
+        font-size: 15px;
 
     &_text {
         text-align: center;
     }
 
     &.danger {
-        background-color: #c01515; /* Основной зелёный цвет кнопки */
+        background-color: #c01515;
     }
 
     &.recovery {
         height: 35px;
         font-size: 16px;
     }
+    }
 }
 
 .calories-button:hover {
-    background-color: #367C39; /* Ещё более темный зелёный для активного состояния */
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.24); /* Внутренняя тень для эффекта вдавленности */
+    background-color: #367C39;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.24);
     &.danger {
-        background-color: #9d1111; /* Основной зелёный цвет кнопки */
+        background-color: #9d1111;
     }
 }
 
 .calories-button:active {
-    background-color: #2E5933; /* Even darker green color for the pressed state */
-    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2); /* Deeper shadow for a more pressed-in effect */
-    transform: scale(0.98); /* Slightly scale down the button to mimic a pressing effect */
+    background-color: #2E5933;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
+    transform: scale(0.98);
     &.danger {
-        background-color: #9d1111; /* Основной зелёный цвет кнопки */
+        background-color: #9d1111;
     }
 }
 

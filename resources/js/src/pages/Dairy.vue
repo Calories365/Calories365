@@ -140,7 +140,7 @@ export default {
     position: relative;
     margin-bottom: 15px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 100%; // для заполнения контейнера
+    width: 100%;
 
     &.success {
         background-color: #e9f6ec;

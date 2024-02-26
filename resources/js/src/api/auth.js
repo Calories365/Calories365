@@ -27,10 +27,6 @@ const updateUsersPassword = (credentials) => {
 const updateCurrentUser = (credentials) => {
     return axios.put('/user/profile-information', credentials)
 }
-// const updateCurrentUser = currentUserInput => {
-//     return axios.put('/user', {user: currentUserInput})
-//         .then(response => response.data.user);
-// }
 
 export default {
     register, login, getCurrentUser,

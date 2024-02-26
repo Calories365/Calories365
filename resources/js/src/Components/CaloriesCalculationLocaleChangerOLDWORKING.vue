@@ -42,7 +42,7 @@ export default {
             this.selectedLocale = locale;
             this.$i18n.locale = locale;
             localStorage.setItem('locale', locale);
-            this.isOpen = false; // Закрыть выпадающий список после выбора
+            this.isOpen = false;
         },
 
     },
@@ -141,8 +141,8 @@ export default {
             z-index: 999;
             top: 180%;
             left: 50%;
-            transform: translate(-50%, -50%); // Сдвинуть список назад на 50% его собственной ширины и высоты
-            min-width: 100%; // Убедитесь, что минимальная ширина не меньше родителя
+            transform: translate(-50%, -50%);
+            min-width: 100%;
             background-color: white;
         }
 
@@ -172,15 +172,15 @@ export default {
         }
 
         &_li:hover {
-            background-color: #e0e0e0; /* светло-серый цвет */
+            background-color: #e0e0e0;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         &_li:active {
-            background-color: #4CAF50; /* Цвет фона при активации */
-            color: white; /* Цвет текста при активации */
-            transform: scale(0.95); /* Немного уменьшить элемент при нажатии */
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2); /* Внутренняя тень для эффекта нажатия */
+            background-color: #4CAF50;
+            color: white;
+            transform: scale(0.95);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
         }
 
         &_hide {

@@ -148,21 +148,13 @@ export default {
                                                :value="Number(activity)"
                                                @update="activity = $event"
                 />
-<!--                <calories-calculation-dropdown class="calculator-section_dropdown"-->
-<!--                                               :name="$t('message.caloriesCalculationDropdownGoal')"-->
-<!--                                               :options="translatedGoals"-->
-<!--                                               :value="goal"-->
-<!--                                               @update="goal = $event"-->
-<!--                />-->
+
             </div>
         </div>
 
         <p class="calculator-section_description">
             {{ $t('message.calculatorSectionDescription') }}
         </p>
-
-<!--        <p class="calculator-section_head">{{ $t('message.calculatorSectionHeadBodyWeight') }}</p>-->
-
 
     </section>
 </template>
@@ -189,71 +181,70 @@ export default {
         padding-top: 30px;
         padding-bottom: 30px;
         font-size: $default-head-font-size;
-        text-align: center; /* Центрирование текста */
-        margin: auto; /* Горизонтальное центрирование блока, если необходимо */
+        text-align: center;
+        margin: auto;
     }
 
     &_description {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: $default-font-size; /* Размер шрифта можно настроить по вашему усмотрению */
-        line-height: 1.5; /* Межстрочный интервал */
-        text-align: justify; /* Выравнивание текста по ширине для лучшего вида; можно заменить на 'left' */
-        //color: #333; /* Темно-серый цвет для лучшего контраста, можно настроить */
-        margin: 1.5vh 0; /* Отступы сверху и снизу */
-        padding: 0 2vh; /* Внутренние поля справа и слева */
+        font-size: $default-font-size;
+        line-height: 1.5;
+        text-align: justify;
+        margin: 1.5vh 0;
+        padding: 0 2vh;
         color: #666666;
 
     }
 
     &_gender-buttons-container {
         margin-top: 2vh;
-        display: flex; /* Применяем Flexbox */
-        justify-content: center; /* Центрирование кнопок по горизонтали */
-        align-items: center; /* Выравнивание кнопок по вертикали */
-        gap: 1.5vh; /* Расстояние между кнопками */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5vh;
     }
 
     &_gender-button {
         width: 500px;
         height: 50px;
-        background-color: #4CAF50; /* Основной зелёный цвет кнопки */
-        color: white; /* Цвет текста */
-        border: none; /* Убрать границу */
-        padding: 1vh 8vh; /* Внутренние отступы для увеличения размера кнопки */
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 1vh 8vh;
         margin-bottom: 20px;
-        font-size: $default-font-size; /* Размер шрифта */
-        cursor: pointer; /* Курсор в виде руки при наведении на кнопку */
-        border-radius: 5px; /* Скругление углов кнопки */
-        transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s; /* Плавные переходы для анимации */
+        font-size: $default-font-size;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
         text-align: center;
 
         @media (max-width: 768px) {
-            padding: 1vh 4vh; /* Уменьшенные внутренние отступы для мобильных устройств */
-            font-size: 14px; /* Немного уменьшаем размер шрифта */
+            padding: 1vh 4vh;
+            font-size: 14px;
         }
     }
 
 
     &_gender-button:hover {
-        background-color: #367C39; /* Ещё более темный зелёный для активного состояния */
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.24); /* Внутренняя тень для эффекта вдавленности */
+        background-color: #367C39;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.24);
     }
 
     &_gender-button.active {
-        background-color: #367C39; /* Ещё более темный зелёный для активного состояния */
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.24); /* Внутренняя тень для эффекта вдавленности */
+        background-color: #367C39;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.24);
     }
 
     &_gender-button.disabled {
-        background-color: #e0e0e0; /* Серый фон для неактивной кнопки */
-        color: #000000; /* Серый цвет текста для неактивной кнопки */
-        cursor: default; /* Стандартный курсор для неактивной кнопки */
-        box-shadow: none; /* Убрать тень */
+        background-color: #e0e0e0;
+        color: #000000;
+        cursor: default;
+        box-shadow: none;
     }
 
     &_gender-button.disabled:hover {
-        background-color: rgba(140, 134, 134, 0.5); /* Чуть темнее зелёный при наведении */
-        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24), 0 4px 5px 0 rgba(0, 0, 0, 0.19); /* Тень для эффекта приподнятости */
+        background-color: rgba(140, 134, 134, 0.5);
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24), 0 4px 5px 0 rgba(0, 0, 0, 0.19);
     }
 
     &_dropdowns {

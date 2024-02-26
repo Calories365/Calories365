@@ -14,12 +14,12 @@ export default {
 
 <style scoped lang="scss">
 .notification-container {
-    position: fixed; // используйте fixed для позиционирования относительно вьюпорта
+    position: fixed;
     top: 10%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: auto; // или конкретная ширина, если вы хотите ограничить ширину уведомления
-    z-index: 1000; // убедитесь, что уведомление находится над другими элементами
+    width: auto;
+    z-index: 1000;
 }
 
 .notification {
@@ -29,7 +29,7 @@ export default {
     position: relative;
     margin-bottom: 15px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 100%; // для заполнения контейнера
+    width: 100%;
 
     &.success {
         background-color: #e9f6ec;

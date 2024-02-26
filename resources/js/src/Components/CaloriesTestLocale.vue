@@ -9,7 +9,7 @@ export default {
             isOpen: false,
             isActive: false,
             selectedLocale: localStorage.getItem('locale') || 'en',
-            locales: ['en', 'ua'], // Исправлено на массив
+            locales: ['en', 'ua'],
         };
     },
     methods: {
@@ -108,11 +108,11 @@ export default {
             display: none;
             position: absolute;
             z-index: 999;
-            top: 50%; // Позиционировать от верхней границы родителя на 50% высоты родителя
-            left: 50%; // Позиционировать от левой границы родителя на 50% ширины родителя
-            transform: translate(-50%, -50%); // Сдвинуть список назад на 50% его собственной ширины и высоты
-            width: auto; // Вы можете задать ширину или установить auto
-            min-width: 100%; // Убедитесь, что минимальная ширина не меньше родителя
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            min-width: 100%;
             background-color: white;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2), 0px 6px 10px rgba(0, 0, 0, 0.1);
         }
@@ -132,7 +132,7 @@ export default {
         }
 
         &_li:hover {
-            background-color: #e0e0e0; /* светло-серый цвет */
+            background-color: #e0e0e0; 
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         }
 

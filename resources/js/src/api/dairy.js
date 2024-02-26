@@ -7,10 +7,10 @@ const saveCurrentProducts = credentials => {
     return axios.post('/api/meals', credentials)
 }
 const getCurrentProducts = date => {
-    return axios.get(`/api/meals/${date}`)// /meals/{date}
+    return axios.get(`/api/meals/${date}`)
 }
 const deleteCurrentProducts = id => {
-    return axios.delete(`/api/meals/${id}`);// /meals/{id}
+    return axios.delete(`/api/meals/${id}`);
 }
 const updateCurrentProducts = (id, quantity) => {
     return axios.put(`/api/meals/${id}`, {quantity});

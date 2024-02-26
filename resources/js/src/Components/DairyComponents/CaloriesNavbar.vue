@@ -45,7 +45,6 @@ export default {
         </div>
         <div class="navbar">
             <ul class="navbar__list">
-                <!--                <calories-arrow-left @click="dateToggle('previous')"/>-->
                 <li class="navbar__element" :class="{ active: part_of_day === 'morning'}"
                     @click="dayPartToggle('morning')">{{ $t('Diary.morning') }}
                 </li>
@@ -55,7 +54,6 @@ export default {
                 <li class="navbar__element" :class="{ active: part_of_day === 'supper'}"
                     @click="dayPartToggle('supper')">{{ $t('Diary.supper') }}
                 </li>
-                <!--                <calories-arrow-right @click="dateToggle('next')"/>-->
             </ul>
         </div>
     </div>

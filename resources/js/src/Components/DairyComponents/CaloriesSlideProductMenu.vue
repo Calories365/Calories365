@@ -56,17 +56,7 @@ export default {
                 this.quantity = newProduct.quantity;
             }
         },
-        // quantity(newQuantity, oldQuantity) {
-        //     if (newQuantity !== oldQuantity && this.product.quantity) {
-        //         this.quantity = this.product.quantity;
-        //     }
-        // },
     },
-    // mounted() {
-    //     if (this.product && 'quantity' in this.product) {
-    //         this.quantity = this.product.quantity;
-    //     }
-    // }
 }
 </script>
 
@@ -85,7 +75,6 @@ export default {
                 <div class="product-counter__card" data-id="1">
                     <div class="product-counter__wrapper1">
                         <div class="product-counter__img">
-                            <!-- <img src="@/images/img.png" alt=""> -->
                         </div>
                         <h2 class="product-counter__title">
                             {{ product.name }}
@@ -460,14 +449,14 @@ export default {
 
 //Слайдера
 .calories-checkBox {
-    background-color: green; /* Задает зеленый фон для чекбокса */
-    border: 2px solid green; /* Задает зеленую границу для чекбокса */
+    background-color: green;
+    border: 2px solid green;
     position: absolute;
     top: 18px;
     left: 110px;
 
     &:hover + .calories-checkBox_description {
-        display: inline-block; /* Показать при наведении на чекбокс */
+        display: inline-block;
     }
 
     &_description {
@@ -560,17 +549,16 @@ export default {
     }
 
     .styled-input {
-        border: 2px solid lightgray; /* Цвет рамки */
-        border-radius: 20px; /* Радиус скругления углов */
-        font-size: $default-font-size; /* Размер шрифта */
-        padding: 10px 20px; /* Внутренние отступы */
-        //box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень */
-        outline: none; /* Убираем стандартный фокус */
-        text-align: center; /* Текст по центру */
+        border: 2px solid lightgray;
+        border-radius: 20px;
+        font-size: $default-font-size;
+        padding: 10px 20px;
+        outline: none;
+        text-align: center;
         width: 100px;
 
         &:focus {
-            border-color: #3e8e41; /* Цвет рамки при фокусе */
+            border-color: #3e8e41;
         }
     }
 }

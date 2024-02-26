@@ -19,14 +19,14 @@ const emits = defineEmits(['update:modelValue']);
 
 <style scoped lang="scss">
 .styled-input {
-    border: 2px solid lightgray; /* Цвет рамки */
-    border-radius: 20px; /* Радиус скругления углов */
-    outline: none; /* Убираем стандартный фокус */
-    text-align: center; /* Текст по центру */
+    border: 2px solid lightgray;
+    border-radius: 20px;
+    outline: none;
+    text-align: center;
     width: 70px;
 
     &:focus {
-        border-color: #3e8e41; /* Цвет рамки при фокусе */
+        border-color: #3e8e41;
     }
 }
 </style>

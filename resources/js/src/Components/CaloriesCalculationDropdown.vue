@@ -111,7 +111,6 @@ export default {
     height: 10px;
     border-left: 2px solid #666666;
     border-bottom: 2px solid #666666;
-    //transform: rotate(-45deg);
     transition: 0.3s ease;
     padding: 7px;
 
@@ -164,11 +163,11 @@ export default {
             display: none;
             position: absolute;
             z-index: 999;
-            top: 100%; // Позиционировать от верхней границы родителя на 50% высоты родителя
-            left: 50%; // Позиционировать от левой границы родителя на 50% ширины родителя
-            transform: translate(-50%, 0%); // Сдвинуть список назад на 50% его собственной ширины и высоты
-            width: auto; // Вы можете задать ширину или установить auto
-            min-width: 100%; // Убедитесь, что минимальная ширина не меньше родителя
+            top: 100%;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            width: auto;
+            min-width: 100%;
             background-color: white;
             border-radius: 5px;
             border: 1px solid lightgray;
@@ -193,15 +192,15 @@ export default {
         }
 
         &_li:hover {
-            background-color: #e0e0e0; /* светло-серый цвет */
+            background-color: #e0e0e0;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         &_li:active {
-            background-color: #4CAF50; /* Цвет фона при активации */
-            color: white; /* Цвет текста при активации */
-            transform: scale(0.95); /* Немного уменьшить элемент при нажатии */
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2); /* Внутренняя тень для эффекта нажатия */
+            background-color: #4CAF50;
+            color: white;
+            transform: scale(0.95);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
         }
 
         &_hide {

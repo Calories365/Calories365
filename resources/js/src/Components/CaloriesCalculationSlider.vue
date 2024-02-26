@@ -91,12 +91,12 @@ export default {
 <style scoped lang="scss">
 
 .inactive {
-    opacity: 0.5; /* делает содержимое полупрозрачным */
-    pointer-events: none; /* предотвращает взаимодействие с элементами */
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .calories-checkBox:hover + .calories-checkBox_description {
-    display: inline-block; /* Показать при наведении на чекбокс */
+    display: inline-block;
 }
 
 .input-container {
@@ -104,8 +104,8 @@ export default {
 }
 
 .calories-checkBox {
-    background-color: green; /* Задает зеленый фон для чекбокса */
-    border: 2px solid green; /* Задает зеленую границу для чекбокса */
+    background-color: green;
+    border: 2px solid green;
     position: absolute;
     top: 18px;
     left: 110px;
@@ -118,7 +118,7 @@ export default {
         font-size: $default-font-size;
         color: white;
         padding: 5px;
-        width: 300px; /* или любая другая ширина */
+        width: 300px;
         position: absolute;
         background-color: rgba(0, 0, 0, 0.4);
         right: 0;
@@ -132,9 +132,9 @@ export default {
 
 .users-data-section {
     margin-top: 2vh;
-    display: flex; // Используем flexbox для выравнивания элементов в ряд
-    align-items: center; // Центрируем элементы по вертикали
-    gap: 20px; // Добавляем небольшой промежуток между элементами
+    display: flex;
+    align-items: center;
+    gap: 20px;
 
     @media (max-width: 768px) {
         justify-content: space-between;
@@ -192,17 +192,16 @@ export default {
     }
 
     .styled-input {
-        border: 2px solid lightgray; /* Цвет рамки */
-        border-radius: 20px; /* Радиус скругления углов */
-        font-size: $default-font-size;; /* Размер шрифта */
-        padding: 10px 20px; /* Внутренние отступы */
-        //box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень */
-        outline: none; /* Убираем стандартный фокус */
-        text-align: center; /* Текст по центру */
+        border: 2px solid lightgray;
+        border-radius: 20px;
+        font-size: $default-font-size;
+        padding: 10px 20px;
+        outline: none;
+        text-align: center;
         width: 100px;
 
         &:focus {
-            border-color: #3e8e41; /* Цвет рамки при фокусе */
+            border-color: #3e8e41;
         }
     }
 }

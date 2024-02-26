@@ -1,6 +1,5 @@
 import axios from "axios";
 import getCookie from "@/helpers/getCookie.js";
-// import {getItem} from "@/helpers/persistanceStorage";
 
 axios.defaults.baseURL = `https://${window.location.host}`
 
@@ -17,10 +16,8 @@ axios.interceptors.request.use(config => {
 });
 
 axios.interceptors.request.use(config => {
-    // Получение текущей локали из i18n или localStorage
     const locale = localStorage.getItem('locale') || 'en';
 
-    // Добавление заголовка 'Accept-Language' с текущей локалью к каждому исходящему запросу
     config.headers['Accept-Language'] = locale;
 
     return config;
