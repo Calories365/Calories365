@@ -47,13 +47,13 @@ export default {
             }
         },
         startHideAnimation() {
-            this.isHiding = true; // Новая переменная данных для контроля анимации
+            this.isHiding = true;
             this.isActiveArrow = false;
 
             setTimeout(() => {
                 this.isActive = false;
                 this.isHiding = false;
-            }, 500); // Соответствует продолжительности анимации fadeOut
+            }, 500);
         },
         handleClickOutside() {
             if (this.isActive) {

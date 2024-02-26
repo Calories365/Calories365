@@ -145,7 +145,7 @@ export default {
                 <calories-calculation-dropdown class="calculator-section_dropdown"
                                                :name="$t('message.caloriesCalculationDropdownActivity')"
                                                :options="translatedActivityOptions"
-                                               :value="activity"
+                                               :value="Number(activity)"
                                                @update="activity = $event"
                 />
 <!--                <calories-calculation-dropdown class="calculator-section_dropdown"-->

@@ -9,7 +9,7 @@ import {actionTypes} from "@/store/modules/dairy.js";
 
 const props = defineProps({
     currentDate: {
-        type: Object,
+        type: String,
         required: true,
     },
 });

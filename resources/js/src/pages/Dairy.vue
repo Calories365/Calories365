@@ -64,20 +64,23 @@ export default {
 
             <div class="dairy-section__food-header">
                 <calories-indication/>
-
             </div>
 
             <div class="dairy-section__food-container">
                 <hr>
-
-                <calories-food-list class="dairy-section__food-list-container"/>
+                <div class="dairy-section__food-list-container">
+                    <calories-food-list/>
+                </div>
 
                 <calories-slide-menu
                     :isOpen="isOpen"
                     @update="isOpen = $event"
                 />
 
-                <calories-add-btn class="dairy-section__addBtn" @click="toggleMenu"/>
+
+                <div class="dairy-section__addBtn">
+                    <calories-add-btn @click="toggleMenu"/>
+                </div>
 
             </div>
         </div>
@@ -87,7 +90,6 @@ export default {
 <style scoped lang="scss">
 
 .dairy-section {
-
     &__parent {
         width: 90%;
         margin: 0 auto;
@@ -115,21 +117,20 @@ export default {
     }
 
     &__addBtn {
-        background-color: $main-color;
         position: absolute;
         bottom: 20px;
         right: 20px;
-        z-index: 97;
+        z-index: 98;
     }
 }
 
 .notification-container {
-    position: fixed; // используйте fixed для позиционирования относительно вьюпорта
+    position: fixed;
     top: 10%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: auto; // или конкретная ширина, если вы хотите ограничить ширину уведомления
-    z-index: 1000; // убедитесь, что уведомление находится над другими элементами
+    width: auto;
+    z-index: 1000;
 }
 
 .notification {

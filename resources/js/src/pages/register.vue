@@ -108,13 +108,13 @@ export default {
                     <div class="mt-2">
                         <input
                             class="password-input"
-                            id="password" name="password" type="password" autocomplete="current-password" required=""
+                            id="password" name="password" type="password"  required=""
                                v-model="password"/>
                     </div>
                 </div>
                 <div>
                     <div class="flex items-center justify-between">
-                        <label for="password" class="block text-sm font-medium leading-6 text-gray-900">{{
+                        <label for="confirm-password" class="block text-sm font-medium leading-6 text-gray-900">{{
                                 $t('message.confirmPassword')
                             }}
                         </label>
@@ -123,7 +123,7 @@ export default {
                     <div class="mt-2">
                         <input
                             class="password-input"
-                            id="password" name="password" type="password" autocomplete="current-password" required=""
+                            id="confirm-password" name="confirm-password" type="password" autocomplete="current-password" required=""
                                v-model="password_confirmation"/>
                     </div>
                 </div>

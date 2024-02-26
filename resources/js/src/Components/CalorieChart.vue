@@ -37,7 +37,7 @@ export default {
                 type: 'doughnut',
                 data: {
                     datasets: [{
-                        data: [35, 45, 25],
+                        data: [35, 45, 20],
                         backgroundColor: ['red', 'blue', 'yellow'],
                         borderColor: ['white', 'white', 'white'],
                         borderWidth: 2

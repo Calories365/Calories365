@@ -18,8 +18,8 @@ export default {
     },
     methods: {
         play() {
-            const audio = new Audio(dedSound);
-            audio.play().catch(e => console.error('Playback failed:', e));
+            // const audio = new Audio(dedSound);
+            // audio.play().catch(e => console.error('Playback failed:', e));
         },
         changeName() {
             this.$store.dispatch(actionTypes.updateUsersData,

@@ -22,7 +22,7 @@ export default {
         return {
             ProductMenuisOpen: false,
             ProductAddMenuisOpen: false,
-            product: null,
+            product: {},
             action: 'add',
             query: null,
             page: 1,
@@ -35,6 +35,7 @@ export default {
             required: true,
         },
     },
+    emits: ['update'],
     methods: {
         toggleMenu(isOpen) {
             this.$emit('update', !this.isOpen);
@@ -112,7 +113,7 @@ export default {
     </calories-slide-product-menu>
 
     <calories-slide-add-product-menu
-        v-if="!ProductMenuisOpen"
+        v-if="!ProductMenuisOpen && query"
         :isOpen="ProductAddMenuisOpen"
         :name="query"
         @update="ProductAddMenuisOpen = $event"

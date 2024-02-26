@@ -5,14 +5,13 @@ export default {
 </script>
 
 <template>
-
     <div class="section-addProducts__btn"></div>
 </template>
 
 <style scoped lang="scss">
 .section-addProducts__btn {
-    //border: 2px solid white;
-    background-color: #fff;
+
+    background-color: $main-color;
     font-size: 16px;
     height: 3em;
     width: 3em;
@@ -25,7 +24,7 @@ export default {
 }
 
 .section-addProducts__btn:hover {
-    //border: 2px solid white;
+
     transition: all 0.3s ease 0s;
 }
 

@@ -26,23 +26,27 @@ function dateToggle(direction) {
         <p class="stats_head">{{ $t('Stats.Stats') }}</p>
 
         <div class="stats_date">
-            <calories-arrow-left class="stats_arrow-left" @click="dateToggle('previous')"/>
+            <div class="stats_arrow-left">
+                <calories-arrow-left @click="dateToggle('previous')"/>
+            </div>
 
             <span class="stats_date-span">
                {{ currentDate }}
             </span>
-            <calories-arrow-right class="stats_arrow-right" @click="dateToggle('next')"/>
+            <div class="stats_arrow-right">
+                <calories-arrow-right @click="dateToggle('next')"/>
+            </div>
 
         </div>
-        <CaloriesCalendar class="stats_calendar" :currentDate="currentDate"/>
-
+        <div class="stats_calendar">
+            <CaloriesCalendar :currentDate="currentDate"/>
+        </div>
     </section>
 </template>
 
 
 <style scoped lang="scss">
 .stats {
-    width: 90%;
     margin: 0 auto;
 
     &_head {

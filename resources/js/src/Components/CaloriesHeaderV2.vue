@@ -38,21 +38,18 @@ export default {
         logout() {
             this.isBurgerOpen = false;
             this.$store.dispatch(actionTypes.logout).then((errors) => {
-                console.log(errors);
                 this.$router.push({name: 'login'})
             })
         },
         resendVerificationEmail() {
             this.isBurgerOpen = false;
             this.$store.dispatch(actionTypes.resendVerificationEmail).then((errors) => {
-                console.log(errors);
             })
         },
     },
     mounted() {
-        // Создаём обработчик прокрутки
         this.handleScroll = () => {
-            const headerBottom = this.$refs.headerBottom; // Обращаемся к элементу через $refs
+            const headerBottom = this.$refs.headerBottom;
             const mainWrapper = document.querySelector('.main-wrapper');
             const fixedClass = 'fixed-header';
             const layoutFixedMarginClass = 'layout-fixed-margin';
@@ -72,9 +69,8 @@ export default {
             }
         };
 
-        // Добавляем обработчик прокрутки к window
         window.addEventListener('scroll', this.handleScroll);
-        this.handleScroll(); // Вызываем для инициализации при монтировании
+        this.handleScroll();
     },
     beforeDestroy() { // Используйте beforeUnmount в Vue 3
         // Удаляем обработчик прокрутки при уничтожении компонента
@@ -180,7 +176,7 @@ export default {
         transform: translateX(-50%);
         width: 100%;
         z-index: 1001;
-        background-color: white;
+        background-color: #dffccc;
         box-shadow: -2px 3px 24px -13px black;
     }
 }
@@ -189,7 +185,7 @@ export default {
 .main-header {
     position: relative;
     z-index: 999;
-    background-color: white;
+    background-color: #dffccc;
     box-shadow: -2px 3px 24px -13px black;
 
     &_container {
