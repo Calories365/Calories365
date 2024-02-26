@@ -48,7 +48,7 @@ class FoodConsumption extends Model
         $year = date('Y', strtotime($date));
         $month = date('m', strtotime($date));
 
-        return self::where('user_id', $userId)
+        return self::where('food_consumptions.user_id', $userId)
             ->join('products', 'food_consumptions.food_id', '=', 'products.id')
             ->whereYear('consumed_at', $year)
             ->whereMonth('consumed_at', $month)
