@@ -170,7 +170,9 @@ const mutations = {
         state.isSybmiting = true;
     },
     [mutationTypes.getSearchedProductsSuccess](state, payload) {
-        state.productsInMenu = [];
+        if (payload.currentPage === 1) {
+            state.productsInMenu = [];
+        }
         payload.products.forEach(product => {
             state.productsInMenu.push(product);
         });
@@ -476,7 +478,8 @@ const actions = {
             authApi.getSearchedProducts(trimedQuery, payload.page)
                 .then(response => {
                     const products = response.data.products.data;
-                    context.commit(mutationTypes.getSearchedProductsSuccess, {products});
+                    const currentPage = response.data.products.current_page;
+                    context.commit(mutationTypes.getSearchedProductsSuccess, {products, currentPage});
                     resolve(response.data.products.total);
                 })
                 .catch(error => {
