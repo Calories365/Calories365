@@ -1,1 +1,7 @@
-https://calculator.calories365.space/calculation - click to open calories365 calculator
+# Calorie Diary
+
+## Select description language
+
+- [English](README.en.md)
+- [Русский](README.ru.md)
+- [Українська](README.ua.md)
