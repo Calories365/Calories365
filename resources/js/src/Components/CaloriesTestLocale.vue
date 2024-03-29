@@ -21,11 +21,11 @@ export default {
             }
         },
         startHideAnimation() {
-            this.isHiding = true; // Новая переменная данных для контроля анимации
+            this.isHiding = true;
             setTimeout(() => {
                 this.isActive = false;
                 this.isHiding = false;
-            }, 500); // Соответствует продолжительности анимации fadeOut
+            }, 500);
         },
         changeLocale(locale) {
             this.selectedLocale = locale;
@@ -132,7 +132,7 @@ export default {
         }
 
         &_li:hover {
-            background-color: #e0e0e0; 
+            background-color: #e0e0e0;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         }
 

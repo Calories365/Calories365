@@ -25,7 +25,6 @@ class MealController extends Controller
         $locale = app()->getLocale();
         $userId = auth()->id();
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale);
-        Log::info('Request data received in store method:', ['data' => $meals]);
         return new MealCollection($meals);
     }
 
@@ -41,8 +40,7 @@ class MealController extends Controller
 
     public function update(QuantityValidationRequest $request, FoodConsumption $meal): \Illuminate\Http\JsonResponse
     {
-        $meal->quantity = $request->quantity;
-        $meal->save();
+        $meal->update(['quantity' => $request->quantity]);
         return response()->json(['message' => 'Success']);
     }
 }
