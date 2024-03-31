@@ -5,7 +5,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-2a78aa90.css",
+    "file": "assets/app-86f6c1c7.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -35,9 +35,9 @@
       "assets/valera-a66758ae.jpeg"
     ],
     "css": [
-      "assets/app-2a78aa90.css"
+      "assets/app-86f6c1c7.css"
     ],
-    "file": "assets/app-71f57cf9.js",
+    "file": "assets/app-a3d489d2.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },

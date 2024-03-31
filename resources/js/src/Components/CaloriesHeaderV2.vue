@@ -176,7 +176,7 @@ export default {
         transform: translateX(-50%);
         width: 100%;
         z-index: 1001;
-        background-color: #dffccc;
+        background-color: white;
         box-shadow: -2px 3px 24px -13px black;
     }
 }
@@ -185,7 +185,7 @@ export default {
 .main-header {
     position: relative;
     z-index: 999;
-    background-color: #dffccc;
+    background-color: white;
     box-shadow: -2px 3px 24px -13px black;
 
     &_container {
