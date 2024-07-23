@@ -3,6 +3,10 @@
 Calorie Diary is a web application for calorie tracking, created using Laravel, Vue.js, Laravel Sanctum, and Vuex. This project is designed for those who aim to control their diet and maintain a healthy lifestyle.
 
 ## [Try Calorie Diary now!](https://spa.calories365.space/calculation)
+### Test Access:
+- **Login**: admin@example.com
+- **Password**: admin@example.com
+
 
 ## Features
 

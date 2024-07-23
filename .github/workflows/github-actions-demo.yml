@@ -1,29 +1,29 @@
-name: GitHub Actions Demo
-on: [push]
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.PAT }}
-
-      - name: Configure Git
-        run: |
-          git config user.name "Maaaaxim"
-          git config user.email "maxim.kubichka@gmail.com"
-
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          script: |
-            cd /home/sc527094/calories365.space/calculator
-            git config user.name "Maaaaxim"
-            git config user.email "maxim.kubichka@gmail.com"
-            git pull origin main
-            composer install
-            php artisan migrate
+#name: GitHub Actions Demo
+#on: [push]
+#jobs:
+#  build-and-deploy:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v2
+#        with:
+#          token: ${{ secrets.PAT }}
+#
+#      - name: Configure Git
+#        run: |
+#          git config user.name "Maaaaxim"
+#          git config user.email "maxim.kubichka@gmail.com"
+#
+#      - name: Deploy to Server via SSH
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.FTP_SERVER }}
+#          username: ${{ secrets.FTP_USERNAME }}
+#          password: ${{ secrets.FTP_PASSWORD }}
+#          script: |
+#            cd /home/sc527094/calories365.space/calculator
+#            git config user.name "Maaaaxim"
+#            git config user.email "maxim.kubichka@gmail.com"
+#            git pull origin main
+#            composer install
+#            php artisan migrate
