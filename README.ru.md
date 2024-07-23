@@ -5,7 +5,7 @@
 ## [Попробуйте Дневник Калорий сейчас!](https://spa.calories365.space/calculation)
 ### Тестовый доступ:
 - **Логин**: admin@example.com
-- **Пароль**: admin@example
+- **Пароль**: admin@example.com
 
 ## Особенности
 
