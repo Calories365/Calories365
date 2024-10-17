@@ -35,4 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+Route::group(['namespace' => 'App\Http\Controllers'], function () {
+    Route::post('/caloriesEndPoint', [\App\Http\Controllers\CaloriesAPIBotController::class, 'store'])->name('calculations.store');
+});
+
 

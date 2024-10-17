@@ -2,7 +2,6 @@
 import {mapState} from "vuex";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import {actionTypes} from "@/store/modules/auth.js";
-import dedSound from '@/assets/ded.mp3';
 import router from "@/router/router.js";
 
 export default {

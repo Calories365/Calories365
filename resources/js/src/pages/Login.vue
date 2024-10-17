@@ -6,7 +6,6 @@ import {actionTypes} from "@/store/modules/auth.js";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import CaloriesLoader from "@/Components/CaloriesLoader.vue";
 import CaloriesErrors from "@/Components/CaloriesErrors.vue";
-import fart from '@/assets/fart.mp3';
 
 const store = useStore();
 const router = useRouter();

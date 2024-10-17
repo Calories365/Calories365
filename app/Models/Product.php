@@ -41,12 +41,13 @@ class Product extends Model
         });
     }
 
-    public static function getSearchedProducts($encodedQuery): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public static function getSearchedProducts($encodedQuery, $pagination = true, $count = 10)
     {
-        $locale = app()->getLocale();
+//        $locale = app()->getLocale();
+        $locale = 'ru';
         $user_id = auth()->id();
 
-        return DB::table('products')
+        $query = DB::table('products')
             ->join('product_translations', 'products.id', '=', 'product_translations.product_id')
             ->where('product_translations.locale', '=', $locale)
             ->where('product_translations.double_metaphoned_name', 'LIKE', "%{$encodedQuery}%")
@@ -65,18 +66,23 @@ class Product extends Model
                 'product_translations.name as name'
             )
             ->orderByRaw("
-        CASE
-            WHEN double_metaphoned_name = ? THEN 1
-            WHEN double_metaphoned_name LIKE ? THEN 2
-            ELSE 3
-        END,
-        CASE
-            WHEN double_metaphoned_name LIKE ? THEN ABS(LENGTH(double_metaphoned_name) - LENGTH(?))
-            ELSE 9999
-        END,
-        double_metaphoned_name ASC
-    ", [$encodedQuery, "%{$encodedQuery}%", "%{$encodedQuery}%", $encodedQuery])
-            ->paginate(10);
+            CASE
+                WHEN double_metaphoned_name = ? THEN 1
+                WHEN double_metaphoned_name LIKE ? THEN 2
+                ELSE 3
+            END,
+            CASE
+                WHEN double_metaphoned_name LIKE ? THEN ABS(LENGTH(double_metaphoned_name) - LENGTH(?))
+                ELSE 9999
+            END,
+            double_metaphoned_name ASC
+        ", [$encodedQuery, "%{$encodedQuery}%", "%{$encodedQuery}%", $encodedQuery]);
+
+        if ($pagination) {
+            return $query->paginate($count);
+        } else {
+            return $query->limit($count)->get();
+        }
     }
 
     public static function createProduct($validatedData): Product
