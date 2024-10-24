@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class Product extends Model
 {
@@ -58,6 +59,8 @@ class Product extends Model
     public static function createProduct($validatedData): Product
     {
         $validatedData['user_id'] = auth()->id();
+        Log::info(print_r($validatedData, true));
+
 
         return Product::create($validatedData);
     }

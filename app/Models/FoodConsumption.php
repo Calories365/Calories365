@@ -60,7 +60,6 @@ class FoodConsumption extends Model
 
     public static function createFoodConsumption($validatedData, $product = null): FoodConsumption
     {
-        $validatedData['user_id'] = auth()->id();
 
         if ($product !== null) {
             $validatedData['food_id'] = $product->id;

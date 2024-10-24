@@ -30,6 +30,7 @@ class ProductTranslation extends Model
                 'product_id' => $product->id,
                 'locale' => $locale,
                 'name' => $validatedData['name'],
+                'user_id' => $validatedData['user_id'],
             ];
 
             ProductTranslation::create($dataForTranslation);
