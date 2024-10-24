@@ -4,11 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class ProductTranslation extends Model
 {
     use HasFactory;
+    use searchable;
 
+    public const SORTABLE = ['id'];
+    public const FILTERABLE = ['locale', 'user_id'];
     protected $fillable = [
         'product_id', 'locale', 'name', 'double_metaphoned_name', 'transliterated_name'
     ];
@@ -17,7 +21,7 @@ class ProductTranslation extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public static function createProductTranslations($product, $validatedData, $doubleMetaphoneName): bool
+    public static function createProductTranslations($product, $validatedData): bool
     {
         $supportedLocales = config('app.supported_locales', []);
 
@@ -26,14 +30,28 @@ class ProductTranslation extends Model
                 'product_id' => $product->id,
                 'locale' => $locale,
                 'name' => $validatedData['name'],
-                'transliterated_name' => null,
-                'double_metaphoned_name' => $doubleMetaphoneName,
             ];
 
             ProductTranslation::create($dataForTranslation);
         }
 
         return true;
+    }
+
+    public function toSearchableArray()
+    {
+        $data = [
+            'locale' => $this->locale,
+            'product_id' => $this->product_id,
+            'name' => $this->name,
+            'user_id' => $this->user_id,
+        ];
+        return $data;
+    }
+
+    public function searchableAs()
+    {
+        return 'products';
     }
 
 }

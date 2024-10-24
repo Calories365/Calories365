@@ -477,10 +477,11 @@ const actions = {
 
             authApi.getSearchedProducts(trimedQuery, payload.page)
                 .then(response => {
-                    const products = response.data.products.data;
-                    const currentPage = response.data.products.current_page;
+                    console.log(response.data);
+                    const products = response.data.products;
+                    const currentPage = response.data.current_page;
                     context.commit(mutationTypes.getSearchedProductsSuccess, {products, currentPage});
-                    resolve(response.data.products.total);
+                    resolve(response.data.total);
                 })
                 .catch(error => {
                     context.commit(mutationTypes.getSearchedProductsFailure, error);

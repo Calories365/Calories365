@@ -8,11 +8,13 @@
         "php": "^8.1",
         "darkaonline/l5-swagger": "^8.6",
         "guzzlehttp/guzzle": "^7.2",
+        "http-interop/http-factory-guzzle": "^1.2",
         "laravel/fortify": "^1.18",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/scout": "^10.11",
         "laravel/tinker": "^2.8",
+        "meilisearch/meilisearch-php": "^1.10",
         "noodlesnz/double-metaphone": "^1.0",
         "predis/predis": "^2.2",
         "voku/portable-ascii": "^2.0"

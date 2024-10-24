@@ -5,16 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name_ukr',
-        'name_rus',
-        'name_eng',
         'calories',
         'proteins',
         'carbohydrates',
@@ -23,6 +19,7 @@ class Product extends Model
         'is_popular',
         'user_id'
     ];
+
 
     public function translations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
@@ -41,48 +38,21 @@ class Product extends Model
         });
     }
 
-    public static function getSearchedProducts($encodedQuery, $pagination = true, $count = 10)
+    public static function getSearchedProductsViaMeili(string $encodedQuery, $count = 10): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-//        $locale = app()->getLocale();
-        $locale = 'ru';
+        $locale = app()->getLocale();
         $user_id = auth()->id();
 
-        $query = DB::table('products')
-            ->join('product_translations', 'products.id', '=', 'product_translations.product_id')
-            ->where('product_translations.locale', '=', $locale)
-            ->where('product_translations.double_metaphoned_name', 'LIKE', "%{$encodedQuery}%")
-            ->where(function ($query) use ($user_id) {
-                $query->where('products.user_id', '=', $user_id)
-                    ->orWhereNull('products.user_id');
+        return ProductTranslation::search($encodedQuery)
+            ->where('locale', $locale)
+            ->query(function ($query) use ($user_id) {
+                $query->where(function ($subQuery) use ($user_id) {
+                    $subQuery->where('user_id', $user_id)
+                        ->orWhereNull('user_id');
+                });
             })
-            ->select(
-                'products.id',
-                'products.calories',
-                'products.proteins',
-                'products.carbohydrates',
-                'products.fats',
-                'products.fibers',
-                'products.user_id',
-                'product_translations.name as name'
-            )
-            ->orderByRaw("
-            CASE
-                WHEN double_metaphoned_name = ? THEN 1
-                WHEN double_metaphoned_name LIKE ? THEN 2
-                ELSE 3
-            END,
-            CASE
-                WHEN double_metaphoned_name LIKE ? THEN ABS(LENGTH(double_metaphoned_name) - LENGTH(?))
-                ELSE 9999
-            END,
-            double_metaphoned_name ASC
-        ", [$encodedQuery, "%{$encodedQuery}%", "%{$encodedQuery}%", $encodedQuery]);
+            ->paginate($count);
 
-        if ($pagination) {
-            return $query->paginate($count);
-        } else {
-            return $query->limit($count)->get();
-        }
     }
 
     public static function createProduct($validatedData): Product

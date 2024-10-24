@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Traits\DoubleMetaphoneTrait;
-use Illuminate\Support\Facades\Log;
 
 class SearchService
 {

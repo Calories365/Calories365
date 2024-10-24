@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUsersFoodConsumptionsRequest;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class UsersMealController extends Controller
 {
@@ -21,6 +22,7 @@ class UsersMealController extends Controller
     public function store(StoreUsersFoodConsumptionsRequest $request): JsonResponse
     {
         $validatedData = $request->validated();
+
 
         $userResult = $this->productService->createProductWithTranslationsAndConsumption($validatedData);
 

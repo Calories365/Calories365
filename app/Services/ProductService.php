@@ -20,10 +20,8 @@ class ProductService
         DB::beginTransaction();
         try {
             $product = Product::createProduct($validatedData);
-            $doubleMetaphoneName = $this->customDoubleMetaphone($validatedData['name']);
-            ProductTranslation::createProductTranslations($product, $validatedData, $doubleMetaphoneName);
+            ProductTranslation::createProductTranslations($product, $validatedData);
             $consumption = FoodConsumption::createFoodConsumption($validatedData, $product);
-
             DB::commit();
             return ['consumption_id' => $consumption->id, 'food_id' => $product->id];
         } catch (\Exception $e) {
