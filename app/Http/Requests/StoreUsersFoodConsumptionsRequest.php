@@ -11,7 +11,8 @@ class StoreUsersFoodConsumptionsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check();
+//        return auth()->check();
+        return true;
     }
 
     /**
@@ -23,14 +24,15 @@ class StoreUsersFoodConsumptionsRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'calories' => 'required|integer|min:0',
-            'carbohydrates' => 'required|integer|min:0',
-            'fats' => 'required|integer|min:0',
-            'fibers' => 'required|integer|min:0',
-            'proteins' => 'required|integer|min:0',
-            'quantity' => 'required|integer|min:0',
+            'calories' => 'required|numeric|min:0',
+            'carbohydrates' => 'required|numeric|min:0',
+            'fats' => 'required|numeric|min:0',
+            'fibers' => 'required|numeric|min:0',
+            'proteins' => 'required|numeric|min:0',
+            'quantity' => 'required|numeric|min:0',
             'consumed_at' => 'required|date',
             'part_of_day' => 'required|in:morning,dinner,supper',
+            'user_id' => 'nullable|integer',
         ];
     }
 }

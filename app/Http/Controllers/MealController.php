@@ -15,6 +15,7 @@ class MealController extends Controller
     public function store(StoreFoodConsumptionRequest $request): \Illuminate\Http\JsonResponse
     {
         $validatedData = $request->validated();
+        $validatedData['user_id'] = auth()->id();
         $foodConsumption = FoodConsumption::createFoodConsumption($validatedData);
         return response()->json(['id' => $foodConsumption->id]);
     }

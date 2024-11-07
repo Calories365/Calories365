@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -39,26 +41,34 @@ class Product extends Model
         });
     }
 
-    public static function getSearchedProductsViaMeili(string $encodedQuery, $count = 10): \Illuminate\Contracts\Pagination\LengthAwarePaginator
-    {
-        $locale = app()->getLocale();
+    public static function getSearchedProductsViaMeili(
+        string $encodedQuery,
+        bool $paginate = true,
+        int $count = 10
+    ): LengthAwarePaginator|Collection {
+        $locale = 'ru';
+//        $locale = app()->getLocale();
         $user_id = auth()->id();
 
-        return ProductTranslation::search($encodedQuery)
+        $builder = ProductTranslation::search($encodedQuery)
             ->where('locale', $locale)
             ->query(function ($query) use ($user_id) {
                 $query->where(function ($subQuery) use ($user_id) {
                     $subQuery->where('user_id', $user_id)
                         ->orWhereNull('user_id');
                 });
-            })
-            ->paginate($count);
+            });
 
+        if ($paginate) {
+            return $builder->paginate();
+        } else {
+            return $builder->take($count)->get();
+        }
     }
 
     public static function createProduct($validatedData): Product
     {
-        $validatedData['user_id'] = auth()->id();
+        $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
         Log::info(print_r($validatedData, true));
 
 

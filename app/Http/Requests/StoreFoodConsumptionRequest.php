@@ -11,7 +11,8 @@ class StoreFoodConsumptionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check();
+//        return auth()->check();
+        return true;
     }
 
     /**
@@ -25,7 +26,8 @@ class StoreFoodConsumptionRequest extends FormRequest
             'food_id' => 'required|exists:products,id',
             'quantity' => 'required|numeric|min:0',
             'consumed_at' => 'required|date_format:Y-m-d',
-            'part_of_day' => 'required|in:morning,dinner,supper'
+            'part_of_day' => 'required|in:morning,dinner,supper',
+            'user_id' => 'nullable|integer|exists:users,id',
         ];
     }
 }
