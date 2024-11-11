@@ -39,9 +39,13 @@ class CaloriesAPIBotController extends BaseController
             $productsInfo = [];
 
             // изначально должно быть по ; но чат напрочь отказывается ставить этот символ
-            $products = explode(';', $text);
-            $products = explode('грамм', $text);
-
+            if (str_contains($text, ';')) {
+                $products = explode(';', $text);
+            } else {
+                $products = explode('грамм', $text);
+            }
+            Log::info('products from bot: ');
+            Log::info(print_r($products, true));
             foreach ($products as $product) {
                 $product = trim($product);
 
@@ -80,6 +84,7 @@ class CaloriesAPIBotController extends BaseController
                                                 'user_id' => $productTranslation->user_id,
                                                 'created_at' => $productTranslation->created_at,
                                                 'updated_at' => $productTranslation->updated_at,
+                                                'said_name' => $productName,
                                             ],
                                             'product' => [
                                                 'id' => $productModel->id,
@@ -96,6 +101,8 @@ class CaloriesAPIBotController extends BaseController
                                             ],
                                             'quantity_grams' => $quantity
                                         ];
+                                        Log::info('for ' . $productName);
+                                        Log::info('found product: ' . $productTranslation->name);
                                     } else {
                                         Log::warning("Нутриентные данные отсутствуют для продукта: {$productName}");
                                     }
@@ -122,8 +129,8 @@ class CaloriesAPIBotController extends BaseController
             }
         }
 
-        Log::info('products: ');
-        Log::info(print_r($productsInfo, true));
+//        Log::info('products: ');
+//        Log::info(print_r($productsInfo, true));
         return response()->json($response);
     }
 
@@ -132,6 +139,7 @@ class CaloriesAPIBotController extends BaseController
     {
         $validatedData = $request->validated();
         Log::info(print_r($validatedData, true));
+        $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
         $userResult = $productService->createProductWithTranslationsAndConsumption($validatedData);
         return response()->json($userResult, 201);
     }

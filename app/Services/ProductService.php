@@ -20,8 +20,6 @@ class ProductService
     {
         DB::beginTransaction();
         try {
-            $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
-            Log::info('айди: ' . $validatedData['user_id']);
             $product = Product::createProduct($validatedData);
             ProductTranslation::createProductTranslations($product, $validatedData);
             $consumption = FoodConsumption::createFoodConsumption($validatedData, $product);

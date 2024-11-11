@@ -22,8 +22,7 @@ class UsersMealController extends Controller
     public function store(StoreUsersFoodConsumptionsRequest $request): JsonResponse
     {
         $validatedData = $request->validated();
-
-
+        $validatedData['user_id'] = auth()->id();
         $userResult = $this->productService->createProductWithTranslationsAndConsumption($validatedData);
 
         return response()->json($userResult, 201);

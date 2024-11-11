@@ -14,7 +14,7 @@ class ProductTranslation extends Model
     public const SORTABLE = ['id'];
     public const FILTERABLE = ['locale', 'user_id'];
     protected $fillable = [
-        'product_id', 'locale', 'name', 'double_metaphoned_name', 'transliterated_name'
+        'product_id', 'locale', 'name', 'double_metaphoned_name', 'transliterated_name','user_id'
     ];
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

@@ -41,15 +41,40 @@ class Product extends Model
         });
     }
 
+//    public static function getSearchedProductsViaMeili(
+//        string $encodedQuery,
+//        bool $paginate = true,
+//        int $count = 10
+//    ): LengthAwarePaginator|Collection {
+//        $locale = 'ru';
+////        $locale = app()->getLocale();
+//        $user_id = auth()->id();
+//
+//        $builder = ProductTranslation::search($encodedQuery)
+//            ->where('locale', $locale)
+//            ->query(function ($query) use ($user_id) {
+//                $query->where(function ($subQuery) use ($user_id) {
+//                    $subQuery->where('user_id', $user_id)
+//                        ->orWhereNull('user_id');
+//                });
+//            });
+//
+//        if ($paginate) {
+//            return $builder->paginate();
+//        } else {
+//            return $builder->take($count)->get();
+//        }
+//    }
     public static function getSearchedProductsViaMeili(
         string $encodedQuery,
         bool $paginate = true,
         int $count = 10
     ): LengthAwarePaginator|Collection {
         $locale = 'ru';
-//        $locale = app()->getLocale();
+        // $locale = app()->getLocale();
         $user_id = auth()->id();
 
+        // Получаем больше результатов из Meilisearch
         $builder = ProductTranslation::search($encodedQuery)
             ->where('locale', $locale)
             ->query(function ($query) use ($user_id) {
@@ -59,12 +84,36 @@ class Product extends Model
                 });
             });
 
+        // Получаем до 100 результатов
+        $results = $builder->take(100)->get();
+
+        // Сортируем результаты: сначала продукты текущего пользователя
+        $sortedResults = $results->sortByDesc(function ($product) use ($user_id) {
+            return $product->user_id == $user_id ? 1 : 0;
+        })->values();
+
         if ($paginate) {
-            return $builder->paginate();
+            // Пагинируем результаты вручную
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $perPage = $count;
+            $total = $sortedResults->count();
+
+            $items = $sortedResults->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+            $paginator = new LengthAwarePaginator(
+                $items,
+                $total,
+                $perPage,
+                $currentPage,
+                ['path' => LengthAwarePaginator::resolveCurrentPath()]
+            );
+
+            return $paginator;
         } else {
-            return $builder->take($count)->get();
+            return $sortedResults->take($count);
         }
     }
+
 
     public static function createProduct($validatedData): Product
     {
