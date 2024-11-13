@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DateValidationRequest;
 use App\Http\Requests\StoreFoodConsumptionRequest;
 use App\Http\Requests\StoreUsersFoodConsumptionsRequest;
+use App\Http\Resources\MealCollection;
 use App\Models\FoodConsumption;
 use App\Models\Product;
 use App\Services\ProductService;
@@ -138,7 +140,7 @@ class CaloriesAPIBotController extends BaseController
     public function saveProduct(StoreUsersFoodConsumptionsRequest $request, ProductService $productService ): JsonResponse
     {
         $validatedData = $request->validated();
-        Log::info(print_r($validatedData, true));
+//        Log::info(print_r($validatedData, true));
         $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
         $userResult = $productService->createProductWithTranslationsAndConsumption($validatedData);
         return response()->json($userResult, 201);
@@ -147,10 +149,21 @@ class CaloriesAPIBotController extends BaseController
     public function saveFoodConsumption(StoreFoodConsumptionRequest $request): \Illuminate\Http\JsonResponse
     {
         $validatedData = $request->validated();
-        Log::info(print_r($validatedData, true));
+//        Log::info(print_r($validatedData, true));
         $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
         $foodConsumption = FoodConsumption::createFoodConsumption($validatedData);
         return response()->json(['id' => $foodConsumption->id]);
+    }
+
+    public function showUserStats(DateValidationRequest $request){
+        $date = $request->route('date');
+        Log::info($date);
+//        $locale = app()->getLocale();
+        $locale = 'ru';
+//        $userId = auth()->id();
+        $userId = 32;
+        $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale);
+        return new MealCollection($meals);
     }
 
 }
