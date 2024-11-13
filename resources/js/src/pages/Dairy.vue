@@ -119,7 +119,7 @@ export default {
     &__addBtn {
         position: absolute;
         bottom: 20px;
-        right: 20px;
+        right: 40px;
         z-index: 98;
     }
 }

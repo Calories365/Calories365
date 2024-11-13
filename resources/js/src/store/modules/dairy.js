@@ -511,9 +511,8 @@ const actions = {
         return new Promise(resolve => {
             const products = context.state.currentProducts;
             const partOfDay = context.state.part_of_day;
-
             let totalCalories = products
-                .filter(product => product.day_part === partOfDay)
+                .filter(product => product.part_of_day === partOfDay)
                 .reduce((total, product) => {
                     const quantity = parseFloat(product.quantity);
                     const calories = product.calories;

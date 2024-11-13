@@ -23,12 +23,18 @@ export default {
         action: {
             type: String,
             required: true,
-        }
+        },
+        productFromFoodList: {
+            type: Boolean,
+            required: false,
+        },
     },
     methods: {
         toggleProduct() {
             this.$emit('update', !this.isOpen);
-            this.quantity = 1;
+            if (!this.productFromFoodList){
+                this.quantity = 1;
+            }
         },
         addProduct() {
             if (this.quantity > 0 && this.quantity < 1250) {

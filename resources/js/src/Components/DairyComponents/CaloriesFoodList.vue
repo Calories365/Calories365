@@ -106,6 +106,7 @@ export default {
         :product="product"
         @update="ProductMenuisOpen = $event"
         :action="action"
+        :productFromFoodList=true
     >
         {{ $t('Diary.Update') }}
     </calories-slide-product-menu>
@@ -125,6 +126,8 @@ export default {
     &__list {
         width: 100%;
         overflow: auto;
+        overflow-y: scroll;
+        height: 100%;
     }
 
     &__title {

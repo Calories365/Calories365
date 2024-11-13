@@ -73,6 +73,7 @@ class Product extends Model
         $locale = 'ru';
         // $locale = app()->getLocale();
         $user_id = auth()->id();
+        $user_id = 32;
 
         // Получаем больше результатов из Meilisearch
         $builder = ProductTranslation::search($encodedQuery)
