@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Meilisearch\Client;
 
 class Product extends Model
 {
@@ -40,44 +41,21 @@ class Product extends Model
                 ->get();
         });
     }
-
-//    public static function getSearchedProductsViaMeili(
-//        string $encodedQuery,
-//        bool $paginate = true,
-//        int $count = 10
-//    ): LengthAwarePaginator|Collection {
-//        $locale = 'ru';
-////        $locale = app()->getLocale();
-//        $user_id = auth()->id();
-//
-//        $builder = ProductTranslation::search($encodedQuery)
-//            ->where('locale', $locale)
-//            ->query(function ($query) use ($user_id) {
-//                $query->where(function ($subQuery) use ($user_id) {
-//                    $subQuery->where('user_id', $user_id)
-//                        ->orWhereNull('user_id');
-//                });
-//            });
-//
-//        if ($paginate) {
-//            return $builder->paginate();
-//        } else {
-//            return $builder->take($count)->get();
-//        }
-//    }
     public static function getSearchedProductsViaMeili(
         string $encodedQuery,
         bool $paginate = true,
         int $count = 10
     ): LengthAwarePaginator|Collection {
+
+        $user_id = auth()->id() ?? 32;
         $locale = 'ru';
         // $locale = app()->getLocale();
         $user_id = auth()->id();
         $user_id = 32;
 
-        // Получаем больше результатов из Meilisearch
         $builder = ProductTranslation::search($encodedQuery)
             ->where('locale', $locale)
+            ->where('active', 1)
             ->query(function ($query) use ($user_id) {
                 $query->where(function ($subQuery) use ($user_id) {
                     $subQuery->where('user_id', $user_id)
@@ -85,16 +63,13 @@ class Product extends Model
                 });
             });
 
-        // Получаем до 100 результатов
-        $results = $builder->take(100)->get();
+        $results = $builder->take(30)->get();
 
-        // Сортируем результаты: сначала продукты текущего пользователя
         $sortedResults = $results->sortByDesc(function ($product) use ($user_id) {
             return $product->user_id == $user_id ? 1 : 0;
         })->values();
 
         if ($paginate) {
-            // Пагинируем результаты вручную
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
             $perPage = $count;
             $total = $sortedResults->count();
@@ -115,12 +90,52 @@ class Product extends Model
         }
     }
 
+    public static function getRawProduct($query, $user_id, $locale): array|bool
+    {
+        $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
+
+        $filters = "active = 1 AND locale = '{$locale}' AND (user_id = {$user_id} OR user_id IS NULL)";
+
+        $res = $client->index('products')->search($query, [
+            'showRankingScore' => true,
+            'limit' => 2,
+            'filter' => $filters,
+        ]);
+
+        $hits = $res->getHits();
+
+        if (!empty($hits))
+        {
+            if($hits[0]['_rankingScore'] == $hits[1]['_rankingScore'])
+            {
+                if ($hits[0]['user_id'])
+                {
+                    $firstProduct = $hits[0];
+                } else
+                {
+                    $firstProduct = $hits[1];
+                }
+            } else {
+                $firstProduct = $hits[0];
+            }
+
+            $rankingScore = $firstProduct['_rankingScore'];
+
+            if ($rankingScore) {
+                return $firstProduct;
+            } else {
+                return false;
+            }
+        } else {
+            Log::info("No products found.");
+            return false;
+        }
+    }
 
     public static function createProduct($validatedData): Product
     {
         $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
         Log::info(print_r($validatedData, true));
-
 
         return Product::create($validatedData);
     }

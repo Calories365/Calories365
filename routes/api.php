@@ -40,6 +40,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
     Route::post('/caloriesEndPoint/saveProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'saveProduct'])->name('calculations.saveProduct');
     Route::post('/caloriesEndPoint/saveFoodConsumption', [\App\Http\Controllers\CaloriesAPIBotController::class, 'saveFoodConsumption'])->name('calculations.saveFoodConsumption');
     Route::get('/caloriesEndPoint/showUserStats/{date}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'showUserStats'])->name('calculations.showUserStats');
+    Route::post('/caloriesEndPoint/getTheMostRelevantProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'getTheMostRelevantProduct'])->name('calculations.getTheMostRelevantProduct');
 
 });
 

@@ -84,9 +84,10 @@ class CaloriesAPIBotController extends BaseController
                                                 'locale' => $productTranslation->locale,
                                                 'name' => $productTranslation->name,
                                                 'user_id' => $productTranslation->user_id,
-                                                'created_at' => $productTranslation->created_at,
-                                                'updated_at' => $productTranslation->updated_at,
+//                                                'created_at' => $productTranslation->created_at,
+//                                                'updated_at' => $productTranslation->updated_at,
                                                 'said_name' => $productName,
+                                                'original_name' => $productName,
                                             ],
                                             'product' => [
                                                 'id' => $productModel->id,
@@ -97,9 +98,9 @@ class CaloriesAPIBotController extends BaseController
                                                 'fats' => $fats,
                                                 'fibers' => $fibers,
                                                 'quantity_grams' => $quantity,
-                                                'is_popular' => $productModel->is_popular,
-                                                'created_at' => $productModel->created_at,
-                                                'updated_at' => $productModel->updated_at,
+//                                                'is_popular' => $productModel->is_popular,
+//                                                'created_at' => $productModel->created_at,
+//                                                'updated_at' => $productModel->updated_at,
                                             ],
                                             'quantity_grams' => $quantity
                                         ];
@@ -136,11 +137,9 @@ class CaloriesAPIBotController extends BaseController
         return response()->json($response);
     }
 
-
     public function saveProduct(StoreUsersFoodConsumptionsRequest $request, ProductService $productService ): JsonResponse
     {
         $validatedData = $request->validated();
-//        Log::info(print_r($validatedData, true));
         $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
         $userResult = $productService->createProductWithTranslationsAndConsumption($validatedData);
         return response()->json($userResult, 201);
@@ -165,5 +164,64 @@ class CaloriesAPIBotController extends BaseController
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale);
         return new MealCollection($meals);
     }
+
+    public function getTheMostRelevantProduct(Request $request)
+    {
+        Log::info('getTheMostRelevantProduct');
+        $text = $request->input('text');
+        $parts = explode(' - ', $text);
+
+        if (count($parts) > 1) {
+            $productName = trim($parts[0]);
+            $quantityStr = trim($parts[1]);
+        }
+        if (preg_match('/(\d+(\.\d+)?)/', $quantityStr, $matches)) {
+            $quantity = floatval($matches[1]);
+        }
+
+//        $user_id = auth()->id() ?? 32;
+        $user_id = 32;
+
+        $productTranslation = Product::getRawProduct($productName, $user_id, 'ru');
+        $product = Product::where('id', $productTranslation['product_id'])->first();
+
+
+
+        if($productTranslation){
+            $productInfo = [
+                'product_translation' => [
+                    'id' => $productTranslation['id'],
+                    'product_id' => $productTranslation['product_id'],
+                    'locale' => $productTranslation['locale'],
+                    'name' => $productTranslation['name'],
+                    'said_name' => $productName,
+                    'original_name' => $productName,
+                ],
+                'product' => [
+                    'id' => $product->id,
+                    'user_id' => $product->user_id,
+                    'calories' => $product->calories,
+                    'proteins' => $product->proteins,
+                    'carbohydrates' => $product->carbohydrates,
+                    'fats' => $product->fats,
+                    'fibers' => $product->fibers,
+                    'quantity_grams' => $quantity,
+                ],
+                'quantity_grams' => $quantity
+            ];
+
+            Log::info(print_r($productInfo, true));
+            return response()->json([
+                'message' => 'Product found',
+                'product' => $productInfo
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Product not found',
+                'product' => false
+            ]);
+        }
+    }
+
 
 }

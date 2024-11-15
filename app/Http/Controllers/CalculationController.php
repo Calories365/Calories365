@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserDataRequest;
 use App\Http\Resources\CalculationResource;
 use App\Models\FoodConsumption;
+use App\Models\Product;
 use App\Models\UserResult;
 use App\Services\UserResultService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 
 class CalculationController extends Controller
