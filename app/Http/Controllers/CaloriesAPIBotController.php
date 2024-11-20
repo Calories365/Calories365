@@ -10,6 +10,7 @@ use App\Models\FoodConsumption;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\SearchService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
@@ -156,12 +157,13 @@ class CaloriesAPIBotController extends BaseController
 
     public function showUserStats(DateValidationRequest $request){
         $date = $request->route('date');
+        $partOfDay = $request->route('partOfDay');
         Log::info($date);
 //        $locale = app()->getLocale();
         $locale = 'ru';
 //        $userId = auth()->id();
         $userId = 32;
-        $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale);
+        $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale, $partOfDay);
         return new MealCollection($meals);
     }
 
@@ -223,5 +225,10 @@ class CaloriesAPIBotController extends BaseController
         }
     }
 
+    public function destroy(FoodConsumption $meal): \Illuminate\Http\JsonResponse
+    {
+        $meal->delete();
+        return response()->json(['message' => 'Success']);
+    }
 
 }

@@ -28,7 +28,7 @@ class FoodConsumption extends Model
         return $this->belongsTo(Product::class, 'food_id');
     }
 
-    public static function getMealsWithCurrentDate($date, $userId, $locale): \Illuminate\Database\Eloquent\Collection|array
+    public static function getMealsWithCurrentDate($date, $userId, $locale, $partOfDay = false): \Illuminate\Database\Eloquent\Collection|array
     {
         return self::with(['product' => function ($query) use ($locale) {
             $query->select('id', 'calories', 'proteins', 'carbohydrates', 'fats', 'fibers')
@@ -39,8 +39,12 @@ class FoodConsumption extends Model
         }])
             ->where('user_id', $userId)
             ->whereDate('consumed_at', $date)
+            ->when($partOfDay, function ($query) use ($partOfDay) {
+                return $query->where('part_of_day', $partOfDay);
+            })
             ->get();
     }
+
 
 
     public static function getDailyCaloriesSum($userId, $date): \Illuminate\Database\Eloquent\Collection|array

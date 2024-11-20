@@ -20,6 +20,7 @@ class DateValidationRequest extends FormRequest
     {
         return [
             'date' => 'required|date_format:Y-m-d',
+            'partOfDay' => 'nullable|in:morning,dinner,supper',
         ];
     }
 
@@ -30,6 +31,10 @@ class DateValidationRequest extends FormRequest
         if ($this->route('date')) {
             $allData['date'] = $this->route('date');
         }
+        if ($this->route('partOfDay')) {
+            $allData['partOfDay'] = $this->route('partOfDay');
+        }
         return $allData;
     }
+
 }
