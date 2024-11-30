@@ -24,9 +24,9 @@ export default ({mode}) => {
             laravel({
                 input: [
                     'resources/css/app.css',
-                    'resources/css/admin.css',
+                    // 'resources/css/admin.css',
                     'resources/js/app.js',
-                    'resources/js/admin.js'
+                    // 'resources/js/admin.js'
                 ],
                 refresh: true,
             }),

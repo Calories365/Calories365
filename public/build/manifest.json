@@ -5,7 +5,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-86f6c1c7.css",
+    "file": "assets/app-09206bc9.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -31,13 +31,13 @@
       "assets/phone3-039042f9.png",
       "assets/stats-f8ddbe19.png",
       "assets/burger-8a2dae5f.png",
-      "assets/ded-d9c73875.mp3",
-      "assets/valera-a66758ae.jpeg"
+      "assets/valera-a66758ae.jpeg",
+      "assets/ded-d9c73875.mp3"
     ],
     "css": [
-      "assets/app-86f6c1c7.css"
+      "assets/app-09206bc9.css"
     ],
-    "file": "assets/app-a3d489d2.js",
+    "file": "assets/app-5a28a984.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },

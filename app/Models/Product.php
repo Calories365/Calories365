@@ -49,6 +49,7 @@ class Product extends Model
 
         $user_id = auth()->id() ?? 32;
         $locale = 'ru';
+//        $locale = 'ua';
         // $locale = app()->getLocale();
         $user_id = auth()->id();
         $user_id = 32;
