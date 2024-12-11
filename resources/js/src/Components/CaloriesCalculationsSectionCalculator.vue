@@ -141,6 +141,7 @@ export default {
                                          @update="fat = $event"
                                          @checkboxChanged="handleCheckboxChange"
             />
+<!--            <p class="calculator-section_description_v2">Активність: </p>-->
             <div class="calculator-section_dropdowns">
                 <calories-calculation-dropdown class="calculator-section_dropdown"
                                                :name="$t('message.caloriesCalculationDropdownActivity')"
@@ -193,7 +194,16 @@ export default {
         margin: 1.5vh 0;
         padding: 0 2vh;
         color: #666666;
-
+    }
+    &_description_v2 {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: $default-font-size;
+        line-height: 1.5;
+        //text-align: justify;
+        //margin: 1.5vh 0;
+        text-align: center;
+        padding: 0 2vh;
+        color: #666666;
     }
 
     &_gender-buttons-container {

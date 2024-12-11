@@ -94,7 +94,7 @@ const actions = {
                 savedData = false;
             }
             if (savedData) {
-                console.log('Данные взяты из локального хранилища. Запрос не отправлен.');
+                // console.log('Данные взяты из локального хранилища. Запрос не отправлен.');
                 const parsedData = JSON.parse(savedData);
                 context.commit(mutationTypes.getCalculationDataSuccess, parsedData);
                 resolve(parsedData);
@@ -112,13 +112,13 @@ const actions = {
                         }
                     } else {
                         context.commit(mutationTypes.getCalculationDataSuccess, response.data);
-                        console.log('Ответ сервера:', response.data);
+                        // console.log('Ответ сервера:', response.data);
                         localStorage.setItem(key, JSON.stringify(response.data));
                         resolve(response.data);
                     }
                 })
                 .catch(error => {
-                    console.log('Ошибка при получении данных:', error);
+                    // console.log('Ошибка при получении данных:', error);
                     context.commit(mutationTypes.getCalculationDataFailure, error);
                     reject(error);
                 });
@@ -147,7 +147,7 @@ const actions = {
             const currentData = JSON.stringify(data);
 
             if (savedData === currentData) {
-                console.log('Данные совпадают с сохраненными. Запрос не отправлен.');
+                // console.log('Данные совпадают с сохраненными. Запрос не отправлен.');
                 resolve();
                 return;
             }
@@ -264,10 +264,6 @@ const actions = {
                     }
                 });
             }
-
-
-
-
 
             function HarrisBenedictBMR(gender, birthYear, weight, height) {
                 const currentYear = new Date().getFullYear();

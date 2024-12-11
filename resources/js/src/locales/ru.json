@@ -100,7 +100,8 @@
         "dinner": "Обед",
         "supper": "Ужин",
         "YourProduct": "Ваш продукт",
-        "MoreProducts": "Еще продукты"
+        "MoreProducts": "Еще продукты",
+        "NewProduct":  "новый продукт"
     },
     "Notification": {
         "Success": {

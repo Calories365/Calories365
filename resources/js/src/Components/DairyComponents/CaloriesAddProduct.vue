@@ -9,7 +9,7 @@ export default {
         <div class="product-card__body">
             <h2 class="product-card__title">
                 <slot></slot>
-                (новый продукт)
+                ({{ $t('Diary.NewProduct') }})
                 <svg class="product-card__plus" style="height: 20px" xmlns="http://www.w3.org/2000/svg"
                      viewBox="0 0 448 512">
                     <path

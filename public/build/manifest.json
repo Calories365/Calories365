@@ -5,7 +5,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-09206bc9.css",
+    "file": "assets/app-35afc2b9.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -30,14 +30,14 @@
       "assets/phon2-aed36cdf.png",
       "assets/phone3-039042f9.png",
       "assets/stats-f8ddbe19.png",
+      "assets/valera-40fb0cab.png",
       "assets/burger-8a2dae5f.png",
-      "assets/valera-a66758ae.jpeg",
       "assets/ded-d9c73875.mp3"
     ],
     "css": [
-      "assets/app-09206bc9.css"
+      "assets/app-35afc2b9.css"
     ],
-    "file": "assets/app-5a28a984.js",
+    "file": "assets/app-7b5711b2.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },
@@ -129,9 +129,9 @@
     "file": "assets/stats-f8ddbe19.png",
     "src": "resources/js/src/assets/stats.png"
   },
-  "resources/js/src/assets/valera.jpeg": {
-    "file": "assets/valera-a66758ae.jpeg",
-    "src": "resources/js/src/assets/valera.jpeg"
+  "resources/js/src/assets/valera.png": {
+    "file": "assets/valera-40fb0cab.png",
+    "src": "resources/js/src/assets/valera.png"
   },
   "resources/js/src/images/burger.png": {
     "file": "assets/burger-8a2dae5f.png",

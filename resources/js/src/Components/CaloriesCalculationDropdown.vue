@@ -101,6 +101,7 @@ export default {
 </template>
 
 <style scoped lang="scss">
+
 .dropdown-arrow {
     display: inline-block;
     //position: absolute;ч

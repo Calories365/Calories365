@@ -5,9 +5,9 @@ import {useI18n} from 'vue-i18n';
 const {t} = useI18n();
 
 const colors = computed(() => [
+    {class: 'nice', description: t('Stats.ColorDescriptions.Nice')},
     {class: 'overreach', description: t('Stats.ColorDescriptions.Overreach')},
     {class: 'significant-overreach', description: t('Stats.ColorDescriptions.SignificantOverreach')},
-    {class: 'nice', description: t('Stats.ColorDescriptions.Nice')},
 ]);
 </script>
 

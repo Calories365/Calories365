@@ -100,7 +100,8 @@
         "dinner": "Dinner",
         "supper": "Supper",
         "YourProduct": "Your product",
-        "MoreProducts": "More products"
+        "MoreProducts": "More products",
+        "NewProduct":  "new product"
     },
     "Notification": {
         "Success": {

@@ -62,7 +62,7 @@ export default {
                 <div class="page-cabinet_top top-info">
                     <div class="top-info_avatar"
                          @click="play">
-                        <img src="@/assets/valera.jpeg">
+                        <img src="@/assets/valera.png">
                     </div>
                 </div>
                 <div class="page-cabinet_mid mid-info">
