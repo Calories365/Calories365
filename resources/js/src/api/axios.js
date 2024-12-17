@@ -6,8 +6,8 @@ import getCookie from "@/helpers/getCookie.js";
 // axios.defaults.baseURL = `${secureCookie ? 'https' : 'http'}://${window.location.host}`;
 const appProd = import.meta.env.VITE_APP_PROD === 'true';
 
-// axios.defaults.baseURL = `${appProd ? 'https' : 'http'}://${window.location.host}`;
-axios.defaults.baseURL = `https://${window.location.host}`;
+axios.defaults.baseURL = `${appProd ? 'https' : 'http'}://${window.location.host}`;
+// axios.defaults.baseURL = `https://${window.location.host}`;
 
 axios.defaults.withCredentials = true;
 
