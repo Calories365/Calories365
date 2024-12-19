@@ -20,8 +20,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
 
           script: |
-            cd /home/maxim/var/www/calories365
+            cd /home/maxim/var/www/calories365/src
             git pull
-            docker-compose down
-            docker-compose build --no-cache
-            docker-compose up -d
+            cd ..
+            docker-compose up --build -d
