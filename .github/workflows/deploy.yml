@@ -20,14 +20,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
 
           script: |
-            # Переключаемся в директорию проекта калорий
             cd /home/maxim/var/www/calories365
-            # Обновляем код
             git pull
-            # Пересобираем и поднимаем контейнеры
-            docker-compose up -d --build
-
-            # По желанию можно очистить кэш, запустить миграции и т.д.
-            # cd /home/maxim/var/www/calories365
-            # docker-compose exec php php artisan migrate --force
-            # docker-compose exec php php artisan cache:clear
+            docker-compose down
+            docker-compose build --no-cache
+            docker-compose up -d
