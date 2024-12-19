@@ -88,7 +88,6 @@ const onSubmit = () => {
                                      :class="{'opacity-50 cursor-not-allowed': isSubmitting}" passed-class="recovery"
                                      class="button">
                         {{ $t('message.signInToYourAccount') }}
-                        test2
                     </calories-button>
                 </div>
             </form>

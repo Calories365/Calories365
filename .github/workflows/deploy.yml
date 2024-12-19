@@ -23,4 +23,5 @@ jobs:
             cd /home/maxim/var/www/calories365/src
             git pull
             cd ..
-            docker-compose up --build -d
+            docker-compose up -d --build
+            docker-compose exec calculator_php php artisan migrate --force
