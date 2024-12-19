@@ -2,7 +2,7 @@ import axios from "axios";
 import getCookie from "@/helpers/getCookie.js";
 
 axios.defaults.baseURL = window.location.origin;
-
+//test
 axios.defaults.withCredentials = true;
 
 axios.interceptors.request.use(config => {
