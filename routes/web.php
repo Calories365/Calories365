@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
-    ->name('social.google.redirect');
+//Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
+//    ->name('social.google.redirect');
 
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
     ->name('social.google.callback');
