@@ -38,6 +38,10 @@ const onSubmit = () => {
     });
 };
 
+const loginWithGoogle = () => {
+        window.location.href = '/api/auth/google';
+    };
+
 </script>
 
 <template>
@@ -88,8 +92,26 @@ const onSubmit = () => {
                                      :class="{'opacity-50 cursor-not-allowed': isSubmitting}" passed-class="recovery"
                                      class="button">
                         {{ $t('message.signInToYourAccount') }}
-                        123
                     </calories-button>
+                    <div class="google-login">
+                        <div class="mt-2">
+                        <span class="social-login">
+                             {{ $t('message.orSignInWith') }}
+                        </span>
+                        </div>
+                        <div class="mt-2 flex">
+                            <calories-button
+                                type="submit"
+                                :disabled="isSubmitting"
+                                :class="{'opacity-50 cursor-not-allowed': isSubmitting}"
+                                passed-class="recovery"
+                                class="button w-1/2 mr-2"
+                                @click="loginWithGoogle"
+                            >
+                                Google
+                            </calories-button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -133,4 +155,11 @@ const onSubmit = () => {
 .button {
     width: 100%;
 }
+.social-login {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: $default-font-size;
+    line-height: 1.5;
+    color: #666666;
+}
+
 </style>

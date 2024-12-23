@@ -13,6 +13,7 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/scout": "^10.11",
+        "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.8",
         "meilisearch/meilisearch-php": "^1.10",
         "noodlesnz/double-metaphone": "^1.0",

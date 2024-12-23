@@ -11,6 +11,8 @@ import Instructions from "@/pages/Instructions.vue";
 import Cabinet from "@/pages/Cabinet.vue";
 import Goals from "@/pages/Goals.vue";
 import ChangePassword from "@/pages/ChangePassword.vue";
+import PrivacyPolicy from "../pages/PrivacyPolicy.vue";
+import TermsOfService from "../pages/TermsOfService.vue";
 
 const routes = [
     {
@@ -20,7 +22,23 @@ const routes = [
         meta: {
             needAuth: true,
         },
-    }, {
+    },
+    {
+        path: '/privacy-policy',
+        component: PrivacyPolicy,
+        name: 'privacyPolicy',
+        meta: {
+            needAuth: false,
+        },
+    },{
+        path: '/terms-of-service',
+        component: TermsOfService,
+        name: 'termsOfService',
+        meta: {
+            needAuth: false,
+        },
+    },
+    {
         path: '/login',
         component: Login,
         name: 'login',

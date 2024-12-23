@@ -49,6 +49,9 @@ export default {
                 this.name = '';
             })
         },
+        loginWithGoogle (){
+            window.location.href = '/api/auth/google';
+        },
     }
 }
 </script>
@@ -137,6 +140,21 @@ export default {
                         class="button">
                         {{ $t('message.signUp') }}
                     </calories-button>
+                    <div class="google-login">
+                        <div class="mt-2">
+                        <span class="social-login">
+                             {{ $t('message.orSignInWith') }}
+                        </span>
+                        </div>
+                        <div class="mt-2 flex">
+                            <calories-button
+                                class="button w-1/2 mr-2"
+                                @click="loginWithGoogle"
+                            >
+                                Google
+                            </calories-button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -177,5 +195,11 @@ export default {
 
 .button {
     width: 100%;
+}
+.social-login {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: $default-font-size;
+    line-height: 1.5;
+    color: #666666;
 }
 </style>

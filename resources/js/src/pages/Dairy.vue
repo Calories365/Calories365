@@ -5,9 +5,9 @@ import CaloriesNavbar from "@/Components/DairyComponents/CaloriesNavbar.vue";
 import CaloriesAddBtn from "@/UI/CaloriesAddBtn.vue";
 import CaloriesSlideMenu from "@/Components/DairyComponents/CaloriesSlideMenu.vue";
 import CaloriesSlideProductMenu from "@/Components/DairyComponents/CaloriesSlideProductMenu.vue";
-import {actionTypes} from "@/store/modules/dairy.js";
-import {mapGetters} from "vuex";
-import {getterTypes as localeChangeGetterTypes} from "@/store/modules/changeLocale.js";
+import { actionTypes } from "@/store/modules/dairy.js";
+import { mapGetters } from "vuex";
+import { getterTypes as localeChangeGetterTypes } from "@/store/modules/changeLocale.js";
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
 import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vue";
 
@@ -17,25 +17,29 @@ export default {
         CaloriesErrorNotification,
         CaloriesSuccessNotification,
         CaloriesSlideProductMenu,
-        CaloriesSlideMenu, CaloriesAddBtn, CaloriesNavbar, CaloriesIndication, CaloriesFoodList
+        CaloriesSlideMenu,
+        CaloriesAddBtn,
+        CaloriesNavbar,
+        CaloriesIndication,
+        CaloriesFoodList
     },
     data() {
         return {
             isOpen: false,
-            counter: 0,
-        }
+            counter: 0
+        };
     },
     methods: {
         toggleMenu() {
             this.isOpen = !this.isOpen;
             if (!this.counter) {
-                this.$store.dispatch(actionTypes.getPopularProducts)
+                this.$store.dispatch(actionTypes.getPopularProducts);
             }
-        },
+        }
     },
     computed: {
         ...mapGetters({
-            currentLocale: localeChangeGetterTypes.selectedLocale,
+            currentLocale: localeChangeGetterTypes.selectedLocale
         }),
         successMessage() {
             return this.$store.getters.isSuccess;
@@ -47,29 +51,41 @@ export default {
     watch: {
         currentLocale(newLocale, oldLocale) {
             if (newLocale !== oldLocale) {
-                this.$store.dispatch(actionTypes.getCurrentProducts)
+                this.$store.dispatch(actionTypes.getCurrentProducts);
                 if (this.isOpen) {
-                    this.$store.dispatch(actionTypes.getPopularProducts)
+                    this.$store.dispatch(actionTypes.getPopularProducts);
                 }
             }
         }
     },
-}
+
+    // Когда компонент МОНТИРУЕТСЯ (открываем страницу)
+    mounted() {
+        // Запрещаем скролл на body ТОЛЬКО пока находимся на этой странице
+        document.body.style.overflow = 'hidden';
+    },
+
+    // Когда компонент УНИЧТОЖАЕТСЯ (уходим со страницы, переключаемся на другую)
+    beforeUnmount() {
+        // Восстанавливаем скролл
+        document.body.style.overflow = 'auto';
+    }
+};
 </script>
+
 <template>
     <section class="dairy-section">
-
         <div class="dairy-section__parent">
-            <calories-navbar/>
+            <calories-navbar />
 
             <div class="dairy-section__food-header">
-                <calories-indication/>
+                <calories-indication />
             </div>
 
             <div class="dairy-section__food-container">
-                <hr>
+                <hr />
                 <div class="dairy-section__food-list-container">
-                    <calories-food-list/>
+                    <calories-food-list />
                 </div>
 
                 <calories-slide-menu
@@ -77,18 +93,15 @@ export default {
                     @update="isOpen = $event"
                 />
 
-
                 <div class="dairy-section__addBtn">
-                    <calories-add-btn @click="toggleMenu"/>
+                    <calories-add-btn @click="toggleMenu" />
                 </div>
-
             </div>
         </div>
     </section>
 </template>
 
 <style scoped lang="scss">
-
 .dairy-section {
     &__parent {
         width: 90%;
@@ -109,7 +122,6 @@ export default {
         width: 100%;
         overflow: hidden;
     }
-
 
     &__food-list-container {
         height: 100%;

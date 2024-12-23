@@ -49,7 +49,8 @@
         "calorieCalculation": "Calorie Calculation",
         "calorieDiary": "Calorie Diary",
         "statistics": "Statistics",
-        "myRecipes": "My Recipes"
+        "myRecipes": "My Recipes",
+        "orSignInWith": "Or sign in with:"
     },
     "calculationResult": {
         "calculatorSectionHeadOne": "Your Result",

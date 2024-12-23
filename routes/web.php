@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,6 +13,12 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
+    ->name('social.google.redirect');
+
+Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
+    ->name('social.google.callback');
 
 Route::get('/{any?}', function () {
     return view('app');

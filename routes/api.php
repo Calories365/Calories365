@@ -45,4 +45,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
 });
 
+use App\Http\Controllers\SocialAuthController;
+
+Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
+    ->name('social.google.redirect');
+
+
 
