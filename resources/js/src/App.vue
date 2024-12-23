@@ -64,6 +64,8 @@ export default {
         </router-link>
         <router-link :to="{ name: 'termsOfService' }" class="privacy-link"
         >Terms of Service
+        </router-link><router-link :to="{ name: 'faq' }" class="privacy-link"
+        >FAQ
         </router-link>
     </footer>
 </template>

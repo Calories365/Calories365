@@ -13,6 +13,7 @@ import Goals from "@/pages/Goals.vue";
 import ChangePassword from "@/pages/ChangePassword.vue";
 import PrivacyPolicy from "../pages/PrivacyPolicy.vue";
 import TermsOfService from "../pages/TermsOfService.vue";
+import FAQ from "../pages/FAQ.vue";
 
 const routes = [
     {
@@ -34,6 +35,13 @@ const routes = [
         path: '/terms-of-service',
         component: TermsOfService,
         name: 'termsOfService',
+        meta: {
+            needAuth: false,
+        },
+    },{
+        path: '/faq',
+        component: FAQ,
+        name: 'faq',
         meta: {
             needAuth: false,
         },
