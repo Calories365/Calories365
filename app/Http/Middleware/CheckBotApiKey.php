@@ -6,13 +6,11 @@ use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckBotApiKey
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next)
     {
         $clientKey = $request->header('X-Api-Key');
@@ -25,6 +23,17 @@ class CheckBotApiKey
         $telegramId = $request->header('X-Telegram-Id');
         if (!$telegramId) {
             return response()->json(['error' => 'Telegram ID not provided'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        Log::info('Request URL: ' . $request->fullUrl());
+
+        if ($request->routeIs('caloriesEndPoint.checkTelegramCode')) {
+
+            $locale = $request->header('X-Locale');
+            if ($locale) {
+                app()->setLocale($locale);
+            }
+            return $next($request);
         }
 
         $user = User::where('telegram_id', $telegramId)->first();
