@@ -27,10 +27,13 @@ const updateUsersPassword = (credentials) => {
 const updateCurrentUser = (credentials) => {
     return axios.put('/user/profile-information', credentials)
 }
+const getTelegramLink = () => {
+    return axios.get('/api/telegram-link')
+}
 
 export default {
     register, login, getCurrentUser,
     logout, recovery, recoveryWithToken,
     resendVerificationEmail, updateUsersPassword,
-    updateCurrentUser
+    updateCurrentUser, getTelegramLink
 }

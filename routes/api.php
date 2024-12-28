@@ -32,17 +32,34 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/products/search', [\App\Http\Controllers\SearchProductController::class, 'search'])->name('meals.search');
         Route::get('/user', [\App\Http\Controllers\UserController::class, 'show'])->name('show');
+
+        Route::get('/telegram-link', [\App\Http\Controllers\TelegramLinkController::class, 'getLink'])
+            ->name('telegram.link');
     });
 });
+Route::middleware('check.bot.key')->group(function () {
+    Route::group(['namespace' => 'App\Http\Controllers'], function () {
+        Route::post('/caloriesEndPoint', [\App\Http\Controllers\CaloriesAPIBotController::class, 'store'])
+            ->name('calculations.store2');
 
-Route::group(['namespace' => 'App\Http\Controllers'], function () {
-    Route::post('/caloriesEndPoint', [\App\Http\Controllers\CaloriesAPIBotController::class, 'store'])->name('calculations.store2');
-    Route::post('/caloriesEndPoint/saveProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'saveProduct'])->name('calculations.saveProduct');
-    Route::post('/caloriesEndPoint/saveFoodConsumption', [\App\Http\Controllers\CaloriesAPIBotController::class, 'saveFoodConsumption'])->name('calculations.saveFoodConsumption');
-    Route::get('/caloriesEndPoint/showUserStats/{date}/{partOfDay?}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'showUserStats'])->name('calculations.showUserStats');
-    Route::post('/caloriesEndPoint/getTheMostRelevantProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'getTheMostRelevantProduct'])->name('calculations.getTheMostRelevantProduct');
-    Route::delete('/caloriesEndPoint/deleteMeal/{meal}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'destroy'])->name('calculations.destroy');
+        Route::post('/caloriesEndPoint/saveProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'saveProduct'])
+            ->name('calculations.saveProduct');
 
+        Route::post('/caloriesEndPoint/saveFoodConsumption', [\App\Http\Controllers\CaloriesAPIBotController::class, 'saveFoodConsumption'])
+            ->name('calculations.saveFoodConsumption');
+
+        Route::get('/caloriesEndPoint/showUserStats/{date}/{partOfDay?}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'showUserStats'])
+            ->name('calculations.showUserStats');
+
+        Route::post('/caloriesEndPoint/getTheMostRelevantProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'getTheMostRelevantProduct'])
+            ->name('calculations.getTheMostRelevantProduct');
+
+        Route::delete('/caloriesEndPoint/deleteMeal/{meal}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'destroy'])
+            ->name('calculations.destroy');
+
+        Route::post('/caloriesEndPoint/checkTelegramCode', [\App\Http\Controllers\TelegramLinkController::class, 'checkTelegramCode'])
+            ->name('caloriesEndPoint.checkTelegramCode');
+    });
 });
 
 use App\Http\Controllers\SocialAuthController;

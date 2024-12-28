@@ -16,6 +16,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CaloriesAPIBotController extends BaseController
@@ -31,6 +32,8 @@ class CaloriesAPIBotController extends BaseController
 
     public function store(Request $request)
     {
+
+
         $text = $request->input('text');
         Log::info("Received text: " . $text);
         $response = [
@@ -156,14 +159,18 @@ class CaloriesAPIBotController extends BaseController
     }
 
     public function showUserStats(DateValidationRequest $request){
+        $id = Auth::id();
+        Log::info("Received text from: " . $id);
         $date = $request->route('date');
         $partOfDay = $request->route('partOfDay');
         Log::info($date);
-//        $locale = app()->getLocale();
+        $locale = app()->getLocale();
+        Log::info('locale: ');
+        Log::info($locale);
         $locale = 'ru';
-//        $userId = auth()->id();
-        $userId = 32;
+        $userId = auth()->id();
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale, $partOfDay);
+
         return new MealCollection($meals);
     }
 
@@ -181,8 +188,7 @@ class CaloriesAPIBotController extends BaseController
             $quantity = floatval($matches[1]);
         }
 
-//        $user_id = auth()->id() ?? 32;
-        $user_id = 32;
+        $user_id = auth()->id();
 
         $productTranslation = Product::getRawProduct($productName, $user_id, 'ru');
         $product = Product::where('id', $productTranslation['product_id'])->first();

@@ -57,7 +57,6 @@ export default {
         </article>
     </main>
 
-    <!-- Футер со ссылкой на Политику конфиденциальности -->
     <footer class="main-footer">
         <router-link :to="{ name: 'privacyPolicy' }" class="privacy-link">
             Privacy Policy
@@ -86,11 +85,7 @@ export default {
     }
 }
 
-.main-article {
-    // ваш контент
-}
 
-/* Футер внизу */
 .main-footer {
     margin-top: 2rem;
     padding: 1rem 0;
@@ -101,7 +96,7 @@ export default {
     .privacy-link {
         padding-right: 10px;
         text-decoration: underline;
-        color: #666; /* При желании можете поменять */
+        color: #666;
         &:hover {
             color: #333;
         }

@@ -47,12 +47,9 @@ class Product extends Model
         int $count = 10
     ): LengthAwarePaginator|Collection {
 
-//        $user_id = auth()->id() ?? 32;
-//        $locale = 'ru';
-//        $locale = 'ua';
-         $locale = app()->getLocale();
+        $locale = app()->getLocale();
         $user_id = auth()->id();
-//        $user_id = 32;
+
 
         $builder = ProductTranslation::search($encodedQuery)
             ->where('locale', $locale)

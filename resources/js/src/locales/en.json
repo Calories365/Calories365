@@ -149,7 +149,10 @@
         "RepeatPassword": "Repeat Password",
         "ChangingPassword": "Changing Password",
         "Update": "Update",
-        "CaloriesLimit": "Calories limit"
+        "CaloriesLimit": "Calories limit",
+        "TelegramBot" : "Telegram bot",
+        "Connect" : "Connect",
+        "Connected" : "Connected"
     },
     "Recovery": {
         "RecoveryYourPassword": "Recovery your password",

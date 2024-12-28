@@ -148,7 +148,10 @@
         "RepeatPassword": "Повторіть пароль",
         "ChangingPassword": "Зміна паролю",
         "Update": "Оновити",
-        "CaloriesLimit": "Лiмiт калорiй"
+        "CaloriesLimit": "Лiмiт калорiй",
+        "TelegramBot" : "Телеграм бот",
+        "Connect" : "Пiдключити",
+        "Connected" : "Пiдключено"
     },
     "Recovery": {
         "RecoveryYourPassword": "Відновлення вашого пароля",

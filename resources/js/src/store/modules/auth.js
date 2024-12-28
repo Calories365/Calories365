@@ -69,6 +69,10 @@ export const mutationTypes = {
     updateUsersDataStart: '[auth] updateUsersDataStart',
     updateUsersDataSuccess: '[auth] updateUsersDataSuccess',
     updateUsersDataFailure: '[auth] updateUsersDataFailure',
+
+    getTelegramLinkStart: '[auth] getTelegramLinkStart',
+    getTelegramLinkSuccess: '[auth] getTelegramLinkSuccess',
+    getTelegramLinkFailure: '[auth] getTelegramLinkFailure',
 }
 
 const mutations = {
@@ -181,6 +185,18 @@ const mutations = {
         state.validationErrors = payload;
     },
 
+    [mutationTypes.getTelegramLinkStart](state) {
+        state.isLoading = true
+        state.validationErrors = null
+    },
+    [mutationTypes.getTelegramLinkSuccess](state) {
+        state.isLoading = false
+    },
+    [mutationTypes.getTelegramLinkFailure](state, payload) {
+        state.isLoading = false
+        state.validationErrors = payload
+    },
+
 
 }
 
@@ -195,7 +211,8 @@ export const actionTypes = {
     destroyErrors: '[auth] destroyErrors',
     resendVerificationEmail: '[auth] resendVerificationEmail',
     updateUsersPassword: '[auth] updateUsersPassword',
-    updateUsersData: '[auth] updateUsersData'
+    updateUsersData: '[auth] updateUsersData',
+    getTelegramLink: '[auth] getTelegramLink'
 }
 
 const actions = {
@@ -364,6 +381,20 @@ const actions = {
                 })
         })
     },
+    [actionTypes.getTelegramLink](context) {
+        return new Promise((resolve, reject) => {
+            context.commit(mutationTypes.getTelegramLinkStart)
+            authApi.getTelegramLink()
+                .then(response => {
+                    context.commit(mutationTypes.getTelegramLinkSuccess)
+                    resolve(response.data.link)
+                })
+                .catch(error => {
+                    context.commit(mutationTypes.getTelegramLinkFailure, error.response?.data?.errors)
+                    reject(error)
+                })
+        })
+    }
 
 
 }

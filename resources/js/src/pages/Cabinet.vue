@@ -1,114 +1,134 @@
 <script>
-import {mapState} from "vuex";
+import { mapState } from "vuex";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
-import {actionTypes} from "@/store/modules/auth.js";
+import { actionTypes } from "@/store/modules/auth.js";
 import router from "@/router/router.js";
 
 export default {
     name: "Cabinet",
-    components: {CaloriesButton},
+    components: { CaloriesButton },
     data() {
         return {
             name: null,
             email: null,
             caloriesLimit: null,
-        }
-
-    },
-    methods: {
-        play() {
-            // const audio = new Audio(dedSound);
-            // audio.play().catch(e => console.error('Playback failed:', e));
-        },
-        changeName() {
-            this.$store.dispatch(actionTypes.updateUsersData,
-                {
-                    name: this.name,
-                    email: this.email,
-                    calories_limit: this.caloriesLimit,
-                }).then(() => {
-                router.push({name: 'login'});
-            })
-        },
-        logout() {
-            this.$store.dispatch(actionTypes.logout).then((errors) => {
-                router.push({name: 'login'});
-            })
-        }
+            telegramAuth: null,
+        };
     },
     computed: {
         ...mapState({
-            currentUser: state => state.auth.currentUser,
+            currentUser: (state) => state.auth.currentUser,
         }),
+        telegramLinkText() {
+            // Если пользователь уже "подключен" к Telegram, выводим "Connected", иначе "Connect"
+            return this.telegramAuth
+                ? this.$t("Cabinet.Connected")
+                : this.$t("Cabinet.Connect");
+        },
+    },
+    methods: {
+        play() {
+            // ...
+        },
+        changeName() {
+            this.$store
+                .dispatch(actionTypes.updateUsersData, {
+                    name: this.name,
+                    email: this.email,
+                    calories_limit: this.caloriesLimit,
+                })
+                .then(() => {
+                    router.push({ name: "login" });
+                });
+        },
+        logout() {
+            this.$store.dispatch(actionTypes.logout).then(() => {
+                router.push({ name: "login" });
+            });
+        },
+        fetchTelegramLink() {
+            this.$store
+                .dispatch(actionTypes.getTelegramLink)
+                .then((link) => {
+                    window.open(link, "_blank");
+                })
+                .catch((err) => {
+                    console.error("Error fetching telegram link", err);
+                });
+        },
     },
     mounted() {
+        // Инициализируем данные из currentUser
         this.name = this.currentUser.name;
         this.email = this.currentUser.email;
         this.caloriesLimit = this.currentUser.calories_limit;
-    }
-}
+        this.telegramAuth = this.currentUser.telegram_auth;
+    },
+};
 </script>
+
 <template>
     <section class="page-cabinet_section">
         <div class="page-cabinet_container">
             <div class="page-cabinet_header">
-
                 <h1 class="page-cabinet_title">
                     {{ $t("Cabinet.PersonalCabinet") }}
                 </h1>
-
             </div>
             <div class="page-cabinet_content">
                 <div class="page-cabinet_top top-info">
-                    <div class="top-info_avatar"
-                         @click="play">
-                        <img src="@/assets/valera.png">
+                    <div class="top-info_avatar" @click="play">
+                        <img src="@/assets/valera.png" />
                     </div>
                 </div>
                 <div class="page-cabinet_mid mid-info">
-                    <div
-                        class="mid-info_email">
-                        <div
-                            class="mid-info_text">{{ $t("Cabinet.Mail") }}:
-                        </div>
-                        <input
-                            v-model="email"
-                            disabled
-                            class="mid-info_credentials">
+                    <div class="mid-info_email">
+                        <div class="mid-info_text">{{ $t("Cabinet.Mail") }}:</div>
+                        <input v-model="email" disabled class="mid-info_credentials" />
                     </div>
                     <div class="mid-info_login">
                         <div class="mid-info_text">{{ $t("Cabinet.Name") }}:</div>
-                        <input
-                            v-model="name"
-                            class="mid-info_credentials">
+                        <input v-model="name" class="mid-info_credentials" />
                     </div>
+
+                    <div class="mid-info_link">
+                        <div class="mid-info_text">{{ $t("Cabinet.TelegramBot") }}:</div>
+                        <span
+                            class="mid-info_credentials link"
+                            @click="fetchTelegramLink"
+                            style="cursor: pointer;"
+                        >
+              {{ telegramLinkText }}
+            </span>
+                    </div>
+
                     <div class="mid-info_login">
                         <div class="mid-info_text">{{ $t("Cabinet.CaloriesLimit") }}:</div>
-                        <input
-                            v-model="caloriesLimit"
-                            class="mid-info_credentials">
+                        <input v-model="caloriesLimit" class="mid-info_credentials" />
                     </div>
                     <div class="mid-info_link">
                         <div class="mid-info_text">{{ $t("Cabinet.Password") }}:</div>
-                        <router-link :to="{name: 'change-password'}" href="">
-                            <span class="mid-info_credentials link">{{ $t("Cabinet.ChangingPassword") }}</span>
+                        <router-link :to="{ name: 'change-password' }">
+              <span class="mid-info_credentials link"
+              >{{ $t("Cabinet.ChangingPassword") }}</span
+              >
                         </router-link>
                     </div>
 
                     <div class="mid-info_buttons new-password">
                         <calories-button
                             @click="changeName"
-                            class="mid-info_button"> {{
-                                $t("Cabinet.Save")
-                            }}
+                            class="mid-info_button"
+                        >
+                            {{ $t("Cabinet.Save") }}
                         </calories-button>
 
                         <calories-button
                             @click="logout"
                             passed-class="danger"
-                            class="mid-info_button"> {{
-                                $t("Cabinet.logOut")
-                            }}
+                            class="mid-info_button"
+                        >
+                            {{ $t("Cabinet.logOut") }}
                         </calories-button>
                     </div>
                 </div>
@@ -285,7 +305,7 @@ export default {
         width: 80%;
         display: flex;
         border-radius: 5px;
-        //padding: 10px 10px 10px 10px;
+        align-items: center;
         padding: 20px 10px 20px 10px;
         flex-wrap: wrap;
         overflow-y: hidden;
@@ -323,7 +343,6 @@ export default {
 
     &_credentials {
         flex: 1;
-        //border: 1px solid #eeb82c;
     }
 
     &_button {

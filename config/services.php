@@ -35,4 +35,6 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect'      => env('GOOGLE_REDIRECT_URL'),
     ],
+    'telegram_bot_url' => env('TELEGRAM_BOT_URL', 'https://t.me/Calories365Test_bot'),
+    'bot_api_key' => env('BOT_API_KEY', ''),
 ];
