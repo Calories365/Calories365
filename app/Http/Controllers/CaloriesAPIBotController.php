@@ -165,12 +165,9 @@ class CaloriesAPIBotController extends BaseController
         $partOfDay = $request->route('partOfDay');
         Log::info($date);
         $locale = app()->getLocale();
-        Log::info('locale: ');
-        Log::info($locale);
-        $locale = 'ru';
         $userId = auth()->id();
+        Log::info($locale);
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale, $partOfDay);
-
         return new MealCollection($meals);
     }
 
@@ -189,8 +186,9 @@ class CaloriesAPIBotController extends BaseController
         }
 
         $user_id = auth()->id();
+        $locale = app()->getLocale();
 
-        $productTranslation = Product::getRawProduct($productName, $user_id, 'ru');
+        $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
         $product = Product::where('id', $productTranslation['product_id'])->first();
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Log;
 
 class MealCollection extends ResourceCollection
 {
@@ -16,7 +17,6 @@ class MealCollection extends ResourceCollection
         return $this->collection->map(function ($meal) {
             $product = $meal->product;
             $translation = $product->translations->first();
-
             return [
                 'id' => $meal->id,
                 'user_id' => $meal->user_id,

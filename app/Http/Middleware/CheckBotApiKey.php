@@ -20,13 +20,6 @@ class CheckBotApiKey
             return response()->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $telegramId = $request->header('X-Telegram-Id');
-        if (!$telegramId) {
-            return response()->json(['error' => 'Telegram ID not provided'], Response::HTTP_UNAUTHORIZED);
-        }
-
-        Log::info('Request URL: ' . $request->fullUrl());
-
         if ($request->routeIs('caloriesEndPoint.checkTelegramCode')) {
 
             $locale = $request->header('X-Locale');
@@ -36,12 +29,14 @@ class CheckBotApiKey
             return $next($request);
         }
 
-        $user = User::where('telegram_id', $telegramId)->first();
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        $userId = $request->header('X-Calories-Id');
+        if (!$userId) {
+            return response()->json(['error' => 'Calories ID not provided'], Response::HTTP_UNAUTHORIZED);
         }
 
-        Auth::login($user);
+        Log::info('Request URL: ' . $request->fullUrl());
+
+        Auth::loginUsingId($userId);
 
         $locale = $request->header('X-Locale');
         if ($locale) {
