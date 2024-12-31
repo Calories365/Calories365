@@ -6,6 +6,7 @@ use App\Models\FoodConsumption;
 use App\Models\Product;
 use App\Models\ProductTranslation;
 use App\Traits\DoubleMetaphoneTrait;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -20,8 +21,9 @@ class ProductService
     {
         DB::beginTransaction();
         try {
-            $locale = 'ru';
-            $user_id = 32;
+            $locale = app()->getLocale();
+            $user_id = auth()->id();
+
             $builder = ProductTranslation::search($validatedData['name'])
                 ->where('locale', $locale)
                 ->where('active', 1)
