@@ -13,6 +13,7 @@ export default {
             email: null,
             caloriesLimit: null,
             telegramAuth: null,
+            telegramLink: null, // хранить ссылку отдельно
         };
     },
     computed: {
@@ -46,23 +47,33 @@ export default {
                 router.push({ name: "login" });
             });
         },
-        fetchTelegramLink() {
-            this.$store
-                .dispatch(actionTypes.getTelegramLink)
-                .then((link) => {
-                    window.open(link, "_blank");
-                })
-                .catch((err) => {
-                    console.error("Error fetching telegram link", err);
-                });
+
+        // Вместо того, чтобы получать ссылку в момент клика,
+        // мы будем использовать уже сохранённый в this.telegramLink URL:
+        openTelegramLink() {
+            if (this.telegramLink) {
+                // Открываем ссылку синхронно — iOS Safari должен пропустить
+                window.open(this.telegramLink, "_blank");
+            } else {
+                // На случай, если ссылка не загрузилась
+                console.error("Telegram link is not available");
+            }
         },
     },
-    mounted() {
+    async mounted() {
         // Инициализируем данные из currentUser
         this.name = this.currentUser.name;
         this.email = this.currentUser.email;
         this.caloriesLimit = this.currentUser.calories_limit;
         this.telegramAuth = this.currentUser.telegram_auth;
+
+        // Получаем телеграм-ссылку заранее (при монтировании).
+        // Тогда при клике не будет асинхронного вызова, и iOS не заблокирует pop-up.
+        try {
+            this.telegramLink = await this.$store.dispatch(actionTypes.getTelegramLink);
+        } catch (error) {
+            console.error("Error fetching telegram link:", error);
+        }
     },
 };
 </script>
@@ -95,7 +106,7 @@ export default {
                         <div class="mid-info_text">{{ $t("Cabinet.TelegramBot") }}:</div>
                         <span
                             class="mid-info_credentials link"
-                            @click="fetchTelegramLink"
+                            @click="openTelegramLink"
                             style="cursor: pointer;"
                         >
               {{ telegramLinkText }}
@@ -109,9 +120,9 @@ export default {
                     <div class="mid-info_link">
                         <div class="mid-info_text">{{ $t("Cabinet.Password") }}:</div>
                         <router-link :to="{ name: 'change-password' }">
-              <span class="mid-info_credentials link"
-              >{{ $t("Cabinet.ChangingPassword") }}</span
-              >
+              <span class="mid-info_credentials link">
+                {{ $t("Cabinet.ChangingPassword") }}
+              </span>
                         </router-link>
                     </div>
 
