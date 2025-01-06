@@ -44,12 +44,29 @@ class CaloriesAPIBotController extends BaseController
         if (trim($text) !== 'Продуктов нет' && !empty(trim($text))) {
             $productsInfo = [];
 
-            // изначально должно быть по ; но чат напрочь отказывается ставить этот символ
+            $locale = app()->getLocale();
+
+            $suffix = 'грамм';
+
+            switch ($locale) {
+                case 'en':
+                    $suffix = 'grams';
+                    break;
+                case 'uk':
+                    $suffix = 'грам';
+                    break;
+                case 'ru':
+                default:
+                    $suffix = 'грамм';
+                    break;
+            }
+
             if (str_contains($text, ';')) {
                 $products = explode(';', $text);
             } else {
-                $products = explode('грамм', $text);
+                $products = explode($suffix, $text);
             }
+
             Log::info('products from bot: ');
             Log::info(print_r($products, true));
             foreach ($products as $product) {
@@ -144,7 +161,7 @@ class CaloriesAPIBotController extends BaseController
     public function saveProduct(StoreUsersFoodConsumptionsRequest $request, ProductService $productService ): JsonResponse
     {
         $validatedData = $request->validated();
-        $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
+        $validatedData['user_id'] = auth()->id();
         $userResult = $productService->createProductWithTranslationsAndConsumption($validatedData);
         return response()->json($userResult, 201);
     }
@@ -153,20 +170,16 @@ class CaloriesAPIBotController extends BaseController
     {
         $validatedData = $request->validated();
 //        Log::info(print_r($validatedData, true));
-        $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
+        $validatedData['user_id'] = auth()->id();
         $foodConsumption = FoodConsumption::createFoodConsumption($validatedData);
         return response()->json(['id' => $foodConsumption->id]);
     }
 
     public function showUserStats(DateValidationRequest $request){
-        $id = Auth::id();
-        Log::info("Received text from: " . $id);
+        $userId = auth()->id();
         $date = $request->route('date');
         $partOfDay = $request->route('partOfDay');
-        Log::info($date);
         $locale = app()->getLocale();
-        $userId = auth()->id();
-        Log::info($locale);
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale, $partOfDay);
         return new MealCollection($meals);
     }
