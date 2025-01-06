@@ -228,7 +228,7 @@ class CaloriesAPIBotController extends BaseController
                 ],
                 'quantity_grams' => $quantity
             ];
-
+//123
             Log::info(print_r($productInfo, true));
             return response()->json([
                 'message' => 'Product found',
