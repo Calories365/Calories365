@@ -169,7 +169,6 @@ class CaloriesAPIBotController extends BaseController
     public function saveFoodConsumption(StoreFoodConsumptionRequest $request): \Illuminate\Http\JsonResponse
     {
         $validatedData = $request->validated();
-//        Log::info(print_r($validatedData, true));
         $validatedData['user_id'] = auth()->id();
         $foodConsumption = FoodConsumption::createFoodConsumption($validatedData);
         return response()->json(['id' => $foodConsumption->id]);
@@ -228,7 +227,6 @@ class CaloriesAPIBotController extends BaseController
                 ],
                 'quantity_grams' => $quantity
             ];
-//123
             Log::info(print_r($productInfo, true));
             return response()->json([
                 'message' => 'Product found',

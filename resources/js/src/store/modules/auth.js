@@ -110,7 +110,8 @@ const mutations = {
     },
 
     [mutationTypes.updateCurrentUserStart]() {
-    }, [mutationTypes.updateCurrentUserSuccess](state, payload) {
+    },
+    [mutationTypes.updateCurrentUserSuccess](state, payload) {
         state.currentUser = payload;
 
     }, [mutationTypes.updateCurrentUserFailure]() {
@@ -173,12 +174,12 @@ const mutations = {
         state.validationErrors = payload;
     },
 
-    [mutationTypes.updateUsersDataStart](state) {
+    [mutationTypes.updateUsersDataStart](state, payload) {
         state.isSybmiting = true;
     },
-    [mutationTypes.updateUsersDataSuccess](state) {
+    [mutationTypes.updateUsersDataSuccess](state, payload) {
         state.isSybmiting = false;
-        state.isLoggedIn = false;
+        state.currentUser = payload;
     },
     [mutationTypes.updateUsersDataFailure](state, payload) {
         state.isSybmiting = false;
@@ -219,7 +220,6 @@ const actions = {
     [actionTypes.register](context, credentials) {
         return new Promise(resolve => {
             context.commit(mutationTypes.registerStart)
-            console.log(111);
             authApi.register(credentials)
                 .then(response => {
                     context.commit(mutationTypes.registerSuccess, response.data.user);
@@ -358,29 +358,34 @@ const actions = {
         })
     },
     [actionTypes.updateUsersData](context, currentUserInput) {
-        return new Promise(resolve => {
-            context.commit(mutationTypes.updateUsersPasswordStart)
-
+        return new Promise((resolve, reject) => {
+            context.commit(mutationTypes.updateUsersDataStart)
             authApi.updateCurrentUser(currentUserInput)
-                .then(user => {
-                    context.commit(mutationTypes.updateUsersPasswordSuccess, user)
+                .then(() => {
+                    context.dispatch(actionTypes.getCurrentUser)
+                        .then(userData => {
+                            context.commit(mutationTypes.updateUsersDataSuccess, userData)
 
-                    const message = i18n.global.t('Notification.Success.NameWasUpdated');
-                    context.dispatch('setSuccess', message, {root: true}).then(() => {
-                        context.dispatch(actionTypes.logout);
-                    });
+                            const message = i18n.global.t('Notification.Success.NameWasUpdated')
+                            context.dispatch('setSuccess', message, { root: true })
 
-                    resolve(user)
+                            resolve(userData)
+                        })
+                        .catch(error => {
+                            context.commit(mutationTypes.updateUsersDataFailure, error)
+                            reject(error)
+                        })
                 })
-                .catch((result) => {
+                .catch(error => {
+                    const message = i18n.global.t('Notification.Error.NameUpdationFiled')
+                    context.dispatch('setError', message, { root: true })
 
-                    const message = i18n.global.t('Notification.Error.NameUpdationFiled');
-                    context.dispatch('setError', message, {root: true});
-
-                    context.commit(mutationTypes.updateUsersPasswordFailure, result.result.data.errors);
+                    context.commit(mutationTypes.updateUsersDataFailure, error?.response?.data?.errors)
+                    reject(error)
                 })
         })
     },
+
     [actionTypes.getTelegramLink](context) {
         return new Promise((resolve, reject) => {
             context.commit(mutationTypes.getTelegramLinkStart)

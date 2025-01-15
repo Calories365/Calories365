@@ -24,7 +24,6 @@ export default {
             router.push({name: 'cabinet'});
         },
         changePassword() {
-            console.log('start')
             this.$store.dispatch(actionTypes.updateUsersPassword,
                 {
                     current_password: this.currentPassword,

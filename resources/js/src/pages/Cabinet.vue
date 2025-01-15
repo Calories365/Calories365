@@ -13,7 +13,7 @@ export default {
             email: null,
             caloriesLimit: null,
             telegramAuth: null,
-            telegramLink: null, // хранить ссылку отдельно
+            telegramLink: null,
         };
     },
     computed: {
@@ -21,7 +21,6 @@ export default {
             currentUser: (state) => state.auth.currentUser,
         }),
         telegramLinkText() {
-            // Если пользователь уже "подключен" к Telegram, выводим "Connected", иначе "Connect"
             return this.telegramAuth
                 ? this.$t("Cabinet.Connected")
                 : this.$t("Cabinet.Connect");
@@ -29,7 +28,6 @@ export default {
     },
     methods: {
         play() {
-            // ...
         },
         changeName() {
             this.$store
@@ -39,7 +37,7 @@ export default {
                     calories_limit: this.caloriesLimit,
                 })
                 .then(() => {
-                    router.push({ name: "login" });
+                    // router.push({ name: "login" });
                 });
         },
         logout() {
@@ -48,27 +46,20 @@ export default {
             });
         },
 
-        // Вместо того, чтобы получать ссылку в момент клика,
-        // мы будем использовать уже сохранённый в this.telegramLink URL:
         openTelegramLink() {
             if (this.telegramLink) {
-                // Открываем ссылку синхронно — iOS Safari должен пропустить
                 window.open(this.telegramLink, "_blank");
             } else {
-                // На случай, если ссылка не загрузилась
                 console.error("Telegram link is not available");
             }
         },
     },
     async mounted() {
-        // Инициализируем данные из currentUser
         this.name = this.currentUser.name;
         this.email = this.currentUser.email;
         this.caloriesLimit = this.currentUser.calories_limit;
         this.telegramAuth = this.currentUser.telegram_auth;
 
-        // Получаем телеграм-ссылку заранее (при монтировании).
-        // Тогда при клике не будет асинхронного вызова, и iOS не заблокирует pop-up.
         try {
             this.telegramLink = await this.$store.dispatch(actionTypes.getTelegramLink);
         } catch (error) {
