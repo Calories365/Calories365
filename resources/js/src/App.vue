@@ -8,7 +8,6 @@ import {actionTypes} from "@/store/modules/changeLocale.js";
 import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vue";
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
 
-// Подключаем иконку
 library.add(faAngleDown)
 
 export default {
@@ -38,7 +37,6 @@ export default {
     }
 }
 </script>
-
 <template>
     <calories-success-notification
         v-if="successMessage">{{ successMessage }}
@@ -57,21 +55,21 @@ export default {
         </article>
     </main>
 
-    <footer class="main-footer">
+    <!-- Показываем футер только если текущий маршрут — 'home' -->
+    <footer class="main-footer" v-if="$route.name === 'home'">
         <router-link :to="{ name: 'privacyPolicy' }" class="privacy-link">
             Privacy Policy
         </router-link>
-        <router-link :to="{ name: 'termsOfService' }" class="privacy-link"
-        >Terms of Service
-        </router-link><router-link :to="{ name: 'faq' }" class="privacy-link"
-        >FAQ
+        <router-link :to="{ name: 'termsOfService' }" class="privacy-link">
+            Terms of Service
+        </router-link>
+        <router-link :to="{ name: 'faq' }" class="privacy-link">
+            FAQ
         </router-link>
     </footer>
 </template>
 
 <style lang="scss">
-
-
 .main-wrapper {
     font-family: 'Open Sans', sans-serif;
     font-style: normal;
@@ -85,7 +83,6 @@ export default {
     }
 }
 
-
 .main-footer {
     margin-top: 2rem;
     padding: 1rem 0;
@@ -97,6 +94,7 @@ export default {
         padding-right: 10px;
         text-decoration: underline;
         color: #666;
+
         &:hover {
             color: #333;
         }
