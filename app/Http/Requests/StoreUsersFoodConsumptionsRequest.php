@@ -33,6 +33,7 @@ class StoreUsersFoodConsumptionsRequest extends FormRequest
             'consumed_at' => 'required|date',
             'part_of_day' => 'required|in:morning,dinner,supper',
             'user_id' => 'nullable|integer',
+            'verified' => 'nullable|boolean',
         ];
     }
 }

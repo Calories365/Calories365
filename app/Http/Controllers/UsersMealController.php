@@ -23,6 +23,7 @@ class UsersMealController extends Controller
     {
         $validatedData = $request->validated();
         $validatedData['user_id'] = auth()->id();
+        $validatedData['verified'] = 1;
         $userResult = $this->productService->createProductWithTranslationsAndConsumption($validatedData);
 
         return response()->json($userResult, 201);

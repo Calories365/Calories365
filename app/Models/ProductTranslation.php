@@ -12,9 +12,9 @@ class ProductTranslation extends Model
     use searchable;
 
     public const SORTABLE = ['id'];
-    public const FILTERABLE = ['locale', 'user_id','active'];
+    public const FILTERABLE = ['locale', 'user_id','active','verified'];
     protected $fillable = [
-        'product_id', 'locale', 'name', 'double_metaphoned_name', 'transliterated_name','user_id','active'
+        'product_id', 'locale', 'name', 'double_metaphoned_name', 'transliterated_name','user_id','active','verified'
     ];
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
@@ -32,6 +32,7 @@ class ProductTranslation extends Model
                 'name' => $validatedData['name'],
                 'user_id' => $validatedData['user_id'],
                 'active' => $validatedData['active'],
+                'verified' => $validatedData['verified'],
             ];
 
             ProductTranslation::create($dataForTranslation);
@@ -49,6 +50,7 @@ class ProductTranslation extends Model
             'name' => $this->name,
             'user_id' => $this->user_id,
             'active' => $this->active,
+            'verified' => $this->verified,
         ];
         return $data;
     }

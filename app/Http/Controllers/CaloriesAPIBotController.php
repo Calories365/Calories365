@@ -32,8 +32,6 @@ class CaloriesAPIBotController extends BaseController
 
     public function store(Request $request)
     {
-
-
         $text = $request->input('text');
         Log::info("Received text: " . $text);
         $response = [

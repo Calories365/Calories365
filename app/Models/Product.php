@@ -21,7 +21,7 @@ class Product extends Model
         'fats',
         'fibers',
         'is_popular',
-        'user_id'
+        'user_id',
     ];
 
 
@@ -41,52 +41,72 @@ class Product extends Model
                 ->get();
         });
     }
+
     public static function getSearchedProductsViaMeili(
         string $encodedQuery,
         bool $paginate = true,
         int $count = 10
     ): LengthAwarePaginator|Collection {
 
-        $locale = app()->getLocale();
+        $locale  = app()->getLocale();
         $user_id = auth()->id();
 
-
+        /**
+         * Итоговые условия:
+         * 1) user_id = $user_id, active=1, verified ∈ [0,1]
+         * 2) user_id IS NULL
+         * 3) verified=1 AND user_id != $user_id
+         */
         $builder = ProductTranslation::search($encodedQuery)
             ->where('locale', $locale)
-            ->where('active', 1)
             ->query(function ($query) use ($user_id) {
                 $query->where(function ($subQuery) use ($user_id) {
-                    $subQuery->where('user_id', $user_id)
-                        ->orWhereNull('user_id');
+                    $subQuery
+                        ->where(function ($inner) use ($user_id) {
+                            $inner->where('user_id', $user_id)
+                                ->where('active', 1)
+                                ->whereIn('verified', [0, 1]);
+                        })
+                        ->orWhereNull('user_id')
+                        ->orWhere(function ($inner) use ($user_id) {
+                            $inner->where('verified', 1)
+                                ->where('user_id', '!=', $user_id);
+                        });
                 });
             });
 
         $results = $builder->take(30)->get();
 
+        /**
+         * Сортируем полученную коллекцию так, чтобы
+         * товары текущего пользователя (user_id = $user_id) шли первыми.
+         */
         $sortedResults = $results->sortByDesc(function ($product) use ($user_id) {
             return $product->user_id == $user_id ? 1 : 0;
         })->values();
 
         if ($paginate) {
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
-            $perPage = $count;
-            $total = $sortedResults->count();
+            $perPage     = $count;
+            $total       = $sortedResults->count();
 
-            $items = $sortedResults->slice(($currentPage - 1) * $perPage, $perPage)->values();
+            $items = $sortedResults
+                ->slice(($currentPage - 1) * $perPage, $perPage)
+                ->values();
 
-            $paginator = new LengthAwarePaginator(
+            return new LengthAwarePaginator(
                 $items,
                 $total,
                 $perPage,
                 $currentPage,
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
-
-            return $paginator;
         } else {
             return $sortedResults->take($count);
         }
     }
+
+
 
     public static function getRawProduct($query, $user_id, $locale): array|bool
     {
@@ -133,8 +153,6 @@ class Product extends Model
     public static function createProduct($validatedData): Product
     {
         $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
-        Log::info(print_r($validatedData, true));
-
         return Product::create($validatedData);
     }
 

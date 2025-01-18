@@ -1,4 +1,6 @@
 <script>
+import {mapState} from "vuex";
+
 export default {
     name: "CaloriesProduct",
     props: {
@@ -7,6 +9,11 @@ export default {
             required: true
         }
     },
+    computed: {
+        ...mapState({
+            currentUser: state => state.auth.currentUser,
+        }),
+    },
 }
 </script>
 
@@ -14,7 +21,7 @@ export default {
     <li class="product-card">
         <div class="product-card__body">
             <h2 class="product-card__title">{{ product.name }}</h2>
-            <span class="product-card__user" v-if="product.user_id">({{ $t('Diary.YourProduct') }})</span>
+            <span class="product-card__user" v-if="product.user_id == currentUser.id">({{ $t('Diary.YourProduct') }})</span>
         </div>
     </li>
 </template>

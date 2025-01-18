@@ -21,34 +21,55 @@ class ProductService
     {
         DB::beginTransaction();
         try {
-            $locale = app()->getLocale();
+            $locale  = app()->getLocale();
             $user_id = auth()->id();
 
-            $builder = ProductTranslation::search($validatedData['name'])
+            $productUserActive = ProductTranslation::query()
                 ->where('locale', $locale)
                 ->where('active', 1)
-                ->query(function ($query) use ($user_id) {
-                    $query->where(function ($subQuery) use ($user_id) {
-                        $subQuery->where('user_id', $user_id);
-                    });
-                });
+                ->where('user_id', $user_id)
+                ->where('name', $validatedData['name'])
+                ->first();
 
-            $product = $builder->first();
+            if ($productUserActive) {
+                ProductTranslation::query()
+                    ->where('product_id', $productUserActive->product_id)
+                    ->update(['active' => 0]);
+            }
 
-            if($product) {
-                $product->update(['active' => false]);
+            $productVerifiedCheck = ProductTranslation::query()
+                ->where('locale', $locale)
+                ->where('name', $validatedData['name'])
+                ->where(function ($query) {
+                    $query->where('verified', 1)
+                        ->orWhereNull('user_id');
+                })
+                ->first();
+
+            if ($productVerifiedCheck) {
+                $validatedData['verified'] = 0;
             }
 
             $validatedData['active'] = 1;
 
             $product = Product::createProduct($validatedData);
+
             ProductTranslation::createProductTranslations($product, $validatedData);
+
             $consumption = FoodConsumption::createFoodConsumption($validatedData, $product);
+
             DB::commit();
-            return ['consumption_id' => $consumption->id, 'food_id' => $product->id];
+
+            return [
+                'consumption_id' => $consumption->id,
+                'food_id'        => $product->id
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
     }
+
+
 }
+
