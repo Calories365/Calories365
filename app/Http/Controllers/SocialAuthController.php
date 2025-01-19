@@ -22,8 +22,8 @@ class SocialAuthController extends Controller
      */
     public function handleGoogleCallback()
     {
-        $socialUser = Socialite::driver('google')->user();
-
+//        $socialUser = Socialite::driver('google')->user();
+        $socialUser = Socialite::driver('google')->stateless()->user();
         $user = $this->findOrCreateUser($socialUser, 'google');
 
         if (is_null($user->email_verified_at)) {
