@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/calendar/{date}', [\App\Http\Controllers\CalendarController::class, 'showRange'])->name('calendar.showRange');
 
         Route::get('/products/search', [\App\Http\Controllers\SearchProductController::class, 'search'])->name('meals.search');
+
         Route::get('/user', [\App\Http\Controllers\UserController::class, 'show'])->name('show');
 
         Route::get('/telegram-link', [\App\Http\Controllers\TelegramLinkController::class, 'getLink'])
@@ -59,6 +60,8 @@ Route::middleware('check.bot.key')->group(function () {
 
         Route::post('/caloriesEndPoint/checkTelegramCode', [\App\Http\Controllers\TelegramLinkController::class, 'checkTelegramCode'])
             ->name('caloriesEndPoint.checkTelegramCode');
+
+        Route::get('/caloriesEndPoint/users-for-bot-multiple', [\App\Http\Controllers\UserController::class, 'showUsersInfoForBotMultiple']);
     });
 });
 

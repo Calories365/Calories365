@@ -20,6 +20,12 @@ class CheckBotApiKey
             return response()->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
+        $admin = $request->header('X-admin');
+
+        if ($admin){
+            return $next($request);
+        }
+
         if ($request->routeIs('caloriesEndPoint.checkTelegramCode')) {
 
             $locale = $request->header('X-Locale');
@@ -34,11 +40,7 @@ class CheckBotApiKey
             return response()->json(['error' => 'Calories ID not provided'], Response::HTTP_UNAUTHORIZED);
         }
 
-//        Log::info('Request URL: ' . $request->fullUrl());
-//        Log::info('User id: ' . $userId);
-
         Auth::loginUsingId($userId);
-//        Log::info('auth id: ' . auth()->id());
 
         $locale = $request->header('X-Locale');
         if ($locale) {

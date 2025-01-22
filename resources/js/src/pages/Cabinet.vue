@@ -82,8 +82,17 @@ export default {
                     <div class="top-info_avatar" @click="play">
                         <img src="@/assets/valera.png" />
                     </div>
+                    <div class="top-info_premium">
+                    <span class="top-info_premium_text">
+                       {{ $t("Cabinet.BuyPremium") }}
+                    </span>
+<!--                        <span class="top-info_premium_text_bought">-->
+<!--                       {{ $t("Cabinet.Premium") }}-->
+<!--                    </span>-->
+                    </div>
                 </div>
                 <div class="page-cabinet_mid mid-info">
+
                     <div class="mid-info_email">
                         <div class="mid-info_text">{{ $t("Cabinet.Mail") }}:</div>
                         <input v-model="email" disabled class="mid-info_credentials" />
@@ -181,8 +190,10 @@ export default {
         gap: 50px;
         @media (max-width: 768px) {
             flex-direction: column;
+            gap: 10px;
         }
         @media (max-width: 375px) {
+            gap: 10px;
         }
     }
 
@@ -226,14 +237,109 @@ export default {
 
 .top-info {
     display: flex;
+    flex-direction: column;
     align-items: center;
 
-    gap: 100px;
+    gap: 20px;
     padding: 40px 25px;
 
     @media (max-width: 768px) {
         padding: 0;
         justify-content: center;
+    }
+
+    &_premium {
+        width: 100%;
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    &_premium_text {
+        color: #eeb82c;
+        font-weight: 700;
+        font-size: 24px;
+        letter-spacing: 0.0625rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: block;
+
+        background: linear-gradient(90deg, #eeb82c, $pink_color, #eeb82c);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        @keyframes spaceboots {
+            0%   { transform: translate(2px, 1px) rotate(0deg); }
+            10%  { transform: translate(-1px, -2px) rotate(-1deg); }
+            20%  { transform: translate(-3px, 0px) rotate(1deg); }
+            30%  { transform: translate(0px, 2px) rotate(0deg); }
+            40%  { transform: translate(1px, -1px) rotate(1deg); }
+            50%  { transform: translate(-1px, 2px) rotate(-1deg); }
+            60%  { transform: translate(-3px, 1px) rotate(0deg); }
+            70%  { transform: translate(2px, 1px) rotate(-1deg); }
+            80%  { transform: translate(-1px, -1px) rotate(1deg); }
+            90%  { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        @-webkit-keyframes spaceboots {
+            0%   { -webkit-transform: translate(2px, 1px) rotate(0deg); }
+            10%  { -webkit-transform: translate(-1px, -2px) rotate(-1deg); }
+            20%  { -webkit-transform: translate(-3px, 0px) rotate(1deg); }
+            30%  { -webkit-transform: translate(0px, 2px) rotate(0deg); }
+            40%  { -webkit-transform: translate(1px, -1px) rotate(1deg); }
+            50%  { -webkit-transform: translate(-1px, 2px) rotate(-1deg); }
+            60%  { -webkit-transform: translate(-3px, 1px) rotate(0deg); }
+            70%  { -webkit-transform: translate(2px, 1px) rotate(-1deg); }
+            80%  { -webkit-transform: translate(-1px, -1px) rotate(1deg); }
+            90%  { -webkit-transform: translate(2px, 2px) rotate(0deg); }
+            100% { -webkit-transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        -webkit-animation: shimmer 3s linear infinite, spaceboots 3s linear infinite;
+        animation: shimmer 3s linear infinite, spaceboots 3s linear infinite;
+
+        &:hover {
+            -webkit-animation-duration: 1.5s, 1.5s;
+            animation-duration: 1.5s, 1.5s;
+        }
+    }
+
+    &_premium_text_bought {
+        color: #eeb82c;
+        font-weight: 700;
+        font-size: 24px;
+        letter-spacing: 0.0625rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: block;
+
+        background: linear-gradient(90deg, #eeb82c, $pink_color, #eeb82c);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        -webkit-animation: shimmer 3s linear infinite;
+        animation: shimmer 3s linear infinite;
+
+        &:hover {
+            -webkit-animation-duration: 1.5s, 1.5s;
+            animation-duration: 1.5s, 1.5s;
+        }
     }
 
     &_avatar {
@@ -285,6 +391,8 @@ export default {
         font-size: 14px;
         width: 100%;
     }
+
+
 
     &_login, &_email {
         background-color: white;
@@ -363,4 +471,5 @@ export default {
         color: $pink_color;
     }
 }
+
 </style>

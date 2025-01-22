@@ -53,7 +53,9 @@ export default {
             const mainWrapper = document.querySelector('.main-wrapper');
             const fixedClass = 'fixed-header';
             const layoutFixedMarginClass = 'layout-fixed-margin';
-            const threshold = 55;
+
+            const threshold = (this.$route.name === 'register') ? 100 : 70;
+
             const scrollY = window.scrollY || window.pageYOffset;
 
             if (scrollY > threshold) {
@@ -72,6 +74,7 @@ export default {
         window.addEventListener('scroll', this.handleScroll);
         this.handleScroll();
     },
+
     beforeDestroy() { // Используйте beforeUnmount в Vue 3
         // Удаляем обработчик прокрутки при уничтожении компонента
         window.removeEventListener('scroll', this.handleScroll);
@@ -183,6 +186,11 @@ export default {
 
 
 .main-header {
+    //position: -webkit-sticky; /* для Safari */
+    //position: sticky;
+    //top: 0;
+    //z-index: 1001;
+
     position: relative;
     z-index: 999;
     background-color: white;

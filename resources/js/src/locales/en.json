@@ -152,7 +152,9 @@
         "CaloriesLimit": "Calories limit",
         "TelegramBot" : "Telegram bot",
         "Connect" : "Connect",
-        "Connected" : "Connected"
+        "Connected" : "Connected",
+        "BuyPremium" : "Buy premium",
+        "Premium" : "Premium"
     },
     "Recovery": {
         "RecoveryYourPassword": "Recovery your password",

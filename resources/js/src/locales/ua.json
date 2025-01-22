@@ -151,7 +151,9 @@
         "CaloriesLimit": "Лiмiт калорiй",
         "TelegramBot" : "Телеграм бот",
         "Connect" : "Пiдключити",
-        "Connected" : "Пiдключено"
+        "Connected" : "Пiдключено",
+        "BuyPremium" : "Купить премiум",
+        "Premium" : "Премiум"
     },
     "Recovery": {
         "RecoveryYourPassword": "Відновлення вашого пароля",
