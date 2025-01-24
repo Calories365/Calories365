@@ -40,6 +40,19 @@ class UserController extends Controller
                 'name'        => $user->name,
             ];
         });
+
+    }
+    public function showAllUsers()
+    {
+        $users = User::all();
+
+        return $users->map(function ($user) {
+            return [
+                'calories_id' => $user->id,
+                'email'       => $user->email,
+                'name'        => $user->name,
+            ];
+        });
     }
 
 

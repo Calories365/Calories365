@@ -72,6 +72,9 @@ class TelegramLinkController extends Controller
         return response()->json([
             'success' => true,
             'user_id' => $userId,
+            'email' => $user->email,
+            'name' => $user->name,
+            'premium' => false
         ]);
     }
 

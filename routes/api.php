@@ -62,6 +62,8 @@ Route::middleware('check.bot.key')->group(function () {
             ->name('caloriesEndPoint.checkTelegramCode');
 
         Route::get('/caloriesEndPoint/users-for-bot-multiple', [\App\Http\Controllers\UserController::class, 'showUsersInfoForBotMultiple']);
+
+        Route::get('/caloriesEndPoint/all-users', [\App\Http\Controllers\UserController::class, 'showAllUsers']);
     });
 });
 
