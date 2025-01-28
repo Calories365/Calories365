@@ -75,6 +75,7 @@ class UserController extends Controller
             $user->premium_until = Carbon::now()->addMonth();
             $user->save();
 
+            Log::info('start SendPremiumStatusToBotPanelJob');
            SendPremiumStatusToBotPanelJob::dispatch($user);
 
             return response()->json([
