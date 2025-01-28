@@ -43,6 +43,7 @@ export default {
                         {
                             product: this.product, quantity: this.quantity,
                         });
+                    this.quantity = 1;
                 } else if (this.action === 'update') {
                     this.$store.dispatch(actionTypes.updateCurrentProducts,
                         {
@@ -50,8 +51,6 @@ export default {
                         })
                 }
                 this.$emit('update', !this.isOpen);
-                //тут баг
-                // this.quantity = 1;
             } else {
                 this.$store.dispatch('setError', this.$t('Notification.Error.invalidData'));
             }
