@@ -81,7 +81,14 @@
         "fibers": "Fibers",
         "goalWeight": "You will reach your desired weight in about:",
         "days": "days",
-        "Save": "Save"
+        "Save": "Save",
+        "calorieDiaryAppHeading": "Log your meals and see how many calories you consume in the 'Calorie Diary' app.",
+        "calorieDiaryAppParagraphOne": "Our app features a 'Calorie Diary' where you can easily record everything you eat throughout the day. Find any product in the existing database or add your own option — this allows you to account for any unique dishes and ingredients.",
+        "calorieDiaryAppParagraphTwo": "With intuitive statistics, you can track your calorie intake over various time periods (for example, monthly). The app highlights if you consume more than the recommended amount, slightly exceed it, or stay within a healthy range. This level of monitoring helps you adjust your diet in time and achieve your goals more quickly.",
+        "calorieDiaryAppParagraphThree": "A special highlight is our chatbot, designed with convenience in mind. Connect our Telegram bot through your account, and input your meal data in just a few steps. Simply say out loud what you've eaten, and the bot will automatically transcribe your speech to text: it provides a list of products that you can edit right away if needed. If you haven't specified the product’s weight, the bot suggests average values, and it can also generate macronutrients (calories, proteins, fats, carbohydrates) via AI if required.",
+        "calorieDiaryAppParagraphFour": "After making any final edits, you can save all your data to the 'Calorie Diary' with a single tap. You can also view daily statistics in the bot to stay on top of your progress. Using voice notes in Telegram saves time and eliminates the need to download another app or manually visit a website. All you need to do is open the messenger and dictate your list of foods.",
+        "calorieDiaryAppParagraphFive": "If your goal is to count calories quickly, conveniently, and without extra hassle, our bot and the 'Calorie Diary' app are exactly what you need. Record your meals by voice and keep track of your nutrition — achieving results has never been easier!"
+
     },
     "Diary": {
         "summary": "Total",
@@ -156,6 +163,7 @@
         "BuyPremium" : "Buy premium",
         "Premium" : "Premium",
         "ConfirmEmail" : "Please confirm your email first"
+
     },
     "Recovery": {
         "RecoveryYourPassword": "Recovery your password",

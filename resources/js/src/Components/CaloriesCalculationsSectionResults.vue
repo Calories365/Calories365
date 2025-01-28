@@ -184,19 +184,30 @@ export default {
         <CalorieChart class="calculator-section_chart"/>
 
         <p class="calculator-section_head calories-padding-bottom calories-padding-top">
-            {{ $t('calculationResult.calculatorSectionCalorieAppPromotion') }}</p>
-
-        <p class="calculator-section_description">
-            {{ $t('calculationResult.calculatorSectionDescriptionAppBenefitsOne') }}
+            {{ $t('calculationResult.calorieDiaryAppHeading') }}
         </p>
 
         <p class="calculator-section_description">
-            {{ $t('calculationResult.calculatorSectionDescriptionAppBenefitsTwo') }}
+            {{ $t('calculationResult.calorieDiaryAppParagraphOne') }}
         </p>
 
         <p class="calculator-section_description">
-            {{ $t('calculationResult.calculatorSectionDescriptionAppBenefitsThree') }}
+            {{ $t('calculationResult.calorieDiaryAppParagraphTwo') }}
         </p>
+
+        <p class="calculator-section_description">
+            {{ $t('calculationResult.calorieDiaryAppParagraphThree') }}
+        </p>
+
+        <p class="calculator-section_description">
+            {{ $t('calculationResult.calorieDiaryAppParagraphFour') }}
+        </p>
+
+        <p class="calculator-section_description">
+            {{ $t('calculationResult.calorieDiaryAppParagraphFive') }}
+        </p>
+
+
     </section>
 </template>
 
