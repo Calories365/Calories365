@@ -50,6 +50,7 @@ export default {
                         })
                 }
                 this.$emit('update', !this.isOpen);
+                //тут баг
                 // this.quantity = 1;
             } else {
                 this.$store.dispatch('setError', this.$t('Notification.Error.invalidData'));
