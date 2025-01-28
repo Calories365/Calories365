@@ -75,7 +75,7 @@ return [
     */
 
 //    'home' => RouteServiceProvider::HOME,
-    'home' => 'https://calories-working.test/',
+    'home' => env('APP_URL', 'http://calories365.org'),
 
     /*
     |--------------------------------------------------------------------------

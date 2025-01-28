@@ -73,9 +73,14 @@ export const mutationTypes = {
     getTelegramLinkStart: '[auth] getTelegramLinkStart',
     getTelegramLinkSuccess: '[auth] getTelegramLinkSuccess',
     getTelegramLinkFailure: '[auth] getTelegramLinkFailure',
+
+    buyPremiumStart: '[auth] buyPremiumStart',
+    buyPremiumSuccess: '[auth] buyPremiumSuccess',
+    buyPremiumFailure: '[auth] buyPremiumFailure',
 }
 
 const mutations = {
+
     [mutationTypes.registerStart](state) {
         state.isSybmiting = true;
         state.validationErrors = null;
@@ -86,6 +91,7 @@ const mutations = {
     }, [mutationTypes.registerFailure](state, payload) {
         state.validationErrors = payload;
         state.isSybmiting = false;
+
     }, [mutationTypes.loginStart](state) {
         state.isSybmiting = true;
         state.validationErrors = null;
@@ -198,6 +204,16 @@ const mutations = {
         state.validationErrors = payload
     },
 
+    [mutationTypes.buyPremiumStart](state) {
+        state.isSybmiting = true;
+        state.validationErrors = null;
+    }, [mutationTypes.buyPremiumSuccess](state, payload) {
+        state.currentUser.premium_until = payload;
+        state.isSybmiting = false;
+    }, [mutationTypes.buyPremiumFailure](state, payload) {
+        state.validationErrors = payload;
+        state.isSybmiting = false;
+    }
 
 }
 
@@ -213,7 +229,8 @@ export const actionTypes = {
     resendVerificationEmail: '[auth] resendVerificationEmail',
     updateUsersPassword: '[auth] updateUsersPassword',
     updateUsersData: '[auth] updateUsersData',
-    getTelegramLink: '[auth] getTelegramLink'
+    getTelegramLink: '[auth] getTelegramLink',
+    buyPremium: '[auth] buyPremium',
 }
 
 const actions = {
@@ -399,7 +416,21 @@ const actions = {
                     reject(error)
                 })
         })
-    }
+    },
+
+    [actionTypes.buyPremium](context, credentials) {
+        return new Promise(resolve => {
+            context.commit(mutationTypes.buyPremiumStart)
+            authApi.buyPremium(credentials)
+                .then(response => {
+                    context.commit(mutationTypes.buyPremiumSuccess, response.data.premium_until);
+                    resolve(response.data.premium_until);
+                })
+                .catch(result => {
+                    context.commit(mutationTypes.buyPremiumFailure, result.response.data.errors);
+                })
+        })
+    },
 
 
 }

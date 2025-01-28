@@ -1,6 +1,6 @@
 {
     "message": {
-        "hello": "Привет россия",
+        "hello": "Привет Украина",
         "home": "Главная",
         "login": "Войти",
         "register": "Регистрация",
@@ -153,7 +153,8 @@
         "Connect" : "Подключить",
         "Connected" : "Подключено",
         "BuyPremium" : "Купить премиум",
-        "Premium" : "Премиум"
+        "Premium" : "Премиум",
+        "ConfirmEmail" : "Сначала подтвердите почту"
     },
     "Recovery": {
         "RecoveryYourPassword": "Восстановление вашего пароля",

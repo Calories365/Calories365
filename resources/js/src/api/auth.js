@@ -30,10 +30,13 @@ const updateCurrentUser = (credentials) => {
 const getTelegramLink = () => {
     return axios.get('/api/telegram-link')
 }
+const buyPremium = () => {
+    return axios.post('/api/buy-premium')
+}
 
 export default {
     register, login, getCurrentUser,
     logout, recovery, recoveryWithToken,
     resendVerificationEmail, updateUsersPassword,
-    updateCurrentUser, getTelegramLink
+    updateCurrentUser, getTelegramLink,buyPremium
 }

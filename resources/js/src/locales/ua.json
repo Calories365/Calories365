@@ -153,7 +153,8 @@
         "Connect" : "Пiдключити",
         "Connected" : "Пiдключено",
         "BuyPremium" : "Купить премiум",
-        "Premium" : "Премiум"
+        "Premium" : "Премiум",
+        "ConfirmEmail" : "Спочатку підтвердьте електронну пошту"
     },
     "Recovery": {
         "RecoveryYourPassword": "Відновлення вашого пароля",

@@ -26,6 +26,7 @@ const onSubmit = () => {
     store.dispatch(actionTypes.login, {
         email: formState.email,
         password: formState.password,
+        remember: true,
     }).then(() => {
         // const audio = new Audio(fart);
         // audio.play().catch(e => console.error('Playback failed:', e));
@@ -101,7 +102,6 @@ const loginWithGoogle = () => {
                         </div>
                         <div class="mt-2 flex">
                             <calories-button
-                                type="submit"
                                 :disabled="isSubmitting"
                                 :class="{'opacity-50 cursor-not-allowed': isSubmitting}"
                                 passed-class="recovery"
@@ -123,27 +123,24 @@ const loginWithGoogle = () => {
 
 .email-input, .password-input {
     width: 100%;
-    //border: 0;
     padding: 5px;
-    color: #1f2937; // text-gray-900 в Tailwind
-    background-color: #fff; // BG is white by default, can be set explicitly if needed
-    border-radius: 0.375rem; // rounded-md в Tailwind
-    font-size: 0.875rem; // text-sm в Tailwind
-    line-height: 1.25rem; // leading-6 в Tailwind
+    color: #1f2937;
+    background-color: #fff;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     border: 1px solid #d1d5db;
     &:focus {
         outline: 2px solid transparent;
         outline-offset: 2px;
-        //border-radius: inherit;
-        border-radius: 0.375rem; // rounded-md в Tailwind
-        box-shadow: 0 0 0 2px $main-color; // focus:ring-2 focus:ring-indigo-600 в Tailwind
+        border-radius: 0.375rem;
+        box-shadow: 0 0 0 2px $main-color;
     }
-    box-shadow: inset 0 0 0 1px #d1d5db; // ring-1 ring-gray-300 в Tailwind
+    box-shadow: inset 0 0 0 1px #d1d5db;
 
-    // Responsive variants
     @media (min-width: 640px) {
-        font-size: 0.875rem; // sm:text-sm в Tailwind
-        line-height: 1.5rem; // sm:leading-6 в Tailwind
+        font-size: 0.875rem;
+        line-height: 1.5rem;
     }
 }
 

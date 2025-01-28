@@ -1,6 +1,6 @@
 {
     "message": {
-        "hello": "Hello Russia",
+        "hello": "Hello Ukraine",
         "home": "Home",
         "login": "Login",
         "register": "Register",
@@ -154,7 +154,8 @@
         "Connect" : "Connect",
         "Connected" : "Connected",
         "BuyPremium" : "Buy premium",
-        "Premium" : "Premium"
+        "Premium" : "Premium",
+        "ConfirmEmail" : "Please confirm your email first"
     },
     "Recovery": {
         "RecoveryYourPassword": "Recovery your password",

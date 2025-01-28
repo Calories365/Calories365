@@ -55,6 +55,7 @@ class SendNewUserToBotPanelJob implements ShouldQueue
                 'X-Api-Key'    => $botApiKey,
             ];
             try {
+
                 $response = $client->post($botPanelUrl . '/api/sync-calories-user', [
                     'headers' => $headers,
                     'json'    => [

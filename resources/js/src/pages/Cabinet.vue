@@ -21,9 +21,20 @@ export default {
             currentUser: (state) => state.auth.currentUser,
         }),
         telegramLinkText() {
+            if (!this.currentUser?.email_verified_at) {
+                return this.$t("Cabinet.ConfirmEmail");
+
+            }
             return this.telegramAuth
                 ? this.$t("Cabinet.Connected")
                 : this.$t("Cabinet.Connect");
+        },
+        isPremium() {
+            if (!this.currentUser?.premium_until) {
+                return false;
+            }
+            const premiumUntil = new Date(this.currentUser.premium_until);
+            return premiumUntil > new Date();
         },
     },
     methods: {
@@ -47,12 +58,21 @@ export default {
         },
 
         openTelegramLink() {
+            if (!this.currentUser?.email_verified_at) {
+                return;
+            }
+
             if (this.telegramLink) {
                 window.open(this.telegramLink, "_blank");
             } else {
                 console.error("Telegram link is not available");
             }
         },
+
+        buyPremium() {
+            this.$store.dispatch(actionTypes.buyPremium).then((response) => {
+            });
+        }
     },
     async mounted() {
         this.name = this.currentUser.name;
@@ -82,21 +102,29 @@ export default {
                     <div class="top-info_avatar" @click="play">
                         <img src="@/assets/valera.png" />
                     </div>
+
                     <div class="top-info_premium">
-                    <span class="top-info_premium_text">
-                       {{ $t("Cabinet.BuyPremium") }}
-                    </span>
-<!--                        <span class="top-info_premium_text_bought">-->
-<!--                       {{ $t("Cabinet.Premium") }}-->
-<!--                    </span>-->
+                        <span
+                            v-if="!isPremium"
+                            class="top-info_premium_text"
+                            @click="buyPremium"
+                        >
+                            {{ $t("Cabinet.BuyPremium") }}
+                        </span>
+                        <span
+                            v-else
+                            class="top-info_premium_text_bought"
+                        >
+                            {{ $t("Cabinet.Premium") }}
+                        </span>
                     </div>
                 </div>
                 <div class="page-cabinet_mid mid-info">
-
                     <div class="mid-info_email">
                         <div class="mid-info_text">{{ $t("Cabinet.Mail") }}:</div>
                         <input v-model="email" disabled class="mid-info_credentials" />
                     </div>
+
                     <div class="mid-info_login">
                         <div class="mid-info_text">{{ $t("Cabinet.Name") }}:</div>
                         <input v-model="name" class="mid-info_credentials" />
@@ -109,20 +137,21 @@ export default {
                             @click="openTelegramLink"
                             style="cursor: pointer;"
                         >
-              {{ telegramLinkText }}
-            </span>
+                            {{ telegramLinkText }}
+                        </span>
                     </div>
 
                     <div class="mid-info_login">
                         <div class="mid-info_text">{{ $t("Cabinet.CaloriesLimit") }}:</div>
                         <input v-model="caloriesLimit" class="mid-info_credentials" />
                     </div>
+
                     <div class="mid-info_link">
                         <div class="mid-info_text">{{ $t("Cabinet.Password") }}:</div>
                         <router-link :to="{ name: 'change-password' }">
-              <span class="mid-info_credentials link">
-                {{ $t("Cabinet.ChangingPassword") }}
-              </span>
+                            <span class="mid-info_credentials link">
+                                {{ $t("Cabinet.ChangingPassword") }}
+                            </span>
                         </router-link>
                     </div>
 
@@ -147,6 +176,7 @@ export default {
         </div>
     </section>
 </template>
+
 
 <style scoped lang="scss">
 
