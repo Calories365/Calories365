@@ -46,6 +46,7 @@ export default {
 <!--        <li-->
 <!--            class="added-product__item"-->
 <!--        >-->
+<!--        >-->
         <li
             class="added-product__item"
             v-for="product in filteredProducts" :key="product.id"
