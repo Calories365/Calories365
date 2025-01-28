@@ -39,7 +39,6 @@ class SendPremiumStatusToBotPanelJob implements ShouldQueue
             Log::warning('Bot panel URL или API key не настроены');
             return;
         }
-
         $payload = [
             'calories_id'   => $this->user->id,
             'premium_until' => $this->user->premium_until,
@@ -54,6 +53,8 @@ class SendPremiumStatusToBotPanelJob implements ShouldQueue
         ];
 
         try {
+            Log::info('$payload: ');
+            Log::info(print_r($payload, true));
             $response = $client->post($botPanelUrl . '/api/update-premium-status', [
                 'headers' => $headers,
                 'json'    => [
