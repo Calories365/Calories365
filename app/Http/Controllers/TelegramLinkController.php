@@ -69,12 +69,14 @@ class TelegramLinkController extends Controller
 
         $telegramCode->delete();
 
+        $premium = $user->isPremium();
+
         return response()->json([
             'success' => true,
             'user_id' => $userId,
             'email' => $user->email,
             'name' => $user->name,
-            'premium' => false
+            'premium' => $premium
         ]);
     }
 

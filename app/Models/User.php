@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\QueuedVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -46,6 +47,18 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'premium_until' => 'datetime',
     ];
+    public function sendEmailVerificationNotification()
+    {
+        $locale = app()->getLocale();
 
+        $this->notify(
+            (new QueuedVerifyEmail())->locale($locale)
+        );
+    }
+    public function isPremium(): bool
+    {
+        return $this->premium_until !== null && $this->premium_until->isFuture();
+    }
 }
