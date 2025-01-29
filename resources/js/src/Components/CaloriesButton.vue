@@ -6,6 +6,11 @@ export default {
             type: String,
             default: 'default',
         },
+        type: {
+            type: String,
+            default: 'button'
+        }
+
     },
 
 }
@@ -14,6 +19,8 @@ export default {
 <template>
     <button
         class="calories-button"
+        :type="type"
+        @click="$emit('click')"
         :class="passedClass">
         <span class="calories-button_text"><slot></slot></span>
     </button>
