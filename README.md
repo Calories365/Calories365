@@ -1,4 +1,4 @@
-# Calorie Diary
+# Bot panel 
 
 ## Select description language
 
