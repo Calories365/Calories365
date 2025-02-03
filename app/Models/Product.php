@@ -52,7 +52,6 @@ class Product extends Model
         $user_id = auth()->id();
 
         /**
-         * Итоговые условия:
          * 1) user_id = $user_id, active=1, verified ∈ [0,1]
          * 2) user_id IS NULL
          * 3) verified=1 AND user_id != $user_id
@@ -78,8 +77,8 @@ class Product extends Model
         $results = $builder->take(30)->get();
 
         /**
-         * Сортируем полученную коллекцию так, чтобы
-         * товары текущего пользователя (user_id = $user_id) шли первыми.
+         * Sort the resulting collection so that
+         *  goods of the current user (user_id = $user_id) go first.
          */
         $sortedResults = $results->sortByDesc(function ($product) use ($user_id) {
             return $product->user_id == $user_id ? 1 : 0;

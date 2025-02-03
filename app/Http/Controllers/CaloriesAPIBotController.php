@@ -39,7 +39,7 @@ class CaloriesAPIBotController extends BaseController
             'products' => []
         ];
 
-        if (trim($text) !== 'Продуктов нет' && !empty(trim($text))) {
+        if (trim($text) !== 'No products' && !empty(trim($text))) {
             $productsInfo = [];
 
             $locale = app()->getLocale();
@@ -126,19 +126,19 @@ class CaloriesAPIBotController extends BaseController
                                         Log::info('for ' . $productName);
                                         Log::info('found product: ' . $productTranslation->name);
                                     } else {
-                                        Log::warning("Нутриентные данные отсутствуют для продукта: {$productName}");
+                                        Log::warning("There are no nutritional data available for the product : {$productName}");
                                     }
                                 } else {
-                                    Log::warning("Продукт не найден: {$productName}");
+                                    Log::warning("Product was not found {$productName}");
                                 }
                             } else {
-                                Log::warning("Некорректное количество для продукта: {$productName}");
+                                Log::warning("Incorrect product's quantity : {$productName}");
                             }
                         } else {
-                            Log::warning("Не удалось извлечь количество из строки: {$quantityStr}");
+                            Log::warning("An error occurred while retrieving a message: {$quantityStr}");
                         }
                     } else {
-                        Log::warning("Некорректный формат продукта: {$product}");
+                        Log::warning("Incorrect product's format: {$product}");
                     }
                 }
             }
