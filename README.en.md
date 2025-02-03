@@ -38,6 +38,7 @@ Thus, if your goal is to **quickly** and **easily** count calories, "Calories365
 - **Telegram SDK** — integration with Telegram.
 - **FFmpeg** — audio/video conversion (especially when processing voice messages).
 - **Vue.js** — frontend framework (SPA + dynamic forms/tables).
+- **OAuth** — a protocol for authorization (for signing in via Google).
 - **Docker** — containerization and orchestration (PHP-FPM, Nginx, MySQL, Redis).
 - **Cloudflare** — proxying and additional protection at the DNS/SSL level.
 
