@@ -48,18 +48,13 @@ export default {
 <template>
     <section class="calculator-section">
 
-
-        <p class="calculator-section_head calories-padding-top calories-padding-bottom">
+       <div class="results_with_arrows">
+           <div class="arrow_mobile">↓</div>
+           <p class="calculator-section_head calories-padding-top calories-padding-bottom">
             {{ $t('calculationResult.calculatorSectionHeadOne') }}</p>
+           <div class="arrow_mobile">↓</div>
+       </div>
 
-        <calories-button
-            @click="saveData()" class="calculator-section_head-button">
-            {{ $t('calculationResult.Save') }}
-        </calories-button>
-
-        <p class="calculator-section_description">
-            {{ $t('calculationResult.calculatorSectionDescriptionOne') }}
-        </p>
 
         <p class="calculator-section_head calories-padding-top">{{
                 $t('calculationResult.calculatorSectionHeadTwo')
@@ -162,6 +157,16 @@ export default {
         <p class="calculator-section_joules-blue calories-padding-bottom">
             ({{ Math.round(userResults.dailyCalories * 4, 1868) }}
             {{ $t('calculationResult.calculatorSectionJoulesBlue') }})</p>
+        <div class="info-block">
+            <div class="info-icon">?</div>
+            <div class="info-text">
+                {{ $t('calculationResult.calculatorSectionCalorieReason') }}
+            </div>
+        </div>
+
+        <p class="calculator-section_head" style="padding-bottom: 20px">{{
+                $t('calculationResult.calculatorSectionHeadTwoCaloriesRecommendationDistribution')
+            }}:</p>
 
         <div class="nutrient-legend">
             <div class="nutrient-item">
@@ -187,27 +192,6 @@ export default {
             {{ $t('calculationResult.calorieDiaryAppHeading') }}
         </p>
 
-        <p class="calculator-section_description">
-            {{ $t('calculationResult.calorieDiaryAppParagraphOne') }}
-        </p>
-
-        <p class="calculator-section_description">
-            {{ $t('calculationResult.calorieDiaryAppParagraphTwo') }}
-        </p>
-
-        <p class="calculator-section_description">
-            {{ $t('calculationResult.calorieDiaryAppParagraphThree') }}
-        </p>
-
-        <p class="calculator-section_description">
-            {{ $t('calculationResult.calorieDiaryAppParagraphFour') }}
-        </p>
-
-        <p class="calculator-section_description">
-            {{ $t('calculationResult.calorieDiaryAppParagraphFive') }}
-        </p>
-
-
     </section>
 </template>
 
@@ -229,10 +213,10 @@ export default {
         font-family: Arial, Helvetica, sans-serif;
         font-size: $default-font-size;
         line-height: 1.5;
+        color: #666666;
         text-align: justify;
         margin: 1.5vh 0;
         padding: 0 2vh;
-        color: #666666;
     }
 }
 
@@ -439,7 +423,15 @@ export default {
 
 
 }
-
+.results_with_arrows{
+    display: flex;
+}
+.arrow_mobile {
+    padding-right: 100px;
+    padding-left: 100px;
+    font-size: 5rem;
+    color: $main-color;
+}
 
 </style>
 

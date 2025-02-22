@@ -9,12 +9,11 @@ const messages = {
     ua
 };
 
-// Убедитесь, что вы используете `legacy: false` для Vue 3 совместимости
 const i18n = createI18n({
-    legacy: false, // Важно для использования Composition API
-    locale: 'en', // установите локаль по умолчанию
-    fallbackLocale: 'en', // установите запасную локаль
-    messages, // установите сообщения локализации
+    legacy: false,
+    locale: 'ua',
+    fallbackLocale: 'ua',
+    messages,
 });
 
 export default i18n;

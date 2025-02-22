@@ -26,7 +26,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'calories_limit',
         'telegram_id',
-        'premium_until'
+        'premium_until',
+        'token'
     ];
 
     /**

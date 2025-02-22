@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/telegram-link', [\App\Http\Controllers\TelegramLinkController::class, 'getLink'])
             ->name('telegram.link');
 
-        Route::post('/buy-premium', [\App\Http\Controllers\UserController::class, 'buyPremium'])->name('buyPremium');
+        Route::post('/buy-premium', [\App\Http\Controllers\PortmoneController::class, 'generatePaymentLink'])->name('buyPremium');
     });
 });
 Route::middleware('check.bot.key')->group(function () {

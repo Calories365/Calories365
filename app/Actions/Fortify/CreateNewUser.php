@@ -4,7 +4,9 @@ namespace App\Actions\Fortify;
 
 use App\Jobs\SendNewUserToBotPanelJob;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth; // Добавляем фасад Auth
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;   // Для отладки (опционально)
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -37,6 +39,8 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
+
+        Auth::login($user, $input['remember'] ?? false);
 
         SendNewUserToBotPanelJob::dispatch($user);
 

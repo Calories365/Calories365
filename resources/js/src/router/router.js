@@ -6,6 +6,12 @@ import i18n from "@/i18n.js";
 
 const router = createRouter({
     history: createWebHistory(),
+    scrollBehavior(to, from, savedPosition) {
+        if (savedPosition) {
+            return savedPosition;
+        }
+        return { top: 0 };
+    },
     linkActiveClass: "calories-menu-item-link-active",
     routes,
 });

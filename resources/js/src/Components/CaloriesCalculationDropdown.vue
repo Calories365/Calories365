@@ -18,6 +18,9 @@ export default {
             type: String,
             required: true,
         },
+        subName: {
+            type: String,
+        },
         value: {
             type: Number,
             required: true,
@@ -75,7 +78,13 @@ export default {
 <template>
     <div class="dropdown-section" v-click-outside="handleClickOutside">
         <div class="calculation-select" @click.stop="toggleActive">
-            <div class="calculation-select_text">{{ selectedOptionComputed ? selectedOptionComputed : name }}</div>
+            <div class="calculation-select_text">
+                {{ selectedOptionComputed
+                ? (selectedOptionComputed + ' ' + subName.toLowerCase())
+                : name
+                }}
+            </div>
+
             <div class="calculation-select_active"
                  :class="{ 'calculation-select_show': isActive, 'calculation-select_hide': isHiding }">
                 <ul class="calculation-select_list">
