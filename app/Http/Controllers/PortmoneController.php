@@ -70,7 +70,7 @@ class PortmoneController extends Controller
 
     public function successPayment(Request $request)
     {
-        Log::info('Success payment route hit', ['request' => $request->all()]);
+//        Log::info('Success payment route hit', ['request' => $request->all()]);
 
         try {
             $orderId = $request->input('SHOPORDERNUMBER');
