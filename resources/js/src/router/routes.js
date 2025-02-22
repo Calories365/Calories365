@@ -25,6 +25,12 @@ const routes = [
         },
     },
     {
+        path: '/portmone/*',
+        beforeEnter: (to, from, next) => {
+            window.location.href = to.fullPath;
+        }
+    },
+    {
         path: '/privacy-policy',
         component: PrivacyPolicy,
         name: 'privacyPolicy',
