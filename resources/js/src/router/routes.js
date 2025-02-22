@@ -11,9 +11,9 @@ import Instructions from "@/pages/Instructions.vue";
 import Cabinet from "@/pages/Cabinet.vue";
 import Goals from "@/pages/Goals.vue";
 import ChangePassword from "@/pages/ChangePassword.vue";
-import PrivacyPolicy from "../pages/PrivacyPolicy.vue";
-import TermsOfService from "../pages/TermsOfService.vue";
-import FAQ from "../pages/FAQ.vue";
+import PrivacyPolicy from "@/pages/PrivacyPolicy.vue";
+import TermsOfService from "@/pages/TermsOfService.vue";
+import FAQ from "@/pages/FAQ.vue";
 
 const routes = [
     {

@@ -67,7 +67,7 @@
 
         <!-- 12. Contact Us -->
         <h2>{{ $t("TermsOfService.Section12") }}</h2>
-        <p>{{ $t("TermsOfService.Section12Text") }}</p>
+        <p>{{ $t("TermsOfService.Section12Text") }} calories365.diary@gmail.com</p>
 
         <!-- New Sections for Portmone Compliance -->
 
@@ -81,7 +81,7 @@
 
         <!-- 15. Refund and Exchange Policy -->
         <h2>{{ $t("TermsOfService.Section15") }}</h2>
-        <p>{{ $t("TermsOfService.Section15Text") }}</p>
+        <p>{{ $t("TermsOfService.Section15Text") }}  calories365.diary@gmail.com</p>
 
         <!-- 16. Ordering and Using Services -->
         <h2>{{ $t("TermsOfService.Section16") }}</h2>

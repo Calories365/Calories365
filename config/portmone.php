@@ -17,7 +17,7 @@ return [
 
     'api_url' => env('PORTMONE_API_URL'),
 
-    'currency' => 'USD',
-    'default_amount' => 2.5,
+    'currency' => 'UAH',
+    'default_amount' => 100,
 
 ];

@@ -3,6 +3,7 @@
 
 <template>
     <div class="privacy-policy-wrapper">
+<!--        111-->
         <h1>{{ $t("PrivacyPolicy.Title") }}</h1>
         <p class="last-updated"><strong>{{ $t("PrivacyPolicy.LastUpdated") }}</strong></p>
 
@@ -59,7 +60,7 @@
         <h2>{{ $t("PrivacyPolicy.Section4") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section4Text") }}</p>
 
-        <!-- 5. Хранение данных -->
+         5. Хранение данных
         <h2>{{ $t("PrivacyPolicy.Section5") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section5Text") }}</p>
 
@@ -77,7 +78,7 @@
             <li>{{ $t("PrivacyPolicy.List7_4") }}</li>
             <li>{{ $t("PrivacyPolicy.List7_5") }}</li>
         </ul>
-        <p>{{ $t("PrivacyPolicy.AdditionalText7") }}</p>
+        <p>{{ $t("PrivacyPolicy.AdditionalText7") }} calories365.diary@gmail.com.</p>
 
         <!-- 8. Конфиденциальность детей -->
         <h2>{{ $t("PrivacyPolicy.Section8") }}</h2>
@@ -93,7 +94,7 @@
 
         <!-- 11. Свяжитесь с нами -->
         <h2>{{ $t("PrivacyPolicy.Section11") }}</h2>
-        <p>{{ $t("PrivacyPolicy.Section11Text") }}</p>
+        <p>{{ $t("PrivacyPolicy.Section11Text") }} calories365.diary@gmail.com</p>
     </div>
 </template>
 

@@ -5,7 +5,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-ead5e769.css",
+    "file": "assets/app-edc101da.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -22,9 +22,9 @@
       "assets/burger-8a2dae5f.png"
     ],
     "css": [
-      "assets/app-ead5e769.css"
+      "assets/app-edc101da.css"
     ],
-    "file": "assets/app-63c1f8dc.js",
+    "file": "assets/app-17ab015c.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },

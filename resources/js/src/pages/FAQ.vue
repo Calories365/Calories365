@@ -7,7 +7,7 @@
         <h1>{{ $t("FAQ.Title") }}</h1>
         <p class="last-updated"><strong>{{ $t("FAQ.LastUpdated") }}</strong></p>
 
-        <p>{{ $t("FAQ.Intro") }}</p>
+        <p>{{ $t("FAQ.Intro") }} calories365.diary@gmail.com.</p>
 
         <!-- 1. Що таке Calories365? -->
         <h2>{{ $t("FAQ.Section1") }}</h2>
@@ -81,7 +81,7 @@
         <!-- 13. Як я можу зв'язатися з підтримкою? -->
         <h2>{{ $t("FAQ.Section13") }}</h2>
         <ul>
-            <li>{{ $t("FAQ.List13_1") }}</li>
+            <li>{{ $t("FAQ.List13_1") }}  calories365.diary@gmail.com</li>
             <li>{{ $t("FAQ.List13_2") }}</li>
             <li>{{ $t("FAQ.List13_3") }}</li>
         </ul>

@@ -61,6 +61,9 @@ export default {
                   <span class="top-info_premium_text_bought">
                     {{ $t("Home.Premium") }}
                   </span>
+                    <button class="cancel-premium-button">
+                        {{ $t("Home.CancelPremium") }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -135,6 +138,22 @@ export default {
             -webkit-text-fill-color: transparent;
             -webkit-animation: shimmer 3s linear infinite;
             animation: shimmer 3s linear infinite;
+        }
+
+        .cancel-premium-button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+
+            &:hover {
+                background-color: #cc0000;
+            }
         }
 
         a {
