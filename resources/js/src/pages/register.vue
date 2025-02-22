@@ -4,7 +4,6 @@ import {mapState} from "vuex";
 import CaloriesErrors from "@/Components/CaloriesErrors.vue";
 import CaloriesLoader from "@/Components/CaloriesLoader.vue";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
-import fart from '@/assets/fart.mp3';
 
 
 export default {
@@ -38,9 +37,6 @@ export default {
                     remember: true,
                 }
             ).then(user => {
-
-                // const audio = new Audio(fart);
-                // audio.play().catch(e => console.error('Playback failed:', e));
 
                 this.$router.push({name: 'home'})
                 this.email = '';

@@ -28,9 +28,6 @@ const onSubmit = () => {
         password: formState.password,
         remember: true,
     }).then(() => {
-        // const audio = new Audio(fart);
-        // audio.play().catch(e => console.error('Playback failed:', e));
-
         router.push({name: 'home'});
         formState.email = '';
         formState.password = '';
