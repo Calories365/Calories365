@@ -79,7 +79,6 @@ export default {
         }
     },
     mounted() {
-        // Встановлення української мови за замовчуванням
         const savedLocale = localStorage.getItem('locale');
         if (!savedLocale) {
             this.$i18n.locale = 'uk';
