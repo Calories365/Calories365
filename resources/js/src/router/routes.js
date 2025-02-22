@@ -24,12 +24,6 @@ const routes = [
             needAuth: false,
         },
     },
-    // {
-    //     path: '/portmone/*',
-    //     beforeEnter: (to, from, next) => {
-    //         window.location.href = to.fullPath;
-    //     }
-    // },
     {
         path: '/privacy-policy',
         component: PrivacyPolicy,

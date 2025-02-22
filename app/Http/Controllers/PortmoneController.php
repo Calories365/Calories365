@@ -76,6 +76,9 @@ class PortmoneController extends Controller
             'method' => $request->method(),
             'data'   => $request->all(),
         ]);
+        if ($request->isMethod('get')){
+            return redirect()->away(url('/?payment=success'));
+        }
         try {
             $orderId = $request->input('SHOPORDERNUMBER');
             $token = $request->input('TOKEN');
