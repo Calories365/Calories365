@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\Route;
 //Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
 //    ->name('social.google.redirect');
 
-Route::post('/portmone/success', [PortmoneController::class, 'successPayment'])->name('portmone.success.payment');
-Route::post('/portmone/failure', [PortmoneController::class, 'failedPayment'])->name('portmone.failure.payment');
+Route::get('/portmone/success', [PortmoneController::class, 'successPayment'])->name('portmone.success.payment');
+Route::get('/portmone/failure', [PortmoneController::class, 'failedPayment'])->name('portmone.failure.payment');
 
 
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
