@@ -71,7 +71,6 @@ export default {
                 return;
             }
             this.$store.dispatch(actionTypes.buyPremium).then((url) => {
-                console.log(url)
                 window.location.href = url;
             });
         },
