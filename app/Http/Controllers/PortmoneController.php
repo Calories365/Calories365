@@ -113,7 +113,7 @@ class PortmoneController extends Controller
     }
 
     /**
-     * Processes a failed payment from Portmone.
+     * Processes a failed payment from Portmone .
      *
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
