@@ -1,65 +1,36 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-73764c6a.css",
+    "file": "assets/app-13129ddf.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-5bbb2ec5.css",
+    "file": "assets/app-ead5e769.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
     "assets": [
       "assets/CALORIES365vectorgreen-8a184506.png",
-      "assets/1-90770dc6.png",
-      "assets/2-8057c750.png",
-      "assets/3-84c3982c.png",
-      "assets/4-84a7de74.png",
-      "assets/5-4d33bc29.png",
+      "assets/miaaa33-8c8cd479.jpg",
+      "assets/SadAndFat-d9267b7f.jpg",
+      "assets/HappyAndFit-417db6a8.jpg",
+      "assets/1159x220-5990110d.svg",
       "assets/CALORIES.365-5a213707.png",
       "assets/CALORIES.365_white-688fee3a.png",
       "assets/CALORIES365vectorgreen2-549b9966.png",
-      "assets/cabinet-c58f27f7.png",
-      "assets/calculation-d7a1ce20.png",
-      "assets/diary-07b973af.png",
-      "assets/goals-b27463d6.png",
-      "assets/img-1aac6c22.png",
-      "assets/instructions-23cf3dc2.png",
-      "assets/logo-03d6d6da.png",
-      "assets/phon-a4364c90.png",
-      "assets/phon2-aed36cdf.png",
-      "assets/phone3-039042f9.png",
-      "assets/stats-f8ddbe19.png",
       "assets/valera-40fb0cab.png",
-      "assets/burger-8a2dae5f.png",
-      "assets/ded-d9c73875.mp3"
+      "assets/burger-8a2dae5f.png"
     ],
     "css": [
-      "assets/app-5bbb2ec5.css"
+      "assets/app-ead5e769.css"
     ],
-    "file": "assets/app-e3c56df2.js",
+    "file": "assets/app-63c1f8dc.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },
-  "resources/js/src/assets/1.png": {
-    "file": "assets/1-90770dc6.png",
-    "src": "resources/js/src/assets/1.png"
-  },
-  "resources/js/src/assets/2.png": {
-    "file": "assets/2-8057c750.png",
-    "src": "resources/js/src/assets/2.png"
-  },
-  "resources/js/src/assets/3.png": {
-    "file": "assets/3-84c3982c.png",
-    "src": "resources/js/src/assets/3.png"
-  },
-  "resources/js/src/assets/4.png": {
-    "file": "assets/4-84a7de74.png",
-    "src": "resources/js/src/assets/4.png"
-  },
-  "resources/js/src/assets/5.png": {
-    "file": "assets/5-4d33bc29.png",
-    "src": "resources/js/src/assets/5.png"
+  "resources/js/src/assets/1159x220.svg": {
+    "file": "assets/1159x220-5990110d.svg",
+    "src": "resources/js/src/assets/1159x220.svg"
   },
   "resources/js/src/assets/CALORIES.365.png": {
     "file": "assets/CALORIES.365-5a213707.png",
@@ -77,57 +48,17 @@
     "file": "assets/CALORIES365vectorgreen2-549b9966.png",
     "src": "resources/js/src/assets/CALORIES365vectorgreen2.png"
   },
-  "resources/js/src/assets/cabinet.png": {
-    "file": "assets/cabinet-c58f27f7.png",
-    "src": "resources/js/src/assets/cabinet.png"
+  "resources/js/src/assets/HappyAndFit.jpg": {
+    "file": "assets/HappyAndFit-417db6a8.jpg",
+    "src": "resources/js/src/assets/HappyAndFit.jpg"
   },
-  "resources/js/src/assets/calculation.png": {
-    "file": "assets/calculation-d7a1ce20.png",
-    "src": "resources/js/src/assets/calculation.png"
+  "resources/js/src/assets/SadAndFat.jpg": {
+    "file": "assets/SadAndFat-d9267b7f.jpg",
+    "src": "resources/js/src/assets/SadAndFat.jpg"
   },
-  "resources/js/src/assets/ded.mp3": {
-    "file": "assets/ded-d9c73875.mp3",
-    "src": "resources/js/src/assets/ded.mp3"
-  },
-  "resources/js/src/assets/diary.png": {
-    "file": "assets/diary-07b973af.png",
-    "src": "resources/js/src/assets/diary.png"
-  },
-  "resources/js/src/assets/fart.mp3": {
-    "file": "assets/fart-742c67c7.mp3",
-    "src": "resources/js/src/assets/fart.mp3"
-  },
-  "resources/js/src/assets/goals.png": {
-    "file": "assets/goals-b27463d6.png",
-    "src": "resources/js/src/assets/goals.png"
-  },
-  "resources/js/src/assets/img.png": {
-    "file": "assets/img-1aac6c22.png",
-    "src": "resources/js/src/assets/img.png"
-  },
-  "resources/js/src/assets/instructions.png": {
-    "file": "assets/instructions-23cf3dc2.png",
-    "src": "resources/js/src/assets/instructions.png"
-  },
-  "resources/js/src/assets/logo.png": {
-    "file": "assets/logo-03d6d6da.png",
-    "src": "resources/js/src/assets/logo.png"
-  },
-  "resources/js/src/assets/phon.png": {
-    "file": "assets/phon-a4364c90.png",
-    "src": "resources/js/src/assets/phon.png"
-  },
-  "resources/js/src/assets/phon2.png": {
-    "file": "assets/phon2-aed36cdf.png",
-    "src": "resources/js/src/assets/phon2.png"
-  },
-  "resources/js/src/assets/phone3.png": {
-    "file": "assets/phone3-039042f9.png",
-    "src": "resources/js/src/assets/phone3.png"
-  },
-  "resources/js/src/assets/stats.png": {
-    "file": "assets/stats-f8ddbe19.png",
-    "src": "resources/js/src/assets/stats.png"
+  "resources/js/src/assets/miaaa33.jpg": {
+    "file": "assets/miaaa33-8c8cd479.jpg",
+    "src": "resources/js/src/assets/miaaa33.jpg"
   },
   "resources/js/src/assets/valera.png": {
     "file": "assets/valera-40fb0cab.png",

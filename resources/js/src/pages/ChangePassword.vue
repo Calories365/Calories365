@@ -3,7 +3,6 @@ import {mapState} from "vuex";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import {actionTypes} from "@/store/modules/auth.js";
 import router from "@/router/router.js";
-import dedSound from "@/assets/ded.mp3";
 
 export default {
     name: "Cabinet",
@@ -17,8 +16,7 @@ export default {
     },
     methods: {
         play() {
-            const audio = new Audio(dedSound);
-            audio.play().catch(e => console.error('Playback failed:', e));
+
         },
         goBack() {
             router.push({name: 'cabinet'});
