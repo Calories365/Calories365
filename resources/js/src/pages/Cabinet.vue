@@ -3,10 +3,11 @@ import { mapState } from "vuex";
 import { actionTypes } from "@/store/modules/auth.js";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import router from "@/router/router.js";
+import PremiumSection from "../Components/PremiumSection.vue";
 
 export default {
     name: "Cabinet",
-    components: { CaloriesButton },
+    components: { PremiumSection, CaloriesButton },
     data() {
         return {
             name: null,
@@ -23,7 +24,6 @@ export default {
         telegramLinkText() {
             if (!this.currentUser?.email_verified_at) {
                 return this.$t("Cabinet.ConfirmEmail");
-
             }
             return this.telegramAuth
                 ? this.$t("Cabinet.Connected")
@@ -39,6 +39,7 @@ export default {
     },
     methods: {
         play() {
+            // Логика для аватара, если нужна
         },
         changeName() {
             this.$store
@@ -56,33 +57,25 @@ export default {
                 router.push({ name: "login" });
             });
         },
-
         openTelegramLink() {
             if (!this.currentUser?.email_verified_at) {
                 return;
             }
-
             if (this.telegramLink) {
                 window.open(this.telegramLink, "_blank");
             } else {
                 console.error("Telegram link is not available");
             }
         },
-
-        buyPremium() {
-            this.$store.dispatch(actionTypes.buyPremium).then((url) => {
-                window.location.href = url;
-            });
-        }
     },
     mounted() {
         const paymentStatus = this.$route.query.payment;
 
-        if (paymentStatus === 'success') {
-            this.$store.dispatch('setSuccess', this.$t('Cabinet.PaymentSuccess'));
-        } else if (paymentStatus === 'error') {
-            const errorMessage = this.$t('Cabinet.PaymentError');
-            this.$store.dispatch('setError', errorMessage);
+        if (paymentStatus === "success") {
+            this.$store.dispatch("setSuccess", this.$t("Cabinet.PaymentSuccess"));
+        } else if (paymentStatus === "error") {
+            const errorMessage = this.$t("Cabinet.PaymentError");
+            this.$store.dispatch("setError", errorMessage);
         }
 
         this.name = this.currentUser.name;
@@ -90,11 +83,12 @@ export default {
         this.caloriesLimit = this.currentUser.calories_limit;
         this.telegramAuth = this.currentUser.telegram_auth;
 
-        this.$store.dispatch(actionTypes.getTelegramLink)
-            .then(link => {
+        this.$store
+            .dispatch(actionTypes.getTelegramLink)
+            .then((link) => {
                 this.telegramLink = link;
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error("Error fetching telegram link:", error);
             });
     },
@@ -105,30 +99,15 @@ export default {
     <section class="page-cabinet_section">
         <div class="page-cabinet_container">
             <div class="page-cabinet_header">
-                <h1 class="page-cabinet_title">
-                    {{ $t("Cabinet.PersonalCabinet") }}
-                </h1>
+                <h1 class="page-cabinet_title">{{ $t("Cabinet.PersonalCabinet") }}</h1>
             </div>
             <div class="page-cabinet_content">
                 <div class="page-cabinet_top top-info">
                     <div class="top-info_avatar" @click="play">
                         <img src="@/assets/valera.png" />
                     </div>
-
                     <div class="top-info_premium">
-                        <span
-                            v-if="!isPremium"
-                            class="top-info_premium_text"
-                            @click="buyPremium"
-                        >
-                            {{ $t("Cabinet.BuyPremium") }}
-                        </span>
-                        <span
-                            v-else
-                            class="top-info_premium_text_bought"
-                        >
-                            {{ $t("Cabinet.Premium") }}
-                        </span>
+                        <PremiumSection :isPremium="isPremium" :currentUser="currentUser" />
                     </div>
                 </div>
                 <div class="page-cabinet_mid mid-info">
@@ -136,12 +115,10 @@ export default {
                         <div class="mid-info_text">{{ $t("Cabinet.Mail") }}:</div>
                         <input v-model="email" disabled class="mid-info_credentials" />
                     </div>
-
                     <div class="mid-info_login">
                         <div class="mid-info_text">{{ $t("Cabinet.Name") }}:</div>
                         <input v-model="name" class="mid-info_credentials" />
                     </div>
-
                     <div class="mid-info_link">
                         <div class="mid-info_text">{{ $t("Cabinet.TelegramBot") }}:</div>
                         <span
@@ -152,12 +129,10 @@ export default {
                             {{ telegramLinkText }}
                         </span>
                     </div>
-
                     <div class="mid-info_login">
                         <div class="mid-info_text">{{ $t("Cabinet.CaloriesLimit") }}:</div>
                         <input v-model="caloriesLimit" class="mid-info_credentials" />
                     </div>
-
                     <div class="mid-info_link">
                         <div class="mid-info_text">{{ $t("Cabinet.Password") }}:</div>
                         <router-link :to="{ name: 'change-password' }">
@@ -166,15 +141,10 @@ export default {
                             </span>
                         </router-link>
                     </div>
-
                     <div class="mid-info_buttons new-password">
-                        <calories-button
-                            @click="changeName"
-                            class="mid-info_button"
-                        >
+                        <calories-button @click="changeName" class="mid-info_button">
                             {{ $t("Cabinet.Save") }}
                         </calories-button>
-
                         <calories-button
                             @click="logout"
                             passed-class="danger"
@@ -288,100 +258,6 @@ export default {
     @media (max-width: 768px) {
         padding: 0;
         justify-content: center;
-    }
-
-    &_premium {
-        width: 100%;
-        text-align: center;
-        margin: 20px 0;
-    }
-
-    &_premium_text {
-        color: #eeb82c;
-        font-weight: 700;
-        font-size: 24px;
-        letter-spacing: 0.0625rem;
-        text-transform: uppercase;
-        cursor: pointer;
-        display: block;
-
-        background: linear-gradient(90deg, #eeb82c, $pink_color, #eeb82c);
-        background-size: 200% 100%;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        color: transparent;
-
-        @keyframes shimmer {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-
-        @keyframes spaceboots {
-            0%   { transform: translate(2px, 1px) rotate(0deg); }
-            10%  { transform: translate(-1px, -2px) rotate(-1deg); }
-            20%  { transform: translate(-3px, 0px) rotate(1deg); }
-            30%  { transform: translate(0px, 2px) rotate(0deg); }
-            40%  { transform: translate(1px, -1px) rotate(1deg); }
-            50%  { transform: translate(-1px, 2px) rotate(-1deg); }
-            60%  { transform: translate(-3px, 1px) rotate(0deg); }
-            70%  { transform: translate(2px, 1px) rotate(-1deg); }
-            80%  { transform: translate(-1px, -1px) rotate(1deg); }
-            90%  { transform: translate(2px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-
-        @-webkit-keyframes spaceboots {
-            0%   { -webkit-transform: translate(2px, 1px) rotate(0deg); }
-            10%  { -webkit-transform: translate(-1px, -2px) rotate(-1deg); }
-            20%  { -webkit-transform: translate(-3px, 0px) rotate(1deg); }
-            30%  { -webkit-transform: translate(0px, 2px) rotate(0deg); }
-            40%  { -webkit-transform: translate(1px, -1px) rotate(1deg); }
-            50%  { -webkit-transform: translate(-1px, 2px) rotate(-1deg); }
-            60%  { -webkit-transform: translate(-3px, 1px) rotate(0deg); }
-            70%  { -webkit-transform: translate(2px, 1px) rotate(-1deg); }
-            80%  { -webkit-transform: translate(-1px, -1px) rotate(1deg); }
-            90%  { -webkit-transform: translate(2px, 2px) rotate(0deg); }
-            100% { -webkit-transform: translate(1px, -2px) rotate(-1deg); }
-        }
-
-        -webkit-animation: shimmer 3s linear infinite, spaceboots 3s linear infinite;
-        animation: shimmer 3s linear infinite, spaceboots 3s linear infinite;
-
-        &:hover {
-            -webkit-animation-duration: 1.5s, 1.5s;
-            animation-duration: 1.5s, 1.5s;
-        }
-    }
-
-    &_premium_text_bought {
-        color: #eeb82c;
-        font-weight: 700;
-        font-size: 24px;
-        letter-spacing: 0.0625rem;
-        text-transform: uppercase;
-        cursor: pointer;
-        display: block;
-
-        background: linear-gradient(90deg, #eeb82c, $pink_color, #eeb82c);
-        background-size: 200% 100%;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        color: transparent;
-
-        @keyframes shimmer {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-
-        -webkit-animation: shimmer 3s linear infinite;
-        animation: shimmer 3s linear infinite;
-
-        &:hover {
-            -webkit-animation-duration: 1.5s, 1.5s;
-            animation-duration: 1.5s, 1.5s;
-        }
     }
 
     &_avatar {

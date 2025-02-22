@@ -101,14 +101,14 @@ class PortmoneController extends Controller
                 });
             }
 
-            return redirect()->away(url('/cabinet?payment=success'));
+            return redirect()->away(url('/?payment=success'));
 
         } catch (\Throwable $th) {
             Log::error('Error in successPayment: ' . $th->getMessage(), [
                 'trace' => $th->getTraceAsString(),
                 'request_data' => $request->all(),
             ]);
-            return redirect()->away(url('/cabinet?payment=error'));
+            return redirect()->away(url('/?payment=error'));
         }
     }
 
