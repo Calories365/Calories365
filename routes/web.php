@@ -18,21 +18,28 @@ use Illuminate\Support\Facades\Route;
 //Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
 //    ->name('social.google.redirect');
 
-Route::match(['get', 'post'], '/portmone/success', [PortmoneController::class, 'successPayment'])->name('portmone.success.payment');
-Route::match(['get', 'post'], '/portmone/failure', [PortmoneController::class, 'failedPayment'])->name('portmone.failure.payment');
+Route::post('/portmone/success', [PortmoneController::class, 'successPayment'])->name('portmone.success.payment');
+Route::post('/portmone/failure', [PortmoneController::class, 'failedPayment'])->name('portmone.failure.payment');
+
 
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
     ->name('social.google.callback');
 
+//Route::get('/{any?}', function () {
+//    return view('app');
+//})->where('any', '.*');
+//
+//Route::any('/{any?}', function () {
+//    return view('app');
+//})->where('any', '.*')->name('login');
+
 Route::get('/{any?}', function () {
     return view('app');
-})->where('any', '.*');
+})->where('any', '^(?!portmone).*$');
 
-Route::any('/{any?}', function () {
+Route::get('/{any?}', function () {
     return view('app');
-})->where('any', '.*')->name('login');
-
-
+})->where('any', '^(?!portmone).*$')->name('login');
 
 Route::get('/reset-password/{token}', function ($token) {
     return view('auth.password-reset', ['token' => $token]);
