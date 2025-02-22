@@ -14,7 +14,7 @@ export default {
     data() {
         return {
             username: 'Пена',
-            locale: localStorage.getItem('locale') || 'en',
+            locale: localStorage.getItem('locale') || 'ua',
         };
     },
     components: {
@@ -38,39 +38,48 @@ export default {
 }
 </script>
 <template>
-    <calories-success-notification
-        v-if="successMessage">{{ successMessage }}
-    </calories-success-notification>
+    <div class="page-wrapper">
+        <calories-success-notification v-if="successMessage">
+            {{ successMessage }}
+        </calories-success-notification>
 
-    <calories-error-notification
-        v-if="errorMessage">{{ errorMessage }}
-    </calories-error-notification>
+        <calories-error-notification v-if="errorMessage">
+            {{ errorMessage }}
+        </calories-error-notification>
 
-    <!-- Шапка -->
-    <calories-header-v2/>
+        <!-- Шапка -->
+        <calories-header-v2/>
 
-    <main id="primary" class="main-wrapper">
-        <article class="main-article">
-            <router-view/>
-        </article>
-    </main>
+        <main id="primary" class="main-wrapper">
+            <article class="main-article">
+                <router-view/>
+            </article>
+        </main>
 
-    <!-- Показываем футер только если текущий маршрут — 'home' -->
-    <footer class="main-footer" v-if="$route.name === 'home'">
-        <router-link :to="{ name: 'privacyPolicy' }" class="privacy-link">
-            Privacy Policy
-        </router-link>
-        <router-link :to="{ name: 'termsOfService' }" class="privacy-link">
-            Terms of Service
-        </router-link>
-        <router-link :to="{ name: 'faq' }" class="privacy-link">
-            FAQ
-        </router-link>
-    </footer>
+        <!-- Показуємо футер тільки якщо поточний маршрут — 'home' -->
+<!--        <footer class="main-footer" v-if="$route.name === 'home'">-->
+<!--            <router-link :to="{ name: 'privacyPolicy' }" class="privacy-link">-->
+<!--                Privacy Policy-->
+<!--            </router-link>-->
+<!--            <router-link :to="{ name: 'termsOfService' }" class="privacy-link">-->
+<!--                Terms of Service-->
+<!--            </router-link>-->
+<!--            <router-link :to="{ name: 'faq' }" class="privacy-link">-->
+<!--                FAQ-->
+<!--            </router-link>-->
+<!--        </footer>-->
+    </div>
 </template>
 
 <style lang="scss">
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 .main-wrapper {
+    flex: 1; /* Додаємо, щоб основний вміст розтягувався */
     font-family: 'Open Sans', sans-serif;
     font-style: normal;
     font-variant: normal;

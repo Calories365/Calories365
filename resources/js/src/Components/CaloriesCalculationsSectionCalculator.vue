@@ -5,10 +5,11 @@ import CaloriesCalculationSlider from "@/Components/CaloriesCalculationSlider.vu
 import CaloriesCalculationDropdown from "@/Components/CaloriesCalculationDropdown.vue";
 import {actionTypes} from "@/store/modules/calculation.js";
 import {mapState} from "vuex";
+import CaloriesButton from "./CaloriesButton.vue";
 
 export default {
     name: "CaloriesCalculationsSectionCalculator",
-    components: {CaloriesCalculationDropdown, CaloriesCalculationSlider, CaloriesCard},
+    components: {CaloriesButton, CaloriesCalculationDropdown, CaloriesCalculationSlider, CaloriesCard},
     data() {
         return {
             isActive: false,
@@ -38,6 +39,16 @@ export default {
         },
         handleCheckboxChange(checkboxState) {
             this.checkboxActive = checkboxState;
+        },
+        saveData() {
+            if (this.currentUser) {
+                this.$store.dispatch(actionTypes.saveCalculationData).then(() => {
+                    this.$store.dispatch(userActionTypes.getCurrentUser);
+                })
+            } else {
+                const message = i18n.global.t('Notification.Error.NeedAuth');
+                store.dispatch('setError', message, {root: true});
+            }
         },
         calculateResults: debounce(function () {
             this.$store.dispatch(actionTypes.countResults, this.transformData());
@@ -93,6 +104,9 @@ export default {
 <template>
     <section class="calculator-section">
         <p class="calculator-section_head">{{ $t('message.calculatorSectionHead') }}</p>
+        <p class="calculator-section_description">
+            {{ $t('message.calculatorSectionDescription') }}
+        </p>
         <div class="calculator-section_gender-buttons-container">
             <button
                 class="calculator-section_gender-button"
@@ -141,10 +155,10 @@ export default {
                                          @update="fat = $event"
                                          @checkboxChanged="handleCheckboxChange"
             />
-<!--            <p class="calculator-section_description_v2">Активність: </p>-->
             <div class="calculator-section_dropdowns">
                 <calories-calculation-dropdown class="calculator-section_dropdown"
                                                :name="$t('message.caloriesCalculationDropdownActivity')"
+                                               :subName="$t('message.caloriesCalculationDropdownActivity')"
                                                :options="translatedActivityOptions"
                                                :value="Number(activity)"
                                                @update="activity = $event"
@@ -152,11 +166,13 @@ export default {
 
             </div>
         </div>
-
-        <p class="calculator-section_description">
-            {{ $t('message.calculatorSectionDescription') }}
-        </p>
-
+        <div class="res-button">
+        <calories-button
+            passed-class="extra-padding"
+            @click="saveData()" class="calculator-section_head-button">
+            {{ $t('calculationResult.Save') }}
+        </calories-button>
+        </div>
     </section>
 </template>
 
@@ -193,6 +209,7 @@ export default {
         text-align: justify;
         margin: 1.5vh 0;
         padding: 0 2vh;
+        padding-bottom: 20px;
         color: #666666;
     }
     &_description_v2 {
@@ -278,7 +295,12 @@ export default {
 
 
 }
-
+.res-button{
+    display: flex;
+    justify-content: center;
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
 
 </style>
 

@@ -1,7 +1,7 @@
 <script>
 import { mapState } from "vuex";
-import CaloriesButton from "@/Components/CaloriesButton.vue";
 import { actionTypes } from "@/store/modules/auth.js";
+import CaloriesButton from "@/Components/CaloriesButton.vue";
 import router from "@/router/router.js";
 
 export default {
@@ -70,21 +70,33 @@ export default {
         },
 
         buyPremium() {
-            this.$store.dispatch(actionTypes.buyPremium).then((response) => {
+            this.$store.dispatch(actionTypes.buyPremium).then((url) => {
+                window.location.href = url;
             });
         }
     },
-    async mounted() {
+    mounted() {
+        const paymentStatus = this.$route.query.payment;
+
+        if (paymentStatus === 'success') {
+            this.$store.dispatch('setSuccess', this.$t('Cabinet.PaymentSuccess'));
+        } else if (paymentStatus === 'error') {
+            const errorMessage = this.$t('Cabinet.PaymentError');
+            this.$store.dispatch('setError', errorMessage);
+        }
+
         this.name = this.currentUser.name;
         this.email = this.currentUser.email;
         this.caloriesLimit = this.currentUser.calories_limit;
         this.telegramAuth = this.currentUser.telegram_auth;
 
-        try {
-            this.telegramLink = await this.$store.dispatch(actionTypes.getTelegramLink);
-        } catch (error) {
-            console.error("Error fetching telegram link:", error);
-        }
+        this.$store.dispatch(actionTypes.getTelegramLink)
+            .then(link => {
+                this.telegramLink = link;
+            })
+            .catch(error => {
+                console.error("Error fetching telegram link:", error);
+            });
     },
 };
 </script>

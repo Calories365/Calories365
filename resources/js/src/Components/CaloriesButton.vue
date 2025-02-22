@@ -9,6 +9,9 @@ export default {
         type: {
             type: String,
             default: 'button'
+        },
+        style:{
+            type: String,
         }
 
     },
@@ -27,12 +30,14 @@ export default {
 </template>
 
 <style scoped lang="scss">
+.extra-padding{
+    padding: 1vh 8vh;
+}
 .calories-button {
     height: 50px;
     background-color: $main-color;
     color: white;
     border: none;
-    padding: 1vh 8vh;
     //margin-bottom: 20px;
     font-size: $default-font-size;
     cursor: pointer;

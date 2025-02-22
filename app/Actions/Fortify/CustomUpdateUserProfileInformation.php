@@ -27,6 +27,7 @@ class CustomUpdateUserProfileInformation implements UpdatesUserProfileInformatio
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],
+            'calories_limit' => ['required', 'integer', 'min:0', 'max:10000'],
         ])->validateWithBag('updateProfileInformation');
 
         if ($input['email'] !== $user->email &&

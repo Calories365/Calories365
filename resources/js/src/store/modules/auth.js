@@ -423,8 +423,8 @@ const actions = {
             context.commit(mutationTypes.buyPremiumStart)
             authApi.buyPremium(credentials)
                 .then(response => {
-                    context.commit(mutationTypes.buyPremiumSuccess, response.data.premium_until);
-                    resolve(response.data.premium_until);
+                    context.commit(mutationTypes.buyPremiumSuccess, response.data.portmone_url);
+                    resolve(response.data.portmone_url);
                 })
                 .catch(result => {
                     context.commit(mutationTypes.buyPremiumFailure, result.response.data.errors);
