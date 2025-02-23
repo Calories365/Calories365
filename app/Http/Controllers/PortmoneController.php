@@ -70,15 +70,6 @@ class PortmoneController extends Controller
 
     public function successPayment(Request $request)
     {
-        Log::info('Success payment route hit', ['request' => $request->query()]);
-        Log::info('Success payment route hit', ['request' => $request->all()]);
-        Log::info('Success payment route hit', [
-            'method' => $request->method(),
-            'data'   => $request->all(),
-        ]);
-        if ($request->isMethod('get')){
-            return redirect()->away(url('/?payment=success'));
-        }
         try {
             $orderId = $request->input('SHOPORDERNUMBER');
             $token = $request->input('TOKEN');
