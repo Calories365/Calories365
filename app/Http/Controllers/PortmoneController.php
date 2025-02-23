@@ -53,7 +53,7 @@ class PortmoneController extends Controller
             $query = http_build_query($data);
 
             $url   = "{$apiUrl}?{$query}";
-            Log::info($url);
+            Log::info(print_r(route('portmone.success.payment'), true));
             return response()->json([
                 'portmone_url' => $url
             ], 200);
