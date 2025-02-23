@@ -53,7 +53,6 @@ class PortmoneController extends Controller
             $query = http_build_query($data);
 
             $url   = "{$apiUrl}?{$query}";
-            Log::info(print_r(route('portmone.success.payment'), true));
             return response()->json([
                 'portmone_url' => $url
             ], 200);
@@ -89,7 +88,7 @@ class PortmoneController extends Controller
                 Log::error('Transaction not found for orderId: ' . $orderId, [
                     'request_data' => $request->all(),
                 ]);
-                return redirect()->away(url('/cabinet?payment=error'));
+                return redirect()->away(url('/?payment=error'));
             }
 
             if ($transaction->status === 'pending') {
@@ -137,7 +136,7 @@ class PortmoneController extends Controller
                 Log::warning('SHOPORDERNUMBER is missing in failedPayment request', [
                     'request_data' => $request->all(),
                 ]);
-                return redirect()->away(url('/cabinet?payment=error'));
+                return redirect()->away(url('/?payment=error'));
             }
 
             $transaction = Transaction::where('transaction_id', $orderId)->first();
@@ -145,7 +144,7 @@ class PortmoneController extends Controller
                 Log::error('Transaction not found for orderId: ' . $orderId, [
                     'request_data' => $request->all(),
                 ]);
-                return redirect()->away(url('/cabinet?payment=error'));
+                return redirect()->away(url('/?payment=error'));
             }
 
             if ($transaction->status === 'pending') {
@@ -155,14 +154,14 @@ class PortmoneController extends Controller
                 });
             }
 
-            return redirect()->away(url('/cabinet?payment=error'));
+            return redirect()->away(url('/?payment=error'));
 
         } catch (\Throwable $th) {
             Log::error('Error in failedPayment: ' . $th->getMessage(), [
                 'trace' => $th->getTraceAsString(),
                 'request_data' => $request->all(),
             ]);
-            return redirect()->away(url('/cabinet?payment=error'));
+            return redirect()->away(url('/?payment=error'));
         }
     }
 }

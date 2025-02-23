@@ -154,7 +154,8 @@
             "PasswordWasUpdated": "Password was updated",
             "NameWasUpdated": "Name was updated",
             "PasswordUpdated": "Password updated",
-            "Result": "The data is accounted for, your result is below"
+            "Result": "The data is accounted for, your result is below",
+            "CanceledSub": "Subscription canceled"
 
         },
         "Error": {

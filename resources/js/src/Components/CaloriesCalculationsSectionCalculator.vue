@@ -104,9 +104,9 @@ export default {
 <template>
     <section class="calculator-section">
         <p class="calculator-section_head">{{ $t('message.calculatorSectionHead') }}</p>
-        <p class="calculator-section_description">
-            {{ $t('message.calculatorSectionDescription') }}
-        </p>
+<!--        <p class="calculator-section_description">-->
+<!--            {{ $t('message.calculatorSectionDescription') }}-->
+<!--        </p>-->
         <div class="calculator-section_gender-buttons-container">
             <button
                 class="calculator-section_gender-button"
@@ -166,13 +166,13 @@ export default {
 
             </div>
         </div>
-        <div class="res-button">
-        <calories-button
-            passed-class="extra-padding"
-            @click="saveData()" class="calculator-section_head-button">
-            {{ $t('calculationResult.Save') }}
-        </calories-button>
-        </div>
+<!--        <div class="res-button">-->
+<!--        <calories-button-->
+<!--            passed-class="extra-padding"-->
+<!--            @click="saveData()" class="calculator-section_head-button">-->
+<!--            {{ $t('calculationResult.Save') }}-->
+<!--        </calories-button>-->
+<!--        </div>-->
     </section>
 </template>
 
@@ -186,10 +186,12 @@ export default {
     width: 85%;
     margin: 0 auto;
     background-color: white;
+    padding-bottom: 0;
 
     @media (max-width: 768px) {
         width: 100%;
         padding: 0 3vh 3vh 3vh;
+        padding-bottom: 0;
     }
 
 
@@ -295,12 +297,7 @@ export default {
 
 
 }
-.res-button{
-    display: flex;
-    justify-content: center;
-    padding-top: 25px;
-    padding-bottom: 25px;
-}
+
 
 </style>
 

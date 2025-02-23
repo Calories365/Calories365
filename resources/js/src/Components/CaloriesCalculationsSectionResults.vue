@@ -50,11 +50,17 @@ export default {
 
        <div class="results_with_arrows">
            <div class="arrow_mobile">↓</div>
-           <p class="calculator-section_head calories-padding-top calories-padding-bottom">
+           <p class="calculator-section_head">
             {{ $t('calculationResult.calculatorSectionHeadOne') }}</p>
            <div class="arrow_mobile">↓</div>
        </div>
-
+        <div class="res-button">
+            <calories-button
+                passed-class="extra-padding"
+                @click="saveData()" class="calculator-section_head-button">
+                {{ $t('calculationResult.Save') }}
+            </calories-button>
+        </div>
 
         <p class="calculator-section_head calories-padding-top">{{
                 $t('calculationResult.calculatorSectionHeadTwo')
@@ -425,13 +431,24 @@ export default {
 }
 .results_with_arrows{
     display: flex;
+    align-items: center;
 }
 .arrow_mobile {
     padding-right: 100px;
     padding-left: 100px;
     font-size: 5rem;
     color: $main-color;
+    @media (max-width: 768px) {
+        padding-right: 1px;
+        padding-left: 1px;
+        font-size: 3rem;
+    }
 }
-
+.res-button{
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: 25px;
+}
 </style>
 

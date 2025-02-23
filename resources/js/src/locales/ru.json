@@ -152,7 +152,8 @@
             "PasswordWasUpdated": "Пароль был обновлен",
             "NameWasUpdated": "Имя было обновлено",
             "PasswordUpdated": "Пароль обновлен",
-            "Result": "Данные учтены, Ваш результат ниже"
+            "Result": "Данные учтены, Ваш результат ниже",
+            "CanceledSub": "Подписка отменена"
         },
         "Error": {
             "ProductAdditionFailed": "Не удалось добавить продукт",

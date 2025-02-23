@@ -182,16 +182,15 @@ export default {
                     <router-link :to="{ name: 'faq' }" class="privacy-link">{{ $t("Home.FAQ") }}</router-link>
                 </div>
             <div class="main-footer_info-for-portmone">
-
-                <div class="payment-logos">
-                    <img src="@/assets/1159x220.svg" alt="Visa" />
-                </div>
                 <div class="contact-info">
                     <p>ФОП Панченко Гліб Станіславович</p>
                     <p>02068, Україна, місто Київ, вулиця Драгоманова, будинок 23 б</p>
                     <p>ІПН: 3733906719</p>
                     <p>Тел: +380 50 171 56 24</p>
                     <p>Email: calories365.diary@gmail.com</p>
+                </div>
+                <div class="payment-logos">
+                    <img src="@/assets/1159x220.svg" alt="Visa" />
                 </div>
             </div>
             </div>
@@ -398,6 +397,9 @@ export default {
             display: flex;
             justify-content: center;
             gap: 20px;
+            @media (max-width: $bp-medium) {
+                flex-direction: column;
+            }
 
         }
         .privacy-link {
@@ -407,7 +409,6 @@ export default {
             transition: color 0.3s ease;
             @media (max-width: $bp-medium) {
                 font-size: 1rem;
-
             }
             &:hover {
                 color: #aaa;
@@ -418,6 +419,10 @@ export default {
             display: flex;
             justify-content: space-between;
             padding-top: 30px;
+
+            @media (max-width: $bp-medium) {
+                flex-direction: column;
+            }
 
             .contact-info {
                 font-size: 0.85rem;

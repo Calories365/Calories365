@@ -153,7 +153,8 @@
             "PasswordWasUpdated": "Пароль був оновлений",
             "NameWasUpdated": "Ім'я було оновлено",
             "PasswordUpdated": "Пароль оновлено",
-            "Result": "Дані враховано, Ваш результат нижче"
+            "Result": "Дані враховано, Ваш результат нижче",
+            "CanceledSub": "Підписку скасовано"
         },
         "Error": {
             "ProductAdditionFailed": "Не вдалося додати продукт",
