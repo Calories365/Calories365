@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Jobs\SendNewUserToBotPanelJob;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
@@ -51,6 +52,9 @@ class SocialAuthController extends Controller
                 'email' => $email,
                 'password' => bcrypt(\Str::random(16)),
             ]);
+
+            SendNewUserToBotPanelJob::dispatch($user);
+
         }
 
         return $user;
