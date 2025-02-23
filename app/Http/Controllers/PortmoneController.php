@@ -45,7 +45,8 @@ class PortmoneController extends Controller
                 'bill_amount'       => $amount,
                 'bill_currency'     => $currency,
                 'description'       => __('portmone.CaloriesSubscription'),
-                'success_url'       => route('portmone.success.payment'),
+//                'success_url'       => route('portmone.success.payment'),
+                'success_url'       => 'http://calculator.calories365.com/portmone/success',
                 'failure_url'       => route('portmone.failure.payment'),
                 'lang'              => $locale,
             ];
