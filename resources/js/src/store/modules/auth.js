@@ -424,7 +424,7 @@ const actions = {
             authApi.buyPremium(credentials)
                 .then(response => {
                     context.commit(mutationTypes.buyPremiumSuccess, response.data.portmone_url);
-                    resolve(response.data.portmone_url);
+                    resolve(response.data.premium_until);
                 })
                 .catch(result => {
                     context.commit(mutationTypes.buyPremiumFailure, result.response.data.errors);

@@ -114,7 +114,8 @@ export default {
         <section class="hero">
             <div class="container hero-content">
                 <div class="hero-image-container">
-                    <img src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />
+<!--                    <img src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />-->
+                    <img src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
                 </div>
                 <div class="hero-action">
                     <h2>{{ $t("Home.Title") }}</h2>
@@ -181,16 +182,12 @@ export default {
                     <router-link :to="{ name: 'termsOfService' }" class="privacy-link">{{ $t("Home.TermsOfService") }}</router-link>
                     <router-link :to="{ name: 'faq' }" class="privacy-link">{{ $t("Home.FAQ") }}</router-link>
                 </div>
-            <div class="main-footer_info-for-portmone">
+            <div class="main-footer_info-for-payment">
                 <div class="contact-info">
-                    <p>ФОП Панченко Гліб Станіславович</p>
-                    <p>02068, Україна, місто Київ, вулиця Драгоманова, будинок 23 б</p>
-                    <p>ІПН: 3733906719</p>
-                    <p>Тел: +380 50 171 56 24</p>
                     <p>Email: calories365.diary@gmail.com</p>
                 </div>
                 <div class="payment-logos">
-                    <img src="@/assets/1159x220.svg" alt="Visa" />
+<!--                    <img src="@/assets/1159x220.svg" alt="Visa" />-->
                 </div>
             </div>
             </div>
@@ -414,7 +411,7 @@ export default {
                 color: #aaa;
             }
         }
-        &_info-for-portmone{
+        &_info-for-payment{
 
             display: flex;
             justify-content: space-between;

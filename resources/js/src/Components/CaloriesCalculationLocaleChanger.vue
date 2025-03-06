@@ -47,13 +47,27 @@ export default {
         ...mapState({
             selectedLocale: state => state.changeLocale.selectedLocale,
             locales: state => state.changeLocale.locales,
+            russianEnabled: state => state.language ? state.language.russianLanguageEnabled : true
         }),
         filteredLocales() {
-            return this.locales.filter(locale => locale !== this.selectedLocale);
+            // Filter out Russian when it's disabled
+            const availableLocales = this.russianEnabled ? 
+                this.locales : 
+                this.locales.filter(locale => locale !== 'ru');
+                
+            return availableLocales.filter(locale => locale !== this.selectedLocale);
         },
     },
     mounted() {
-        // this.changeLocale(localStorage.getItem('locale') || 'en');
+        // Fetch language status when component is mounted
+        this.$store.dispatch('language/fetchLanguageStatus');
+        
+        // Check if the current locale is Russian and it's disabled, switch to English
+        this.$nextTick(() => {
+            if (this.selectedLocale === 'ru' && !this.russianEnabled) {
+                this.changeLocale('en');
+            }
+        });
     },
 }
 

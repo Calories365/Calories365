@@ -28,8 +28,9 @@ export default {
                 this.$router.push({ name: "cabinet" });
                 return;
             }
-            this.$store.dispatch(actionTypes.buyPremium).then((url) => {
-                window.location.href = url;
+            this.$store.dispatch(actionTypes.buyPremium).then((premium_until) => {
+                // window.location.href = url;
+                this.currentUser.premium_until = premium_until;
             });
         },
         cancelPremium() {

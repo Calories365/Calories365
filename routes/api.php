@@ -37,7 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/telegram-link', [\App\Http\Controllers\TelegramLinkController::class, 'getLink'])
             ->name('telegram.link');
 
-        Route::post('/buy-premium', [\App\Http\Controllers\PortmoneController::class, 'generatePaymentLink'])->name('buyPremium');
+        Route::post('/buy-premium', [\App\Http\Controllers\PaymentController::class, 'generatePaymentLink'])->name('buyPremium');
+
+        Route::get('/language/status', [\App\Http\Controllers\LanguageSettingController::class, 'getRussianLanguageStatus'])
+            ->name('language.status');
     });
 });
 Route::middleware('check.bot.key')->group(function () {
@@ -65,9 +68,14 @@ Route::middleware('check.bot.key')->group(function () {
 
         Route::get('/caloriesEndPoint/users-for-bot-multiple', [\App\Http\Controllers\UserController::class, 'showUsersInfoForBotMultiple']);
 
+        Route::post('/caloriesEndPoint/toggleRussianLanguage', [\App\Http\Controllers\LanguageSettingController::class, 'toggleRussianLanguage'])
+            ->name('language.toggleRussian');
+
         Route::get('/caloriesEndPoint/all-users', [\App\Http\Controllers\UserController::class, 'showAllUsers']);
     });
 });
+
+
 
 use App\Http\Controllers\SocialAuthController;
 
