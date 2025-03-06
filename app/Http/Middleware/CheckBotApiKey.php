@@ -35,12 +35,12 @@ class CheckBotApiKey
             return $next($request);
         }
 
-//        $userId = $request->header('X-Calories-Id');
-//        if (!$userId) {
-//            return response()->json(['error' => 'Calories ID not provided'], Response::HTTP_UNAUTHORIZED);
-//        }
-//
-//        Auth::loginUsingId($userId);
+        $userId = $request->header('X-Calories-Id');
+        if (!$userId) {
+            return response()->json(['error' => 'Calories ID not provided'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        Auth::loginUsingId($userId);
 
         $locale = $request->header('X-Locale');
         if ($locale) {
