@@ -114,8 +114,8 @@ export default {
         <section class="hero">
             <div class="container hero-content">
                 <div class="hero-image-container">
-<!--                    <img src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />-->
-                    <img src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
+                    <img src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />
+<!--                    <img src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />-->
                 </div>
                 <div class="hero-action">
                     <h2>{{ $t("Home.Title") }}</h2>
