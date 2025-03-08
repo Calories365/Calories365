@@ -49,22 +49,27 @@ export default {
             locales: state => state.changeLocale.locales,
             russianEnabled: state => state.language ? state.language.russianLanguageEnabled : true
         }),
+        shouldShowRussian() {
+            // Don't show Russian if in academic mode OR Russian is disabled from backend
+            return !this.$isAcademic && this.russianEnabled;
+        },
         filteredLocales() {
-            // Filter out Russian when it's disabled
-            const availableLocales = this.russianEnabled ? 
-                this.locales : 
-                this.locales.filter(locale => locale !== 'ru');
-                
-            return availableLocales.filter(locale => locale !== this.selectedLocale);
+            // Filter out Russian when it's disabled or in academic mode
+            return this.locales.filter(locale => {
+                if (locale === 'ru') {
+                    return this.shouldShowRussian;
+                }
+                return locale !== this.selectedLocale;
+            });
         },
     },
     mounted() {
         // Fetch language status when component is mounted
         this.$store.dispatch('language/fetchLanguageStatus');
         
-        // Check if the current locale is Russian and it's disabled, switch to English
+        // Check if the current locale is Russian and it's disabled or in academic mode, switch to English
         this.$nextTick(() => {
-            if (this.selectedLocale === 'ru' && !this.russianEnabled) {
+            if (this.selectedLocale === 'ru' && !this.shouldShowRussian) {
                 this.changeLocale('en');
             }
         });

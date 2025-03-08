@@ -3,6 +3,7 @@ import { mapState } from "vuex";
 import { actionTypes } from "@/store/modules/auth.js";
 import CaloriesButton from "../Components/CaloriesButton.vue";
 import PremiumSection from "../Components/PremiumSection.vue";
+import { useAcademic } from '@/composables/useAcademic';
 
 export default {
     name: "LandingPage",
@@ -95,6 +96,9 @@ export default {
             this.$store.dispatch("setError", errorMessage);
         }
 
+        // Log whether the application is in academic mode
+        console.log('Academic mode:', this.$isAcademic ? 'ENABLED' : 'DISABLED');
+
         if (this.currentUser) {
             this.telegramAuth = this.currentUser.telegram_auth;
             this.$store.dispatch(actionTypes.getTelegramLink)
@@ -114,8 +118,8 @@ export default {
         <section class="hero">
             <div class="container hero-content">
                 <div class="hero-image-container">
-                    <img src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />
-<!--                    <img src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />-->
+                    <img v-if="!$isAcademic" src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />
+                    <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
                 </div>
                 <div class="hero-action">
                     <h2>{{ $t("Home.Title") }}</h2>
