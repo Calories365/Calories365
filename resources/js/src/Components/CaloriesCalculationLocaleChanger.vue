@@ -54,12 +54,20 @@ export default {
             return !this.$isAcademic && this.russianEnabled;
         },
         filteredLocales() {
-            // Filter out Russian when it's disabled or in academic mode
+            // Filter out the currently selected locale and potentially Russian
             return this.locales.filter(locale => {
+                // Always filter out the currently selected locale
+                if (locale === this.selectedLocale) {
+                    return false;
+                }
+                
+                // Filter out Russian when not allowed
                 if (locale === 'ru') {
                     return this.shouldShowRussian;
                 }
-                return locale !== this.selectedLocale;
+                
+                // Keep all other languages
+                return true;
             });
         },
     },
