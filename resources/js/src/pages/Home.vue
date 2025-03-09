@@ -175,7 +175,7 @@ export default {
             </div>
         </section>
 
-        <section class="premium">
+        <section class="premium" v-if="!$isAcademic">
             <PremiumSection :isPremium="isPremium" :currentUser="currentUser" :is-home-page="true" />
         </section>
 

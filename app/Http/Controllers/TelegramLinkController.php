@@ -17,20 +17,27 @@ class TelegramLinkController extends Controller
     public function getLink(Request $request)
     {
         $user = $request->user();
-
+        
+        // Check if we're in academic mode using the app container
+        $isAcademic = app('academic') === true;
+        
+        // Generate a new code for the user
         $newCode = Str::random(10);
-
         TelegramCode::where('user_id', $user->id)->delete();
-
         TelegramCode::create([
             'user_id'               => $user->id,
             'telegram_code'         => $newCode,
             'telegram_code_expire_at' => Carbon::now()->addMinutes(30),
         ]);
 
-        $baseUrl = config('services.telegram_bot_url');
+        // Get the appropriate bot URL based on academic status
+        if ($isAcademic) {
+            $baseUrl = config('services.academic_telegram_bot_url');
+        } else {
+            $baseUrl = config('services.telegram_bot_url');
+        }
+        
         $finalLink = $baseUrl.'?start='.$newCode;
-
         Log::info('Generated telegram link: '.$finalLink);
 
         return response()->json([
