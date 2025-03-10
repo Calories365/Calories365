@@ -1,6 +1,7 @@
 <script>
 import { mapState } from "vuex";
 import { actionTypes } from "@/store/modules/auth.js";
+import { useAcademic } from '@/composables/useAcademic';
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import router from "@/router/router.js";
 import PremiumSection from "../Components/PremiumSection.vue";
@@ -106,7 +107,7 @@ export default {
                     <div class="top-info_avatar" @click="play">
                         <img src="@/assets/valera.png" />
                     </div>
-                    <div class="top-info_premium">
+                    <div class="top-info_premium" v-if="!$isAcademic">
                         <PremiumSection :isPremium="isPremium" :currentUser="currentUser" />
                     </div>
                 </div>
@@ -320,7 +321,7 @@ export default {
         padding: 20px 10px 20px 10px;
         flex-wrap: wrap;
         overflow-y: hidden;
-        overflow-x: scroll;
+        //overflow-x: scroll;
         justify-content: space-between;
 
         @media (max-width: 768px) {
@@ -337,7 +338,7 @@ export default {
         padding: 20px 10px 20px 10px;
         flex-wrap: wrap;
         overflow-y: hidden;
-        overflow-x: scroll;
+        //overflow-x: scroll;
         @media (max-width: 768px) {
             width: 100%;
         }

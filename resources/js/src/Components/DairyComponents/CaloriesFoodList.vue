@@ -126,7 +126,7 @@ export default {
     &__list {
         width: 100%;
         overflow: auto;
-        overflow-y: scroll;
+        //overflow-y: scroll;
         height: 100%;
     }
 

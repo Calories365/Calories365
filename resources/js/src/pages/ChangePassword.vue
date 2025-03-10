@@ -298,7 +298,7 @@ export default {
         padding: 20px 10px 20px 10px;
         flex-wrap: wrap;
         overflow-y: hidden;
-        overflow-x: scroll;
+        //overflow-x: scroll;
         justify-content: space-between;
 
         @media (max-width: 768px) {
@@ -317,7 +317,7 @@ export default {
         padding: 10px 10px 10px 10px;
         flex-wrap: wrap;
         overflow-y: hidden;
-        overflow-x: scroll;
+        //overflow-x: scroll;
         @media (max-width: 768px) {
             width: 100%;
         }

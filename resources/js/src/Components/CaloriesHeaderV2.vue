@@ -54,7 +54,8 @@ export default {
             const fixedClass = 'fixed-header';
             const layoutFixedMarginClass = 'layout-fixed-margin';
 
-            const threshold = (this.$route.name === 'register') ? 100 : 70;
+            // const threshold = (this.$route.name === 'register') ? 100 : 80;
+            const threshold = 200;
 
             const scrollY = window.scrollY || window.pageYOffset;
 

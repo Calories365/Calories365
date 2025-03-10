@@ -96,8 +96,6 @@ export default {
             this.$store.dispatch("setError", errorMessage);
         }
 
-        // Log whether the application is in academic mode
-        console.log('Academic mode:', this.$isAcademic ? 'ENABLED' : 'DISABLED');
 
         if (this.currentUser) {
             this.telegramAuth = this.currentUser.telegram_auth;
