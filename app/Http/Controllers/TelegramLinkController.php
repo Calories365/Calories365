@@ -17,14 +17,11 @@ class TelegramLinkController extends Controller
     public function getLink(Request $request)
     {
         $user = $request->user();
-        
-        // Get locale from the request or default to ua
+
         $locale = $request->input('locale', 'ua');
 
-        // Check if we're in academic mode using the app container
         $isAcademic = app('academic') === true;
 
-        // Generate a new code for the user
         $newCode = Str::random(10);
         TelegramCode::where('user_id', $user->id)->delete();
         TelegramCode::create([
@@ -33,14 +30,12 @@ class TelegramLinkController extends Controller
             'telegram_code_expire_at' => Carbon::now()->addMinutes(30),
         ]);
 
-        // Get the appropriate bot URL based on academic status
         if ($isAcademic) {
             $baseUrl = config('services.academic_telegram_bot_url');
         } else {
             $baseUrl = config('services.telegram_bot_url');
         }
 
-        // Add the locale to the start parameter with an underscore
         $finalLink = $baseUrl.'?start='.$newCode.'_'.$locale;
         Log::info('Generated telegram link: '.$finalLink);
 
