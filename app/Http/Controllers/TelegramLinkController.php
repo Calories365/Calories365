@@ -18,9 +18,12 @@ class TelegramLinkController extends Controller
     {
         $user = $request->user();
         
+        // Get locale from the request or default to ua
+        $locale = $request->input('locale', 'ua');
+
         // Check if we're in academic mode using the app container
         $isAcademic = app('academic') === true;
-        
+
         // Generate a new code for the user
         $newCode = Str::random(10);
         TelegramCode::where('user_id', $user->id)->delete();
@@ -36,8 +39,9 @@ class TelegramLinkController extends Controller
         } else {
             $baseUrl = config('services.telegram_bot_url');
         }
-        
-        $finalLink = $baseUrl.'?start='.$newCode;
+
+        // Add the locale to the start parameter with an underscore
+        $finalLink = $baseUrl.'?start='.$newCode.'_'.$locale;
         Log::info('Generated telegram link: '.$finalLink);
 
         return response()->json([
@@ -83,7 +87,7 @@ class TelegramLinkController extends Controller
             'user_id' => $userId,
             'email' => $user->email,
             'name' => $user->name,
-            'premium' => $premium
+            'premium' => $premium,
         ]);
     }
 

@@ -12,9 +12,20 @@ library.add(faAngleDown)
 
 export default {
     data() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const langParam = urlParams.get('lang');
+        
+        const validLocales = ['en', 'ru', 'ua'];
+        let userLocale = localStorage.getItem('locale') || 'ua';
+        
+        if (langParam && validLocales.includes(langParam)) {
+            userLocale = langParam;
+            localStorage.setItem('locale', langParam);
+        }
+        
         return {
             username: 'Пена',
-            locale: localStorage.getItem('locale') || 'ua',
+            locale: userLocale,
         };
     },
     components: {
