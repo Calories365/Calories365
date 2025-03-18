@@ -201,7 +201,9 @@ class CaloriesAPIBotController extends BaseController
         $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
         $product = Product::where('id', $productTranslation['product_id'])->first();
 
-
+        if ($productTranslation['_rankingScore'] < 0.9){
+            return false;
+        }
 
         if($productTranslation){
             $productInfo = [
@@ -231,10 +233,7 @@ class CaloriesAPIBotController extends BaseController
                 'product' => $productInfo
             ]);
         } else {
-            return response()->json([
-                'message' => 'Product not found',
-                'product' => false
-            ]);
+            return false;
         }
     }
 
