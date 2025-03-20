@@ -121,7 +121,7 @@ export default {
                 </div>
                 <div class="hero-action">
                     <h2>{{ $t("Home.Title") }}</h2>
-                    <p>{{ $t("Home.Description") }}</p>
+                    <p>{{ $t("Home.DescriptionP1") }} <span class="hero-action__desc-link">Telegram bot</span> {{ $t("Home.DescriptionP2") }}</p>
                     <div class="hero-buttons">
                         <calories-button @click="goToCalculator" class="calculator-section_head-button">
                             {{ $t("Home.LoseWeight") }}
@@ -184,14 +184,14 @@ export default {
                     <router-link :to="{ name: 'termsOfService' }" class="privacy-link">{{ $t("Home.TermsOfService") }}</router-link>
                     <router-link :to="{ name: 'faq' }" class="privacy-link">{{ $t("Home.FAQ") }}</router-link>
                 </div>
-            <div class="main-footer_info-for-payment">
-                <div class="contact-info">
-                    <p>Email: calories365.diary@gmail.com</p>
+                <div class="main-footer_info-for-payment">
+                    <div class="contact-info">
+                        <p>Email: calories365.diary@gmail.com</p>
+                    </div>
+                    <div class="payment-logos">
+                        <!--                    <img src="@/assets/1159x220.svg" alt="Visa" />-->
+                    </div>
                 </div>
-                <div class="payment-logos">
-<!--                    <img src="@/assets/1159x220.svg" alt="Visa" />-->
-                </div>
-            </div>
             </div>
         </footer>
     </div>
@@ -250,6 +250,18 @@ export default {
             flex-direction: column;
             align-items: center;
             text-align: center;
+
+            &__desc-link{
+                color: inherit;
+                text-decoration: underline;
+                transition: all 0.3s ease;
+                color: $main-color;
+                
+                &:hover{
+                color: $main-color;
+                text-decoration: underline;
+            }
+            }
 
             h2 {
                 font-size: 2.5rem;

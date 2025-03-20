@@ -14,15 +14,15 @@ export default {
     data() {
         const urlParams = new URLSearchParams(window.location.search);
         const langParam = urlParams.get('lang');
-        
+
         const validLocales = ['en', 'ru', 'ua'];
         let userLocale = localStorage.getItem('locale') || 'ua';
-        
+
         if (langParam && validLocales.includes(langParam)) {
             userLocale = langParam;
             localStorage.setItem('locale', langParam);
         }
-        
+
         return {
             username: 'Пена',
             locale: userLocale,
@@ -50,6 +50,7 @@ export default {
                 this.$store.dispatch('language/fetchLanguageStatus')
                     .then(() => {
                         const language = this.$store.state.language;
+                        console.log(language)
                         // If Russian is disabled and current locale is Russian, switch to English
                         if (this.locale === 'ru' && language && language.russianLanguageEnabled === false) {
                             this.locale = 'en';

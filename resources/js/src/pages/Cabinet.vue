@@ -24,11 +24,11 @@ export default {
         }),
         telegramLinkText() {
             if (!this.currentUser?.email_verified_at) {
-                return this.$t("Cabinet.ConfirmEmail");
+                return this.$t("Home.ConfirmEmail");
             }
             return this.telegramAuth
-                ? this.$t("Cabinet.Connected")
-                : this.$t("Cabinet.Connect");
+                ? this.$t("Home.Connected")
+                : this.$t("Home.Connect");
         },
         isPremium() {
             if (!this.currentUser?.premium_until) {
@@ -121,7 +121,7 @@ export default {
                         <input v-model="name" class="mid-info_credentials" />
                     </div>
                     <div class="mid-info_link">
-                        <div class="mid-info_text">{{ $t("Cabinet.TelegramBot") }}:</div>
+                        <div class="mid-info_text"><a href="#" @click.prevent="openTelegramLink" class="telegram-bot-link">{{ $t("Cabinet.TelegramBot") }}</a>:</div>
                         <span
                             class="mid-info_credentials link"
                             @click="openTelegramLink"
@@ -162,6 +162,17 @@ export default {
 
 
 <style scoped lang="scss">
+
+.telegram-bot-link {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s ease;
+
+    &:hover {
+        color: $main-color;
+        text-decoration: underline;
+    }
+}
 
 .page-cabinet {
     width: 100%;

@@ -38,9 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('telegram.link');
 
         Route::post('/buy-premium', [\App\Http\Controllers\PaymentController::class, 'generatePaymentLink'])->name('buyPremium');
-
-        Route::get('/language/status', [\App\Http\Controllers\LanguageSettingController::class, 'getRussianLanguageStatus'])
-            ->name('language.status');
     });
 });
 Route::middleware('check.bot.key')->group(function () {
@@ -78,6 +75,8 @@ Route::middleware('check.bot.key')->group(function () {
 
 
 use App\Http\Controllers\SocialAuthController;
+Route::get('/language/status', [\App\Http\Controllers\LanguageSettingController::class, 'getRussianLanguageStatus'])
+    ->name('language.status');
 
 Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
     ->name('social.google.redirect');

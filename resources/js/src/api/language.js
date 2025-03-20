@@ -22,4 +22,4 @@ export function getLanguageStatus() {
 
 export default {
     getLanguageStatus
-}; 
+};

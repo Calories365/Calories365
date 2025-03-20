@@ -55,7 +55,8 @@
     },
     "Home": {
         "Title": "Calorie Tracking",
-        "Description": "Our app helps you quickly calculate your diet, keep a detailed food diary, and connect a voice Telegram bot for easy data entry.",
+        "DescriptionP1": "Our app helps quickly calculate the diet, keep a detailed food diary, and connect a voice assistant",
+        "DescriptionP2": "for convenient data entry.",
         "LoseWeight": "Lose Weight!",
         "TelegramBotTitle": "Telegram Bot for Convenience",
         "TelegramBotDesc": "Connect a voice Telegram bot for quick and easy meal logging. Just say what you ate, and the bot will process it instantly.",
@@ -409,4 +410,3 @@
         "ConclusionText": "We hope this FAQ covers your main questions about Calories365. If you have more questions or ideas, feel free to reach out via any of our contact channels. Thank you for using Calories365 to track your diet and health!"
     }
 }
-
