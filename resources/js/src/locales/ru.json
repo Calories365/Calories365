@@ -82,7 +82,8 @@
         "AgreeToTermsPart1": "Я согласен с",
         "AgreeToTermsPart2": "",
         "TermsOfService2": "Условиями использования",
-        "CancelPremium": "Отменить премиум"
+        "CancelPremium": "Отменить премиум",
+        "CaloriesDesc": "Демонстрация Calories365"
     },
     "calculationResult": {
         "calculatorSectionHeadOne": "Результаты",

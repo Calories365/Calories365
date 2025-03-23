@@ -19,6 +19,19 @@ export default {
         ...mapState({
             currentUser: state => state.auth.currentUser,
         }),
+        /**
+         * Depending on the current locale, we return the corresponding video.
+         */
+        videoUrl() {
+            const locale = this.$i18n.locale;
+            if (locale === 'ua') {
+                return 'https://www.youtube.com/embed/UJO-9fank5c';
+            } else if (locale === 'ru') {
+                return 'https://www.youtube.com/embed/_-fZHn5Xv8c';
+            } else {
+                return 'https://www.youtube.com/embed/q-42W0YCldk';
+            }
+        },
         telegramLinkText() {
             if (!this.currentUser) {
                 return this.$t("Cabinet.Connect");
@@ -121,7 +134,11 @@ export default {
                 </div>
                 <div class="hero-action">
                     <h2>{{ $t("Home.Title") }}</h2>
-                    <p>{{ $t("Home.DescriptionP1") }} <span class="hero-action__desc-link">Telegram bot</span> {{ $t("Home.DescriptionP2") }}</p>
+                    <p>
+                        {{ $t("Home.DescriptionP1") }}
+                        <span class="hero-action__desc-link" @click="openTelegramLink">Telegram bot</span>
+                        {{ $t("Home.DescriptionP2") }}
+                    </p>
                     <div class="hero-buttons">
                         <calories-button @click="goToCalculator" class="calculator-section_head-button">
                             {{ $t("Home.LoseWeight") }}
@@ -157,6 +174,26 @@ export default {
             </div>
         </section>
 
+        <section class="video-section">
+            <div class="container video-container">
+                <h2>{{ $t("Home.CaloriesDesc") }}</h2>
+                <div class="video-wrapper">
+                    <iframe
+                        :src="videoUrl"
+                        frameborder="0"
+                        allow="accelerometer;
+                               autoplay;
+                               clipboard-write;
+                               encrypted-media;
+                               gyroscope;
+                               picture-in-picture"
+                        allowfullscreen
+                    ></iframe>
+                </div>
+            </div>
+        </section>
+
+
         <section class="transformation">
             <div class="container transformation-content">
                 <div class="transformation-images">
@@ -189,7 +226,7 @@ export default {
                         <p>Email: calories365.diary@gmail.com</p>
                     </div>
                     <div class="payment-logos">
-                        <!--                    <img src="@/assets/1159x220.svg" alt="Visa" />-->
+                        <!-- <img src="@/assets/1159x220.svg" alt="Visa" /> -->
                     </div>
                 </div>
             </div>
@@ -211,7 +248,7 @@ export default {
         padding: 20px;
     }
 
-    /* Баннер */
+    /* Banner section */
     .hero {
         background-color: #f9f9f9;
         padding: 40px 0;
@@ -251,16 +288,11 @@ export default {
             align-items: center;
             text-align: center;
 
-            &__desc-link{
-                color: inherit;
+            &__desc-link {
                 text-decoration: underline;
                 transition: all 0.3s ease;
                 color: $main-color;
-                
-                &:hover{
-                color: $main-color;
-                text-decoration: underline;
-            }
+                cursor: pointer;
             }
 
             h2 {
@@ -290,7 +322,7 @@ export default {
         }
     }
 
-    /* Блок можливостей */
+    /* Features section */
     .features {
         background: #fff;
         padding: 60px 0;
@@ -317,19 +349,74 @@ export default {
                 font-size: 1.8rem;
                 margin-bottom: 10px;
             }
+
             p {
                 font-size: 1.1rem;
                 line-height: 1.5;
                 margin-bottom: 20px;
             }
+
             .mid-info_button {
                 margin-top: auto;
             }
         }
     }
 
-    .transformation {
+    /* Video section*/
+    .video-section {
         background-color: #f9f9f9;
+        padding: 30px 0;
+        text-align: center;
+
+
+        .video-container {
+            max-width: 900px;
+            margin: 0 auto;
+
+            h2 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            height: 0;
+            margin-top: 20px;
+
+            iframe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+
+    /* Video section adaptation*/
+    @media (max-width: 768px) {
+        .video-section {
+            padding: 30px 0;
+
+            .video-wrapper {
+                padding-bottom: 56.25%;
+            }
+        }
+    }
+
+    /* Video section adaptation*/
+    @media (min-width: 1400px) {
+        .video-section .video-container {
+            max-width: 1000px;
+        }
+    }
+
+    /* Transformations section*/
+    .transformation {
+        background-color: #fff;
         padding: 40px 0;
 
         @media (max-width: $bp-medium) {
@@ -343,6 +430,7 @@ export default {
             text-align: center;
             gap: 20px;
         }
+
         .transformation-images {
             display: flex;
             align-items: center;
@@ -359,9 +447,11 @@ export default {
                 border-radius: 10px;
                 border: 2px solid $main-color;
             }
+
             .arrow_desktop {
                 font-size: 7rem;
                 color: $main-color;
+
                 @media (max-width: $bp-medium) {
                     display: none;
                 }
@@ -370,11 +460,13 @@ export default {
             .arrow_mobile {
                 font-size: 7rem;
                 color: $main-color;
+
                 @media (min-width: $bp-medium) {
                     display: none;
                 }
             }
         }
+
         .transformation-button {
             background-color: #4caf50;
             color: #fff;
@@ -387,8 +479,9 @@ export default {
         }
     }
 
+    /* Premium section*/
     .premium {
-        background-color: #fff;
+        background-color: #f9f9f9;
         padding: 60px 0;
 
         @media (min-width: $bp-medium) {
@@ -398,6 +491,7 @@ export default {
         text-align: center;
     }
 
+    /* Footer*/
     .main-footer {
         background-color: #333;
         color: #fff;
@@ -408,25 +502,28 @@ export default {
             display: flex;
             justify-content: center;
             gap: 20px;
+
             @media (max-width: $bp-medium) {
                 flex-direction: column;
             }
-
         }
+
         .privacy-link {
             color: #fff;
             text-decoration: none;
             font-size: 1.2rem;
             transition: color 0.3s ease;
+
             @media (max-width: $bp-medium) {
                 font-size: 1rem;
             }
+
             &:hover {
                 color: #aaa;
             }
         }
-        &_info-for-payment{
 
+        &_info-for-payment {
             display: flex;
             justify-content: space-between;
             padding-top: 30px;
@@ -437,6 +534,7 @@ export default {
 
             .contact-info {
                 font-size: 0.85rem;
+
                 p {
                     margin: 5px 0;
                 }
@@ -447,12 +545,12 @@ export default {
                 justify-content: center;
                 gap: 20px;
                 margin: 10px 0;
+
                 img {
                     height: 100px;
                 }
             }
         }
-
     }
 }
 </style>
