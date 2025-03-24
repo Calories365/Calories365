@@ -23,6 +23,7 @@ export default {
             localStorage.setItem('locale', langParam);
         }
 
+        localStorage.setItem('locale', langParam);
         return {
             username: 'Пена',
             locale: userLocale,
@@ -52,9 +53,9 @@ export default {
                         const language = this.$store.state.language;
                         console.log(language)
                         // If Russian is disabled and current locale is Russian, switch to English
-                        if (this.locale === 'ru' && language && language.russianLanguageEnabled === false) {
-                            this.locale = 'en';
-                        }
+                        // if (this.locale === 'ru' && language && language.russianLanguageEnabled === false) {
+                        //     this.locale = 'en';
+                        // }
                         this.$store.dispatch(actionTypes.setLocale, {locale: this.locale, i18n: this.$i18n});
                     })
                     .catch(error => {

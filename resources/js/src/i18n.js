@@ -8,10 +8,10 @@ const messages = {
     ru,
     ua
 };
-
+let userLocale = localStorage.getItem('locale') || 'ua';
 const i18n = createI18n({
     legacy: false,
-    locale: 'ua',
+    locale: userLocale,
     fallbackLocale: 'ua',
     messages,
 });
