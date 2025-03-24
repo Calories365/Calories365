@@ -78,9 +78,8 @@ This allows adding or removing fields and columns without changing the component
 
 ## 4. Development Environment
 
-- **Modified Laradock**: a unified environment with PHP-FPM, Node.js, MySQL, Redis, Meilisearch, etc.
-- **Ngrok**: remote access to the local server (Telegram Webhook can come to the local machine).
-- **FFmpeg**: installed for media file conversion/analysis (voice messages).
+- **Development with Docker**: The build is configured to automatically launch the development server along with Ngrok, ensuring seamless remote access to the local environment.
+- **Automatic Webhook Setup**: On service startup, the bot's webhook is installed automatically, streamlining integration and configuration.
 
 ---
 
