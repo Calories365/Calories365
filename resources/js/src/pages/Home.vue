@@ -133,7 +133,6 @@ export default {
                     <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
                 </div>
                 <div class="hero-action">
-                    Academic!
                     <h2>{{ $t("Home.Title") }}</h2>
                     <p>
                         {{ $t("Home.DescriptionP1") }}
@@ -174,26 +173,6 @@ export default {
                 </div>
             </div>
         </section>
-
-        <section class="video-section">
-            <div class="container video-container">
-                <h2>{{ $t("Home.CaloriesDesc") }}</h2>
-                <div class="video-wrapper">
-                    <iframe
-                        :src="videoUrl"
-                        frameborder="0"
-                        allow="accelerometer;
-                               autoplay;
-                               clipboard-write;
-                               encrypted-media;
-                               gyroscope;
-                               picture-in-picture"
-                        allowfullscreen
-                    ></iframe>
-                </div>
-            </div>
-        </section>
-
 
         <section class="transformation">
             <div class="container transformation-content">
