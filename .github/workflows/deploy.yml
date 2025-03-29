@@ -21,8 +21,7 @@ jobs:
 
           script: |
             cd /home/maxim/var/www/calories365/src
-            git checkout academic
-            git pull origin academic
+            git pull
             cd ..
             docker-compose up -d --build
             docker builder prune --all --force
