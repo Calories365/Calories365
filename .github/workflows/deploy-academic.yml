@@ -21,7 +21,7 @@ jobs:
 
           script: |
             cd /home/maxim/var/www/calories365.xyz/src
-            git pull
+            git clone https://github.com/Calories365/Calories365.git
 #            cd ..
 #            docker-compose up -d --build
 #            docker builder prune --all --force
