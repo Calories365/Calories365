@@ -25,4 +25,4 @@ jobs:
             cd ..
             docker-compose up -d --build
             docker builder prune --all --force
-            docker-compose exec calculator_php php artisan migrate --force
+            docker-compose exec calories365.xyz_php php artisan migrate --force
