@@ -22,7 +22,7 @@ jobs:
           script: |
             cd /home/maxim/var/www/calories365.xyz/src
             git pull
-            cd ..
-            docker-compose up -d --build
-            docker builder prune --all --force
-            docker-compose exec calculator_php php artisan migrate --force
+#            cd ..
+#            docker-compose up -d --build
+#            docker builder prune --all --force
+#            docker-compose exec calculator_php php artisan migrate --force
