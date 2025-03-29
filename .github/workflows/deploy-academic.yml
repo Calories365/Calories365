@@ -20,10 +20,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
 
           script: |
-            rm -rf /home/maxim/var/www/calories365.xyz/src
-            git clone "https://${{ secrets.GH_PAT }}@github.com/Calories365/Calories365.git" /home/maxim/var/www/calories365.xyz/src
-
-#            cd ..
-#            docker-compose up -d --build
-#            docker builder prune --all --force
-#            docker-compose exec calculator_php php artisan migrate --force
+            cd /home/maxim/var/www/calories365.xyz/src
+            git pull
+            cd ..
+            docker-compose up -d --build
+            docker builder prune --all --force
+            docker-compose exec calculator_php php artisan migrate --force

@@ -133,7 +133,7 @@ export default {
                     <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
                 </div>
                 <div class="hero-action">
-                    Academic
+                    Academic123
                     <h2>{{ $t("Home.Title") }}</h2>
                     <p>
                         {{ $t("Home.DescriptionP1") }}
