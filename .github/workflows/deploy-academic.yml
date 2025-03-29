@@ -1,0 +1,28 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ "academic" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+
+          script: |
+            cd /home/maxim/var/www/calories365.xyz/src
+            git pull
+            cd ..
+            docker-compose up -d --build
+            docker builder prune --all --force
+            docker-compose exec calculator_php php artisan migrate --force
