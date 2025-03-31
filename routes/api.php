@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,18 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('telegram.link');
 
         Route::post('/buy-premium', [\App\Http\Controllers\PaymentController::class, 'generatePaymentLink'])->name('buyPremium');
+
+        // Маршрут для загрузки голосовых записей 
+        Route::post('/voice/upload', [VoiceController::class, 'upload'])->name('voice.upload');
+
+        // Маршрут для сохранения продуктов
+        Route::post('/voice/save-products', [VoiceController::class, 'saveProducts'])->name('voice.saveProducts');
+
+        // Маршрут для генерации данных продукта
+        Route::post('/voice/generate-product', [VoiceController::class, 'generateProductData'])->name('voice.generateProduct');
+
+        // Маршрут для поиска продукта по названию
+        Route::post('/voice/search-product', [VoiceController::class, 'searchProduct'])->name('voice.searchProduct');
     });
 });
 Route::middleware('check.bot.key')->group(function () {
