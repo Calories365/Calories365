@@ -6,6 +6,7 @@ import dairy from "@/store/modules/dairy.js";
 import changeLocale from "@/store/modules/changeLocale.js";
 import stats from "@/store/modules/stats.js";
 import language from "@/store/modules/language.js";
+import voice from "@/store/modules/voice.js";
 
 export default createStore({
     state: {
@@ -56,6 +57,6 @@ export default createStore({
         },
     },
     modules: {
-        auth, calculation, dairy, changeLocale, stats, language
+        auth, calculation, dairy, changeLocale, stats, language, voice
     }
 });

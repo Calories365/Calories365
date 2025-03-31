@@ -113,38 +113,61 @@ class Product extends Model
 
         $filters = "active = 1 AND locale = '{$locale}' AND (user_id = {$user_id} OR user_id IS NULL)";
 
-        $res = $client->index('products')->search($query, [
-            'showRankingScore' => true,
-            'limit' => 2,
-            'filter' => $filters,
-        ]);
+        try {
+            $res = $client->index('products')->search($query, [
+                'showRankingScore' => true,
+                'limit' => 2,
+                'filter' => $filters,
+            ]);
 
-        $hits = $res->getHits();
+            $hits = $res->getHits();
 
-        if (!empty($hits))
-        {
-            if($hits[0]['_rankingScore'] == $hits[1]['_rankingScore'])
-            {
-                if ($hits[0]['user_id'])
-                {
+            // Если массив hits пуст, сразу возвращаем false
+            if (empty($hits)) {
+                Log::info("No products found.");
+                return false;
+            }
+
+            // Если есть только один результат, сразу используем его
+            if (count($hits) == 1) {
+                $firstProduct = $hits[0];
+                $rankingScore = $firstProduct['_rankingScore'] ?? 0;
+                
+                if ($rankingScore) {
+                    return $firstProduct;
+                } else {
+                    return false;
+                }
+            }
+
+            // Если есть два и более результата, сравниваем их
+            if (isset($hits[0]['_rankingScore']) && isset($hits[1]['_rankingScore']) && 
+                $hits[0]['_rankingScore'] == $hits[1]['_rankingScore']) {
+                // Если рейтинги равны, предпочитаем продукт пользователя
+                if (isset($hits[0]['user_id']) && $hits[0]['user_id']) {
                     $firstProduct = $hits[0];
-                } else
-                {
+                } else {
                     $firstProduct = $hits[1];
                 }
             } else {
+                // Иначе используем первый результат
                 $firstProduct = $hits[0];
             }
 
-            $rankingScore = $firstProduct['_rankingScore'];
+            $rankingScore = $firstProduct['_rankingScore'] ?? 0;
 
             if ($rankingScore) {
                 return $firstProduct;
             } else {
                 return false;
             }
-        } else {
-            Log::info("No products found.");
+        } catch (\Exception $e) {
+            Log::error("Error in getRawProduct: " . $e->getMessage(), [
+                'query' => $query,
+                'user_id' => $user_id,
+                'locale' => $locale,
+                'trace' => $e->getTraceAsString()
+            ]);
             return false;
         }
     }
