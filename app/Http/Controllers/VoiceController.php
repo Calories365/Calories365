@@ -201,7 +201,7 @@ class VoiceController extends Controller
                         ]);
                     }
 
-                    $result = $this->productService->createdProductWithTranslationsAndConsumption($productData);
+                    $result = $this->productService->createProductWithTranslationsAndConsumption($productData);
                 }
 
                 $savedProducts[] = $result;
