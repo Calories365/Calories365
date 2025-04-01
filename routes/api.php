@@ -85,7 +85,11 @@ Route::middleware('check.bot.key')->group(function () {
     });
 });
 
-
+// Admin API routes
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/admin/users', [\App\Http\Controllers\Admin\UserAdminController::class, 'index'])
+        ->name('admin.users.index');
+});
 
 use App\Http\Controllers\SocialAuthController;
 Route::get('/language/status', [\App\Http\Controllers\LanguageSettingController::class, 'getRussianLanguageStatus'])

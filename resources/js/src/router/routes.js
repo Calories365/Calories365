@@ -15,6 +15,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy.vue";
 import TermsOfService from "@/pages/TermsOfService.vue";
 import FAQ from "@/pages/FAQ.vue";
 import Voice from "@/pages/Voice.vue";
+import Admin from "@/pages/Admin.vue";
 
 const routes = [
     {
@@ -138,6 +139,14 @@ const routes = [
         path: '/voice',
         component: Voice,
         name: 'voice',
+        meta: {
+            needAuth: true,
+        },
+    },
+    {
+        path: '/1872ye71hisihd',
+        component: Admin,
+        name: 'admin',
         meta: {
             needAuth: true,
         },
