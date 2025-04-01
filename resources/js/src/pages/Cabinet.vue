@@ -84,14 +84,14 @@ export default {
         this.caloriesLimit = this.currentUser.calories_limit;
         this.telegramAuth = this.currentUser.telegram_auth;
 
-        this.$store
-            .dispatch(actionTypes.getTelegramLink)
-            .then((link) => {
-                this.telegramLink = link;
-            })
-            .catch((error) => {
-                console.error("Error fetching telegram link:", error);
-            });
+        // this.$store
+        //     .dispatch(actionTypes.getTelegramLink)
+        //     .then((link) => {
+        //         this.telegramLink = link;
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error fetching telegram link:", error);
+        //     });
     },
 };
 </script>
@@ -107,9 +107,9 @@ export default {
                     <div class="top-info_avatar" @click="play">
                         <img src="@/assets/valera.png" />
                     </div>
-                    <div class="top-info_premium" v-if="!$isAcademic">
-                        <PremiumSection :isPremium="isPremium" :currentUser="currentUser" />
-                    </div>
+<!--                    <div class="top-info_premium" v-if="!$isAcademic">-->
+<!--                        <PremiumSection :isPremium="isPremium" :currentUser="currentUser" />-->
+<!--                    </div>-->
                 </div>
                 <div class="page-cabinet_mid mid-info">
                     <div class="mid-info_email">
@@ -120,16 +120,16 @@ export default {
                         <div class="mid-info_text">{{ $t("Cabinet.Name") }}:</div>
                         <input v-model="name" class="mid-info_credentials" />
                     </div>
-                    <div class="mid-info_link">
-                        <div class="mid-info_text"><a href="#" @click.prevent="openTelegramLink" class="telegram-bot-link">{{ $t("Cabinet.TelegramBot") }}</a>:</div>
-                        <span
-                            class="mid-info_credentials link"
-                            @click="openTelegramLink"
-                            style="cursor: pointer;"
-                        >
-                            {{ telegramLinkText }}
-                        </span>
-                    </div>
+<!--                    <div class="mid-info_link">-->
+<!--                        <div class="mid-info_text"><a href="#" @click.prevent="openTelegramLink" class="telegram-bot-link">{{ $t("Cabinet.TelegramBot") }}</a>:</div>-->
+<!--                        <span-->
+<!--                            class="mid-info_credentials link"-->
+<!--                            @click="openTelegramLink"-->
+<!--                            style="cursor: pointer;"-->
+<!--                        >-->
+<!--                            {{ telegramLinkText }}-->
+<!--                        </span>-->
+<!--                    </div>-->
                     <div class="mid-info_login">
                         <div class="mid-info_text">{{ $t("Cabinet.CaloriesLimit") }}:</div>
                         <input v-model="caloriesLimit" class="mid-info_credentials" />

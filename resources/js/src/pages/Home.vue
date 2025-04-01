@@ -62,17 +62,10 @@ export default {
             this.$router.push({ name: "stats" });
         },
         openTelegramLink() {
-            if (!this.currentUser) {
-                this.$router.push({ name: "cabinet" });
-                return;
-            }
-            if (!this.currentUser?.email_verified_at) {
-                return;
-            }
-            if (this.telegramLink) {
-                window.open(this.telegramLink, "_blank");
+            if (this.currentUser && this.currentUser.email_verified_at) {
+                this.$router.push({ name: "voice" });
             } else {
-                console.error("Telegram link is not available");
+                this.$router.push("/login");
             }
         },
         buyPremium() {
@@ -136,7 +129,7 @@ export default {
                     <h2>{{ $t("Home.Title") }}</h2>
                     <p>
                         {{ $t("Home.DescriptionP1") }}
-                        <span class="hero-action__desc-link" @click="openTelegramLink">Telegram bot</span>
+                        <span class="hero-action__desc-link" @click="openTelegramLink">{{ $t("message.voice") }}</span>
                         {{ $t("Home.DescriptionP2") }}
                     </p>
                     <div class="hero-buttons">
@@ -150,10 +143,10 @@ export default {
         <section class="features">
             <div class="container features-grid">
                 <div class="feature">
-                    <h3>{{ $t("Home.TelegramBotTitle") }}</h3>
-                    <p>{{ $t("Home.TelegramBotDesc") }}</p>
+                    <h3>{{ $t("Home.VoiceInputTitle") }}</h3>
+                    <p>{{ $t("Home.VoiceInputDesc") }}</p>
                     <calories-button @click="openTelegramLink" class="mid-info_button">
-                        {{ telegramLinkText }}
+                        {{ $t("Home.GoToVoice") }}
                     </calories-button>
                 </div>
                 <div class="feature">
@@ -189,9 +182,9 @@ export default {
             </div>
         </section>
 
-        <section class="premium" v-if="!$isAcademic">
-            <PremiumSection :isPremium="isPremium" :currentUser="currentUser" :is-home-page="true" />
-        </section>
+<!--        <section class="premium" v-if="!$isAcademic">-->
+<!--            <PremiumSection :isPremium="isPremium" :currentUser="currentUser" :is-home-page="true" />-->
+<!--        </section>-->
 
         <footer class="main-footer" v-if="$route.name === 'home'">
             <div class="container">
