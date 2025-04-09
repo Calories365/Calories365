@@ -5,11 +5,15 @@ import { mapState, mapActions } from 'vuex';
 import { actionTypes } from '@/store/modules/voice';
 import { saveVoiceProducts, generateProductData, searchProduct } from '@/api/voice';
 import i18n from '@/i18n';
+import CaloriesSuccessNotification from '@/Components/CaloriesSuccessNotification.vue';
+import CaloriesErrorNotification from '@/Components/CaloriesErrorNotification.vue';
 
 export default {
     name: "Voice",
     components: {
-        FontAwesomeIcon
+        FontAwesomeIcon,
+        CaloriesSuccessNotification,
+        CaloriesErrorNotification
     },
     data() {
         return {
@@ -17,6 +21,8 @@ export default {
             products: [],
             successMessage: '',
             showSuccessMessage: false,
+            errorMessage: '',
+            showErrorMessage: false,
             mediaRecorder: null,
             audioChunks: [],
             stream: null,
@@ -43,6 +49,22 @@ export default {
             voiceUploadRecording: actionTypes.uploadRecording,
             voiceResetRecording: actionTypes.resetRecording
         }),
+        showSuccess(message) {
+            this.successMessage = message;
+            this.showSuccessMessage = true;
+            
+            setTimeout(() => {
+                this.showSuccessMessage = false;
+            }, 3000);
+        },
+        showError(message) {
+            this.errorMessage = message;
+            this.showErrorMessage = true;
+            
+            setTimeout(() => {
+                this.showErrorMessage = false;
+            }, 3000);
+        },
         faSpinner() {
             return faSpinner
         },
@@ -72,7 +94,7 @@ export default {
         },
         async toggleRecording() {
             if (!this.browserSupportsRecording) {
-                this.$store.dispatch('setError', this.$t('Voice.browserWarning'));
+                this.showError(this.$t('Voice.browserWarning'));
                 return;
             }
 
@@ -117,8 +139,9 @@ export default {
                     // Создаем Blob из записанных данных
                     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
 
-                    // Сохраняем Blob в Vuex
+                    // Сохраняем Blob в Vuex и устанавливаем состояние обработки
                     this.$store.commit('voice/RECORDING_COMPLETE', audioBlob);
+                    this.$store.commit('voice/RECORDING_PROCESS'); // Показываем индикатор загрузки
 
                     // Загружаем запись на сервер
                     try {
@@ -158,55 +181,17 @@ export default {
                             // Выводим в консоль найденные продукты
                             console.log("Найденные продукты:", this.products);
                         } else {
-                            // Добавляем демо-продукты
-                            this.products = [
-                                // {
-                                //     name: "Куриная грудка",
-                                //     calories: 250,
-                                //     protein: 40,
-                                //     fats: 5,
-                                //     carbs: 0,
-                                //     weight: 200,
-                                //     isGenerated: false,
-                                //     isModified: false,
-                                //     nameModified: false,
-                                //     needsSearch: false,
-                                //     originalName: "Куриная грудка",
-                                //     searchedBefore: false
-                                // },
-                                // {
-                                //     name: "Яблоко",
-                                //     calories: 80,
-                                //     protein: 0.5,
-                                //     fats: 0.3,
-                                //     carbs: 20,
-                                //     weight: 150,
-                                //     isGenerated: false,
-                                //     isModified: false,
-                                //     nameModified: false,
-                                //     needsSearch: false,
-                                //     originalName: "Яблоко",
-                                //     searchedBefore: false
-                                // },
-                                // {
-                                //     name: "Рисовая каша",
-                                //     calories: 180,
-                                //     protein: 4,
-                                //     fats: 1,
-                                //     carbs: 40,
-                                //     weight: 150,
-                                //     isGenerated: false,
-                                //     isModified: false,
-                                //     nameModified: false,
-                                //     needsSearch: false,
-                                //     originalName: "Рисовая каша",
-                                //     searchedBefore: false
-                                // }
-                            ];
+                            // Добавляем демо-продукты если нужно
+                            this.products = [];
                         }
+
+                        // Завершаем обработку после получения и обработки данных
+                        this.$store.commit('voice/RECORDING_COMPLETE', audioBlob);
                     } catch (error) {
                         console.error('Ошибка при отправке записи:', error);
-                        this.$store.dispatch('setError', 'Не удалось отправить аудиозапись');
+                        this.showError('Не удалось отправить аудиозапись');
+                        // Завершаем обработку при ошибке
+                        this.$store.commit('voice/RECORDING_COMPLETE', audioBlob);
                     }
                 };
 
@@ -231,7 +216,7 @@ export default {
                     errorMessage = error.message;
                 }
 
-                this.$store.dispatch('setError', errorMessage);
+                this.showError(errorMessage);
             }
         },
         async stopRecording() {
@@ -252,25 +237,15 @@ export default {
         processProductData(index) {
             // Проверяем, есть ли у продукта имя
             if (!this.products[index].name || this.products[index].name.trim() === '') {
-                this.$store.dispatch('setError', this.$t('Voice.errors.emptyProductName'));
+                this.showError(this.$t('Voice.errors.emptyProductName'));
                 return;
             }
-
-            // Получаем название продукта
-            const productName = this.products[index].name;
-            const product = this.products[index];
 
             // Устанавливаем состояние обработки
             this.$store.commit('voice/RECORDING_PROCESS');
 
-            // Проверяем, нужно ли выполнить поиск или сразу генерировать данные
-            if (product.needsSearch) {
-                // Выполняем поиск продукта по новому названию
-                this.searchProductByName(index);
-            } else {
-                // Генерируем данные для существующего продукта
-                this.generateProductData(index);
-            }
+            // Всегда генерируем данные для продукта
+            this.generateProductData(index);
         },
         // Поиск продукта по названию
         async searchProductByName(index) {
@@ -303,15 +278,10 @@ export default {
 
                     // Если рейтинг низкий, предлагаем сгенерировать данные
                     if (response.should_generate) {
-                        this.successMessage = this.$t('Voice.success.productFoundLowMatch', { product: productData.product_translation.name });
+                        this.showSuccess(this.$t('Voice.success.productFoundLowMatch', { product: productData.product_translation.name }));
                     } else {
-                        this.successMessage = this.$t('Voice.success.productFound', { product: productData.product_translation.name });
+                        this.showSuccess(this.$t('Voice.success.productFound', { product: productData.product_translation.name }));
                     }
-
-                    this.showSuccessMessage = true;
-                    setTimeout(() => {
-                        this.showSuccessMessage = false;
-                    }, 3000);
                 } else {
                     // Продукт не найден, предлагаем сгенерировать данные
                     this.products[index].needsSearch = false; // Поиск выполнен, но безуспешно
@@ -323,7 +293,7 @@ export default {
                     await this.generateProductData(index);
                 }
             } catch (error) {
-                this.$store.dispatch('setError', error.message || this.$t('Voice.errors.searchError'));
+                this.showError(error.message || this.$t('Voice.errors.searchError'));
                 console.error('Ошибка при поиске продукта:', error);
             } finally {
                 this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
@@ -349,20 +319,14 @@ export default {
                     this.products[index].needsSearch = false;
 
                     // Показываем сообщение об успехе
-                    this.successMessage = this.$t('Voice.success.dataGenerated', { product: productName });
-                    this.showSuccessMessage = true;
-
-                    // Скрываем сообщение через 3 секунды
-                    setTimeout(() => {
-                        this.showSuccessMessage = false;
-                    }, 3000);
+                    this.showSuccess(this.$t('Voice.success.dataGenerated', { product: productName }));
                 } else {
                     // Если запрос неуспешен
                     throw new Error(response.message || this.$t('Voice.errors.generateError'));
                 }
             } catch (error) {
                 // Обработка ошибок
-                this.$store.dispatch('setError', error.message || this.$t('Voice.errors.generateError'));
+                this.showError(error.message || this.$t('Voice.errors.generateError'));
                 console.error('Ошибка при генерации данных:', error);
             } finally {
                 // В любом случае завершаем обработку
@@ -382,7 +346,7 @@ export default {
 
             // Проверка на наличие продуктов
             if (!this.products.length) {
-                this.$store.dispatch('setError', this.$t('Voice.errors.noProducts'));
+                this.showError(this.$t('Voice.errors.noProducts'));
                 return;
             }
 
@@ -399,37 +363,25 @@ export default {
                     this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
 
                     // Показываем сообщение об успехе с русским названием приема пищи
-                    this.successMessage = this.$t('Voice.success.productsSaved', { meal: mealType });
-                    this.showSuccessMessage = true;
+                    this.showSuccess(this.$t('Voice.success.productsSaved', { meal: mealType }));
 
                     // Очищаем список продуктов и расшифровку
                     this.products = [];
                     this.transcription = '';
                     this.voiceResetRecording();
-
-                    // Скрываем сообщение через 3 секунды
-                    setTimeout(() => {
-                        this.showSuccessMessage = false;
-                    }, 3000);
                 })
                 .catch(error => {
                     // Обработка ошибок
                     this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
-                    this.$store.dispatch('setError', error.response?.data?.message || this.$t('Voice.errors.saveError'));
+                    this.showError(error.response?.data?.message || this.$t('Voice.errors.saveError'));
                     console.error('Ошибка при сохранении продуктов:', error);
                 });
         },
         cancel() {
-            this.successMessage = this.$t('Voice.success.productsDeleted');
-            this.showSuccessMessage = true;
+            this.showSuccess(this.$t('Voice.success.productsDeleted'));
             this.products = [];
             this.transcription = '';
             this.voiceResetRecording();
-
-            // Скрываем сообщение через 3 секунды
-            setTimeout(() => {
-                this.showSuccessMessage = false;
-            }, 3000);
         },
         // Проверка поддержки браузером необходимых API
         checkBrowserSupport() {
@@ -553,17 +505,10 @@ export default {
 
             // Устанавливаем флаг изменения имени
             product.nameModified = true;
-
-            // Если ранее уже выполнялся поиск для этого продукта и имя изменилось снова,
-            // то не нужно выполнять поиск, а нужно сразу генерировать данные
-            if (product.searchedBefore) {
-                product.needsSearch = false;
-                console.log(`Повторное изменение имени продукта с "${product.originalName}" на "${product.name}". Будем генерировать данные.`);
-            } else {
-                // Если это первое изменение имени, нужно выполнить поиск
-                product.needsSearch = true;
-                console.log(`Первое изменение имени продукта с "${product.originalName}" на "${product.name}". Флаг needsSearch установлен.`);
-            }
+            
+            // Всегда устанавливаем needsSearch в false, чтобы всегда использовалась генерация
+            product.needsSearch = false;
+            console.log(`Изменение имени продукта с "${product.originalName}" на "${product.name}". Будем генерировать данные.`);
         },
     },
     beforeUnmount() {
@@ -580,12 +525,14 @@ export default {
             <h1>{{ $t('Voice.title') }}</h1>
 
             <!-- Сообщение об успешном действии -->
-            <div class="success-message" v-if="showSuccessMessage">
-                <div class="success-message-content">
-                    <FontAwesomeIcon :icon="faCheckCircle()" class="success-icon" />
-                    <span>{{ successMessage }}</span>
-                </div>
-            </div>
+            <CaloriesSuccessNotification v-if="showSuccessMessage">
+                {{ successMessage }}
+            </CaloriesSuccessNotification>
+
+            <!-- Сообщение об ошибке -->
+            <CaloriesErrorNotification v-if="showErrorMessage">
+                {{ errorMessage }}
+            </CaloriesErrorNotification>
 
             <div class="voice-description">
                 <p>{{ $t('Voice.description') }}</p>
@@ -645,9 +592,9 @@ export default {
                                 <span v-if="product.nameModified" class="name-modified-tag">{{ $t('Voice.nameModifiedTag') }}</span>
                             </div>
                             <div class="product-actions">
-                                <button class="generate-btn" @click="processProductData(index)" :title="product.needsSearch ? $t('Voice.searchButton') : $t('Voice.generateButton')">
-                                    <FontAwesomeIcon :icon="product.needsSearch ? faSearch() : faMagic()" />
-                                    <span>{{ product.needsSearch ? $t('Voice.searchButton') : $t('Voice.generateButton') }}</span>
+                                <button class="generate-btn" @click="processProductData(index)" :title="$t('Voice.generateButton')">
+                                    <FontAwesomeIcon :icon="faMagic()" />
+                                    <span>{{ $t('Voice.generateButton') }}</span>
                                 </button>
                                 <button class="remove-btn" @click="removeProduct(index)" :title="$t('Voice.deleteProduct')">
                                     <FontAwesomeIcon :icon="faTrash()" />
