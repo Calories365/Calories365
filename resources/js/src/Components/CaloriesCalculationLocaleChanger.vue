@@ -60,12 +60,12 @@ export default {
                 if (locale === this.selectedLocale) {
                     return false;
                 }
-                
+
                 // Filter out Russian when not allowed
                 if (locale === 'ru') {
                     return this.shouldShowRussian;
                 }
-                
+
                 // Keep all other languages
                 return true;
             });
@@ -74,7 +74,7 @@ export default {
     mounted() {
         // Fetch language status when component is mounted
         this.$store.dispatch('language/fetchLanguageStatus');
-        
+
         // Check if the current locale is Russian and it's disabled or in academic mode, switch to English
         this.$nextTick(() => {
             if (this.selectedLocale === 'ru' && !this.shouldShowRussian) {

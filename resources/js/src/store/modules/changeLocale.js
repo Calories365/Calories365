@@ -8,7 +8,7 @@ export const getterTypes = {
     availableLocales: '[localeChange] availableLocales',
 }
 
-//геттеры глобальные, но в данном случае они получают локальное состояние
+
 const getters = {
     [getterTypes.selectedLocale]: state => {
         return state.selectedLocale
@@ -42,7 +42,7 @@ const actions = {
         if (locale === 'ru' && context.rootState.language && !context.rootState.language.russianLanguageEnabled) {
             locale = 'en';
         }
-        
+
         return new Promise(resolve => {
             context.commit(mutationTypes.setLocale, locale);
             i18n.locale = locale;
