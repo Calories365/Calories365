@@ -52,7 +52,7 @@ export default {
         showSuccess(message) {
             this.successMessage = message;
             this.showSuccessMessage = true;
-            
+
             setTimeout(() => {
                 this.showSuccessMessage = false;
             }, 3000);
@@ -60,7 +60,7 @@ export default {
         showError(message) {
             this.errorMessage = message;
             this.showErrorMessage = true;
-            
+
             setTimeout(() => {
                 this.showErrorMessage = false;
             }, 3000);
@@ -333,7 +333,7 @@ export default {
                 this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
             }
         },
-        saveToMeal(mealType) {
+        saveToMeal(mealType, textForMsg) {
             // Преобразование русских названий частей дня в английские
             const mealTypeMap = {
                 'завтрак': 'morning',
@@ -363,7 +363,7 @@ export default {
                     this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
 
                     // Показываем сообщение об успехе с русским названием приема пищи
-                    this.showSuccess(this.$t('Voice.success.productsSaved', { meal: mealType }));
+                    this.showSuccess(this.$t('Voice.success.productsSaved', { meal: textForMsg }));
 
                     // Очищаем список продуктов и расшифровку
                     this.products = [];
@@ -505,7 +505,7 @@ export default {
 
             // Устанавливаем флаг изменения имени
             product.nameModified = true;
-            
+
             // Всегда устанавливаем needsSearch в false, чтобы всегда использовалась генерация
             product.needsSearch = false;
             console.log(`Изменение имени продукта с "${product.originalName}" на "${product.name}". Будем генерировать данные.`);
@@ -628,15 +628,16 @@ export default {
                 </div>
 
                 <div class="save-actions">
-                    <button class="save-btn breakfast" @click="saveToMeal('завтрак')">
+<!--                    <button class="save-btn breakfast" @click="saveToMeal($t('Voice.saveBreakfast'))">-->
+                    <button class="save-btn breakfast" @click="saveToMeal('завтрак', $t('Diary.morning'))">
                         <FontAwesomeIcon :icon="faSave()" />
                         <span>{{ $t('Voice.saveBreakfast') }}</span>
                     </button>
-                    <button class="save-btn lunch" @click="saveToMeal('обед')">
+                    <button class="save-btn lunch" @click="saveToMeal( 'обед' , $t('Diary.dinner'))">
                         <FontAwesomeIcon :icon="faSave()" />
                         <span>{{ $t('Voice.saveLunch') }}</span>
                     </button>
-                    <button class="save-btn dinner" @click="saveToMeal('ужин')">
+                    <button class="save-btn dinner" @click="saveToMeal('ужин', $t('Diary.supper'))">
                         <FontAwesomeIcon :icon="faSave()" />
                         <span>{{ $t('Voice.saveDinner') }}</span>
                     </button>

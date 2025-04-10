@@ -46,27 +46,20 @@ export default {
     },
     methods: {
         initializeLanguage() {
-            // Safeguard against errors during language initialization
             try {
                 this.$store.dispatch('language/fetchLanguageStatus')
                     .then(() => {
-                        const language = this.$store.state.language;
-                        console.log(language)
-                        // If Russian is disabled and current locale is Russian, switch to English
-                        // if (this.locale === 'ru' && language && language.russianLanguageEnabled === false) {
-                        //     this.locale = 'en';
-                        // }
                         this.$store.dispatch(actionTypes.setLocale, {locale: this.locale, i18n: this.$i18n});
                     })
                     .catch(error => {
                         console.error('Error loading language settings:', error);
-                        // If there's an error, proceed with default locale
                         this.$store.dispatch(actionTypes.setLocale, {locale: this.locale, i18n: this.$i18n});
                     });
             } catch (error) {
                 console.error('Error in language initialization:', error);
-                // If there's an error, proceed with default locale
                 this.$store.dispatch(actionTypes.setLocale, {locale: this.locale, i18n: this.$i18n});
+            } finally {
+
             }
         }
     },

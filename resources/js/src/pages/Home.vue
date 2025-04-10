@@ -19,6 +19,7 @@ export default {
         ...mapState({
             currentUser: state => state.auth.currentUser,
         }),
+
         /**
          * Depending on the current locale, we return the corresponding video.
          */
@@ -30,6 +31,16 @@ export default {
                 return 'https://www.youtube.com/embed/_-fZHn5Xv8c';
             } else {
                 return 'https://www.youtube.com/embed/q-42W0YCldk';
+            }
+        },
+        voiceInput(){
+            const locale = this.$i18n.locale;
+            if (locale === 'ua') {
+                return 'Голосове введення';
+            } else if (locale === 'ru') {
+                return 'Голосовой ввод';
+            } else {
+                return 'Voice input';
             }
         },
         telegramLinkText() {
@@ -54,6 +65,9 @@ export default {
     methods: {
         goToCalculator() {
             this.$router.push({ name: "calculation" });
+        },
+        goToVoiceInput(){
+            this.$router.push({ name: "voice" });
         },
         goToDiary() {
             this.$router.push({ name: "diary" });
@@ -131,6 +145,7 @@ export default {
                         {{ $t("Home.DescriptionP1") }}
                         <span class="hero-action__desc-link" @click="openTelegramLink">{{ $t("message.voice") }}</span>
                         {{ $t("Home.DescriptionP2") }}
+                        <span class="hero-action__desc-link" @click="goToVoiceInput">{{voiceInput}}</span>.
                     </p>
                     <div class="hero-buttons">
                         <calories-button @click="goToCalculator" class="calculator-section_head-button">
