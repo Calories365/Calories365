@@ -2,18 +2,20 @@ import axios from '@/api/axios';
 
 export const uploadVoiceRecord = async (audioBlob) => {
     const formData = new FormData();
-    formData.append('audio', audioBlob, 'voice-record.webm');
-    
+    const mime = audioBlob.type || '';               // ← важно
+    const ext  = mime.includes('mp4') ? 'm4a' : 'webm';
+    formData.append('audio', audioBlob, `record.${ext}`);
+
     try {
         const response = await axios.post('/api/voice/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
-        
+
         // Логируем ответ для отладки
         console.log("Ответ API uploadVoiceRecord:", response.data);
-        
+
         return response.data;
     } catch (error) {
         console.error('Error uploading voice record:', error);
@@ -25,7 +27,7 @@ export const saveVoiceProducts = async (products, mealType) => {
     // Логируем данные, отправляемые на сервер
     console.log("Отправляем продукты на сервер:", products);
     console.log("Тип приема пищи:", mealType);
-    
+
     // Проверяем, что все продукты имеют значение веса
     products.forEach((product, index) => {
         if (!product.weight || product.weight <= 0) {
@@ -35,15 +37,15 @@ export const saveVoiceProducts = async (products, mealType) => {
             console.log(`Продукт #${index + 1} (${product.name}): ${product.weight} грамм`);
         }
     });
-    
+
     try {
         const response = await axios.post('/api/voice/save-products', {
             products,
             meal_type: mealType
         });
-        
+
         console.log("Ответ API saveVoiceProducts:", response.data);
-        
+
         return response.data;
     } catch (error) {
         console.error('Error saving voice products:', error);
@@ -57,13 +59,13 @@ export const saveVoiceProducts = async (products, mealType) => {
 export const generateProductData = async (productName) => {
     try {
         console.log(`Генерация данных для продукта: ${productName}`);
-        
+
         const response = await axios.post('/api/voice/generate-product', {
             product_name: productName
         });
-        
+
         console.log("Ответ API generateProductData:", response.data);
-        
+
         return response.data;
     } catch (error) {
         console.error('Error generating product data:', error);
@@ -77,13 +79,13 @@ export const generateProductData = async (productName) => {
 export const searchProduct = async (productName) => {
     try {
         console.log(`Поиск продукта: ${productName}`);
-        
+
         const response = await axios.post('/api/voice/search-product', {
             product_name: productName
         });
-        
+
         console.log("Ответ API searchProduct:", response.data);
-        
+
         return response.data;
     } catch (error) {
         console.error('Error searching product:', error);
@@ -99,4 +101,4 @@ export default {
     saveVoiceProducts,
     generateProductData,
     searchProduct
-}; 
+};

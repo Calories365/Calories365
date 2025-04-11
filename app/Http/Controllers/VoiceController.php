@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\SpeechToTextService;
+use App\Services\AudioConversionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -15,11 +16,14 @@ class VoiceController extends Controller
 {
     protected SpeechToTextService $speechToTextService;
     protected ProductService $productService;
+    protected AudioConversionService $audioConversionService;
 
-    public function __construct(SpeechToTextService $speechToTextService, ProductService $productService)
+    public function __construct(SpeechToTextService $speechToTextService, ProductService $productService,   AudioConversionService $audioConversionService  )
     {
         $this->speechToTextService = $speechToTextService;
         $this->productService = $productService;
+        $this->audioConversionService = $audioConversionService;
+
     }
 
     /**
@@ -31,64 +35,70 @@ class VoiceController extends Controller
     public function upload(Request $request)
     {
         try {
-            // Проверяем, есть ли файл в запросе
+            /** === 1. проверяем файл === */
             if (!$request->hasFile('audio')) {
                 return response()->json(['success' => false, 'message' => 'Аудиофайл не найден'], 400);
             }
-
-            // Получаем файл из запроса
             $audioFile = $request->file('audio');
 
-            // Генерируем уникальное имя файла
-            $fileName = Str::uuid() . '.' . $audioFile->getClientOriginalExtension();
+            /** === 2. сохраняем оригинал === */
+            $fileName = Str::uuid().'.'.$audioFile->getClientOriginalExtension();
+            $localPath = $audioFile->storeAs('voice_records', $fileName, 'public');
+            $fullPath  = Storage::disk('public')->path($localPath);
 
-            // Сохраняем файл в хранилище (папка voice_records в /storage/app/public/)
-            $path = $audioFile->storeAs('voice_records', $fileName, 'public');
-            $fullPath = Storage::disk('public')->path($path);
+            /** === 3. конвертируем в mp3 === */
+            [$mp3Local, $mp3Full] = $this->audioConversionService->convertToMp3($localPath, $fullPath);
 
-            // Отправляем аудиофайл на расшифровку
-            $transcriptionResult = $this->speechToTextService->convertSpeechToText($fullPath);
+            // если конвертация не удалась — работаем с исходным файлом
+            $fileForStt = $mp3Full ?: $fullPath;
 
-            // После расшифровки удаляем файл из хранилища
-            Storage::disk('public')->delete($path);
+            /** === 4. Whisper (передаём локаль) === */
+            $transcription = $this->speechToTextService->convertSpeechToText(
+                $fileForStt,
+                app()->getLocale()          // метод в сервисе должен принимать language
+            );
 
-            // Проверяем, успешно ли выполнена расшифровка
-            if (is_array($transcriptionResult) && isset($transcriptionResult['error'])) {
+            /** === 5. чистим временные файлы === */
+            Storage::disk('public')->delete($localPath);
+            if ($mp3Local) {
+                Storage::disk('public')->delete($mp3Local);
+            }
+
+            /** === 6. проверяем результат === */
+            if (is_array($transcription) && isset($transcription['error'])) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ошибка при расшифровке: ' . $transcriptionResult['error']
+                    'message' => 'Ошибка при расшифровке: '.$transcription['error']
                 ], 500);
             }
 
-            // Форматируем расшифрованный текст для поиска продуктов
-            $productsFound = $this->searchProductsFromTranscription($transcriptionResult);
+            $products = $this->searchProductsFromTranscription($transcription);
 
             Log::info('Voice record processed', [
-                'user_id' => Auth::id(),
-                'transcription' => $transcriptionResult,
-                'products_found' => $productsFound
+                'user_id'       => Auth::id(),
+                'transcription' => $transcription,
+                'products_found'=> $products
             ]);
 
-            // Возвращаем успешный ответ
             return response()->json([
-                'success' => true,
-                'message' => 'Голосовая запись успешно обработана',
-                'transcription' => $transcriptionResult,
-                'products' => $productsFound
+                'success'       => true,
+                'message'       => 'Голосовая запись успешно обработана',
+                'transcription' => $transcription,
+                'products'      => $products
             ]);
-        } catch (\Exception $e) {
-            // Удаляем временный файл, если он был создан
-            if (isset($path) && Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->delete($path);
-            }
 
-            // Логируем ошибку
-            Log::error('Error processing voice record: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            // попытка удалить всё, что могло остаться
+            if (isset($localPath)) Storage::disk('public')->delete($localPath);
+            if (isset($mp3Local))  Storage::disk('public')->delete($mp3Local);
 
-            // Возвращаем ошибку
+            Log::error('Error processing voice record: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Произошла ошибка при обработке записи: ' . $e->getMessage()
+                'message' => 'Произошла ошибка при обработке записи: '.$e->getMessage()
             ], 500);
         }
     }
@@ -382,6 +392,7 @@ class VoiceController extends Controller
             $productName = $request->input('product_name');
 
             Log::info('Генерация данных для продукта', ['name' => $productName]);
+
 
             // Генерируем данные о продукте через OpenAI
             $generatedData = $this->speechToTextService->generateNewProductData($productName);

@@ -122,9 +122,20 @@ export default {
                 } else {
                     throw new Error(this.$t('Voice.errors.micPermission'));
                 }
+                const preferedTypes = [
+                    'audio/mp4',                     // iOS Safari
+                    'audio/webm;codecs=opus',        // Chrome, Firefox
+                    'audio/webm',
+                ];
+                const mimeType = preferedTypes.find(t => MediaRecorder.isTypeSupported(t));
+                if (!mimeType) {
+                    this.browserSupportsRecording = false;
+                    return;
+                }
 
                 // Создаем MediaRecorder
-                this.mediaRecorder = new MediaRecorder(this.stream);
+                this.mediaRecorder = new MediaRecorder(this.stream, { mimeType });
+                this.chosenMimeType = mimeType;
                 this.audioChunks = [];
 
                 // Обработчик события dataavailable
@@ -137,7 +148,7 @@ export default {
                 // Обработчик события stop
                 this.mediaRecorder.onstop = async () => {
                     // Создаем Blob из записанных данных
-                    const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                    const audioBlob = new Blob(this.audioChunks, { type: this.chosenMimeType });
 
                     // Сохраняем Blob в Vuex и устанавливаем состояние обработки
                     this.$store.commit('voice/RECORDING_COMPLETE', audioBlob);
