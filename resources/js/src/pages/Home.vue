@@ -144,8 +144,8 @@ export default {
                     <p>
                         {{ $t("Home.DescriptionP1") }}
                         <span class="hero-action__desc-link" @click="openTelegramLink">{{ $t("message.voice") }}</span>
-                        {{ $t("Home.DescriptionP2") }}
-                        <span class="hero-action__desc-link" @click="goToVoiceInput">{{voiceInput}}</span>.
+<!--                        {{ $t("Home.DescriptionP2") }}-->
+<!--                        <span class="hero-action__desc-link" @click="goToVoiceInput">{{voiceInput}}</span>.-->
                     </p>
                     <div class="hero-buttons">
                         <calories-button @click="goToCalculator" class="calculator-section_head-button">
