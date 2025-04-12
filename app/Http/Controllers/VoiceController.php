@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\SpeechToTextService;
 use App\Services\AudioConversionService;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -35,6 +37,16 @@ class VoiceController extends Controller
     public function upload(Request $request)
     {
         try {
+
+            $res = $this->canTranscribeAudio(Auth::id());
+
+           if(!$res['canTranscribeAudio']){
+               return response()->json([
+                   'success' => false,
+                   'message' => 'please_buy_premium'
+               ], 200);
+           }
+
             /** === 1. проверяем файл === */
             if (!$request->hasFile('audio')) {
                 return response()->json(['success' => false, 'message' => 'Аудиофайл не найден'], 400);
@@ -52,7 +64,7 @@ class VoiceController extends Controller
             // если конвертация не удалась — работаем с исходным файлом
             $fileForStt = $mp3Full ?: $fullPath;
 
-            /** === 4. Whisper (передаём локаль) === */
+
             $transcription = $this->speechToTextService->convertSpeechToText(
                 $fileForStt,
                 app()->getLocale()          // метод в сервисе должен принимать language
@@ -802,6 +814,35 @@ class VoiceController extends Controller
                 'message' => 'Произошла ошибка при поиске продукта: ' . $e->getMessage(),
                 'should_generate' => true
             ], 500);
+        }
+    }
+    private function canTranscribeAudio($user_id){
+        $botPanelUrl = env('BOT_PANEL_URL');
+        $botApiKey   = env('BOT_API_KEY');
+        $host   = env('BOT_HOST');
+
+        if (!$botPanelUrl || !$botApiKey) {
+            Log::warning('Bot panel URL или API key не настроены');
+            return;
+        }
+
+        $client = new Client();
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Accept'       => 'application/json',
+            'Host'         => $host,
+            'X-Api-Key'    => $botApiKey,
+        ];
+        try {
+            $response = $client->get($botPanelUrl . '/api/subscription-check/' . $user_id, [
+                'headers' => $headers,
+            ]);
+            Log::info('response from sub');
+            Log::info(print_r($response, true));
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error sending text to diary service: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
         }
     }
 }

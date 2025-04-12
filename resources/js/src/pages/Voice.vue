@@ -157,13 +157,17 @@ export default {
                     // Загружаем запись на сервер
                     try {
                         const response = await this.voiceUploadRecording();
-                        console.log("Ответ от сервера:", response);
+                        const message = response.message;
+
+                        if(message === 'please_buy_premium'){
+                            this.showError( this.$t('Voice.please_buy_premium'));
+                        }
 
                         // Для демонстрации UI добавим несколько продуктов после обработки
                         if (response && response.transcription) {
                             this.transcription = response.transcription;
                         } else {
-                            this.transcription = "Я съел куриную грудку 200 грамм, яблоко и рисовую кашу.";
+                            this.transcription = '';
                         }
 
                         // Добавляем продукты из ответа или демо-продукты
