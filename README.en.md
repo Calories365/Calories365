@@ -66,7 +66,7 @@ Key aspects of the service layer:
     - And others.
 
 This setup ensures the flexibility to add new bots and extensions.  
-**More details**: [See the separate README on the bot service layer](./README.BotPanelArchitecture.ru.md)
+**More details**: [See the separate README on the bot service layer](./README.BotPanelArchitecture.en.md)
 
 ### 3.2 Dynamic Forms and Tables in Vue
 
@@ -75,7 +75,7 @@ The frontend is built with universal components:
 - Tables are also configured via objects: each item in the array describes a column (name, cell type, character limit, and more).
 
 This approach allows you to add or remove fields and columns without modifying the component code.  
-**More details**: [See the separate README on dynamic forms/tables](./README.DynamicFormsAndTables.ru.md)
+**More details**: [See the separate README on dynamic forms/tables](./README.DynamicFormsAndTables.en.md)
 
 ---
 
@@ -121,5 +121,5 @@ If you need to **quickly** and **comfortably** manage your diet, our “Calories
 ---
 
 > **Additionally**:
-> - [**Bot Service Layer Architecture**](./README.BotPanelArchitecture.ru.md)
-> - [**Dynamic Forms and Tables in Vue**](./README.DynamicFormsAndTables.ru.md)
+> - [**Bot Service Layer Architecture**](./README.BotPanelArchitecture.en.md)
+> - [**Dynamic Forms and Tables in Vue**](./README.DynamicFormsAndTables.en.md)
