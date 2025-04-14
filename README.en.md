@@ -47,7 +47,7 @@ Universal components have been developed for the frontend:
 - **Tables** are also configurable: each object describes a column (header, cell type, character limit, and more).
 
 This enables adding or removing fields and columns without changing the code.  
-More details: [README.DynamicFormsAndTables.ru.md](./README.DynamicFormsAndTables.ru.md)
+More details: [README.DynamicFormsAndTables.ru.md](./README.DynamicFormsAndTables.en.md)
 
 ---
 

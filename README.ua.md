@@ -47,7 +47,7 @@
 - **Таблиці** також налаштовуються конфігураціями: кожен об’єкт описує стовпець (заголовок, тип клітинки, ліміт символів та інше).
 
 Це дозволяє без зміни коду додавати або видаляти поля та стовпці.  
-Детальніше: [README.DynamicFormsAndTables.ru.md](./README.DynamicFormsAndTables.ru.md)
+Детальніше: [README.DynamicFormsAndTables.ru.md](./README.DynamicFormsAndTables.ua.md)
 
 ---
 
