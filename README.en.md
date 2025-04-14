@@ -90,4 +90,4 @@ If you need to quickly and comfortably manage your diet, Calories365 is an excel
 ---
 
 > **Additionally**:
-> - [**Dynamic Forms and Tables in Vue**](./README.DynamicFormsAndTables.ru.md)
+> - [**Dynamic Forms and Tables in Vue**](./README.DynamicFormsAndTables.en.md)

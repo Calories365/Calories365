@@ -90,4 +90,4 @@
 ---
 
 > **Додатково**:
-> - [**Динамічні форми та таблиці на Vue**](./README.DynamicFormsAndTables.ru.md)
+> - [**Динамічні форми та таблиці на Vue**](./README.DynamicFormsAndTables.ua.md)
