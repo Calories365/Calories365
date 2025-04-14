@@ -46,8 +46,7 @@ Universal components have been developed for the frontend:
 - **Forms** are built based on configurations: each object defines a field (type, placeholder, required status, etc.).
 - **Tables** are also configurable: each object describes a column (header, cell type, character limit, and more).
 
-This enables adding or removing fields and columns without changing the code.  
-More details: [README.DynamicFormsAndTables.ru.md](./README.DynamicFormsAndTables.en.md)
+This enables adding or removing fields and columns without changing the code.
 
 ---
 
@@ -89,5 +88,3 @@ If you need to quickly and comfortably manage your diet, Calories365 is an excel
 
 ---
 
-> **Additionally**:
-> - [**Dynamic Forms and Tables in Vue**](./README.DynamicFormsAndTables.en.md)
