@@ -67,6 +67,7 @@ class CaloriesAPIBotController extends BaseController
 
             Log::info('products from bot: ');
             Log::info(print_r($products, true));
+
             foreach ($products as $product) {
                 $product = trim($product);
 
