@@ -23,7 +23,6 @@ class LanguageSettingController extends Controller
 
         $enabled = $request->input('enabled');
 
-        // Get the first record or create it if it doesn't exist
         $setting = LanguageSetting::firstOrCreate(
             ['id' => 1],
             ['russian_language_enabled' => $enabled]
