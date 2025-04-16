@@ -12,19 +12,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Deploy via SSH
+      - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+
           script: |
-            export DOCKER_BUILDKIT=1
-            cd /home/maxim/var/www/calories365
-            cd src
-            git fetch origin main
-            git reset --hard origin/main
+            cd /home/maxim/var/www/calories365/src
+            git pull
             cd ..
-            docker compose up -d --build --pull
-            docker builder prune --filter "until=168h" --force
-            docker compose exec calculator_php php artisan migrate --force
+            docker-compose up -d --build
+            docker builder prune --all --force
+            docker-compose exec calculator_php php artisan migrate --force
