@@ -325,24 +325,34 @@ const actions = {
             }
 
             function calculateDailyCalories(bmr, activityLevel, goal) {
+                const maintenance = calculateMaintenanceCalories(bmr, activityLevel)
 
-                let dailyCalories = calculateMaintenanceCalories(bmr, activityLevel);
+                const DEFICIT  = 0.15
+                const SURPLUS  = 0.15
+                const MIN_SAFE = bmr * 1.1
+
+                let dailyCalories = maintenance
 
                 switch (goal) {
                     case 1:
-                        dailyCalories *= 0.8; // Уменьшение на 20%
-                        break;
+                        dailyCalories = maintenance * (1 - DEFICIT)
+                        break
                     case 2:
-                        break;
+                        break
                     case 3:
-                        dailyCalories *= 1.2; // Увеличение на 20%
-                        break;
+                        dailyCalories = maintenance * (1 + SURPLUS)
+                        break
                     default:
-                        throw new Error('Invalid goal');
+                        throw new Error('Invalid goal')
                 }
 
-                return dailyCalories;
+
+                if (dailyCalories < MIN_SAFE) {
+                    dailyCalories = MIN_SAFE
+                }
+                return Math.round(dailyCalories)
             }
+
 
             function calculateMaintenanceCalories(bmr, activityLevel) {
                 let activityMultiplier;
