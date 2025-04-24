@@ -327,27 +327,26 @@ const actions = {
             function calculateDailyCalories(bmr, activityLevel, goal) {
                 const maintenance = calculateMaintenanceCalories(bmr, activityLevel)
 
-                // межі безпеки: –15 % / +15 %
-                const DEFICIT  = 0.15         // 15 %
-                const SURPLUS  = 0.15         // 15 %
-                const MIN_SAFE = bmr * 1.1    // не нижче 110 % від BMR
+                const DEFICIT  = 0.15
+                const SURPLUS  = 0.15
+                const MIN_SAFE = bmr * 1.1
 
                 let dailyCalories = maintenance
 
                 switch (goal) {
-                    case 1: // схуднення
+                    case 1:
                         dailyCalories = maintenance * (1 - DEFICIT)
                         break
-                    case 2: // підтримка
+                    case 2:
                         break
-                    case 3: // набір ваги
+                    case 3:
                         dailyCalories = maintenance * (1 + SURPLUS)
                         break
                     default:
                         throw new Error('Invalid goal')
                 }
 
-                // гарантуємо мінімум
+
                 if (dailyCalories < MIN_SAFE) {
                     dailyCalories = MIN_SAFE
                 }
