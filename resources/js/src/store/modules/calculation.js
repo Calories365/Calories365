@@ -325,24 +325,35 @@ const actions = {
             }
 
             function calculateDailyCalories(bmr, activityLevel, goal) {
+                const maintenance = calculateMaintenanceCalories(bmr, activityLevel)
 
-                let dailyCalories = calculateMaintenanceCalories(bmr, activityLevel);
+                // межі безпеки: –15 % / +15 %
+                const DEFICIT  = 0.15         // 15 %
+                const SURPLUS  = 0.15         // 15 %
+                const MIN_SAFE = bmr * 1.1    // не нижче 110 % від BMR
+
+                let dailyCalories = maintenance
 
                 switch (goal) {
-                    case 1:
-                        dailyCalories *= 0.8; // Уменьшение на 20%
-                        break;
-                    case 2:
-                        break;
-                    case 3:
-                        dailyCalories *= 1.2; // Увеличение на 20%
-                        break;
+                    case 1: // схуднення
+                        dailyCalories = maintenance * (1 - DEFICIT)
+                        break
+                    case 2: // підтримка
+                        break
+                    case 3: // набір ваги
+                        dailyCalories = maintenance * (1 + SURPLUS)
+                        break
                     default:
-                        throw new Error('Invalid goal');
+                        throw new Error('Invalid goal')
                 }
 
-                return dailyCalories;
+                // гарантуємо мінімум
+                if (dailyCalories < MIN_SAFE) {
+                    dailyCalories = MIN_SAFE
+                }
+                return Math.round(dailyCalories)
             }
+
 
             function calculateMaintenanceCalories(bmr, activityLevel) {
                 let activityMultiplier;

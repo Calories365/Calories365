@@ -20,9 +20,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
 
           script: |
+            export DOCKER_BUILDKIT=1
             cd /home/maxim/var/www/calories365/src
             git pull
             cd ..
             docker-compose up -d --build
-            docker builder prune --all --force
+            docker builder prune --filter "until=168h" --force
             docker-compose exec calculator_php php artisan migrate --force
