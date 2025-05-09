@@ -49,7 +49,11 @@ class SpeechToTextService
             [
                 'name'     => 'model',
                 'contents' => 'whisper-1'
-            ]
+            ],
+            [
+            'name' => 'language',
+            'contents' => 'uk',
+        ],
         ]);
 
         $headers = [
@@ -84,6 +88,9 @@ class SpeechToTextService
         $prompt = __('calories365-bot.prompt_analyze_food_intake', [
             'text' => $text,
         ]);
+
+        Log::info('calories365-bot.prompt_analyze_food_intake');
+        Log::info(print_r($prompt, true));
 
         try {
             $response = $this->client->post('https://api.openai.com/v1/chat/completions', [

@@ -132,7 +132,7 @@ class Product extends Model
             if (count($hits) == 1) {
                 $firstProduct = $hits[0];
                 $rankingScore = $firstProduct['_rankingScore'] ?? 0;
-                
+
                 if ($rankingScore) {
                     return $firstProduct;
                 } else {
@@ -140,8 +140,18 @@ class Product extends Model
                 }
             }
 
+            ProductTranslation::search($query)
+                ->where('locale', $locale)
+                ->where('active', 1);
+
+            $client->index('products')->search($query, [
+                'showRankingScore' => true,
+                'limit'            => 2,
+                'filter'           => $filters
+            ]);
+
             // Если есть два и более результата, сравниваем их
-            if (isset($hits[0]['_rankingScore']) && isset($hits[1]['_rankingScore']) && 
+            if (isset($hits[0]['_rankingScore']) && isset($hits[1]['_rankingScore']) &&
                 $hits[0]['_rankingScore'] == $hits[1]['_rankingScore']) {
                 // Если рейтинги равны, предпочитаем продукт пользователя
                 if (isset($hits[0]['user_id']) && $hits[0]['user_id']) {

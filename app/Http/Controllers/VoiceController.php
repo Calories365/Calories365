@@ -29,7 +29,6 @@ class VoiceController extends Controller
     }
 
     /**
-     * Загрузка голосовой записи, расшифровка и поиск продуктов
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -47,36 +46,31 @@ class VoiceController extends Controller
                ], 200);
            }
 
-            /** === 1. проверяем файл === */
             if (!$request->hasFile('audio')) {
                 return response()->json(['success' => false, 'message' => 'Аудиофайл не найден'], 400);
             }
             $audioFile = $request->file('audio');
 
-            /** === 2. сохраняем оригинал === */
             $fileName = Str::uuid().'.'.$audioFile->getClientOriginalExtension();
             $localPath = $audioFile->storeAs('voice_records', $fileName, 'public');
             $fullPath  = Storage::disk('public')->path($localPath);
 
-            /** === 3. конвертируем в mp3 === */
             [$mp3Local, $mp3Full] = $this->audioConversionService->convertToMp3($localPath, $fullPath);
 
-            // если конвертация не удалась — работаем с исходным файлом
             $fileForStt = $mp3Full ?: $fullPath;
 
 
             $transcription = $this->speechToTextService->convertSpeechToText(
                 $fileForStt,
-                app()->getLocale()          // метод в сервисе должен принимать language
+                app()->getLocale()
             );
-
-            /** === 5. чистим временные файлы === */
+            Log::info('$transcription: ');
+            Log::info(print_r($transcription, true));
             Storage::disk('public')->delete($localPath);
             if ($mp3Local) {
                 Storage::disk('public')->delete($mp3Local);
             }
 
-            /** === 6. проверяем результат === */
             if (is_array($transcription) && isset($transcription['error'])) {
                 return response()->json([
                     'success' => false,
@@ -100,7 +94,6 @@ class VoiceController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-            // попытка удалить всё, что могло остаться
             if (isset($localPath)) Storage::disk('public')->delete($localPath);
             if (isset($mp3Local))  Storage::disk('public')->delete($mp3Local);
 
@@ -116,7 +109,6 @@ class VoiceController extends Controller
     }
 
     /**
-     * Сохранение продуктов в базу данных
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -126,16 +118,14 @@ class VoiceController extends Controller
         try {
             $data = $request->all();
             $products = $data['products'] ?? [];
-            $mealType = $data['meal_type'] ?? 'morning'; // morning, dinner, supper
+            $mealType = $data['meal_type'] ?? 'morning';
 
-            // Преобразование русских названий в английские
             $mealTypeMap = [
                 'завтрак' => 'morning',
                 'обед' => 'dinner',
                 'ужин' => 'supper'
             ];
 
-            // Если передано русское название, преобразуем в английское
             if (isset($mealTypeMap[$mealType])) {
                 $mealType = $mealTypeMap[$mealType];
                 Log::info('Meal type converted to English', ['original' => $data['meal_type'], 'converted' => $mealType]);
@@ -152,21 +142,19 @@ class VoiceController extends Controller
             foreach ($products as $product) {
                 Log::info('Processing product', $product);
 
-                // Проверяем наличие необходимых полей
                 if (!isset($product['name'])) {
                     Log::warning('Missing name in product data', $product);
                     continue;
                 }
 
-                // Подготавливаем данные для создания/поиска продукта
                 $productData = [
                     'user_id' => Auth::id(),
                     'part_of_day' => $mealType,
-                    'name' => $product['name'], // Добавляем в корень для ProductService
+                    'name' => $product['name'],
                     'product_translation' => [
                         'name' => $product['name'],
                         'locale' => app()->getLocale(),
-                        'verified' => 0, // Добавляем поле verified, по умолчанию 0 (не проверено)
+                        'verified' => 0,
                     ],
                     'product' => [
                         'calories' => $product['calories'] ?? 0,
@@ -178,17 +166,14 @@ class VoiceController extends Controller
                     'quantity' => $product['weight'] ?? 0, // Front: weight, Back: quantity
                 ];
 
-                // Добавляем поле verified на верхнем уровне для ProductTranslation::createProductTranslations
                 $productData['verified'] = 0;
                 $productData['active'] = 1;
 
                 Log::info('product data');
                 Log::info(print_r($productData, true));
 
-                // Проверяем, был ли модифицирован продукт
                 $wasModified = isset($product['isModified']) && $product['isModified'] === true;
 
-                // Если продукт имеет ID (уже существует в базе) и НЕ был модифицирован
                 if (!empty($product['product_id']) && !$wasModified) {
                     Log::info('Using existing product ID', ['product_id' => $product['product_id']]);
                     Log::info('Saving product with weight', [
@@ -202,7 +187,6 @@ class VoiceController extends Controller
                         'quantity' => $product['weight'] ?? 0,
                     ]);
                 }
-                // Если продукт был модифицирован или это новый продукт
                 else {
                     Log::info('Creating new product or saving modified product', [
                         'name' => $productData['name'],
@@ -210,7 +194,6 @@ class VoiceController extends Controller
                         'hasProductId' => !empty($product['product_id'])
                     ]);
 
-                    // Если продукт был модифицирован, сохраняем его как пользовательскую версию
                     if ($wasModified && !empty($product['product_id'])) {
                         Log::info('Creating custom version of existing product', [
                             'original_id' => $product['product_id'],
@@ -248,7 +231,6 @@ class VoiceController extends Controller
     }
 
     /**
-     * Поиск продуктов на основе расшифрованного текста
      *
      * @param string $text
      * @return array
@@ -258,8 +240,8 @@ class VoiceController extends Controller
         $productsInfo = [];
         $locale = app()->getLocale();
         $user_id = Auth::id();
+        Log::info(print_r($locale, true));
 
-        // Определение суффикса в зависимости от локали
         $suffix = 'грамм';
         switch ($locale) {
             case 'en':
@@ -274,14 +256,12 @@ class VoiceController extends Controller
                 break;
         }
 
-        // Разбиваем текст на отдельные продукты
         if (str_contains($text, ';')) {
             $products = explode(';', $text);
         } else {
             $products = explode($suffix, $text);
         }
 
-        // Фильтруем пустые строки из массива продуктов
         $products = array_filter($products, function($item) {
             return trim($item) !== '';
         });
@@ -302,13 +282,11 @@ class VoiceController extends Controller
                         $quantity = floatval($matches[1]);
 
                         if ($quantity > 0) {
-                            // Ищем продукт в базе данных
                             $productData = $this->findProduct($productName, $quantity, $user_id, $locale);
 
                             if ($productData) {
                                 $productsInfo[] = $productData;
                             } else {
-                                // Если продукт не найден, генерируем данные продукта
                                 $generatedProductData = $this->generateProductsData($productName, $quantity);
                                 if ($generatedProductData) {
                                     $productsInfo[] = $generatedProductData;
@@ -330,7 +308,6 @@ class VoiceController extends Controller
     }
 
     /**
-     * Поиск продукта в базе данных
      *
      * @param string $productName
      * @param float $quantity
@@ -340,21 +317,17 @@ class VoiceController extends Controller
      */
     private function findProduct(string $productName, float $quantity, int $user_id, string $locale): ?array
     {
-        // Пытаемся найти продукт через MeiliSearch
         $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
 
-        // Если рейтинг совпадения слишком низкий, считаем, что продукт не найден
         if (is_array($productTranslation) && isset($productTranslation['_rankingScore']) && $productTranslation['_rankingScore'] < 0.9) {
             Log::info("Продукт не найден (низкий рейтинг): {$productName}");
             return null;
         }
 
         if (is_array($productTranslation)) {
-            // Загружаем данные продукта
             $product = Product::find($productTranslation['product_id']);
 
             if ($product && $product->calories !== null) {
-                // Передаем точное количество, указанное пользователем
                 Log::info("Найден продукт '{$productTranslation['name']}', указанное количество: {$quantity} грамм");
                 return [
                     'product_translation' => [
@@ -385,7 +358,6 @@ class VoiceController extends Controller
     }
 
     /**
-     * Генерация данных продукта
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -393,7 +365,6 @@ class VoiceController extends Controller
     public function generateProductData(Request $request)
     {
         try {
-            // Проверяем наличие имени продукта в запросе
             if (!$request->has('product_name')) {
                 return response()->json([
                     'success' => false,
@@ -406,13 +377,11 @@ class VoiceController extends Controller
             Log::info('Генерация данных для продукта', ['name' => $productName]);
 
 
-            // Генерируем данные о продукте через OpenAI
             $generatedData = $this->speechToTextService->generateNewProductData($productName);
 
             Log::info('$generatedData: ');
             Log::info(print_r($generatedData, true));
 
-            // Проверяем на ошибки (если вернулся массив с ошибкой)
             if (is_array($generatedData) && isset($generatedData['error'])) {
                 Log::error('Ошибка при генерации данных продукта', ['error' => $generatedData['error']]);
                 return response()->json([
@@ -421,7 +390,6 @@ class VoiceController extends Controller
                 ], 500);
             }
 
-            // Убедимся, что у нас есть строка для парсинга
             if (!is_string($generatedData)) {
                 Log::error('Неожиданный формат данных от OpenAI', ['data' => $generatedData]);
                 return response()->json([
@@ -430,7 +398,6 @@ class VoiceController extends Controller
                 ], 500);
             }
 
-            // Парсим результат
             $parsedData = $this->parseGeneratedProductData($generatedData);
 
             if (!$parsedData) {
@@ -443,7 +410,6 @@ class VoiceController extends Controller
 
             Log::info('Сгенерированы данные о продукте', ['product' => $productName, 'data' => $parsedData]);
 
-            // Возвращаем сгенерированные данные
             return response()->json([
                 'success' => true,
                 'message' => 'Данные продукта успешно сгенерированы',
@@ -470,7 +436,6 @@ class VoiceController extends Controller
     }
 
     /**
-     * Парсинг сгенерированных данных продукта
      *
      * @param string $generatedData
      * @return array|null
@@ -478,7 +443,6 @@ class VoiceController extends Controller
     private function parseGeneratedProductData(string $generatedData): ?array
     {
         try {
-            // Пытаемся распарсить как JSON
             if (Str::startsWith($generatedData, '{') && Str::endsWith($generatedData, '}')) {
                 $data = json_decode($generatedData, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
@@ -486,13 +450,10 @@ class VoiceController extends Controller
                 }
             }
 
-            // Если не удается распарсить как JSON, пытаемся извлечь данные из текста
             $data = [];
 
-            // Логирование входных данных для отладки
             Log::info('Начало парсинга данных продукта:', ['raw' => $generatedData]);
 
-            // Проверяем русский формат данных (Калории - 98; Белки - 16.7; Жиры - 9; Углеводы - 2;)
             if (preg_match('/Калории[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['calories'] = floatval($matches[1]);
                 Log::info('Распознаны калории (русский формат):', ['value' => $data['calories']]);
@@ -518,7 +479,6 @@ class VoiceController extends Controller
                 Log::info('Распознана клетчатка (русский формат):', ['value' => $data['fibers']]);
             }
 
-            // Проверяем украинский формат данных (Калорії - 77; Білки - 2; Жири - 0.1; Вуглеводи - 17.5;)
             if (!isset($data['calories']) && preg_match('/Калорії[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['calories'] = floatval($matches[1]);
                 Log::info('Распознаны калории (украинский формат):', ['value' => $data['calories']]);
@@ -544,7 +504,6 @@ class VoiceController extends Controller
                 Log::info('Распознана клетчатка (украинский формат):', ['value' => $data['fibers']]);
             }
 
-            // Стандартный английский формат (как запасной вариант)
             if (!isset($data['calories']) && preg_match('/calories[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['calories'] = floatval($matches[1]);
             }
@@ -565,15 +524,12 @@ class VoiceController extends Controller
                 $data['fibers'] = floatval($matches[1]);
             }
 
-            // Более общий подход для любого формата с разделителями
             if (empty($data)) {
-                // Разбиваем строку на части по точке с запятой или запятой
                 $parts = preg_split('/[;,]/', $generatedData);
 
                 foreach ($parts as $part) {
                     $part = trim($part);
 
-                    // Пробуем найти пары ключ-значение по шаблону "название - число"
                     if (preg_match('/([а-яА-Яa-zA-Zіїєґ]+)[\s\-:]+(\d+\.?\d*)/u', $part, $matches)) {
                         $key = strtolower(trim($matches[1]));
                         $value = floatval($matches[2]);
@@ -612,15 +568,12 @@ class VoiceController extends Controller
                 }
             }
 
-            // Устанавливаем значения по умолчанию, если не найдены
             if (!isset($data['fibers'])) {
                 $data['fibers'] = 0;
             }
 
-            // Вывод результата парсинга для отладки
             Log::info('Результат парсинга данных продукта:', $data);
 
-            // Если удалось извлечь хотя бы калории или белки или жиры, возвращаем данные
             if (isset($data['calories']) || isset($data['proteins']) || isset($data['fats'])) {
                 return $data;
             }
@@ -635,7 +588,6 @@ class VoiceController extends Controller
     }
 
     /**
-     * Генерация данных продукта через AI
      *
      * @param string $productName
      * @param float $quantity
@@ -644,7 +596,6 @@ class VoiceController extends Controller
     private function generateProductsData(string $productName, float $quantity): ?array
     {
         try {
-            // Генерируем данные продукта через AI
             $generatedData = $this->speechToTextService->generateNewProductData($productName);
 
             Log::info('Генерация данных для продукта из расшифровки', [
@@ -653,19 +604,16 @@ class VoiceController extends Controller
                 'response' => $generatedData
             ]);
 
-            // Проверяем на ошибки (в случае массива с ошибкой)
             if (is_array($generatedData) && isset($generatedData['error'])) {
                 Log::error("Ошибка при генерации данных продукта: " . $generatedData['error']);
                 return null;
             }
 
-            // Убедимся, что у нас есть строка для парсинга
             if (!is_string($generatedData)) {
                 Log::error('Неожиданный формат данных от OpenAI', ['data' => $generatedData]);
                 return null;
             }
 
-            // Парсим сгенерированные данные
             $nutritionData = $this->parseGeneratedProductData($generatedData);
 
             if ($nutritionData) {
@@ -706,7 +654,6 @@ class VoiceController extends Controller
     }
 
     /**
-     * Поиск продукта по названию
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -714,7 +661,6 @@ class VoiceController extends Controller
     public function searchProduct(Request $request)
     {
         try {
-            // Проверяем наличие имени продукта в запросе
             if (!$request->has('product_name')) {
                 return response()->json([
                     'success' => false,
@@ -732,7 +678,6 @@ class VoiceController extends Controller
                 'locale' => $locale
             ]);
 
-            // Ищем продукт в базе данных с использованием MeiliSearch
             $searchResult = Product::getRawProduct($productName, $userId, $locale);
 
             if ($searchResult) {
@@ -743,7 +688,6 @@ class VoiceController extends Controller
                     'ranking_score' => $rankingScore
                 ]);
 
-                // Загружаем полные данные о продукте из базы данных
                 $productId = $searchResult['product_id'] ?? null;
 
                 if (!$productId) {
@@ -754,7 +698,6 @@ class VoiceController extends Controller
                     ]);
                 }
 
-                // Получаем полные данные о продукте из базы данных
                 $fullProduct = Product::find($productId);
 
                 if (!$fullProduct) {
@@ -765,7 +708,6 @@ class VoiceController extends Controller
                     ]);
                 }
 
-                // Форматируем данные о продукте
                 $formattedProduct = [
                     'product_translation' => [
                         'id' => $searchResult['id'],
@@ -797,7 +739,6 @@ class VoiceController extends Controller
                     'should_generate' => $rankingScore < 0.9
                 ]);
             } else {
-                // Если продукт не найден, возвращаем соответствующий статус
                 return response()->json([
                     'success' => false,
                     'message' => 'Продукт не найден',
