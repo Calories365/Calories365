@@ -256,6 +256,13 @@ export default {
                 return;
             }
 
+            const product = this.products[index];
+            
+            // Если имя продукта было изменено, убеждаемся, что обнулен product_id
+            if (product.nameModified) {
+                product.product_id = null;
+            }
+
             // Устанавливаем состояние обработки
             this.$store.commit('voice/RECORDING_PROCESS');
 
@@ -319,6 +326,9 @@ export default {
             const productName = this.products[index].name;
 
             try {
+                // Показываем индикатор загрузки
+                this.$store.commit('voice/RECORDING_PROCESS');
+                
                 const response = await generateProductData(productName);
 
                 // Проверяем успешность запроса
@@ -329,6 +339,11 @@ export default {
                     this.products[index].fats = response.data.fats || 0;
                     this.products[index].carbs = response.data.carbohydrates || 0;
                     this.products[index].isGenerated = true;
+
+                    // Если имя продукта было изменено, убеждаемся что это новый продукт
+                    if (this.products[index].nameModified) {
+                        this.products[index].product_id = null;
+                    }
 
                     // Сбрасываем флаг поиска
                     this.products[index].needsSearch = false;
@@ -348,7 +363,7 @@ export default {
                 this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
             }
         },
-        saveToMeal(mealType, textForMsg) {
+        saveToMeal(mealType, mealLabel) {
             // Преобразование русских названий частей дня в английские
             const mealTypeMap = {
                 'завтрак': 'morning',
@@ -365,20 +380,36 @@ export default {
                 return;
             }
 
-            // Проверяем изменения в продуктах
-            this.checkModifiedProducts();
+            // Проверяем и подготавливаем продукты перед отправкой
+            const productsToSave = this.products.map(product => {
+                // Создаем копию продукта, чтобы не изменять оригинал
+                const preparedProduct = { ...product };
+
+                // Если название продукта было изменено, убеждаемся что это новый продукт
+                if (preparedProduct.nameModified) {
+                    preparedProduct.product_id = null; // Гарантированно обнуляем ID
+                    preparedProduct.isGenerated = false; // Устанавливаем как пользовательский продукт
+                }
+                
+                // Проверяем, есть ли у продукта вес
+                if (!preparedProduct.weight || preparedProduct.weight <= 0) {
+                    preparedProduct.weight = 100; // Устанавливаем вес по умолчанию
+                }
+
+                return preparedProduct;
+            });
 
             // Устанавливаем состояние обработки
             this.$store.commit('voice/RECORDING_PROCESS');
 
             // Отправляем продукты на сохранение
-            saveVoiceProducts(this.products, englishMealType)
+            saveVoiceProducts(productsToSave, englishMealType)
                 .then(response => {
                     // Обновляем состояние после успешного сохранения
                     this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
 
-                    // Показываем сообщение об успехе с русским названием приема пищи
-                    this.showSuccess(this.$t('Voice.success.productsSaved', { meal: textForMsg }));
+                    // Показываем сообщение об успехе с названием приема пищи
+                    this.showSuccess(this.$t('Voice.success.productsSaved', { meal: mealLabel || mealType }));
 
                     // Очищаем список продуктов и расшифровку
                     this.products = [];
@@ -486,7 +517,8 @@ export default {
                     this.products[index].calories !== original.calories ||
                     this.products[index].protein !== original.protein ||
                     this.products[index].fats !== original.fats ||
-                    this.products[index].carbs !== original.carbs
+                    this.products[index].carbs !== original.carbs ||
+                    this.products[index].weight !== original.weight
                 )) {
                     // Устанавливаем флаг "модифицирован"
                     this.products[index].isModified = true;
@@ -495,16 +527,21 @@ export default {
                             calories: original.calories,
                             protein: original.protein,
                             fats: original.fats,
-                            carbs: original.carbs
+                            carbs: original.carbs,
+                            weight: original.weight
                         },
                         modified: {
                             calories: this.products[index].calories,
                             protein: this.products[index].protein,
                             fats: this.products[index].fats,
-                            carbs: this.products[index].carbs
+                            carbs: this.products[index].carbs,
+                            weight: this.products[index].weight
                         }
                     });
                 }
+            } else if (this.products[index].nameModified) {
+                // Если это продукт с измененным названием, отмечаем его как isModified
+                this.products[index].isModified = true;
             }
         },
 
@@ -518,12 +555,22 @@ export default {
                 return;
             }
 
-            // Устанавливаем флаг изменения имени
+            // Создаем новый пользовательский продукт:
+            // 1. Устанавливаем флаг изменения имени
             product.nameModified = true;
-
-            // Всегда устанавливаем needsSearch в false, чтобы всегда использовалась генерация
+            // 2. Обнуляем product_id, чтобы продукт был сохранен как новый
+            product.product_id = null;
+            // 3. Устанавливаем флаг isGenerated в false чтобы система знала, что это пользовательский продукт
+            product.isGenerated = false;
+            // 4. Устанавливаем флаг isModified в true чтобы продукт визуально выделялся
+            product.isModified = true;
+            
+            // Установливаем needsSearch в false, чтобы при нажатии generate всегда использовалась генерация
             product.needsSearch = false;
-            console.log(`Изменение имени продукта с "${product.originalName}" на "${product.name}". Будем генерировать данные.`);
+            console.log(`Изменение имени продукта с "${product.originalName}" на "${product.name}". Создан новый пользовательский продукт.`);
+            
+            // Обновляем originalName, чтобы отслеживать дальнейшие изменения
+            product.originalName = product.name;
         },
     },
     beforeUnmount() {
@@ -643,12 +690,11 @@ export default {
                 </div>
 
                 <div class="save-actions">
-<!--                    <button class="save-btn breakfast" @click="saveToMeal($t('Voice.saveBreakfast'))">-->
                     <button class="save-btn breakfast" @click="saveToMeal('завтрак', $t('Diary.morning'))">
                         <FontAwesomeIcon :icon="faSave()" />
                         <span>{{ $t('Voice.saveBreakfast') }}</span>
                     </button>
-                    <button class="save-btn lunch" @click="saveToMeal( 'обед' , $t('Diary.dinner'))">
+                    <button class="save-btn lunch" @click="saveToMeal('обед', $t('Diary.dinner'))">
                         <FontAwesomeIcon :icon="faSave()" />
                         <span>{{ $t('Voice.saveLunch') }}</span>
                     </button>
