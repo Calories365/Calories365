@@ -163,10 +163,10 @@ export default {
             </div>
         </section>
 
-        <section class="features">
+        <section class="features" id="voice-input-section">
             <div class="container features-grid">
-                <div class="feature">
-                    <h3>{{ $t("Home.TelegramBotTitle") }}</h3>
+                <div class="feature" id="telegram-bot-block">
+                    <h3 class="telegram-section-title">{{ $t("Home.TelegramBotTitle") }}</h3>
                     <p>{{ $t("Home.TelegramBotDesc") }}</p>
                     <calories-button @click="openTelegramLink" class="mid-info_button">
                         {{ telegramLinkText }}
@@ -225,7 +225,7 @@ export default {
             </div>
         </section>
 
-        <section class="premium" v-if="!$isAcademic">
+        <section class="premium" id="premium-section" v-if="!$isAcademic">
             <PremiumSection :isPremium="isPremium" :currentUser="currentUser" :is-home-page="true" />
         </section>
 

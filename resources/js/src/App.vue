@@ -7,6 +7,7 @@ import CaloriesCalculationLocaleChanger from "@/Components/CaloriesCalculationLo
 import {actionTypes} from "@/store/modules/changeLocale.js";
 import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vue";
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
+import PremiumNotice from "@/Components/PremiumNotice.vue";
 
 library.add(faAngleDown)
 
@@ -35,6 +36,7 @@ export default {
         CaloriesCalculationLocaleChanger,
         CaloriesHeaderV2,
         CaloriesTestLocale,
+        PremiumNotice,
     },
     computed: {
         successMessage() {
@@ -80,6 +82,9 @@ export default {
 
         <!-- Шапка -->
         <calories-header-v2/>
+        
+        <!-- Global premium notice -->
+        <premium-notice/>
 
         <main id="primary" class="main-wrapper">
             <article class="main-article">

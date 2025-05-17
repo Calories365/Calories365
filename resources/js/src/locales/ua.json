@@ -431,7 +431,9 @@
         "saveLunch": "Зберегти на обід",
         "saveDinner": "Зберегти на вечерю",
         "cancel": "Скасувати",
-        "please_buy_premium": "Your free trial has ended, please purchase premium!",
+        "please_buy_premium": "У вас закінчився безкоштовний період, будь ласка купіть преміум!",
+        "premiumNotice": "у безкоштовній версії ви можете використовувати <router-link :to=\"{ name: 'home' }\" class=\"voice-link\">голосового помічника</router-link> лише 10 разів, для постійного використання купіть <router-link :to=\"{ name: 'home', hash: '#premium-section' }\" class=\"premium-link\">преміум</router-link>",
+        "premiumLink": "преміум",
         "tips": {
             "title": "Поради для кращого розпізнавання:",
             "tip1": "Говоріть чітко і не надто швидко",

@@ -35,7 +35,8 @@ export default {
             isRecording: state => state.voice.isRecording,
             isProcessing: state => state.voice.isProcessing,
             audioBlob: state => state.voice.audioBlob,
-            isUploading: state => state.voice.isUploading
+            isUploading: state => state.voice.isUploading,
+            currentUser: state => state.auth.currentUser
         })
     },
     created() {
@@ -732,35 +733,6 @@ export default {
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         position: relative;
-
-        .success-message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            animation: fadeInOut 3s forwards;
-
-            .success-message-content {
-                display: flex;
-                align-items: center;
-                padding: 12px 24px;
-                background-color: #4CAF50;
-                color: white;
-                border-radius: 30px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-
-                .success-icon {
-                    margin-right: 10px;
-                    font-size: 1.2rem;
-                }
-
-                span {
-                    font-weight: 500;
-                    font-size: 1.1rem;
-                }
-            }
-        }
 
         h1 {
             color: #333;
