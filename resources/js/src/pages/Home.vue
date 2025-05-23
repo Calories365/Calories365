@@ -146,8 +146,8 @@ export default {
                     <img v-if="!$isAcademic" src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />
                     <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
                 </div>
-                <div class="hero-action">
-                    <h2>{{ $t("Home.Title") }}</h2>
+                <div class="hero-action" id="voice-input">
+                    <h2>{{ $t("Home.Title") }}</h2 >
                     <p>
                         {{ $t("Home.DescriptionP1") }}
                         <span class="hero-action__desc-link" @click="openTelegramLink">Telegram bot</span>

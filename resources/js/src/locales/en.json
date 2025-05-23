@@ -435,7 +435,9 @@
         "saveDinner": "Save to Dinner",
         "cancel": "Cancel",
         "please_buy_premium": "Your free trial has ended, please purchase premium!",
-        "premiumNotice": "in the free version, you can use the <router-link :to=\"{ name: 'home' }\" class=\"voice-link\">voice assistant</router-link> only 10 times; for continuous use, purchase <router-link :to=\"{ name: 'home', hash: '#premium-section' }\" class=\"premium-link\">premium</router-link>",
+        "premiumNoticeStart": "in the free version, you can use the",
+        "premiumNoticeAssistant": "voice assistant",
+        "premiumNoticeMiddle": "only 10 times; for continuous use, purchase",
         "premiumLink": "premium",
         "tips": {
             "title": "Tips for Better Recognition:",

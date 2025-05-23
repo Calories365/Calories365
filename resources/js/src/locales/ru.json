@@ -431,7 +431,9 @@
         "saveDinner": "Сохранить на ужин",
         "cancel": "Отменить",
         "please_buy_premium": "У вас закончился бесплатный период, пожалуйста купить премиум!",
-        "premiumNotice": "в бесплатной версии вы можете использовать <router-link :to=\"{ name: 'home' }\" class=\"voice-link\">голосового помощника</router-link> только 10 раз, для постоянного использования купите <router-link :to=\"{ name: 'home', hash: '#premium-section' }\" class=\"premium-link\">премиум</router-link>",
+        "premiumNoticeStart": "в бесплатной версии вы можете использовать",
+        "premiumNoticeAssistant": "голосового помощника",
+        "premiumNoticeMiddle": "только 10 раз, для постоянного использования купите",
         "premiumLink": "премиум",
         "tips": {
             "title": "Советы для лучшего распознавания:",

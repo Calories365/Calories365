@@ -33,73 +33,75 @@ export default {
             });
         },
         goToVoiceSection() {
-            // Переход на главную страницу без скролла
-            this.$router.push({ name: 'home' }).then(() => {
+            // Переход на главную страницу c хешем к разделу telegram-bot-block
+            this.$router.push({ name: 'home', hash: '#voice-input' }).then(() => {
                 this.$nextTick(() => {
                     setTimeout(() => {
-                        // Найдем ссылку на голосовой ввод в хиро секции и анимируем её
-                        const voiceLink = document.querySelector('.hero-action__desc-link:last-child');
-                        
-                        // Найдем также телеграм-бот блок для его анимации
+                        // Скроллим к телеграм-бот блоку
+                        const telegramBotBlockScroll = document.getElementById('voice-input');
                         const telegramBotBlock = document.getElementById('telegram-bot-block');
-                        const telegramTitle = document.querySelector('.telegram-section-title');
-                        const telegramButton = telegramBotBlock?.querySelector('.mid-info_button');
-                        
-                        // Функция для анимации элемента
-                        const animateElement = (element, animationClass) => {
-                            if (element) {
-                                // Добавляем класс анимации
-                                element.classList.add(animationClass);
-                                
-                                // После завершения анимации (6 секунд) удаляем класс
-                                setTimeout(() => {
-                                    element.classList.remove(animationClass);
-                                }, 6000);
+                        if (telegramBotBlock) {
+                            telegramBotBlockScroll.scrollIntoView({ behavior: 'smooth' });
+
+                            // Найдем нужные элементы для анимации
+                            const telegramTitle = document.querySelector('.telegram-section-title');
+                            const telegramButton = telegramBotBlock?.querySelector('.mid-info_button');
+
+                            // Найдем ссылку на голосовой ввод в хиро секции и анимируем её
+                            const voiceLink = document.querySelector('.hero-action__desc-link:last-child');
+
+                            // Функция для анимации элемента
+                            const animateElement = (element, animationClass) => {
+                                if (element) {
+                                    // Добавляем класс анимации
+                                    element.classList.add(animationClass);
+
+                                    // После завершения анимации (6 секунд) удаляем класс
+                                    setTimeout(() => {
+                                        element.classList.remove(animationClass);
+                                    }, 6000);
+                                }
+                            };
+
+                            // Анимируем ссылку на голосовой ввод
+                            if (voiceLink) {
+                                animateElement(voiceLink, 'scale-animation');
+                                // Добавим выделение
+                                animateElement(voiceLink, 'highlight-text-animation');
                             }
-                        };
-                        
-                        // Анимируем ссылку на голосовой ввод
-                        if (voiceLink) {
-                            animateElement(voiceLink, 'scale-animation');
-                            // Добавим выделение
-                            animateElement(voiceLink, 'highlight-text-animation');
+
+                            // Применяем анимации к блоку телеграм-бота
+                            animateElement(telegramBotBlock, 'highlight-animation');
+
+                            setTimeout(() => {
+                                animateElement(telegramTitle, 'scale-animation');
+                            }, 300);
+
+                            setTimeout(() => {
+                                animateElement(telegramButton, 'button-pulse-animation');
+                            }, 900);
                         }
-                        
-                        // Применяем анимации к блоку телеграм-бота
-                        animateElement(telegramBotBlock, 'highlight-animation');
-                        
-                        setTimeout(() => {
-                            animateElement(telegramTitle, 'scale-animation');
-                        }, 300);
-                        
-                        setTimeout(() => {
-                            animateElement(telegramButton, 'button-pulse-animation');
-                        }, 900);
                     }, 600);
                 });
             });
-        },
-        handleClick(event) {
-            // Клик по ссылке на премиум
-            if (event.target.classList.contains('premium-link')) {
-                event.preventDefault();
-                this.goToPremium();
-            }
-            
-            // Клик по ссылке на голосовой помощник
-            if (event.target.classList.contains('voice-link')) {
-                event.preventDefault();
-                this.goToVoiceSection();
-            }
         }
     }
 }
 </script>
 
 <template>
-    <div class="premium-notice" v-if="!isPremium">
-        <div class="premium-notice-content" @click="handleClick">
-            <p v-html="$t('Voice.premiumNotice')"></p>
+    <div class="premium-notice">
+        <div class="premium-notice-content">
+            <p>
+                {{ $t('Voice.premiumNoticeStart') }}
+                <router-link :to="{ name: 'home' }" class="voice-link" @click.native="goToVoiceSection">
+                    {{ $t('Voice.premiumNoticeAssistant') }}
+                </router-link>
+                {{ $t('Voice.premiumNoticeMiddle') }}
+                <router-link :to="{ name: 'home', hash: '#premium-section' }" class="premium-link" @click.native="goToPremium">
+                    {{ $t('Voice.premiumLink') }}
+                </router-link>
+            </p>
         </div>
     </div>
 </template>
@@ -114,7 +116,7 @@ export default {
     max-width: 1200px;
     position: relative;
     z-index: 100;
-    
+
     .premium-notice-content {
         p {
             color: #5e35b1;
@@ -122,29 +124,29 @@ export default {
             line-height: 1.4;
             margin: 0;
         }
-        
-        :deep(.premium-link) {
+
+        .premium-link {
             color: #7e57c2;
             font-weight: 600;
             text-decoration: none;
             border-bottom: 1px solid #7e57c2;
             transition: all 0.2s ease;
             cursor: pointer;
-            
+
             &:hover {
                 color: #5e35b1;
                 border-bottom-color: #5e35b1;
             }
         }
-        
-        :deep(.voice-link) {
+
+        .voice-link {
             color: #5e35b1;
             font-weight: 600;
             text-decoration: none;
             border-bottom: 1px solid #5e35b1;
             transition: all 0.2s ease;
             cursor: pointer;
-            
+
             &:hover {
                 color: #3f1f91;
                 border-bottom-color: #3f1f91;
@@ -157,7 +159,7 @@ export default {
     .premium-notice {
         margin: 10px;
         padding: 10px 15px;
-        
+
         .premium-notice-content p {
             font-size: 0.9rem;
         }
@@ -260,4 +262,4 @@ export default {
         background-color: transparent;
     }
 }
-</style> 
+</style>

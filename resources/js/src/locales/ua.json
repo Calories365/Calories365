@@ -432,7 +432,9 @@
         "saveDinner": "Зберегти на вечерю",
         "cancel": "Скасувати",
         "please_buy_premium": "У вас закінчився безкоштовний період, будь ласка купіть преміум!",
-        "premiumNotice": "у безкоштовній версії ви можете використовувати <router-link :to=\"{ name: 'home' }\" class=\"voice-link\">голосового помічника</router-link> лише 10 разів, для постійного використання купіть <router-link :to=\"{ name: 'home', hash: '#premium-section' }\" class=\"premium-link\">преміум</router-link>",
+        "premiumNoticeStart": "у безкоштовній версії ви можете використовувати",
+        "premiumNoticeAssistant": "голосового помічника",
+        "premiumNoticeMiddle": "лише 10 разів, для постійного використання купіть",
         "premiumLink": "преміум",
         "tips": {
             "title": "Поради для кращого розпізнавання:",
