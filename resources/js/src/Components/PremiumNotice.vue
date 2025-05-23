@@ -90,7 +90,7 @@ export default {
 </script>
 
 <template>
-    <div class="premium-notice">
+    <div class="premium-notice" v-if="!isPremium">
         <div class="premium-notice-content">
             <p>
                 {{ $t('Voice.premiumNoticeStart') }}
