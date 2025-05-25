@@ -1,6 +1,5 @@
 import { uploadVoiceRecord } from '@/api/voice.js';
 
-// Types мутаций
 export const mutationTypes = {
     RECORDING_START: 'voice/RECORDING_START',
     RECORDING_STOP: 'voice/RECORDING_STOP',
@@ -13,7 +12,6 @@ export const mutationTypes = {
     UPLOAD_FAILURE: 'voice/UPLOAD_FAILURE'
 };
 
-// Types действий
 export const actionTypes = {
     startRecording: 'voice/startRecording',
     stopRecording: 'voice/stopRecording',
@@ -84,7 +82,7 @@ const actions = {
     },
     async [actionTypes.uploadRecording]({ commit, state }) {
         if (!state.audioBlob) {
-            commit(mutationTypes.UPLOAD_FAILURE, 'Нет записи для отправки');
+            commit(mutationTypes.UPLOAD_FAILURE, 'Помилка');
             return;
         }
 
@@ -93,11 +91,10 @@ const actions = {
         try {
             const response = await uploadVoiceRecord(state.audioBlob);
             commit(mutationTypes.UPLOAD_SUCCESS);
-            
-            // Возвращаем данные для использования в компоненте
+
             return response;
         } catch (error) {
-            commit(mutationTypes.UPLOAD_FAILURE, error.response?.data?.message || 'Ошибка при отправке записи');
+            commit(mutationTypes.UPLOAD_FAILURE, error.response?.data?.message || 'Помилка');
             throw error;
         }
     },
@@ -121,4 +118,4 @@ export default {
     mutations,
     actions,
     getters
-}; 
+};

@@ -143,12 +143,12 @@ export default {
                         </span>
                         </div>
                         <div class="mt-2 flex">
-                            <calories-button
-                                class="button w-1/2 mr-2"
-                                @click="loginWithGoogle"
-                            >
-                                Google
-                            </calories-button>
+<!--                            <calories-button-->
+<!--                                class="button w-1/2 mr-2"-->
+<!--                                @click="loginWithGoogle"-->
+<!--                            >-->
+<!--                                Google-->
+<!--                            </calories-button>-->
                         </div>
                     </div>
                 </div>
