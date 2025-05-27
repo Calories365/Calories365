@@ -143,8 +143,9 @@ export default {
         <section class="hero">
             <div class="container hero-content">
                 <div class="hero-image-container">
-                    <img v-if="!$isAcademic" src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />
-                    <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
+<!--                    <img v-if="!$isAcademic" src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />-->
+<!--                    <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />-->
+                    <img src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
                 </div>
                 <div class="hero-action" id="voice-input">
                     <h2>{{ $t("Home.Title") }}</h2 >
