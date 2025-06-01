@@ -51,7 +51,9 @@ export default {
                             if (isMobile) {
                                 const heroPicture = document.getElementById('hero-picture');
                                 if (heroPicture) {
-                                    heroPicture.scrollIntoView({ behavior: 'smooth' });
+                                    const targetTop =
+                                        heroPicture.getBoundingClientRect().top + window.pageYOffset + 20;
+                                    window.scrollTo({ top: targetTop, behavior: 'smooth' });
                                 }
                             }
 
