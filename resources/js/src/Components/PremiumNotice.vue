@@ -18,69 +18,50 @@ export default {
     },
     methods: {
         goToPremium() {
-            // Сначала выполняем переход на главную страницу
             this.$router.push({ name: 'home', hash: '#premium-section' }).then(() => {
-                // После завершения навигации ждем следующего тика и добавляем небольшую задержку
-                // чтобы обеспечить полную загрузку страницы
                 this.$nextTick(() => {
                     setTimeout(() => {
                         const premiumSection = document.getElementById('premium-section');
                         if (premiumSection) {
                             premiumSection.scrollIntoView({ behavior: 'smooth' });
                         }
-                    }, 500); // Задержка 500 мс для гарантии полной загрузки страницы
+                    }, 500);
                 });
             });
         },
         goToVoiceSection() {
-            // Переход на главную страницу c хешем к разделу telegram-bot-block
-            this.$router.push({ name: 'home', hash: '#voice-input' }).then(() => {
+            this.$router.push({ name: 'home', hash: '#hero-picture' }).then(() => {
                 this.$nextTick(() => {
                     setTimeout(() => {
-                        // Скроллим к телеграм-бот блоку
-                        const telegramBotBlockScroll = document.getElementById('voice-input');
-                        const telegramBotBlock = document.getElementById('telegram-bot-block');
-                        if (telegramBotBlock) {
-                            telegramBotBlockScroll.scrollIntoView({ behavior: 'smooth' });
 
-                            // Найдем нужные элементы для анимации
-                            const telegramTitle = document.querySelector('.telegram-section-title');
-                            const telegramButton = telegramBotBlock?.querySelector('.mid-info_button');
+                            const telegramLink = document.querySelector('.telegram_link');
+                            const voicePageLink = document.querySelector('.voice_page_link');
 
-                            // Найдем ссылку на голосовой ввод в хиро секции и анимируем её
-                            const voiceLink = document.querySelector('.hero-action__desc-link:last-child');
-
-                            // Функция для анимации элемента
                             const animateElement = (element, animationClass) => {
                                 if (element) {
-                                    // Добавляем класс анимации
                                     element.classList.add(animationClass);
 
-                                    // После завершения анимации (6 секунд) удаляем класс
+
                                     setTimeout(() => {
                                         element.classList.remove(animationClass);
                                     }, 6000);
                                 }
                             };
 
-                            // Анимируем ссылку на голосовой ввод
-                            if (voiceLink) {
-                                animateElement(voiceLink, 'scale-animation');
-                                // Добавим выделение
-                                animateElement(voiceLink, 'highlight-text-animation');
+                            if (voicePageLink && telegramLink) {
+
+                                const heroPicture = document.getElementById('hero-picture');
+                                if (heroPicture) {
+                                    heroPicture.scrollIntoView({ behavior: 'smooth' });
+                                }
+
+                                animateElement(telegramLink, 'scale-animation');
+                                animateElement(voicePageLink, 'scale-animation');
+
+                                animateElement(telegramLink, 'highlight-text-animation');
+                                animateElement(voicePageLink, 'highlight-text-animation');
+
                             }
-
-                            // Применяем анимации к блоку телеграм-бота
-                            animateElement(telegramBotBlock, 'highlight-animation');
-
-                            setTimeout(() => {
-                                animateElement(telegramTitle, 'scale-animation');
-                            }, 300);
-
-                            setTimeout(() => {
-                                animateElement(telegramButton, 'button-pulse-animation');
-                            }, 900);
-                        }
                     }, 600);
                 });
             });

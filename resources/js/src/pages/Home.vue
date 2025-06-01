@@ -142,7 +142,7 @@ export default {
     <div class="landing-page">
         <section class="hero">
             <div class="container hero-content">
-                <div class="hero-image-container">
+                <div class="hero-image-container" id="hero-picture">
 <!--                    <img v-if="!$isAcademic" src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />-->
 <!--                    <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />-->
                     <img src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
@@ -151,9 +151,9 @@ export default {
                     <h2>{{ $t("Home.Title") }}</h2 >
                     <p>
                         {{ $t("Home.DescriptionP1") }}
-                        <span class="hero-action__desc-link" @click="openTelegramLink">Telegram bot</span>
+                        <span class="hero-action__desc-link telegram_link" @click="openTelegramLink">Telegram bot</span>
                         {{ $t("Home.DescriptionP2") }}
-                        <span class="hero-action__desc-link" @click="goToVoiceInput">{{voiceInput}}</span>.
+                        <span class="hero-action__desc-link voice_page_link" @click="goToVoiceInput">{{voiceInput}}</span>.
                     </p>
                     <div class="hero-buttons">
                         <calories-button @click="goToCalculator" class="calculator-section_head-button">
