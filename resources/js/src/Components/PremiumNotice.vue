@@ -34,34 +34,33 @@ export default {
                 this.$nextTick(() => {
                     setTimeout(() => {
 
-                            const telegramLink = document.querySelector('.telegram_link');
-                            const voicePageLink = document.querySelector('.voice_page_link');
+                        const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-                            const animateElement = (element, animationClass) => {
-                                if (element) {
-                                    element.classList.add(animationClass);
+                        const telegramLink  = document.querySelector('.telegram_link');
+                        const voicePageLink = document.querySelector('.voice_page_link');
 
+                        const animateElement = (element, animationClass) => {
+                            if (element) {
+                                element.classList.add(animationClass);
+                                setTimeout(() => element.classList.remove(animationClass), 6000);
+                            }
+                        };
 
-                                    setTimeout(() => {
-                                        element.classList.remove(animationClass);
-                                    }, 6000);
-                                }
-                            };
+                        if (telegramLink && voicePageLink) {
 
-                            if (voicePageLink && telegramLink) {
-
+                            if (isMobile) {
                                 const heroPicture = document.getElementById('hero-picture');
                                 if (heroPicture) {
                                     heroPicture.scrollIntoView({ behavior: 'smooth' });
                                 }
-
-                                animateElement(telegramLink, 'scale-animation');
-                                animateElement(voicePageLink, 'scale-animation');
-
-                                animateElement(telegramLink, 'highlight-text-animation');
-                                animateElement(voicePageLink, 'highlight-text-animation');
-
                             }
+
+                            ['scale-animation', 'highlight-text-animation'].forEach(cls => {
+                                animateElement(telegramLink,  cls);
+                                animateElement(voicePageLink, cls);
+                            });
+                        }
+
                     }, 600);
                 });
             });

@@ -56,8 +56,8 @@
     },
     "Home": {
         "Title": "Calorie Tracking",
-        "DescriptionP1": "Our app helps quickly calculate the diet, keep a detailed food diary, and connect a voice assistant",
-        "DescriptionP2": "for convenient data entry. You can also enter products using voice in the section",
+        "DescriptionP1": "Our app helps you quickly calculate your diet, keep a detailed food diary using voice input powered by",
+        "DescriptionP2": "for convenient data entry. Or you can enter products by voice on the page",
         "LoseWeight": "Calculate Diet!",
         "TelegramBotTitle": "Telegram Bot for Convenience",
         "TelegramBotDesc": "Connect a voice Telegram bot for quick and easy meal logging. Just say what you ate, and the bot will process it instantly.",
