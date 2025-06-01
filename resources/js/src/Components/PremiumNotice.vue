@@ -52,7 +52,7 @@ export default {
                                 const heroPicture = document.getElementById('hero-picture');
                                 if (heroPicture) {
                                     const targetTop =
-                                        heroPicture.getBoundingClientRect().top + window.pageYOffset + 20;
+                                        heroPicture.getBoundingClientRect().top + window.pageYOffset + 35;
                                     window.scrollTo({ top: targetTop, behavior: 'smooth' });
                                 }
                             }
