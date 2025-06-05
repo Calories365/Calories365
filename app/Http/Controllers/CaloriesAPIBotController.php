@@ -20,11 +20,6 @@ class CaloriesAPIBotController extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    public function __construct()
-    {
-        // Конструктор може бути порожнім або видаленим
-    }
-
     public function store(Request $request)
     {
         $text = $request->input('text');
