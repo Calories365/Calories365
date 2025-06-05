@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class LanguageSetting extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -17,7 +17,7 @@ class LanguageSetting extends Model
     protected $fillable = [
         'russian_language_enabled',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *

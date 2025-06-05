@@ -12,10 +12,13 @@ class ProductTranslation extends Model
     use searchable;
 
     public const SORTABLE = ['id'];
-    public const FILTERABLE = ['locale', 'user_id','active','verified'];
+
+    public const FILTERABLE = ['locale', 'user_id', 'active', 'verified'];
+
     protected $fillable = [
-        'product_id', 'locale', 'name', 'double_metaphoned_name', 'transliterated_name','user_id','active','verified'
+        'product_id', 'locale', 'name', 'double_metaphoned_name', 'transliterated_name', 'user_id', 'active', 'verified',
     ];
+
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -41,7 +44,6 @@ class ProductTranslation extends Model
         return true;
     }
 
-
     public function toSearchableArray()
     {
         $data = [
@@ -52,6 +54,7 @@ class ProductTranslation extends Model
             'active' => $this->active,
             'verified' => $this->verified,
         ];
+
         return $data;
     }
 
@@ -59,5 +62,4 @@ class ProductTranslation extends Model
     {
         return 'products';
     }
-
 }

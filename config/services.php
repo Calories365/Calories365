@@ -31,9 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
     'google' => [
-        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect'      => env('GOOGLE_REDIRECT_URL'),
+        'redirect' => env('GOOGLE_REDIRECT_URL'),
     ],
     'telegram_bot_url' => env('TELEGRAM_BOT_URL', 'https://t.me/Calories365Test_bot'),
     'academic_telegram_bot_url' => env('ACADEMIC_TELEGRAM_BOT_URL', 'https://t.me/Calories365KNU_bot'),

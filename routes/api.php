@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VoiceController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/buy-premium', [\App\Http\Controllers\PaymentController::class, 'generatePaymentLink'])->name('buyPremium');
 
-        // Маршрут для загрузки голосовых записей 
+        // Маршрут для загрузки голосовых записей
         Route::post('/voice/upload', [VoiceController::class, 'upload'])->name('voice.upload');
 
         // Маршрут для сохранения продуктов
@@ -85,14 +85,10 @@ Route::middleware('check.bot.key')->group(function () {
     });
 });
 
-
-
 use App\Http\Controllers\SocialAuthController;
+
 Route::get('/language/status', [\App\Http\Controllers\LanguageSettingController::class, 'getRussianLanguageStatus'])
     ->name('language.status');
 
 Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
     ->name('social.google.redirect');
-
-
-

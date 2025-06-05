@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DateValidationRequest;
 use App\Models\FoodConsumption;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class CalendarController extends Controller
 {
@@ -16,7 +14,7 @@ class CalendarController extends Controller
         $dailyCalories = FoodConsumption::getDailyCaloriesSum($user->id, $date);
 
         return response()->json([
-            'dailyCalories' => $dailyCalories
+            'dailyCalories' => $dailyCalories,
         ]);
     }
 }

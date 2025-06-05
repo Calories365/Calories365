@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\Log;
 class FoodSelection
 {
     private Client $client;
+
     private string $apiKey;
 
     public function __construct(string $apiKey)
     {
-        $this->client = new Client();
+        $this->client = new Client;
         $this->apiKey = $apiKey;
     }
 
@@ -25,23 +26,24 @@ class FoodSelection
             [
                 'name' => 'file',
                 'contents' => fopen($filePath, 'r'),
-                'filename' => basename($filePath)
+                'filename' => basename($filePath),
             ],
             [
                 'name' => 'model',
-                'contents' => 'whisper-1'
-            ]
+                'contents' => 'whisper-1',
+            ],
         ]);
 
         $headers = [
-            'Authorization' => 'Bearer ' . $this->apiKey,
-            'Content-Type' => 'multipart/form-data; boundary=' . $multipartBody->getBoundary()
+            'Authorization' => 'Bearer '.$this->apiKey,
+            'Content-Type' => 'multipart/form-data; boundary='.$multipartBody->getBoundary(),
         ];
 
         $request = new Request('POST', 'https://api.openai.com/v1/audio/transcriptions', $headers, $multipartBody);
 
         try {
             $response = $this->client->send($request);
+
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
             return ['error' => $e->getMessage()];
@@ -53,8 +55,8 @@ class FoodSelection
         Log::info('start analyze');
         $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json'
+                'Authorization' => 'Bearer '.$this->apiKey,
+                'Content-Type' => 'application/json',
             ],
             'json' => [
                 'model' => 'gpt-4o',
@@ -67,10 +69,10 @@ class FoodSelection
                         Помидор - 120грамм;
                         то есть без лишней информации
                         и надо все переводить в граммы, если не указано их количество, если например говориться что 3 яйца, ты должен будешь написать именно среднестатистическое количество грамм в 3 яйцах
-                        если текст не содержит продуктов для списка - пиши: 'продуктов нет'"
-                    ]
-                ]
-            ]
+                        если текст не содержит продуктов для списка - пиши: 'продуктов нет'",
+                    ],
+                ],
+            ],
         ]);
 
         try {
@@ -78,6 +80,7 @@ class FoodSelection
             Log::info($result);
 
             $output = $result['choices'][0]['message']['content'] ?? 'Не удалось извлечь данные.';
+
             return $output;
         } catch (GuzzleException $e) {
             return ['error' => $e->getMessage()];

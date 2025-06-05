@@ -28,10 +28,9 @@ class SearchProductController extends Controller
         $result = [
             'total' => $products->total(),
             'current_page' => $products->currentPage(),
-            'products' => $resourceCollection->response()->getData()->data
+            'products' => $resourceCollection->response()->getData()->data,
         ];
 
         return response()->json($result);
     }
-
 }

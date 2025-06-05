@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,9 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
+// Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
 //    ->name('social.google.redirect');
-
 
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
     ->name('social.google.callback');
@@ -30,10 +28,8 @@ Route::any('/{any?}', function () {
     return view('app');
 })->where('any', '.*')->name('login');
 
-
 Route::get('/reset-password/{token}', function ($token) {
     return view('auth.password-reset', ['token' => $token]);
 })
-    ->middleware(['guest:' . config('fortify.guard')])
+    ->middleware(['guest:'.config('fortify.guard')])
     ->name('password.reset');
-

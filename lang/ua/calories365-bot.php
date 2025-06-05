@@ -25,53 +25,53 @@ return [
     'total_for_day' => 'Всього за день',
     'total_for_part_of_day' => 'Всього за :partOfDayName',
     'delete' => 'Видалити',
-    'you_said'  => 'Ви сказали: ',
+    'you_said' => 'Ви сказали: ',
     'parameter' => 'Параметр',
-    '100g'      => '100г',
-    'g'         => 'г',
+    '100g' => '100г',
+    'g' => 'г',
     'editing_session_expired' => 'Сесія редагування завершена або відсутня.',
-    'product_not_found'       => 'Продукт не знайдено або час сеансу вичерпано.',
+    'product_not_found' => 'Продукт не знайдено або час сеансу вичерпано.',
     'editing_canceled' => 'Редагування скасовано.',
-    'step_skipped'                        => 'Крок пропущено.',
-    'please_enter_new_quantity_of_grams'  => 'Будь ласка, введіть нову кількість грамів.',
-    'please_enter_new_calories'           => 'Будь ласка, введіть нову кількість калорій.',
-    'please_enter_new_proteins'           => 'Будь ласка, введіть нову кількість білків.',
-    'please_enter_new_fats'               => 'Будь ласка, введіть нову кількість жирів.',
-    'please_enter_new_carbohydrates'      => 'Будь ласка, введіть нову кількість вуглеводів.',
-    'error_editing_product'               => 'Сталася помилка під час редагування продукту.',
+    'step_skipped' => 'Крок пропущено.',
+    'please_enter_new_quantity_of_grams' => 'Будь ласка, введіть нову кількість грамів.',
+    'please_enter_new_calories' => 'Будь ласка, введіть нову кількість калорій.',
+    'please_enter_new_proteins' => 'Будь ласка, введіть нову кількість білків.',
+    'please_enter_new_fats' => 'Будь ласка, введіть нову кількість жирів.',
+    'please_enter_new_carbohydrates' => 'Будь ласка, введіть нову кількість вуглеводів.',
+    'error_editing_product' => 'Сталася помилка під час редагування продукту.',
     'exit_edit_mode' => 'Вийдіть з режиму редагування (натисніть зберегти або скасувати).',
     'action_canceled_product_list_cleared' => 'Дію скасовано. Ваш список продуктів було очищено.',
-    'cancellation_completed'               => 'Скасування виконано',
+    'cancellation_completed' => 'Скасування виконано',
     'product_list_is_empty_or_was_cleared' => 'Ваш список продуктів порожній або вже був очищений.',
-    'list_is_already_empty'                => 'Список вже порожній',
+    'list_is_already_empty' => 'Список вже порожній',
     'product_removed_from_list' => 'Продукт видалено зі списку.',
     'error_deleting_product' => 'Ошибка при удалении продукта.',
     'product_deleted' => 'Продукт удалён.',
-    'you_are_editing_product'        => 'Ви редагуєте продукт: *:productName*',
-    'please_enter_new_product_name'  => 'Будь ласка, введіть нову назву продукту.',
-    'save'                           => 'Зберегти',
-    'skip_step'                      => 'Пропустити крок',
-    'cancel'                         => 'Скасувати',
-    'invalid_request'                => 'Некоректний запит.',
+    'you_are_editing_product' => 'Ви редагуєте продукт: *:productName*',
+    'please_enter_new_product_name' => 'Будь ласка, введіть нову назву продукту.',
+    'save' => 'Зберегти',
+    'skip_step' => 'Пропустити крок',
+    'cancel' => 'Скасувати',
+    'invalid_request' => 'Некоректний запит.',
     'data_saved_you_consumed' => 'Дані збережено, Ви вжили',
-    'grams'                     => 'грамів',
-    'error_processing_data'     => 'Сталася помилка під час обробки даних.',
-    'error_generating_data'     => 'Сталася помилка під час генерації даних.',
+    'grams' => 'грамів',
+    'error_processing_data' => 'Сталася помилка під час обробки даних.',
+    'error_generating_data' => 'Сталася помилка під час генерації даних.',
     'failed_to_get_product_data' => 'Не вдалося отримати дані про продукт.',
     'cannot_generate_product_data' => 'Вибачте, не вдалося згенерувати дані для цього продукту. Спробуйте відредагувати його вручну.',
-    'product_data_updated'      => 'Дані продукту оновлено.',
-    'value_too_long'                           => 'Значення занадто довге',
-    'enter_valid_numeric_value_for_grams'      => 'Будь ласка, введіть коректне числове значення для грамів.',
-    'enter_valid_numeric_value_for_calories'   => 'Будь ласка, введіть коректне числове значення для калорій.',
-    'enter_valid_numeric_value_for_proteins'   => 'Будь ласка, введіть коректне числове значення для білків.',
-    'enter_valid_numeric_value_for_fats'       => 'Будь ласка, введіть коректне числове значення для жирів.',
+    'product_data_updated' => 'Дані продукту оновлено.',
+    'value_too_long' => 'Значення занадто довге',
+    'enter_valid_numeric_value_for_grams' => 'Будь ласка, введіть коректне числове значення для грамів.',
+    'enter_valid_numeric_value_for_calories' => 'Будь ласка, введіть коректне числове значення для калорій.',
+    'enter_valid_numeric_value_for_proteins' => 'Будь ласка, введіть коректне числове значення для білків.',
+    'enter_valid_numeric_value_for_fats' => 'Будь ласка, введіть коректне числове значення для жирів.',
     'enter_valid_numeric_value_for_carbohydrates' => 'Будь ласка, введіть коректне числове значення для вуглеводів.',
     'please_choose_your_language' => 'Будь ласка, оберіть мову',
-    'language_set_english'        => 'Вашу мову встановлено на англійську.',
-    'language_set_russian'        => 'Вашу мову встановлено на російську.',
-    'language_set_ukrainian'      => 'Вашу мову встановлено на українську.',
+    'language_set_english' => 'Вашу мову встановлено на англійську.',
+    'language_set_russian' => 'Вашу мову встановлено на російську.',
+    'language_set_ukrainian' => 'Вашу мову встановлено на українську.',
     'invalid_or_used_code' => 'Код недійсний або вже використаний. Будь ласка, зареєструйтеся знову.',
-     'seems_you_are_new'    => 'Схоже, ви тут уперше. Щоб зв`язати обліковий запис, використайте посилання «Підключити» з особистого кабінету (https://calculator.calories365.com?lang=ua).',
+    'seems_you_are_new' => 'Схоже, ви тут уперше. Щоб зв`язати обліковий запис, використайте посилання «Підключити» з особистого кабінету (https://calculator.calories365.com?lang=ua).',
     'error_occurred' => 'Сталася помилка: ',
     'incomplete_product_info' => 'Неповна інформація про продукт.',
     'save_products_for' => 'Зберегти продукти на:',
@@ -85,9 +85,9 @@ return [
     'generate_with_ai' => 'Згенерувати за допомогою ШІ',
     'edit' => 'Змінити',
     'you_must_be_authorized' => 'Ви маєте бути авторизованими!',
-    'no_entries_remain' => "Продуктiв не залишилось",
-    'subscription_required_message' => "Ліміт запитів вичерпано, щоб зберігати прийоми їжі без обмежень — придбайте преміум в особистому кабінеті (https://calculator.calories365.com?lang=ua)",
-    'prompt_analyze_food_intake' => <<<EOT
+    'no_entries_remain' => 'Продуктiв не залишилось',
+    'subscription_required_message' => 'Ліміт запитів вичерпано, щоб зберігати прийоми їжі без обмежень — придбайте преміум в особистому кабінеті (https://calculator.calories365.com?lang=ua)',
+    'prompt_analyze_food_intake' => <<<'EOT'
 Аналізуй текст: ":text". Виведи лише список продуктів із вказаною кількістю в грамах. Якщо кількість не вказана, використовуй середньостатистичну вагу чи порцію. Формат виводу повинен точно відповідати наведеному прикладу, де після кожного продукту стоїть крапка з комою:
 
 Приклад:
@@ -148,7 +148,7 @@ return [
    Пиво – 500 грамів;
 EOT,
 
-    'prompt_generate_new_product_data' => <<<EOT
+    'prompt_generate_new_product_data' => <<<'EOT'
 Є продукт: ":text". Виведи КБЖУ (Калорії, Білки, Жири, Вуглеводи) на 100 грамів продукту.
 Формат виводу має точно відповідати прикладу, де після кожного параметру стоїть крапка з комою:
 
@@ -167,11 +167,11 @@ EOT,
 Калорії - 890; Білки - 0.2; Жири - 100; Вуглеводи - 0;
 EOT,
 
-    'prompt_choose_relevant_products_part' => <<<EOT
+    'prompt_choose_relevant_products_part' => <<<'EOT'
 Який продукт найбільше відповідає назві ":name"? Ось доступні варіанти: :productNames.
 EOT,
 
-    'prompt_choose_relevant_products_footer' => <<<EOT
+    'prompt_choose_relevant_products_footer' => <<<'EOT'
 Поверни відповідь у такому форматі:
 назва продукту1 - id;
 назва продукту2 - id;
@@ -180,7 +180,7 @@ EOT,
 EOT,
 
     'data_not_extracted' => 'Не вдалося отримати дані.',
-    'welcome_guide' => <<<EOT
+    'welcome_guide' => <<<'EOT'
 Відео інструкція: https://t.me/calories_365/5
 
 Надішліть боту голосове повідомлення з тим, що ви з'їли, щоб додати запис до щоденника.
@@ -193,7 +193,7 @@ https://calculator.calories365.com?lang=ua
 Почніть вести свій щоденник калорій легко та зручно!
 EOT,
 
-    'welcome_guide_KNU' => <<<EOT
+    'welcome_guide_KNU' => <<<'EOT'
 Відео інструкція: https://t.me/calories_365/5
 
 Надішліть боту голосове повідомлення з тим, що ви з'їли, щоб додати запис до щоденника.
@@ -206,10 +206,10 @@ https://calculator.calories365.xyz?lang=ua
 Почніть вести свій щоденник калорій легко та зручно!
 EOT,
 
-    'menu'             => 'Меню',
-    'statistics'       => 'Статистика',
-    'choose_language'  => 'Вибір мови',
-    'feedback'         => 'Зворотний зв\'язок',
+    'menu' => 'Меню',
+    'statistics' => 'Статистика',
+    'choose_language' => 'Вибір мови',
+    'feedback' => 'Зворотний зв\'язок',
     'whole_day' => 'Весь день',
     'send_feedback_email' => 'Ви можете надіслати свій відгук адмiнiстратору: @calories365_admin',
 ];

@@ -29,11 +29,10 @@ class mls extends Command
     {
         $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
 
-
         $client->index('products')
             ->updateFilterableAttributes(ProductTranslation::FILTERABLE);
 
         //        $client->index('product')
-//            ->updateSortableAttributes(ProductTranslation::SORTABLE);
+        //            ->updateSortableAttributes(ProductTranslation::SORTABLE);
     }
 }

@@ -6,7 +6,7 @@ use App\Jobs\SendNewUserToBotPanelJob;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth; // Добавляем фасад Auth
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;   // Для отладки (опционально)
+// Для отладки (опционально)
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;

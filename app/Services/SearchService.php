@@ -12,7 +12,7 @@ class SearchService
     public function search($query, $pagination = true, $count = 10)
     {
         $encodedQuery = $this->customDoubleMetaphone($query);
+
         return Product::getSearchedProducts($encodedQuery, $pagination, $count);
     }
-
 }

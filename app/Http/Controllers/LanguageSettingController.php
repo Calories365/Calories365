@@ -3,17 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\LanguageSetting;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class LanguageSettingController extends Controller
 {
     /**
      * Toggle Russian language availability.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function toggleRussianLanguage(Request $request): JsonResponse
     {
@@ -35,17 +31,15 @@ class LanguageSettingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Russian language ' . ($enabled ? 'enabled' : 'disabled') . ' successfully',
+            'message' => 'Russian language '.($enabled ? 'enabled' : 'disabled').' successfully',
             'data' => [
-                'russian_language_enabled' => $setting->russian_language_enabled
-            ]
+                'russian_language_enabled' => $setting->russian_language_enabled,
+            ],
         ]);
     }
 
     /**
      * Get current Russian language status.
-     *
-     * @return JsonResponse
      */
     public function getRussianLanguageStatus(): JsonResponse
     {
@@ -57,8 +51,8 @@ class LanguageSettingController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'russian_language_enabled' => $setting->russian_language_enabled
-            ]
+                'russian_language_enabled' => $setting->russian_language_enabled,
+            ],
         ]);
     }
 }

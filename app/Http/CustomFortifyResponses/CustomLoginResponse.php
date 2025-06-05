@@ -18,8 +18,8 @@ class CustomLoginResponse implements LoginResponseContract
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'email_verified_at' => $request->user()->email_verified_at,
-                    'id' =>$request->user()->id,
-                ]
+                    'id' => $request->user()->id,
+                ],
             ]);
         }
 

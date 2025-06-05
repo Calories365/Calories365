@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class DateValidationRequest extends FormRequest
 {
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -14,7 +13,6 @@ class DateValidationRequest extends FormRequest
     {
         return true;
     }
-
 
     public function rules(): array
     {
@@ -34,7 +32,7 @@ class DateValidationRequest extends FormRequest
         if ($this->route('partOfDay')) {
             $allData['partOfDay'] = $this->route('partOfDay');
         }
+
         return $allData;
     }
-
 }

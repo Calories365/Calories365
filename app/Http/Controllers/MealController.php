@@ -8,7 +8,6 @@ use App\Http\Requests\StoreFoodConsumptionRequest;
 use App\Http\Resources\MealCollection;
 use App\Models\FoodConsumption;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Log;
 
 class MealController extends Controller
 {
@@ -17,6 +16,7 @@ class MealController extends Controller
         $validatedData = $request->validated();
         $validatedData['user_id'] = auth()->id();
         $foodConsumption = FoodConsumption::createFoodConsumption($validatedData);
+
         return response()->json(['id' => $foodConsumption->id]);
     }
 
@@ -26,6 +26,7 @@ class MealController extends Controller
         $locale = app()->getLocale();
         $userId = auth()->id();
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale);
+
         return new MealCollection($meals);
     }
 
@@ -36,12 +37,14 @@ class MealController extends Controller
     {
         $this->authorize('delete', $meal);
         $meal->delete();
+
         return response()->json(['message' => 'Success']);
     }
 
     public function update(QuantityValidationRequest $request, FoodConsumption $meal): \Illuminate\Http\JsonResponse
     {
         $meal->update(['quantity' => $request->quantity]);
+
         return response()->json(['message' => 'Success']);
     }
 }

@@ -11,12 +11,11 @@ class FoodConsumption extends Model
 {
     use HasFactory;
 
-
     /**
      * @var int|mixed|string|null
      */
     protected $fillable = [
-        'user_id', 'food_id', 'quantity', 'consumed_at', 'part_of_day'
+        'user_id', 'food_id', 'quantity', 'consumed_at', 'part_of_day',
     ];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -46,8 +45,6 @@ class FoodConsumption extends Model
             ->get();
     }
 
-
-
     public static function getDailyCaloriesSum($userId, $date): \Illuminate\Database\Eloquent\Collection|array
     {
         $year = date('Y', strtotime($date));
@@ -67,44 +64,42 @@ class FoodConsumption extends Model
     {
         // Добавляем логирование для отладки
         Log::info('FoodConsumption::createFoodConsumption data', $validatedData);
-        
+
         // Проверяем есть ли product, если нет, то должен быть food_id
         if ($product !== null) {
             $validatedData['food_id'] = $product->id;
-        } elseif (!isset($validatedData['food_id']) && isset($validatedData['product_id'])) {
+        } elseif (! isset($validatedData['food_id']) && isset($validatedData['product_id'])) {
             $validatedData['food_id'] = $validatedData['product_id'];
         }
-        
+
         // Проверяем и устанавливаем consumed_at, если не указано
-        if (!isset($validatedData['consumed_at'])) {
+        if (! isset($validatedData['consumed_at'])) {
             $validatedData['consumed_at'] = now();
         }
-        
+
         // Проверяем, есть ли значение quantity
-        if (!isset($validatedData['quantity']) && isset($validatedData['quantity_grams'])) {
+        if (! isset($validatedData['quantity']) && isset($validatedData['quantity_grams'])) {
             $validatedData['quantity'] = $validatedData['quantity_grams'];
         }
-        
+
         // Преобразование русских названий частей дня в английские
         $mealTypeMap = [
             'завтрак' => 'morning',
             'обед' => 'dinner',
-            'ужин' => 'supper'
+            'ужин' => 'supper',
         ];
-        
+
         if (isset($validatedData['part_of_day']) && isset($mealTypeMap[$validatedData['part_of_day']])) {
             $validatedData['part_of_day'] = $mealTypeMap[$validatedData['part_of_day']];
-            Log::info('Part of day converted to English in Model::createFoodConsumption', 
+            Log::info('Part of day converted to English in Model::createFoodConsumption',
                 ['converted' => $validatedData['part_of_day']]);
         }
-        
+
         // Устанавливаем дефолтные значения
         $validatedData['quantity'] = $validatedData['quantity'] ?? 0;
         $validatedData['part_of_day'] = $validatedData['part_of_day'] ?? 'morning';
-        
+
         // Создаем запись
         return FoodConsumption::create($validatedData);
     }
-
-
 }

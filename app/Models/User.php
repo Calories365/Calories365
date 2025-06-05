@@ -27,7 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'calories_limit',
         'telegram_id',
         'premium_until',
-        'token'
+        'token',
     ];
 
     /**
@@ -50,14 +50,16 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
         'premium_until' => 'datetime',
     ];
+
     public function sendEmailVerificationNotification()
     {
         $locale = app()->getLocale();
 
         $this->notify(
-            (new QueuedVerifyEmail())->locale($locale)
+            (new QueuedVerifyEmail)->locale($locale)
         );
     }
+
     public function isPremium(): bool
     {
         return $this->premium_until !== null && $this->premium_until->isFuture();

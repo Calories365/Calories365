@@ -2,15 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
 use App\Jobs\SendPremiumStatusToBotPanelJob;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
@@ -25,7 +20,7 @@ class PaymentController extends Controller
         SendPremiumStatusToBotPanelJob::dispatch($user);
 
         return response()->json([
-            'premium_until' => $user->premium_until
+            'premium_until' => $user->premium_until,
         ], 200);
     }
 }

@@ -74,7 +74,7 @@ return [
     |
     */
 
-//    'home' => RouteServiceProvider::HOME,
+    //    'home' => RouteServiceProvider::HOME,
     'home' => env('APP_URL', 'http://calories365.org'),
 
     /*
@@ -152,7 +152,7 @@ return [
         Features::updateProfileInformation(),
         Features::updatePasswords(),
         Features::twoFactorAuthentication([
-//            'confirm' => true,
+            //            'confirm' => true,
             'confirmPassword' => true,
             // 'window' => 0,
         ]),

@@ -25,12 +25,15 @@ axios.get('/sanctum/csrf-cookie').then(() => {
         console.error('Error during CSRF token initialization', error);
     }).finally(() => {
     const app = createApp(App);
-    
+
     // Make academic status available globally in Vue
     app.config.globalProperties.$isAcademic = isAcademic;
-    
+
     app.use(router)
         .use(store)
         .use(i18n)
         .mount('#app');
 });
+
+
+

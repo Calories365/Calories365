@@ -1,0 +1,16 @@
+includes:
+  - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+  paths:
+    - app
+  level: 5
+  ignoreErrors:
+    - '#Relation .* is not found in App\\Models\\.* model\.#'
+    - '#Call to an undefined method.*::get.*\(\)\.#'
+    - '#Using nullsafe method call on non-nullable type.*#'
+    - '#Access to an undefined property Telegram\\Bot\\Objects\\File::\$file_path\.#'
+    - '#Call to an undefined method.*::process\(\)\.#'
+    - '#Access to an undefined property App\\Http\\Resources\\.*Resource::\$.*#'
+  checkModelProperties: true
+  inferPrivatePropertyTypeFromConstructor: true

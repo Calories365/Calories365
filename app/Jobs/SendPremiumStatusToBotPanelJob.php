@@ -6,11 +6,11 @@ use App\Models\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class SendPremiumStatusToBotPanelJob implements ShouldQueue
 {
@@ -32,32 +32,33 @@ class SendPremiumStatusToBotPanelJob implements ShouldQueue
     public function handle()
     {
         $botPanelUrl = env('BOT_PANEL_URL');
-        $botApiKey   = env('BOT_API_KEY');
-        $host        = env('BOT_HOST');
+        $botApiKey = env('BOT_API_KEY');
+        $host = env('BOT_HOST');
 
-        if (!$botPanelUrl || !$botApiKey) {
+        if (! $botPanelUrl || ! $botApiKey) {
             Log::warning('Bot panel URL или API key не настроены');
+
             return;
         }
         $payload = [
-            'calories_id'   => $this->user->id,
+            'calories_id' => $this->user->id,
             'premium_until' => $this->user->premium_until,
         ];
 
-        $client  = new Client();
+        $client = new Client;
         $headers = [
             'Content-Type' => 'application/json',
-            'Accept'       => 'application/json',
-            'Host'         => $host,
-            'X-Api-Key'    => $botApiKey,
+            'Accept' => 'application/json',
+            'Host' => $host,
+            'X-Api-Key' => $botApiKey,
         ];
 
         try {
             Log::info('$payload: ');
             Log::info(print_r($payload, true));
-            $response = $client->post($botPanelUrl . '/api/update-premium-status', [
+            $response = $client->post($botPanelUrl.'/api/update-premium-status', [
                 'headers' => $headers,
-                'json'    => [
+                'json' => [
                     'payload' => $payload,
                 ],
             ]);
@@ -65,7 +66,8 @@ class SendPremiumStatusToBotPanelJob implements ShouldQueue
             return json_decode($response->getBody()->getContents(), true);
 
         } catch (GuzzleException $e) {
-            Log::error("Error sending premium status to bot panel: " . $e->getMessage());
+            Log::error('Error sending premium status to bot panel: '.$e->getMessage());
+
             return ['error' => $e->getMessage()];
         }
     }

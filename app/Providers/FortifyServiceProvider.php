@@ -33,13 +33,13 @@ class FortifyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Fortify::createUsersUsing(CreateNewUser::class);
-//        Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
+        //        Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserProfileInformationUsing(CustomUpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
         });
@@ -52,10 +52,10 @@ class FortifyServiceProvider extends ServiceProvider
             return view('auth.verify-email');
         });
 
-        //переназначание класса ответа для логина
+        // переназначание класса ответа для логина
         $this->app->singleton(LoginResponseContract::class, CustomLoginResponse::class);
 
-        //переназначание класса ответа для регистрации
+        // переназначание класса ответа для регистрации
         $this->app->singleton(RegisterResponseContract::class, CustomRegisterResponse::class);
 
     }

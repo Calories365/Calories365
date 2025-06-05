@@ -47,7 +47,6 @@ class FoodConsumptionPolicy
         return $user->id === $foodConsumption->user_id;
     }
 
-
     /**
      * Determine whether the user can restore the model.
      */

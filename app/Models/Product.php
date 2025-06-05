@@ -24,7 +24,6 @@ class Product extends Model
         'user_id',
     ];
 
-
     public function translations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ProductTranslation::class);
@@ -34,6 +33,7 @@ class Product extends Model
     {
         return Cache::remember($cacheKey, now()->addMinutes(1440), function () {
             $locale = app()->getLocale();
+
             return self::with(['translations' => function ($query) use ($locale) {
                 $query->where('locale', $locale);
             }])
@@ -48,7 +48,7 @@ class Product extends Model
         int $count = 10
     ): LengthAwarePaginator|Collection {
 
-        $locale  = app()->getLocale();
+        $locale = app()->getLocale();
         $user_id = auth()->id();
 
         /**
@@ -86,8 +86,8 @@ class Product extends Model
 
         if ($paginate) {
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
-            $perPage     = $count;
-            $total       = $sortedResults->count();
+            $perPage = $count;
+            $total = $sortedResults->count();
 
             $items = $sortedResults
                 ->slice(($currentPage - 1) * $perPage, $perPage)
@@ -104,8 +104,6 @@ class Product extends Model
             return $sortedResults->take($count);
         }
     }
-
-
 
     public static function getRawProduct($query, $user_id, $locale): array|bool
     {
@@ -124,7 +122,8 @@ class Product extends Model
 
             // Если массив hits пуст, сразу возвращаем false
             if (empty($hits)) {
-                Log::info("No products found.");
+                Log::info('No products found.');
+
                 return false;
             }
 
@@ -146,8 +145,8 @@ class Product extends Model
 
             $client->index('products')->search($query, [
                 'showRankingScore' => true,
-                'limit'            => 2,
-                'filter'           => $filters
+                'limit' => 2,
+                'filter' => $filters,
             ]);
 
             // Если есть два и более результата, сравниваем их
@@ -172,12 +171,13 @@ class Product extends Model
                 return false;
             }
         } catch (\Exception $e) {
-            Log::error("Error in getRawProduct: " . $e->getMessage(), [
+            Log::error('Error in getRawProduct: '.$e->getMessage(), [
                 'query' => $query,
                 'user_id' => $user_id,
                 'locale' => $locale,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
@@ -185,9 +185,7 @@ class Product extends Model
     public static function createProduct($validatedData): Product
     {
         $validatedData['user_id'] = $validatedData['user_id'] ?? auth()->id();
+
         return Product::create($validatedData);
     }
-
-
 }
-

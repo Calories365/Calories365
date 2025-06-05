@@ -12,7 +12,6 @@ class UserResult extends Model
     protected $fillable = [
         'gender', 'birthYear', 'weight', 'height', 'goalWeight',
         'fat', 'activity', 'goal', 'dailyCalories', 'user_id',
-        'checkboxActive'
+        'checkboxActive',
     ];
-
 }

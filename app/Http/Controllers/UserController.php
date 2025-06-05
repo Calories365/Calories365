@@ -2,17 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SendPremiumStatusToBotPanelJob;
 use App\Models\User;
-use App\Services\PortmoneService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-
     public function show(Request $request)
     {
         $user = $request->user();
@@ -24,10 +18,10 @@ class UserController extends Controller
                 'email_verified_at',
                 'calories_limit',
                 'id',
-                'premium_until'
+                'premium_until',
             ]),
             [
-                'telegram_auth' => !empty($user->telegram_id),
+                'telegram_auth' => ! empty($user->telegram_id),
             ]
         );
     }
@@ -39,16 +33,18 @@ class UserController extends Controller
         $idsArray = array_filter($idsArray);
 
         $users = User::whereIn('id', $idsArray)->get();
-        return $users->map(function($user) {
+
+        return $users->map(function ($user) {
             return [
                 'calories_id' => $user->id,
-                'email'       => $user->email,
-                'name'        => $user->name,
-                'premium_until' => $user->premium_until
+                'email' => $user->email,
+                'name' => $user->name,
+                'premium_until' => $user->premium_until,
             ];
         });
 
     }
+
     public function showAllUsers()
     {
         $users = User::all();
@@ -56,11 +52,10 @@ class UserController extends Controller
         return $users->map(function ($user) {
             return [
                 'calories_id' => $user->id,
-                'email'       => $user->email,
-                'name'        => $user->name,
-                'premium_until' => $user->premium_until
+                'email' => $user->email,
+                'name' => $user->name,
+                'premium_until' => $user->premium_until,
             ];
         });
     }
-
 }

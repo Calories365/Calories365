@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\TelegramCode;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class TelegramLinkController extends Controller
 {
@@ -25,8 +25,8 @@ class TelegramLinkController extends Controller
         $newCode = Str::random(10);
         TelegramCode::where('user_id', $user->id)->delete();
         TelegramCode::create([
-            'user_id'               => $user->id,
-            'telegram_code'         => $newCode,
+            'user_id' => $user->id,
+            'telegram_code' => $newCode,
             'telegram_code_expire_at' => Carbon::now()->addMinutes(30),
         ]);
 
@@ -40,9 +40,10 @@ class TelegramLinkController extends Controller
         Log::info('Generated telegram link: '.$finalLink);
 
         return response()->json([
-            'link' => $finalLink
+            'link' => $finalLink,
         ]);
     }
+
     public function checkTelegramCode(Request $request)
     {
         $code = $request->input('code');
@@ -50,17 +51,17 @@ class TelegramLinkController extends Controller
 
         $telegramCode = TelegramCode::where('telegram_code', $code)->first();
 
-        if (!$telegramCode) {
+        if (! $telegramCode) {
             return response()->json([
                 'success' => false,
-                'message' => 'Code not found or already used'
+                'message' => 'Code not found or already used',
             ], 404);
         }
 
         if ($telegramCode->telegram_code_expire_at && now()->greaterThan($telegramCode->telegram_code_expire_at)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Code expired'
+                'message' => 'Code expired',
             ], 410);
         }
 
@@ -85,6 +86,4 @@ class TelegramLinkController extends Controller
             'premium' => $premium,
         ]);
     }
-
-
 }

@@ -10,13 +10,11 @@ use App\Models\FoodConsumption;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\SearchService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CaloriesAPIBotController extends BaseController
@@ -33,13 +31,13 @@ class CaloriesAPIBotController extends BaseController
     public function store(Request $request)
     {
         $text = $request->input('text');
-        Log::info("Received text: " . $text);
+        Log::info('Received text: '.$text);
         $response = [
             'message' => 'No products mentioned',
-            'products' => []
+            'products' => [],
         ];
 
-        if (trim($text) !== 'No products' && !empty(trim($text))) {
+        if (trim($text) !== 'No products' && ! empty(trim($text))) {
             $productsInfo = [];
 
             $locale = app()->getLocale();
@@ -71,7 +69,7 @@ class CaloriesAPIBotController extends BaseController
             foreach ($products as $product) {
                 $product = trim($product);
 
-                if (!empty($product)) {
+                if (! empty($product)) {
                     $parts = explode(' - ', $product);
 
                     if (count($parts) > 1) {
@@ -104,8 +102,8 @@ class CaloriesAPIBotController extends BaseController
                                                 'locale' => $productTranslation->locale,
                                                 'name' => $productTranslation->name,
                                                 'user_id' => $productTranslation->user_id,
-//                                                'created_at' => $productTranslation->created_at,
-//                                                'updated_at' => $productTranslation->updated_at,
+                                                //                                                'created_at' => $productTranslation->created_at,
+                                                //                                                'updated_at' => $productTranslation->updated_at,
                                                 'said_name' => $productName,
                                                 'original_name' => $productName,
                                             ],
@@ -118,14 +116,14 @@ class CaloriesAPIBotController extends BaseController
                                                 'fats' => $fats,
                                                 'fibers' => $fibers,
                                                 'quantity_grams' => $quantity,
-//                                                'is_popular' => $productModel->is_popular,
-//                                                'created_at' => $productModel->created_at,
-//                                                'updated_at' => $productModel->updated_at,
+                                                //                                                'is_popular' => $productModel->is_popular,
+                                                //                                                'created_at' => $productModel->created_at,
+                                                //                                                'updated_at' => $productModel->updated_at,
                                             ],
-                                            'quantity_grams' => $quantity
+                                            'quantity_grams' => $quantity,
                                         ];
-                                        Log::info('for ' . $productName);
-                                        Log::info('found product: ' . $productTranslation->name);
+                                        Log::info('for '.$productName);
+                                        Log::info('found product: '.$productTranslation->name);
                                     } else {
                                         Log::warning("There are no nutritional data available for the product : {$productName}");
                                     }
@@ -144,24 +142,25 @@ class CaloriesAPIBotController extends BaseController
                 }
             }
 
-            if (!empty($productsInfo)) {
+            if (! empty($productsInfo)) {
                 $response = [
                     'message' => 'Products found',
-                    'products' => $productsInfo
+                    'products' => $productsInfo,
                 ];
             }
         }
 
-//        Log::info('products: ');
-//        Log::info(print_r($productsInfo, true));
+        //        Log::info('products: ');
+        //        Log::info(print_r($productsInfo, true));
         return response()->json($response);
     }
 
-    public function saveProduct(StoreUsersFoodConsumptionsRequest $request, ProductService $productService ): JsonResponse
+    public function saveProduct(StoreUsersFoodConsumptionsRequest $request, ProductService $productService): JsonResponse
     {
         $validatedData = $request->validated();
         $validatedData['user_id'] = auth()->id();
         $userResult = $productService->createProductWithTranslationsAndConsumption($validatedData);
+
         return response()->json($userResult, 201);
     }
 
@@ -170,15 +169,18 @@ class CaloriesAPIBotController extends BaseController
         $validatedData = $request->validated();
         $validatedData['user_id'] = auth()->id();
         $foodConsumption = FoodConsumption::createFoodConsumption($validatedData);
+
         return response()->json(['id' => $foodConsumption->id]);
     }
 
-    public function showUserStats(DateValidationRequest $request){
+    public function showUserStats(DateValidationRequest $request)
+    {
         $userId = auth()->id();
         $date = $request->route('date');
         $partOfDay = $request->route('partOfDay');
         $locale = app()->getLocale();
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale, $partOfDay);
+
         return new MealCollection($meals);
     }
 
@@ -202,11 +204,11 @@ class CaloriesAPIBotController extends BaseController
         $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
         $product = Product::where('id', $productTranslation['product_id'])->first();
 
-        if ($productTranslation['_rankingScore'] < 0.9){
+        if ($productTranslation['_rankingScore'] < 0.9) {
             return false;
         }
 
-        if($productTranslation){
+        if ($productTranslation) {
             $productInfo = [
                 'product_translation' => [
                     'id' => $productTranslation['id'],
@@ -226,12 +228,13 @@ class CaloriesAPIBotController extends BaseController
                     'fibers' => $product->fibers,
                     'quantity_grams' => $quantity,
                 ],
-                'quantity_grams' => $quantity
+                'quantity_grams' => $quantity,
             ];
             Log::info(print_r($productInfo, true));
+
             return response()->json([
                 'message' => 'Product found',
-                'product' => $productInfo
+                'product' => $productInfo,
             ]);
         } else {
             return false;
@@ -241,7 +244,7 @@ class CaloriesAPIBotController extends BaseController
     public function destroy(FoodConsumption $meal): \Illuminate\Http\JsonResponse
     {
         $meal->delete();
+
         return response()->json(['message' => 'Success']);
     }
-
 }

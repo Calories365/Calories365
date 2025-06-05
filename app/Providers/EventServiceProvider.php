@@ -27,7 +27,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //наблюдается модель user, если создатся новая запись, то кеш очищается
+        // наблюдается модель user, если создатся новая запись, то кеш очищается
         User::observe(UserObserver::class);
     }
 

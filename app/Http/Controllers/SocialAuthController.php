@@ -1,12 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Jobs\SendNewUserToBotPanelJob;
-use Illuminate\Support\Facades\Log;
-use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
 {
@@ -36,9 +36,9 @@ class SocialAuthController extends Controller
 
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
-                'name'  => $socialUser->getName(),
+                'name' => $socialUser->getName(),
                 'email' => $email,
                 'password' => bcrypt(\Str::random(16)),
             ]);

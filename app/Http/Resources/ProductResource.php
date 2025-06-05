@@ -21,7 +21,7 @@ class ProductResource extends JsonResource
             'fats' => $this->product->fats,
             'fibers' => $this->product->fibers,
             'user_id' => $this->product->user_id,
-            'name' => $this->name
+            'name' => $this->name,
         ];
     }
 }

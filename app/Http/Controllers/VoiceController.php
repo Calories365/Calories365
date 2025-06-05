@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Services\AudioConversionService;
 use App\Services\ProductService;
 use App\Services\SpeechToTextService;
-use App\Services\AudioConversionService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
@@ -17,10 +17,12 @@ use Illuminate\Support\Str;
 class VoiceController extends Controller
 {
     protected SpeechToTextService $speechToTextService;
+
     protected ProductService $productService;
+
     protected AudioConversionService $audioConversionService;
 
-    public function __construct(SpeechToTextService $speechToTextService, ProductService $productService,   AudioConversionService $audioConversionService  )
+    public function __construct(SpeechToTextService $speechToTextService, ProductService $productService, AudioConversionService $audioConversionService)
     {
         $this->speechToTextService = $speechToTextService;
         $this->productService = $productService;
@@ -29,8 +31,6 @@ class VoiceController extends Controller
     }
 
     /**
-     *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function upload(Request $request)
@@ -39,26 +39,25 @@ class VoiceController extends Controller
 
             $res = $this->canTranscribeAudio(Auth::id());
 
-           if(!$res['canTranscribeAudio']){
-               return response()->json([
-                   'success' => false,
-                   'message' => 'please_buy_premium'
-               ], 200);
-           }
+            if (! $res['canTranscribeAudio']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'please_buy_premium',
+                ], 200);
+            }
 
-            if (!$request->hasFile('audio')) {
+            if (! $request->hasFile('audio')) {
                 return response()->json(['success' => false, 'message' => 'Аудиофайл не найден'], 400);
             }
             $audioFile = $request->file('audio');
 
             $fileName = Str::uuid().'.'.$audioFile->getClientOriginalExtension();
             $localPath = $audioFile->storeAs('voice_records', $fileName, 'public');
-            $fullPath  = Storage::disk('public')->path($localPath);
+            $fullPath = Storage::disk('public')->path($localPath);
 
             [$mp3Local, $mp3Full] = $this->audioConversionService->convertToMp3($localPath, $fullPath);
 
             $fileForStt = $mp3Full ?: $fullPath;
-
 
             $transcription = $this->speechToTextService->convertSpeechToText(
                 $fileForStt,
@@ -74,43 +73,45 @@ class VoiceController extends Controller
             if (is_array($transcription) && isset($transcription['error'])) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ошибка при расшифровке: '.$transcription['error']
+                    'message' => 'Ошибка при расшифровке: '.$transcription['error'],
                 ], 500);
             }
 
             $products = $this->searchProductsFromTranscription($transcription);
 
             Log::info('Voice record processed', [
-                'user_id'       => Auth::id(),
+                'user_id' => Auth::id(),
                 'transcription' => $transcription,
-                'products_found'=> $products
+                'products_found' => $products,
             ]);
 
             return response()->json([
-                'success'       => true,
-                'message'       => 'Голосовая запись успешно обработана',
+                'success' => true,
+                'message' => 'Голосовая запись успешно обработана',
                 'transcription' => $transcription,
-                'products'      => $products
+                'products' => $products,
             ]);
 
         } catch (\Throwable $e) {
-            if (isset($localPath)) Storage::disk('public')->delete($localPath);
-            if (isset($mp3Local))  Storage::disk('public')->delete($mp3Local);
+            if (isset($localPath)) {
+                Storage::disk('public')->delete($localPath);
+            }
+            if (isset($mp3Local)) {
+                Storage::disk('public')->delete($mp3Local);
+            }
 
             Log::error('Error processing voice record: '.$e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Произошла ошибка при обработке записи: '.$e->getMessage()
+                'message' => 'Произошла ошибка при обработке записи: '.$e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function saveProducts(Request $request)
@@ -123,7 +124,7 @@ class VoiceController extends Controller
             $mealTypeMap = [
                 'завтрак' => 'morning',
                 'обед' => 'dinner',
-                'ужин' => 'supper'
+                'ужин' => 'supper',
             ];
 
             if (isset($mealTypeMap[$mealType])) {
@@ -134,7 +135,7 @@ class VoiceController extends Controller
             if (empty($products)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Нет продуктов для сохранения'
+                    'message' => 'Нет продуктов для сохранения',
                 ], 400);
             }
 
@@ -142,8 +143,9 @@ class VoiceController extends Controller
             foreach ($products as $product) {
                 Log::info('Processing product', $product);
 
-                if (!isset($product['name'])) {
+                if (! isset($product['name'])) {
                     Log::warning('Missing name in product data', $product);
+
                     continue;
                 }
 
@@ -174,7 +176,7 @@ class VoiceController extends Controller
 
                 $wasModified = isset($product['isModified']) && $product['isModified'] === true;
 
-                if (!empty($product['product_id']) && !$wasModified) {
+                if (! empty($product['product_id']) && ! $wasModified) {
                     Log::info('Using existing product ID', ['product_id' => $product['product_id']]);
                     Log::info('Saving product with weight', [
                         'name' => $product['name'],
@@ -186,23 +188,22 @@ class VoiceController extends Controller
                         'part_of_day' => $mealType,
                         'quantity' => $product['weight'] ?? 0,
                     ]);
-                }
-                else {
+                } else {
                     Log::info('Creating new product or saving modified product', [
                         'name' => $productData['name'],
                         'wasModified' => $wasModified,
-                        'hasProductId' => !empty($product['product_id'])
+                        'hasProductId' => ! empty($product['product_id']),
                     ]);
 
-                    if ($wasModified && !empty($product['product_id'])) {
+                    if ($wasModified && ! empty($product['product_id'])) {
                         Log::info('Creating custom version of existing product', [
                             'original_id' => $product['product_id'],
                             'new_values' => [
                                 'calories' => $product['calories'],
                                 'protein' => $product['protein'],
                                 'fats' => $product['fats'],
-                                'carbs' => $product['carbs']
-                            ]
+                                'carbs' => $product['carbs'],
+                            ],
                         ]);
                     }
 
@@ -215,26 +216,22 @@ class VoiceController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Продукты успешно сохранены',
-                'data' => $savedProducts
+                'data' => $savedProducts,
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Error saving products: ' . $e->getMessage(), [
+            Log::error('Error saving products: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'line' => $e->getLine(),
-                'file' => $e->getFile()
+                'file' => $e->getFile(),
             ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Произошла ошибка при сохранении продуктов: ' . $e->getMessage()
+                'message' => 'Произошла ошибка при сохранении продуктов: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     *
-     * @param string $text
-     * @return array
-     */
     private function searchProductsFromTranscription(string $text): array
     {
         $productsInfo = [];
@@ -262,7 +259,7 @@ class VoiceController extends Controller
             $products = explode($suffix, $text);
         }
 
-        $products = array_filter($products, function($item) {
+        $products = array_filter($products, function ($item) {
             return trim($item) !== '';
         });
 
@@ -271,7 +268,7 @@ class VoiceController extends Controller
         foreach ($products as $product) {
             $product = trim($product);
 
-            if (!empty($product)) {
+            if (! empty($product)) {
                 $parts = explode(' - ', $product);
 
                 if (count($parts) > 1) {
@@ -307,20 +304,13 @@ class VoiceController extends Controller
         return $productsInfo;
     }
 
-    /**
-     *
-     * @param string $productName
-     * @param float $quantity
-     * @param int $user_id
-     * @param string $locale
-     * @return array|null
-     */
     private function findProduct(string $productName, float $quantity, int $user_id, string $locale): ?array
     {
         $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
 
         if (is_array($productTranslation) && isset($productTranslation['_rankingScore']) && $productTranslation['_rankingScore'] < 0.9) {
             Log::info("Продукт не найден (низкий рейтинг): {$productName}");
+
             return null;
         }
 
@@ -329,6 +319,7 @@ class VoiceController extends Controller
 
             if ($product && $product->calories !== null) {
                 Log::info("Найден продукт '{$productTranslation['name']}', указанное количество: {$quantity} грамм");
+
                 return [
                     'product_translation' => [
                         'id' => $productTranslation['id'],
@@ -349,7 +340,7 @@ class VoiceController extends Controller
                         'fibers' => $product->fibers ?? 0,
                         'quantity' => $quantity,
                     ],
-                    'quantity' => $quantity
+                    'quantity' => $quantity,
                 ];
             }
         }
@@ -358,24 +349,21 @@ class VoiceController extends Controller
     }
 
     /**
-     *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function generateProductData(Request $request)
     {
         try {
-            if (!$request->has('product_name')) {
+            if (! $request->has('product_name')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Имя продукта не указано'
+                    'message' => 'Имя продукта не указано',
                 ], 400);
             }
 
             $productName = $request->input('product_name');
 
             Log::info('Генерация данных для продукта', ['name' => $productName]);
-
 
             $generatedData = $this->speechToTextService->generateNewProductData($productName);
 
@@ -384,27 +372,30 @@ class VoiceController extends Controller
 
             if (is_array($generatedData) && isset($generatedData['error'])) {
                 Log::error('Ошибка при генерации данных продукта', ['error' => $generatedData['error']]);
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ошибка при генерации данных: ' . $generatedData['error']
+                    'message' => 'Ошибка при генерации данных: '.$generatedData['error'],
                 ], 500);
             }
 
-            if (!is_string($generatedData)) {
+            if (! is_string($generatedData)) {
                 Log::error('Неожиданный формат данных от OpenAI', ['data' => $generatedData]);
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Неожиданный формат данных от API'
+                    'message' => 'Неожиданный формат данных от API',
                 ], 500);
             }
 
             $parsedData = $this->parseGeneratedProductData($generatedData);
 
-            if (!$parsedData) {
+            if (! $parsedData) {
                 Log::error('Не удалось распарсить данные продукта', ['raw_data' => $generatedData]);
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Не удалось распарсить данные продукта'
+                    'message' => 'Не удалось распарсить данные продукта',
                 ], 500);
             }
 
@@ -419,27 +410,23 @@ class VoiceController extends Controller
                     'proteins' => $parsedData['proteins'] ?? 0,
                     'carbohydrates' => $parsedData['carbohydrates'] ?? 0,
                     'fats' => $parsedData['fats'] ?? 0,
-                    'fibers' => $parsedData['fibers'] ?? 0
-                ]
+                    'fibers' => $parsedData['fibers'] ?? 0,
+                ],
             ]);
         } catch (\Exception $e) {
-            Log::error('Ошибка при генерации данных продукта: ' . $e->getMessage(), [
+            Log::error('Ошибка при генерации данных продукта: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Произошла ошибка при генерации данных продукта: ' . $e->getMessage()
+                'message' => 'Произошла ошибка при генерации данных продукта: '.$e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     *
-     * @param string $generatedData
-     * @return array|null
-     */
     private function parseGeneratedProductData(string $generatedData): ?array
     {
         try {
@@ -479,48 +466,48 @@ class VoiceController extends Controller
                 Log::info('Распознана клетчатка (русский формат):', ['value' => $data['fibers']]);
             }
 
-            if (!isset($data['calories']) && preg_match('/Калорії[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['calories']) && preg_match('/Калорії[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['calories'] = floatval($matches[1]);
                 Log::info('Распознаны калории (украинский формат):', ['value' => $data['calories']]);
             }
 
-            if (!isset($data['proteins']) && preg_match('/Білки[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['proteins']) && preg_match('/Білки[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['proteins'] = floatval($matches[1]);
                 Log::info('Распознаны белки (украинский формат):', ['value' => $data['proteins']]);
             }
 
-            if (!isset($data['carbohydrates']) && preg_match('/Вуглеводи[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['carbohydrates']) && preg_match('/Вуглеводи[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['carbohydrates'] = floatval($matches[1]);
                 Log::info('Распознаны углеводы (украинский формат):', ['value' => $data['carbohydrates']]);
             }
 
-            if (!isset($data['fats']) && preg_match('/Жири[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['fats']) && preg_match('/Жири[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['fats'] = floatval($matches[1]);
                 Log::info('Распознаны жиры (украинский формат):', ['value' => $data['fats']]);
             }
 
-            if (!isset($data['fibers']) && preg_match('/Клітковина[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['fibers']) && preg_match('/Клітковина[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['fibers'] = floatval($matches[1]);
                 Log::info('Распознана клетчатка (украинский формат):', ['value' => $data['fibers']]);
             }
 
-            if (!isset($data['calories']) && preg_match('/calories[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['calories']) && preg_match('/calories[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['calories'] = floatval($matches[1]);
             }
 
-            if (!isset($data['proteins']) && preg_match('/proteins[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['proteins']) && preg_match('/proteins[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['proteins'] = floatval($matches[1]);
             }
 
-            if (!isset($data['carbohydrates']) && preg_match('/carbohydrates[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['carbohydrates']) && preg_match('/carbohydrates[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['carbohydrates'] = floatval($matches[1]);
             }
 
-            if (!isset($data['fats']) && preg_match('/fats[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['fats']) && preg_match('/fats[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['fats'] = floatval($matches[1]);
             }
 
-            if (!isset($data['fibers']) && preg_match('/fibers[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
+            if (! isset($data['fibers']) && preg_match('/fibers[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['fibers'] = floatval($matches[1]);
             }
 
@@ -568,7 +555,7 @@ class VoiceController extends Controller
                 }
             }
 
-            if (!isset($data['fibers'])) {
+            if (! isset($data['fibers'])) {
                 $data['fibers'] = 0;
             }
 
@@ -578,21 +565,15 @@ class VoiceController extends Controller
                 return $data;
             }
         } catch (\Exception $e) {
-            Log::error("Ошибка при парсинге данных продукта: " . $e->getMessage(), [
+            Log::error('Ошибка при парсинге данных продукта: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
-                'input' => $generatedData
+                'input' => $generatedData,
             ]);
         }
 
         return null;
     }
 
-    /**
-     *
-     * @param string $productName
-     * @param float $quantity
-     * @return array|null
-     */
     private function generateProductsData(string $productName, float $quantity): ?array
     {
         try {
@@ -601,16 +582,18 @@ class VoiceController extends Controller
             Log::info('Генерация данных для продукта из расшифровки', [
                 'name' => $productName,
                 'quantity' => $quantity,
-                'response' => $generatedData
+                'response' => $generatedData,
             ]);
 
             if (is_array($generatedData) && isset($generatedData['error'])) {
-                Log::error("Ошибка при генерации данных продукта: " . $generatedData['error']);
+                Log::error('Ошибка при генерации данных продукта: '.$generatedData['error']);
+
                 return null;
             }
 
-            if (!is_string($generatedData)) {
+            if (! is_string($generatedData)) {
                 Log::error('Неожиданный формат данных от OpenAI', ['data' => $generatedData]);
+
                 return null;
             }
 
@@ -643,10 +626,10 @@ class VoiceController extends Controller
                 ];
             }
         } catch (\Exception $e) {
-            Log::error("Ошибка при генерации данных продукта: " . $e->getMessage(), [
+            Log::error('Ошибка при генерации данных продукта: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'product' => $productName,
-                'quantity' => $quantity
+                'quantity' => $quantity,
             ]);
         }
 
@@ -654,17 +637,15 @@ class VoiceController extends Controller
     }
 
     /**
-     *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function searchProduct(Request $request)
     {
         try {
-            if (!$request->has('product_name')) {
+            if (! $request->has('product_name')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Имя продукта не указано'
+                    'message' => 'Имя продукта не указано',
                 ], 400);
             }
 
@@ -675,7 +656,7 @@ class VoiceController extends Controller
             Log::info('Поиск продукта', [
                 'name' => $productName,
                 'user_id' => $userId,
-                'locale' => $locale
+                'locale' => $locale,
             ]);
 
             $searchResult = Product::getRawProduct($productName, $userId, $locale);
@@ -685,26 +666,26 @@ class VoiceController extends Controller
 
                 Log::info('Найден продукт', [
                     'product' => $searchResult,
-                    'ranking_score' => $rankingScore
+                    'ranking_score' => $rankingScore,
                 ]);
 
                 $productId = $searchResult['product_id'] ?? null;
 
-                if (!$productId) {
+                if (! $productId) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Продукт найден, но отсутствует ID',
-                        'should_generate' => true
+                        'should_generate' => true,
                     ]);
                 }
 
                 $fullProduct = Product::find($productId);
 
-                if (!$fullProduct) {
+                if (! $fullProduct) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Не удалось загрузить полные данные о продукте',
-                        'should_generate' => true
+                        'should_generate' => true,
                     ]);
                 }
 
@@ -716,7 +697,7 @@ class VoiceController extends Controller
                         'name' => $searchResult['name'],
                         'user_id' => $searchResult['user_id'] ?? null,
                         'said_name' => $productName,
-                        'original_name' => $searchResult['name']
+                        'original_name' => $searchResult['name'],
                     ],
                     'product' => [
                         'id' => $productId,
@@ -726,63 +707,68 @@ class VoiceController extends Controller
                         'carbohydrates' => floatval($fullProduct->carbohydrates ?? 0),
                         'fats' => floatval($fullProduct->fats ?? 0),
                         'fibers' => floatval($fullProduct->fibers ?? 0),
-                        'quantity' => 100.0
+                        'quantity' => 100.0,
                     ],
                     'quantity' => 100.0,
-                    'ranking_score' => $rankingScore
+                    'ranking_score' => $rankingScore,
                 ];
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Продукт найден',
                     'product' => $formattedProduct,
-                    'should_generate' => $rankingScore < 0.9
+                    'should_generate' => $rankingScore < 0.9,
                 ]);
             } else {
                 return response()->json([
                     'success' => false,
                     'message' => 'Продукт не найден',
-                    'should_generate' => true
+                    'should_generate' => true,
                 ]);
             }
         } catch (\Exception $e) {
-            Log::error('Ошибка при поиске продукта: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+            Log::error('Ошибка при поиске продукта: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Произошла ошибка при поиске продукта: ' . $e->getMessage(),
-                'should_generate' => true
+                'message' => 'Произошла ошибка при поиске продукта: '.$e->getMessage(),
+                'should_generate' => true,
             ], 500);
         }
     }
-    private function canTranscribeAudio($user_id){
-        $botPanelUrl = env('BOT_PANEL_URL');
-        $botApiKey   = env('BOT_API_KEY');
-        $host   = env('BOT_HOST');
 
-        if (!$botPanelUrl || !$botApiKey) {
+    private function canTranscribeAudio($user_id)
+    {
+        $botPanelUrl = env('BOT_PANEL_URL');
+        $botApiKey = env('BOT_API_KEY');
+        $host = env('BOT_HOST');
+
+        if (! $botPanelUrl || ! $botApiKey) {
             Log::warning('Bot panel URL или API key не настроены');
+
             return;
         }
 
-        $client = new Client();
+        $client = new Client;
         $headers = [
             'Content-Type' => 'application/json',
-            'Accept'       => 'application/json',
-            'Host'         => $host,
-            'X-Api-Key'    => $botApiKey,
+            'Accept' => 'application/json',
+            'Host' => $host,
+            'X-Api-Key' => $botApiKey,
         ];
         try {
-            $response = $client->get($botPanelUrl . '/api/subscription-check/' . $user_id, [
+            $response = $client->get($botPanelUrl.'/api/subscription-check/'.$user_id, [
                 'headers' => $headers,
             ]);
             Log::info('response from sub');
             Log::info(print_r($response, true));
+
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            Log::error("Error sending text to diary service: " . $e->getMessage());
+            Log::error('Error sending text to diary service: '.$e->getMessage());
+
             return ['error' => $e->getMessage()];
         }
     }

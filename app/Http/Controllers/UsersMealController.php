@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUsersFoodConsumptionsRequest;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class UsersMealController extends Controller
 {

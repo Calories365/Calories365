@@ -11,13 +11,9 @@ class Post extends Model
 
     /**
      * Get the index name for the model.
-     *
-     * @return string
      */
     public function searchableAs(): string
     {
         return 'posts_index';
     }
 }
-
-

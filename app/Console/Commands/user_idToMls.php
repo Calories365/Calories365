@@ -35,6 +35,7 @@ class user_idToMls extends Command
         }
 
         $this->info('Updated product_translations with user_id from products.');
+
         return 0;
     }
 }

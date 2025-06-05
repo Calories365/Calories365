@@ -31,6 +31,7 @@ class ProcessRecurringPaymentJob implements ShouldQueue
             Log::warning('У пользователя нет токена, пропускаем рекуррентный платеж', [
                 'user_id' => $this->user->id,
             ]);
+
             return;
         }
 
@@ -43,10 +44,11 @@ class ProcessRecurringPaymentJob implements ShouldQueue
             Log::error('Конфигурация платежной системы не настроена корректно.', [
                 'user_id' => $this->user->id,
             ]);
+
             return;
         }
 
-        $orderId = 'recurring_' . Str::uuid();
+        $orderId = 'recurring_'.Str::uuid();
         $amount = config('portmone.default_amount', 2.50); // Укажите вашу сумму
 
         $payload = [
@@ -73,6 +75,7 @@ class ProcessRecurringPaymentJob implements ShouldQueue
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
+
             return;
         }
 
@@ -98,7 +101,7 @@ class ProcessRecurringPaymentJob implements ShouldQueue
             SendPremiumStatusToBotPanelJob::dispatch($this->user);
         } else {
             $errorMsg = $data['result']['result'] ?? $data['errorMessage'] ?? 'Неизвестная ошибка';
-            Log::warning("Платеж отклонён или ошибка", [
+            Log::warning('Платеж отклонён или ошибка', [
                 'user_id' => $this->user->id,
                 'error' => $errorMsg,
                 'response' => $data,

@@ -42,10 +42,10 @@ class Kernel extends HttpKernel
 
         'api' => [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\SetLocale::class,
-//            'verified', //темка чтобы запретить не верифицированным пользователям доступ к api путям
+            //            'verified', //темка чтобы запретить не верифицированным пользователям доступ к api путям
         ],
     ];
 

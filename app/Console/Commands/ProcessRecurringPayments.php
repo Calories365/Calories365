@@ -11,6 +11,7 @@ use Symfony\Component\Console\Command\Command as CommandAlias;
 class ProcessRecurringPayments extends Command
 {
     protected $signature = 'portmone:process-recurring';
+
     protected $description = 'Processes recurring payments for users whose subscription expires today';
 
     public function handle()
@@ -25,6 +26,7 @@ class ProcessRecurringPayments extends Command
             });
 
         $this->info('Recurring payments processed for users with subscriptions expiring today.');
+
         return CommandAlias::SUCCESS;
     }
 }

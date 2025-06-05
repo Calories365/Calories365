@@ -26,21 +26,21 @@ class ProductTranslationsSeeder extends Seeder
             ProductTranslation::create([
                 'product_id' => $product->id,
                 'locale' => 'ua',
-                'name' => $product->name_ukr
+                'name' => $product->name_ukr,
             ]);
 
             // Создание перевода на русском
             ProductTranslation::create([
                 'product_id' => $product->id,
                 'locale' => 'ru',
-                'name' => $product->name_rus
+                'name' => $product->name_rus,
             ]);
 
             // Создание перевода на английском
             ProductTranslation::create([
                 'product_id' => $product->id,
                 'locale' => 'en',
-                'name' => $product->name_eng
+                'name' => $product->name_eng,
             ]);
         }
 

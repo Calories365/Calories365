@@ -104,14 +104,12 @@ return [
 
     'mac_address' => 'Поле :attribute повинно бути дійсною MAC-адресою.',
 
-
     'max' => [
         'array' => 'Поле :attribute не повинно містити більше, ніж :max елементів.',
         'file' => 'Розмір :attribute не повинен бути більше, ніж :max кілобайт.',
         'numeric' => 'Поле :attribute не повинно бути більше, ніж :max.',
         'string' => 'Поле :attribute не повинно бути більше, ніж :max символів.',
     ],
-
 
     'max_digits' => 'Поле :attribute не повинно містити більше, ніж :max цифр.',
     'mimes' => 'Поле :attribute повинно бути файлом типу: :values.',
@@ -167,7 +165,6 @@ return [
         'numeric' => 'Поле :attribute повинно бути :size.',
         'string' => 'Поле :attribute повинно бути :size символів.',
     ],
-
 
     'starts_with' => 'Поле :attribute повинно починатися однією з наступних: :values.',
     'string' => 'Поле :attribute повинно бути рядком.',

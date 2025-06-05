@@ -14,7 +14,7 @@ class SpeechToTextService
 
     public function __construct()
     {
-        $this->client = new Client();
+        $this->client = new Client;
     }
 
     /**
@@ -24,7 +24,7 @@ class SpeechToTextService
     {
         $locale = app()->getLocale();
 
-        Log::info('$locale: ' . $locale);
+        Log::info('$locale: '.$locale);
 
         switch ($locale) {
             case 'ua':
@@ -53,23 +53,23 @@ class SpeechToTextService
         Log::info(print_r($languageCode, true));
         $multipartBody = new MultipartStream([
             [
-                'name'     => 'file',
+                'name' => 'file',
                 'contents' => fopen($filePath, 'r'),
                 'filename' => basename($filePath),
             ],
             [
-                'name'     => 'model',
+                'name' => 'model',
                 'contents' => 'whisper-1',
             ],
             [
-                'name'     => 'language',
+                'name' => 'language',
                 'contents' => $languageCode,
             ],
         ]);
 
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getApiKey(),
-            'Content-Type'  => 'multipart/form-data; boundary=' . $multipartBody->getBoundary()
+            'Authorization' => 'Bearer '.$this->getApiKey(),
+            'Content-Type' => 'multipart/form-data; boundary='.$multipartBody->getBoundary(),
         ];
 
         $request = new Request(
@@ -86,6 +86,7 @@ class SpeechToTextService
             if (isset($data['text'])) {
                 return $this->analyzeFoodIntake($data['text']);
             }
+
             return false;
         } catch (GuzzleException $e) {
             return ['error' => $e->getMessage()];
@@ -94,7 +95,7 @@ class SpeechToTextService
 
     public function analyzeFoodIntake(string $text)
     {
-        Log::info('prompt: ' . $text);
+        Log::info('prompt: '.$text);
 
         $prompt = __('calories365-bot.prompt_analyze_food_intake', [
             'text' => $text,
@@ -106,18 +107,18 @@ class SpeechToTextService
         try {
             $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->getApiKey(),
-                    'Content-Type'  => 'application/json'
+                    'Authorization' => 'Bearer '.$this->getApiKey(),
+                    'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model'    => 'gpt-4o',
+                    'model' => 'gpt-4o',
                     'messages' => [
                         [
-                            'role'    => 'user',
+                            'role' => 'user',
                             'content' => $prompt,
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ]);
 
             $result = json_decode($response->getBody()->getContents(), true);
@@ -141,18 +142,18 @@ class SpeechToTextService
         try {
             $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->getApiKey(),
-                    'Content-Type'  => 'application/json'
+                    'Authorization' => 'Bearer '.$this->getApiKey(),
+                    'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model'    => 'gpt-4o',
+                    'model' => 'gpt-4o',
                     'messages' => [
                         [
-                            'role'    => 'user',
-                            'content' => $prompt
-                        ]
-                    ]
-                ]
+                            'role' => 'user',
+                            'content' => $prompt,
+                        ],
+                    ],
+                ],
             ]);
 
             $result = json_decode($response->getBody()->getContents(), true);
@@ -173,17 +174,17 @@ class SpeechToTextService
                 $prompt = '';
 
                 for ($j = $i; $j < $i + 5 && $j < count($products); $j++) {
-                    $name    = $products[$j]['name'];
+                    $name = $products[$j]['name'];
                     $details = $products[$j]['details'];
 
                     $productNames = array_map(function ($detail) {
-                        return $detail['id'] . ' - ' . $detail['name'];
+                        return $detail['id'].' - '.$detail['name'];
                     }, $details);
 
                     $prompt .= __('calories365-bot.prompt_choose_relevant_products_part', [
-                            'name'         => $name,
-                            'productNames' => implode(', ', $productNames),
-                        ]) . ' ';
+                        'name' => $name,
+                        'productNames' => implode(', ', $productNames),
+                    ]).' ';
                 }
 
                 $prompt .= __('calories365-bot.prompt_choose_relevant_products_footer');
@@ -192,9 +193,11 @@ class SpeechToTextService
             }
 
         } catch (\Exception $e) {
-            Log::error("Error in choosing product: " . $e->getMessage());
+            Log::error('Error in choosing product: '.$e->getMessage());
+
             return ['error' => $e->getMessage()];
         }
+
         return true;
     }
 
@@ -203,18 +206,18 @@ class SpeechToTextService
         try {
             $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->getApiKey(),
-                    'Content-Type'  => 'application/json'
+                    'Authorization' => 'Bearer '.$this->getApiKey(),
+                    'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model'    => 'gpt-4o',
+                    'model' => 'gpt-4o',
                     'messages' => [
                         [
-                            'role'    => 'user',
-                            'content' => $prompt
-                        ]
-                    ]
-                ]
+                            'role' => 'user',
+                            'content' => $prompt,
+                        ],
+                    ],
+                ],
             ]);
 
             $result = json_decode($response->getBody()->getContents(), true);
