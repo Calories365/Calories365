@@ -6,11 +6,7 @@ parameters:
     - app
   level: 5
   ignoreErrors:
-    - '#Relation .* is not found in App\\Models\\.* model\.#'
-    - '#Call to an undefined method.*::get.*\(\)\.#'
-    - '#Using nullsafe method call on non-nullable type.*#'
-    - '#Access to an undefined property Telegram\\Bot\\Objects\\File::\$file_path\.#'
-    - '#Call to an undefined method.*::process\(\)\.#'
     - '#Access to an undefined property App\\Http\\Resources\\.*Resource::\$.*#'
+    - '#Call to an undefined method Laravel\\Socialite\\Contracts\\Provider::stateless\(\)\.#'
   checkModelProperties: true
   inferPrivatePropertyTypeFromConstructor: true

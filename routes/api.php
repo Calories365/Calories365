@@ -67,9 +67,6 @@ Route::middleware('check.bot.key')->group(function () {
         Route::get('/caloriesEndPoint/showUserStats/{date}/{partOfDay?}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'showUserStats'])
             ->name('calculations.showUserStats');
 
-        Route::post('/caloriesEndPoint/getTheMostRelevantProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'getTheMostRelevantProduct'])
-            ->name('calculations.getTheMostRelevantProduct');
-
         Route::delete('/caloriesEndPoint/deleteMeal/{meal}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'destroy'])
             ->name('calculations.destroy');
 

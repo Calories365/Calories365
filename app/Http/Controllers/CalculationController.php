@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserDataRequest;
 use App\Http\Resources\CalculationResource;
+use App\Models\User;
 use App\Models\UserResult;
 use App\Services\UserResultService;
 use Illuminate\Support\Facades\Cache;
 
 class CalculationController extends Controller
 {
-    protected ?\Illuminate\Contracts\Auth\Authenticatable $user;
+    protected ?User $user;
 
-    protected function getUser(): ?\Illuminate\Contracts\Auth\Authenticatable
+    protected function getUser(): ?User
     {
         return $this->user ??= auth()->user();
     }

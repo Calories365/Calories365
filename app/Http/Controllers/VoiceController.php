@@ -59,36 +59,33 @@ class VoiceController extends Controller
 
             $fileForStt = $mp3Full ?: $fullPath;
 
-            $transcription = $this->speechToTextService->convertSpeechToText(
-                $fileForStt,
-                app()->getLocale()
-            );
+            $text = $this->speechToTextService->convertSpeechToText($fileForStt);
             Log::info('$transcription: ');
-            Log::info(print_r($transcription, true));
+            Log::info(print_r($text, true));
             Storage::disk('public')->delete($localPath);
             if ($mp3Local) {
                 Storage::disk('public')->delete($mp3Local);
             }
 
-            if (is_array($transcription) && isset($transcription['error'])) {
+            if (is_array($text) && isset($text['error'])) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ошибка при расшифровке: '.$transcription['error'],
+                    'message' => 'Ошибка при расшифровке: '.$text['error'],
                 ], 500);
             }
 
-            $products = $this->searchProductsFromTranscription($transcription);
+            $products = $this->searchProductsFromTranscription($text);
 
             Log::info('Voice record processed', [
                 'user_id' => Auth::id(),
-                'transcription' => $transcription,
+                'transcription' => $text,
                 'products_found' => $products,
             ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Голосовая запись успешно обработана',
-                'transcription' => $transcription,
+                'transcription' => $text,
                 'products' => $products,
             ]);
 

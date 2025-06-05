@@ -9,7 +9,6 @@ use App\Http\Resources\MealCollection;
 use App\Models\FoodConsumption;
 use App\Models\Product;
 use App\Services\ProductService;
-use App\Services\SearchService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
@@ -21,11 +20,9 @@ class CaloriesAPIBotController extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    private SearchService $searchService;
-
-    public function __construct(SearchService $searchService)
+    public function __construct()
     {
-        $this->searchService = $searchService;
+        // Конструктор може бути порожнім або видаленим
     }
 
     public function store(Request $request)
@@ -182,63 +179,6 @@ class CaloriesAPIBotController extends BaseController
         $meals = FoodConsumption::getMealsWithCurrentDate($date, $userId, $locale, $partOfDay);
 
         return new MealCollection($meals);
-    }
-
-    public function getTheMostRelevantProduct(Request $request)
-    {
-        Log::info('getTheMostRelevantProduct');
-        $text = $request->input('text');
-        $parts = explode(' - ', $text);
-
-        if (count($parts) > 1) {
-            $productName = trim($parts[0]);
-            $quantityStr = trim($parts[1]);
-        }
-        if (preg_match('/(\d+(\.\d+)?)/', $quantityStr, $matches)) {
-            $quantity = floatval($matches[1]);
-        }
-
-        $user_id = auth()->id();
-        $locale = app()->getLocale();
-
-        $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
-        $product = Product::where('id', $productTranslation['product_id'])->first();
-
-        if ($productTranslation['_rankingScore'] < 0.9) {
-            return false;
-        }
-
-        if ($productTranslation) {
-            $productInfo = [
-                'product_translation' => [
-                    'id' => $productTranslation['id'],
-                    'product_id' => $productTranslation['product_id'],
-                    'locale' => $productTranslation['locale'],
-                    'name' => $productTranslation['name'],
-                    'said_name' => $productName,
-                    'original_name' => $productName,
-                ],
-                'product' => [
-                    'id' => $product->id,
-                    'user_id' => $product->user_id,
-                    'calories' => $product->calories,
-                    'proteins' => $product->proteins,
-                    'carbohydrates' => $product->carbohydrates,
-                    'fats' => $product->fats,
-                    'fibers' => $product->fibers,
-                    'quantity_grams' => $quantity,
-                ],
-                'quantity_grams' => $quantity,
-            ];
-            Log::info(print_r($productInfo, true));
-
-            return response()->json([
-                'message' => 'Product found',
-                'product' => $productInfo,
-            ]);
-        } else {
-            return false;
-        }
     }
 
     public function destroy(FoodConsumption $meal): \Illuminate\Http\JsonResponse

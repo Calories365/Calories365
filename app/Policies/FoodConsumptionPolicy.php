@@ -20,7 +20,7 @@ class FoodConsumptionPolicy
      */
     public function view(User $user, FoodConsumption $foodConsumption): bool
     {
-        //
+        return $user->id === $foodConsumption->user_id;
     }
 
     /**
@@ -28,7 +28,7 @@ class FoodConsumptionPolicy
      */
     public function create(User $user): bool
     {
-        //
+        return true;
     }
 
     /**
@@ -52,7 +52,7 @@ class FoodConsumptionPolicy
      */
     public function restore(User $user, FoodConsumption $foodConsumption): bool
     {
-        //
+        return $user->id === $foodConsumption->user_id;
     }
 
     /**
@@ -60,6 +60,6 @@ class FoodConsumptionPolicy
      */
     public function forceDelete(User $user, FoodConsumption $foodConsumption): bool
     {
-        //
+        return $user->id === $foodConsumption->user_id;
     }
 }
