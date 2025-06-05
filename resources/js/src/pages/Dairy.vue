@@ -21,12 +21,12 @@ export default {
         CaloriesAddBtn,
         CaloriesNavbar,
         CaloriesIndication,
-        CaloriesFoodList
+        CaloriesFoodList,
     },
     data() {
         return {
             isOpen: false,
-            counter: 0
+            counter: 0,
         };
     },
     methods: {
@@ -35,18 +35,18 @@ export default {
             if (!this.counter) {
                 this.$store.dispatch(actionTypes.getPopularProducts);
             }
-        }
+        },
     },
     computed: {
         ...mapGetters({
-            currentLocale: localeChangeGetterTypes.selectedLocale
+            currentLocale: localeChangeGetterTypes.selectedLocale,
         }),
         successMessage() {
             return this.$store.getters.isSuccess;
         },
         errorMessage() {
             return this.$store.getters.isError;
-        }
+        },
     },
     watch: {
         currentLocale(newLocale, oldLocale) {
@@ -56,7 +56,7 @@ export default {
                     this.$store.dispatch(actionTypes.getPopularProducts);
                 }
             }
-        }
+        },
     },
 };
 </script>

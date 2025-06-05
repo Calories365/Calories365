@@ -10,49 +10,47 @@ const state = {
         PFC: {
             carbsPercent: 40,
             fatPercent: 25,
-            proteinPercent: 35
+            proteinPercent: 35,
         },
         dailyCalories: 0,
         bmi: 0,
         bmr: 0,
         daysRequired: 0,
-        humanWeightClassifications: 0
-
+        humanWeightClassifications: 0,
     },
-}
+};
 export const getterTypes = {
-    dataKey: '[calculation] dataKey',
-}
+    dataKey: "[calculation] dataKey",
+};
 
 //геттеры глобальные, но в данном случае они получают локальное состояние
 const getters = {
     [getterTypes.dataKey]: (state, getters, rootState) => {
         if (rootState.auth.currentUser) {
-            return `calculationData${rootState.auth.currentUser.id}`
+            return `calculationData${rootState.auth.currentUser.id}`;
         } else {
             return false;
         }
     },
-}
+};
 
 export const mutationTypes = {
-    getCalculationDataStart: '[calculation] get calculation data Start',
-    getCalculationDataSuccess: '[calculation] get calculation data Success',
-    getCalculationDataFailure: '[calculation] get calculation data Failure',
+    getCalculationDataStart: "[calculation] get calculation data Start",
+    getCalculationDataSuccess: "[calculation] get calculation data Success",
+    getCalculationDataFailure: "[calculation] get calculation data Failure",
 
-    saveCalculationDataStart: '[calculation] save calculation data Start',
-    saveCalculationDataSuccess: '[calculation] save calculation data Success',
-    saveCalculationDataFailure: '[calculation] save calculation data Failure',
+    saveCalculationDataStart: "[calculation] save calculation data Start",
+    saveCalculationDataSuccess: "[calculation] save calculation data Success",
+    saveCalculationDataFailure: "[calculation] save calculation data Failure",
 
-    countResults: '[calculation] count results',
-
-}
+    countResults: "[calculation] count results",
+};
 export const actionTypes = {
-    getCalculationData: '[calculation] Get calculation data',
-    getCalculationDataNotAuth: '[calculation] Get calculation data not auth',
-    saveCalculationData: '[calculation] Save calculation data',
-    countResults: '[calculation] count results',
-}
+    getCalculationData: "[calculation] Get calculation data",
+    getCalculationDataNotAuth: "[calculation] Get calculation data not auth",
+    saveCalculationData: "[calculation] Save calculation data",
+    countResults: "[calculation] count results",
+};
 const mutations = {
     [mutationTypes.getCalculationDataStart](state) {
         state.isLoading = true;
@@ -78,13 +76,12 @@ const mutations = {
         state.userResults = payload.results;
         state.userData = payload.data;
     },
-}
+};
 
 const actions = {
     [actionTypes.getCalculationData](context) {
         return new Promise((resolve, reject) => {
             context.commit(mutationTypes.getCalculationDataStart);
-
 
             const key = context.getters[getterTypes.dataKey];
             let savedData;
@@ -96,30 +93,46 @@ const actions = {
             if (savedData) {
                 // console.log('Данные взяты из локального хранилища. Запрос не отправлен.');
                 const parsedData = JSON.parse(savedData);
-                context.commit(mutationTypes.getCalculationDataSuccess, parsedData);
+                context.commit(
+                    mutationTypes.getCalculationDataSuccess,
+                    parsedData
+                );
                 resolve(parsedData);
                 return;
             }
 
-            calculationApi.getCalculationData()
-                .then(response => {
-                    if (response.data.message === 'Record not found') {
-                        savedData = localStorage.getItem('calculationData');
+            calculationApi
+                .getCalculationData()
+                .then((response) => {
+                    if (response.data.message === "Record not found") {
+                        savedData = localStorage.getItem("calculationData");
                         if (savedData) {
                             const parsedData = JSON.parse(savedData);
-                            context.commit(mutationTypes.getCalculationDataSuccess, parsedData);
+                            context.commit(
+                                mutationTypes.getCalculationDataSuccess,
+                                parsedData
+                            );
                             resolve(parsedData);
                         }
                     } else {
-                        context.commit(mutationTypes.getCalculationDataSuccess, response.data);
+                        context.commit(
+                            mutationTypes.getCalculationDataSuccess,
+                            response.data
+                        );
                         // console.log('Ответ сервера:', response.data);
-                        localStorage.setItem(key, JSON.stringify(response.data));
+                        localStorage.setItem(
+                            key,
+                            JSON.stringify(response.data)
+                        );
                         resolve(response.data);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     // console.log('Ошибка при получении данных:', error);
-                    context.commit(mutationTypes.getCalculationDataFailure, error);
+                    context.commit(
+                        mutationTypes.getCalculationDataFailure,
+                        error
+                    );
                     reject(error);
                 });
         });
@@ -128,12 +141,14 @@ const actions = {
         return new Promise((resolve, reject) => {
             context.commit(mutationTypes.getCalculationDataStart);
 
-
-            const savedData = localStorage.getItem('calculationData');
+            const savedData = localStorage.getItem("calculationData");
 
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                context.commit(mutationTypes.getCalculationDataSuccess, parsedData);
+                context.commit(
+                    mutationTypes.getCalculationDataSuccess,
+                    parsedData
+                );
                 resolve(parsedData);
             }
         });
@@ -155,69 +170,110 @@ const actions = {
             context.commit(mutationTypes.saveCalculationDataStart);
 
             data.dailyCalories = context.state.userResults.dailyCalories;
-            calculationApi.saveCalculationData(data)
-                .then(response => {
+            calculationApi
+                .saveCalculationData(data)
+                .then((response) => {
                     context.commit(mutationTypes.saveCalculationDataSuccess);
 
                     const key = context.getters[getterTypes.dataKey];
 
                     localStorage.setItem(key, currentData);
-                    const message = i18n.global.t('Notification.Success.ResultWasSaved');
-                    context.dispatch('setSuccess', message, { root: true });
+                    const message = i18n.global.t(
+                        "Notification.Success.ResultWasSaved"
+                    );
+                    context.dispatch("setSuccess", message, { root: true });
 
                     resolve();
                 })
-                .catch(error => {
+                .catch((error) => {
                     context.commit(mutationTypes.saveCalculationDataFailure);
-                    const message = i18n.global.t('Notification.Error.ResultSaveFailed');
-                    context.dispatch('setError', message, { root: true });
+                    const message = i18n.global.t(
+                        "Notification.Error.ResultSaveFailed"
+                    );
+                    context.dispatch("setError", message, { root: true });
                     reject(error);
                 });
         });
     },
     [actionTypes.countResults](context, data) {
         return new Promise((resolve, reject) => {
-
             validation(data)
                 .then(() => {
-
                     let result = {};
 
                     if (data.checkboxActive) {
-                        result.bmr = Math.round(KatchMcArdleBMR(data.weight, data.height, data.fat));
-
+                        result.bmr = Math.round(
+                            KatchMcArdleBMR(data.weight, data.height, data.fat)
+                        );
                     } else {
-                        result.bmr = Math.round(HarrisBenedictBMR(data.gender, data.birthYear, data.weight, data.height));
+                        result.bmr = Math.round(
+                            HarrisBenedictBMR(
+                                data.gender,
+                                data.birthYear,
+                                data.weight,
+                                data.height
+                            )
+                        );
                     }
 
                     let goal = determineGoal(data.weight, data.goalWeight);
 
-                    result.bmi = parseFloat(calculateBMI(data.weight, data.height).toFixed(2));
+                    result.bmi = parseFloat(
+                        calculateBMI(data.weight, data.height).toFixed(2)
+                    );
 
-                    result.humanWeightClassifications = determineBMICategory(result.bmi);
+                    result.humanWeightClassifications = determineBMICategory(
+                        result.bmi
+                    );
 
-                    result.dailyCalories = Math.round(calculateDailyCalories(result.bmr, Number(data.activity), Number(goal)));
+                    result.dailyCalories = Math.round(
+                        calculateDailyCalories(
+                            result.bmr,
+                            Number(data.activity),
+                            Number(goal)
+                        )
+                    );
 
-                    result.PFC = determineMacronutrientPercentages(data.fat, Number(data.activity), Number(goal));
+                    result.PFC = determineMacronutrientPercentages(
+                        data.fat,
+                        Number(data.activity),
+                        Number(goal)
+                    );
 
-                    result.daysRequired = Math.round(calculateWeightLossTime(data.weight, data.goalWeight, result.dailyCalories, result.bmr, Number(data.activity)));
+                    result.daysRequired = Math.round(
+                        calculateWeightLossTime(
+                            data.weight,
+                            data.goalWeight,
+                            result.dailyCalories,
+                            result.bmr,
+                            Number(data.activity)
+                        )
+                    );
 
-                    context.commit(mutationTypes.countResults, {results: result, data: data});
+                    context.commit(mutationTypes.countResults, {
+                        results: result,
+                        data: data,
+                    });
 
-                    const message = i18n.global.t('Notification.Success.Result');
+                    const message = i18n.global.t(
+                        "Notification.Success.Result"
+                    );
 
-                    context.dispatch('setSuccess', message, {root: true});
+                    context.dispatch("setSuccess", message, { root: true });
 
                     const key = context.getters[getterTypes.dataKey];
 
                     if (!localStorage.getItem(key)) {
-                        localStorage.setItem('calculationData', JSON.stringify(data));
+                        localStorage.setItem(
+                            "calculationData",
+                            JSON.stringify(data)
+                        );
                     }
 
                     resolve(result);
                 })
-                .catch(error => {
-                    resolve(false);  // resolve with false instead of reject to indicate validation failure
+                .catch((error) => {
+                    resolve(false); // resolve with false instead of reject to indicate validation failure
                 });
 
             function validation(data) {
@@ -256,11 +312,13 @@ const actions = {
                     }
 
                     if (messageKey !== "") {
-                        const message = i18n.global.t("Notification.Error.invalidData");
-                        context.dispatch('setError', message, {root: true});
-                        reject(new Error(message));  // reject validation promise if there's an error
+                        const message = i18n.global.t(
+                            "Notification.Error.invalidData"
+                        );
+                        context.dispatch("setError", message, { root: true });
+                        reject(new Error(message)); // reject validation promise if there's an error
                     } else {
-                        resolve();  // resolve validation promise if all checks pass
+                        resolve(); // resolve validation promise if all checks pass
                     }
                 });
             }
@@ -270,22 +328,22 @@ const actions = {
                 const age = currentYear - birthYear;
                 let BMR;
 
-                if (gender === 'male') {
-                    BMR = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-                } else if (gender === 'female') {
-                    BMR = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+                if (gender === "male") {
+                    BMR =
+                        88.362 + 13.397 * weight + 4.799 * height - 5.677 * age;
+                } else if (gender === "female") {
+                    BMR =
+                        447.593 + 9.247 * weight + 3.098 * height - 4.33 * age;
                 } else {
-                    throw new Error('Invalid gender');
+                    throw new Error("Invalid gender");
                 }
                 return BMR;
             }
 
             function KatchMcArdleBMR(weight, height, fatPercentage) {
-
                 let LBM = (weight * (100 - fatPercentage)) / 100;
 
-                return 370 + (21.6 * LBM);
-
+                return 370 + 21.6 * LBM;
             }
 
             function calculateBMI(weight, height) {
@@ -293,7 +351,6 @@ const actions = {
 
                 // Расчет ИМТ
                 return weight / (height * height);
-
             }
 
             function determineBMICategory(bmi) {
@@ -325,34 +382,35 @@ const actions = {
             }
 
             function calculateDailyCalories(bmr, activityLevel, goal) {
-                const maintenance = calculateMaintenanceCalories(bmr, activityLevel)
+                const maintenance = calculateMaintenanceCalories(
+                    bmr,
+                    activityLevel
+                );
 
-                const DEFICIT  = 0.15
-                const SURPLUS  = 0.15
-                const MIN_SAFE = bmr * 1.1
+                const DEFICIT = 0.15;
+                const SURPLUS = 0.15;
+                const MIN_SAFE = bmr * 1.1;
 
-                let dailyCalories = maintenance
+                let dailyCalories = maintenance;
 
                 switch (goal) {
                     case 1:
-                        dailyCalories = maintenance * (1 - DEFICIT)
-                        break
+                        dailyCalories = maintenance * (1 - DEFICIT);
+                        break;
                     case 2:
-                        break
+                        break;
                     case 3:
-                        dailyCalories = maintenance * (1 + SURPLUS)
-                        break
+                        dailyCalories = maintenance * (1 + SURPLUS);
+                        break;
                     default:
-                        throw new Error('Invalid goal')
+                        throw new Error("Invalid goal");
                 }
-
 
                 if (dailyCalories < MIN_SAFE) {
-                    dailyCalories = MIN_SAFE
+                    dailyCalories = MIN_SAFE;
                 }
-                return Math.round(dailyCalories)
+                return Math.round(dailyCalories);
             }
-
 
             function calculateMaintenanceCalories(bmr, activityLevel) {
                 let activityMultiplier;
@@ -384,13 +442,16 @@ const actions = {
                 let proteinPercent;
                 let fatPercent;
 
-                if (goal === 1) { // Похудение
+                if (goal === 1) {
+                    // Похудение
                     proteinPercent = 35;
                     fatPercent = fat > 25 ? 20 : 25;
-                } else if (goal === 2) { // Поддержание формы
+                } else if (goal === 2) {
+                    // Поддержание формы
                     proteinPercent = 30;
                     fatPercent = 25;
-                } else if (goal === 3) { // Набор массы
+                } else if (goal === 3) {
+                    // Набор массы
                     proteinPercent = 30;
                     fatPercent = 30;
                 }
@@ -401,31 +462,37 @@ const actions = {
                 }
                 let carbsPercent = 100 - proteinPercent - fatPercent;
 
-                return {proteinPercent, fatPercent, carbsPercent};
+                return { proteinPercent, fatPercent, carbsPercent };
             }
 
-            function calculateWeightLossTime(currentWeight, targetWeight, dailyCalories, bmr, activity) {
-
-                let maintenanceCalories = calculateMaintenanceCalories(bmr, activity);
+            function calculateWeightLossTime(
+                currentWeight,
+                targetWeight,
+                dailyCalories,
+                bmr,
+                activity
+            ) {
+                let maintenanceCalories = calculateMaintenanceCalories(
+                    bmr,
+                    activity
+                );
 
                 const weightLossRequired = currentWeight - targetWeight;
 
                 const dailyCalorieDeficit = maintenanceCalories - dailyCalories;
 
-                const daysRequired = (weightLossRequired * 7700) / dailyCalorieDeficit;
+                const daysRequired =
+                    (weightLossRequired * 7700) / dailyCalorieDeficit;
 
                 return Math.abs(daysRequired);
             }
-
-
-        })
-    }
-}
-
+        });
+    },
+};
 
 export default {
     state,
     actions,
     mutations,
-    getters
-}
+    getters,
+};

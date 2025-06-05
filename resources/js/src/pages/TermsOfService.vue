@@ -1,10 +1,11 @@
-<script setup>
-</script>
+<script setup></script>
 
 <template>
     <div class="terms-of-service-wrapper">
         <h1>{{ $t("TermsOfService.Title") }}</h1>
-        <p class="last-updated"><strong>{{ $t("TermsOfService.LastUpdated") }}</strong></p>
+        <p class="last-updated">
+            <strong>{{ $t("TermsOfService.LastUpdated") }}</strong>
+        </p>
 
         <p>{{ $t("TermsOfService.Intro") }}</p>
 
@@ -67,7 +68,9 @@
 
         <!-- 12. Contact Us -->
         <h2>{{ $t("TermsOfService.Section12") }}</h2>
-        <p>{{ $t("TermsOfService.Section12Text") }} calories365.diary@gmail.com</p>
+        <p>
+            {{ $t("TermsOfService.Section12Text") }} calories365.diary@gmail.com
+        </p>
 
         <!-- New Sections for Portmone Compliance -->
 
@@ -81,7 +84,9 @@
 
         <!-- 15. Refund and Exchange Policy -->
         <h2>{{ $t("TermsOfService.Section15") }}</h2>
-        <p>{{ $t("TermsOfService.Section15Text") }}  calories365.diary@gmail.com</p>
+        <p>
+            {{ $t("TermsOfService.Section15Text") }} calories365.diary@gmail.com
+        </p>
 
         <!-- 16. Ordering and Using Services -->
         <h2>{{ $t("TermsOfService.Section16") }}</h2>

@@ -1,10 +1,9 @@
 <script>
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 export default {
     name: "CaloriesCalculationDropdown",
-    components: {FontAwesomeIcon},
+    components: { FontAwesomeIcon },
     props: {
         options: {
             type: Array,
@@ -25,7 +24,7 @@ export default {
             isActive: false,
             isHiding: false,
             selectedOption: null,
-        }
+        };
     },
     methods: {
         toggleActive() {
@@ -49,12 +48,13 @@ export default {
         },
         setName(option, event) {
             this.selectedOption = option;
-            const dataIndex = event.currentTarget.getAttribute('data-attribute');
+            const dataIndex =
+                event.currentTarget.getAttribute("data-attribute");
             this.updateVariable(dataIndex);
         },
         updateVariable(option) {
             console.log("Emitting update event with:", option);
-            this.$emit('update', option);
+            this.$emit("update", option);
         },
         updateSelectedOption(newValue) {
             const optionIndex = newValue - 1;
@@ -64,52 +64,55 @@ export default {
     watch: {
         value(newValue) {
             this.updateSelectedOption(newValue);
-        }
+        },
     },
     mounted() {
-        document.addEventListener('click', this.handleClickOutside);
+        document.addEventListener("click", this.handleClickOutside);
 
         const optionIndex = this.value - 1;
 
         this.selectedOption = this.options[optionIndex];
     },
     beforeUnmount() {
-        document.removeEventListener('click', this.handleClickOutside);
-    }
-}
-
+        document.removeEventListener("click", this.handleClickOutside);
+    },
+};
 </script>
 
 <template>
     <div class="dropdown-section">
-
         <div class="calculation-select" @click.stop="toggleActive">
-            <div class="calculation-select_text">{{ selectedOption ? selectedOption : name }}</div>
-            <div class="calculation-select_active"
-                 :class="{ 'calculation-select_show': isActive, 'calculation-select_hide': isHiding }">
+            <div class="calculation-select_text">
+                {{ selectedOption ? selectedOption : name }}
+            </div>
+            <div
+                class="calculation-select_active"
+                :class="{
+                    'calculation-select_show': isActive,
+                    'calculation-select_hide': isHiding,
+                }"
+            >
                 <ul class="calculation-select_list">
-                    <li v-for="(option, index) in options"
+                    <li
+                        v-for="(option, index) in options"
                         :key="index"
                         :data-attribute="index + 1"
                         @click="setName(option, $event)"
-                        class="calculation-select_li">
+                        class="calculation-select_li"
+                    >
                         {{ option }}
                     </li>
                 </ul>
             </div>
 
             <div class="calculation-select_arrow">
-                <font-awesome-icon :icon="['fas', 'angle-down']"/>
+                <font-awesome-icon :icon="['fas', 'angle-down']" />
             </div>
         </div>
-
-
     </div>
-
 </template>
 
 <style scoped lang="scss">
-
 .dropdown-section {
     cursor: pointer;
     margin: 0 auto;
@@ -213,6 +216,4 @@ export default {
         opacity: 0;
     }
 }
-
-
 </style>

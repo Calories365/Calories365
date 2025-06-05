@@ -1,22 +1,21 @@
 <script>
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import clickOutside from "@/directives/clickOutside.js";
-import {actionTypes} from "@/store/modules/changeLocale.js";
-import {mapState} from "vuex";
-
+import { actionTypes } from "@/store/modules/changeLocale.js";
+import { mapState } from "vuex";
 
 export default {
     name: "CaloriesCalculationLocaleChanger",
-    components: {FontAwesomeIcon},
+    components: { FontAwesomeIcon },
     directives: {
-        'click-outside': clickOutside
+        "click-outside": clickOutside,
     },
     data() {
         return {
             isOpen: false,
             isActive: false,
             isHiding: false,
-        }
+        };
     },
     methods: {
         toggleActive() {
@@ -39,15 +38,19 @@ export default {
             }
         },
         changeLocale(locale) {
-            this.$store.dispatch(actionTypes.setLocale, {locale, i18n: this.$i18n})
+            this.$store.dispatch(actionTypes.setLocale, {
+                locale,
+                i18n: this.$i18n,
+            });
             this.isOpen = false;
         },
     },
     computed: {
         ...mapState({
-            selectedLocale: state => state.changeLocale.selectedLocale,
-            locales: state => state.changeLocale.locales,
-            russianEnabled: state => state.language ? state.language.russianLanguageEnabled : true
+            selectedLocale: (state) => state.changeLocale.selectedLocale,
+            locales: (state) => state.changeLocale.locales,
+            russianEnabled: (state) =>
+                state.language ? state.language.russianLanguageEnabled : true,
         }),
         shouldShowRussian() {
             // Don't show Russian if in academic mode OR Russian is disabled from backend
@@ -55,14 +58,14 @@ export default {
         },
         filteredLocales() {
             // Filter out the currently selected locale and potentially Russian
-            return this.locales.filter(locale => {
+            return this.locales.filter((locale) => {
                 // Always filter out the currently selected locale
                 if (locale === this.selectedLocale) {
                     return false;
                 }
 
                 // Filter out Russian when not allowed
-                if (locale === 'ru') {
+                if (locale === "ru") {
                     return this.shouldShowRussian;
                 }
 
@@ -73,41 +76,46 @@ export default {
     },
     mounted() {
         // Fetch language status when component is mounted
-        this.$store.dispatch('language/fetchLanguageStatus');
+        this.$store.dispatch("language/fetchLanguageStatus");
 
         // Check if the current locale is Russian and it's disabled or in academic mode, switch to English
         this.$nextTick(() => {
-            if (this.selectedLocale === 'ru' && !this.shouldShowRussian) {
-                this.changeLocale('en');
+            if (this.selectedLocale === "ru" && !this.shouldShowRussian) {
+                this.changeLocale("en");
             }
         });
     },
-}
-
+};
 </script>
 
 <template>
     <div class="dropdown-section" v-click-outside="handleClickOutside">
-
         <div class="calculation-select" @click.stop="toggleActive">
             <div class="calculation-select_text">{{ selectedLocale }}</div>
 
-            <div class="calculation-select_active"
-                 :class="{ 'calculation-select_show': isActive, 'calculation-select_hide': isHiding }">
+            <div
+                class="calculation-select_active"
+                :class="{
+                    'calculation-select_show': isActive,
+                    'calculation-select_hide': isHiding,
+                }"
+            >
                 <ul class="calculation-select_list">
-                    <li @click="changeLocale(locale)" class="calculation-select_li" v-for="locale in filteredLocales"
-                        :key="locale">
+                    <li
+                        @click="changeLocale(locale)"
+                        class="calculation-select_li"
+                        v-for="locale in filteredLocales"
+                        :key="locale"
+                    >
                         {{ locale }}
                     </li>
                 </ul>
             </div>
 
             <div class="calculation-select_arrow">
-                <font-awesome-icon :icon="['fas', 'angle-down']"/>
+                <font-awesome-icon :icon="['fas', 'angle-down']" />
             </div>
         </div>
-
-
     </div>
 </template>
 
@@ -229,6 +237,4 @@ export default {
         opacity: 0;
     }
 }
-
-
 </style>

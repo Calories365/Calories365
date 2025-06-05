@@ -1,11 +1,11 @@
 <script>
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
 export default {
     name: "PremiumNotice",
     computed: {
         ...mapState({
-            currentUser: state => state.auth.currentUser
+            currentUser: (state) => state.auth.currentUser,
         }),
         // Check if user has premium
         isPremium() {
@@ -14,74 +14,108 @@ export default {
             }
             const premiumUntil = new Date(this.currentUser.premium_until);
             return premiumUntil > new Date();
-        }
+        },
     },
     methods: {
         goToPremium() {
-            this.$router.push({ name: 'home', hash: '#premium-section' }).then(() => {
-                this.$nextTick(() => {
-                    setTimeout(() => {
-                        const premiumSection = document.getElementById('premium-section');
-                        if (premiumSection) {
-                            premiumSection.scrollIntoView({ behavior: 'smooth' });
-                        }
-                    }, 500);
+            this.$router
+                .push({ name: "home", hash: "#premium-section" })
+                .then(() => {
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            const premiumSection =
+                                document.getElementById("premium-section");
+                            if (premiumSection) {
+                                premiumSection.scrollIntoView({
+                                    behavior: "smooth",
+                                });
+                            }
+                        }, 500);
+                    });
                 });
-            });
         },
         goToVoiceSection() {
-            this.$router.push({ name: 'home', hash: '#hero-picture' }).then(() => {
-                this.$nextTick(() => {
-                    setTimeout(() => {
+            this.$router
+                .push({ name: "home", hash: "#hero-picture" })
+                .then(() => {
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            const isMobile =
+                                window.matchMedia("(max-width: 768px)").matches;
 
-                        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                            const telegramLink =
+                                document.querySelector(".telegram_link");
+                            const voicePageLink =
+                                document.querySelector(".voice_page_link");
 
-                        const telegramLink  = document.querySelector('.telegram_link');
-                        const voicePageLink = document.querySelector('.voice_page_link');
-
-                        const animateElement = (element, animationClass) => {
-                            if (element) {
-                                element.classList.add(animationClass);
-                                setTimeout(() => element.classList.remove(animationClass), 6000);
-                            }
-                        };
-
-                        if (telegramLink && voicePageLink) {
-
-                            if (isMobile) {
-                                const heroPicture = document.getElementById('hero-picture');
-                                if (heroPicture) {
-                                    const targetTop =
-                                        heroPicture.getBoundingClientRect().top + window.pageYOffset + 35;
-                                    window.scrollTo({ top: targetTop, behavior: 'smooth' });
+                            const animateElement = (
+                                element,
+                                animationClass
+                            ) => {
+                                if (element) {
+                                    element.classList.add(animationClass);
+                                    setTimeout(
+                                        () =>
+                                            element.classList.remove(
+                                                animationClass
+                                            ),
+                                        6000
+                                    );
                                 }
+                            };
+
+                            if (telegramLink && voicePageLink) {
+                                if (isMobile) {
+                                    const heroPicture =
+                                        document.getElementById("hero-picture");
+                                    if (heroPicture) {
+                                        const targetTop =
+                                            heroPicture.getBoundingClientRect()
+                                                .top +
+                                            window.pageYOffset +
+                                            35;
+                                        window.scrollTo({
+                                            top: targetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }
+
+                                [
+                                    "scale-animation",
+                                    "highlight-text-animation",
+                                ].forEach((cls) => {
+                                    animateElement(telegramLink, cls);
+                                    animateElement(voicePageLink, cls);
+                                });
                             }
-
-                            ['scale-animation', 'highlight-text-animation'].forEach(cls => {
-                                animateElement(telegramLink,  cls);
-                                animateElement(voicePageLink, cls);
-                            });
-                        }
-
-                    }, 600);
+                        }, 600);
+                    });
                 });
-            });
-        }
-    }
-}
+        },
+    },
+};
 </script>
 
 <template>
     <div class="premium-notice" v-if="!isPremium">
         <div class="premium-notice-content">
             <p>
-                {{ $t('Voice.premiumNoticeStart') }}
-                <router-link :to="{ name: 'home' }" class="voice-link" @click.native="goToVoiceSection">
-                    {{ $t('Voice.premiumNoticeAssistant') }}
+                {{ $t("Voice.premiumNoticeStart") }}
+                <router-link
+                    :to="{ name: 'home' }"
+                    class="voice-link"
+                    @click.native="goToVoiceSection"
+                >
+                    {{ $t("Voice.premiumNoticeAssistant") }}
                 </router-link>
-                {{ $t('Voice.premiumNoticeMiddle') }}
-                <router-link :to="{ name: 'home', hash: '#premium-section' }" class="premium-link" @click.native="goToPremium">
-                    {{ $t('Voice.premiumLink') }}
+                {{ $t("Voice.premiumNoticeMiddle") }}
+                <router-link
+                    :to="{ name: 'home', hash: '#premium-section' }"
+                    class="premium-link"
+                    @click.native="goToPremium"
+                >
+                    {{ $t("Voice.premiumLink") }}
                 </router-link>
             </p>
         </div>

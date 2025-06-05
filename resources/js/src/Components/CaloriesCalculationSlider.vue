@@ -1,5 +1,4 @@
 <script>
-
 export default {
     name: "CaloriesCalculationSlider",
     props: {
@@ -35,7 +34,7 @@ export default {
             },
             set(newValue) {
                 this.emitData(newValue);
-            }
+            },
         },
         isCheckboxActive: {
             get() {
@@ -43,7 +42,7 @@ export default {
             },
             set(newValue) {
                 this.emitCheckboxState(newValue);
-            }
+            },
         },
     },
     methods: {
@@ -51,45 +50,66 @@ export default {
             this.variable = event.target.value;
         },
         emitData(newValue) {
-            this.$emit('update', Number(newValue));
+            this.$emit("update", Number(newValue));
         },
         emitCheckboxState(newValue) {
-            this.$emit('checkboxChanged', newValue);
-        }
-    }
-}
+            this.$emit("checkboxChanged", newValue);
+        },
+    },
+};
 </script>
-
 
 <template>
     <div class="users-data-section">
+        <span
+            :class="{ inactive: !isCheckboxActive && checkBox }"
+            class="users-data-section_name"
+            >{{ name }}</span
+        >
 
-        <span :class="{ 'inactive': !isCheckboxActive && checkBox }" class="users-data-section_name">{{ name }}</span>
-
-        <div :class="{ 'inactive': !isCheckboxActive && checkBox }" class="slider-container">
-            <input type="range" :min="from" :max="to" class="slider" id="myRange" :value="variable"
-                   @input="updateVariable">
+        <div
+            :class="{ inactive: !isCheckboxActive && checkBox }"
+            class="slider-container"
+        >
+            <input
+                type="range"
+                :min="from"
+                :max="to"
+                class="slider"
+                id="myRange"
+                :value="variable"
+                @input="updateVariable"
+            />
         </div>
 
         <div class="input-container">
+            <input
+                :class="{ inactive: !isCheckboxActive && checkBox }"
+                type="number"
+                class="styled-input"
+                :value="variable"
+                :min="from"
+                :max="to"
+                @input="updateVariable"
+            />
 
-            <input :class="{ 'inactive': !isCheckboxActive && checkBox }" type="number" class="styled-input"
-                   :value="variable"
-                   :min="from" :max="to"
-                   @input="updateVariable">
-
-            <input class="calories-checkBox" v-if="checkBox" type="checkbox" id="scales" name="scales"
-                   v-model="isCheckboxActive"/>
+            <input
+                class="calories-checkBox"
+                v-if="checkBox"
+                type="checkbox"
+                id="scales"
+                name="scales"
+                v-model="isCheckboxActive"
+            />
 
             <span v-if="checkBox" class="calories-checkBox_description">{{
-                    $t('message.fatPercentageDescription')
-                }}</span>
+                $t("message.fatPercentageDescription")
+            }}</span>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
-
 .inactive {
     opacity: 0.5;
     pointer-events: none;
@@ -205,5 +225,4 @@ export default {
         }
     }
 }
-
 </style>

@@ -13,71 +13,71 @@ const state = {
     caloriesPerDay: 0,
     caloriesPerDayPart: 0,
     dateFromCalendar: 0,
-}
+};
 
 export const getterTypes = {
-    productsInMenu: '[dairy] productsInMenu',
-    currentProducts: '[dairy] currentProducts',
-    part_of_day: '[dairy] part_of_day',
-    currentDate: '[dairy] currentDate',
-}
+    productsInMenu: "[dairy] productsInMenu",
+    currentProducts: "[dairy] currentProducts",
+    part_of_day: "[dairy] part_of_day",
+    currentDate: "[dairy] currentDate",
+};
 
 const getters = {
-    [getterTypes.productsInMenu]: state => {
-        return state.productsInMenu
+    [getterTypes.productsInMenu]: (state) => {
+        return state.productsInMenu;
     },
-    [getterTypes.currentProducts]: state => {
-        return state.currentProducts
+    [getterTypes.currentProducts]: (state) => {
+        return state.currentProducts;
     },
-    [getterTypes.part_of_day]: state => {
-        return state.part_of_day
+    [getterTypes.part_of_day]: (state) => {
+        return state.part_of_day;
     },
-    [getterTypes.currentDate]: state => {
-        return state.currentDate
+    [getterTypes.currentDate]: (state) => {
+        return state.currentDate;
     },
-}
+};
 
 export const mutationTypes = {
-    getPopularStart: '[dairy] getPopularStart',
-    getPopularSuccess: '[dairy] getPopularSuccess',
-    getPopularFailure: '[dairy] getPopularFailure',
+    getPopularStart: "[dairy] getPopularStart",
+    getPopularSuccess: "[dairy] getPopularSuccess",
+    getPopularFailure: "[dairy] getPopularFailure",
 
-    saveCurrentProductsStart: '[dairy] saveCurrentProductsStart',
-    saveCurrentProductsSuccess: '[dairy] saveCurrentProductsSuccess',
-    saveCurrentProductsFailure: '[dairy] saveCurrentProductsFailure',
+    saveCurrentProductsStart: "[dairy] saveCurrentProductsStart",
+    saveCurrentProductsSuccess: "[dairy] saveCurrentProductsSuccess",
+    saveCurrentProductsFailure: "[dairy] saveCurrentProductsFailure",
 
-    setPartOfDay: '[dairy] setPartOfDay',
+    setPartOfDay: "[dairy] setPartOfDay",
 
-    setDate: '[dairy] setDate',
+    setDate: "[dairy] setDate",
 
-    getCurrentProductsStart: '[dairy] getCurrentProductsStart',
-    getCurrentProductsSuccess: '[dairy] getCurrentProductsSuccess',
-    getCurrentProductsFailure: '[dairy] getCurrentProductsFailure',
+    getCurrentProductsStart: "[dairy] getCurrentProductsStart",
+    getCurrentProductsSuccess: "[dairy] getCurrentProductsSuccess",
+    getCurrentProductsFailure: "[dairy] getCurrentProductsFailure",
 
-    deleteCurrentProductsStart: '[dairy] deleteCurrentProductsStart',
-    deleteCurrentProductsSuccess: '[dairy] deleteCurrentProductsSuccess',
-    deleteCurrentProductsFailure: '[dairy] deleteCurrentProductsFailure',
+    deleteCurrentProductsStart: "[dairy] deleteCurrentProductsStart",
+    deleteCurrentProductsSuccess: "[dairy] deleteCurrentProductsSuccess",
+    deleteCurrentProductsFailure: "[dairy] deleteCurrentProductsFailure",
 
-    updateCurrentProductsStart: '[dairy] updateCurrentProductsStart',
-    updateCurrentProductsSuccess: '[dairy] updateCurrentProductsSuccess',
-    updateCurrentProductsFailure: '[dairy] updateCurrentProductsFailure',
+    updateCurrentProductsStart: "[dairy] updateCurrentProductsStart",
+    updateCurrentProductsSuccess: "[dairy] updateCurrentProductsSuccess",
+    updateCurrentProductsFailure: "[dairy] updateCurrentProductsFailure",
 
-    getSearchedProductsStart: '[dairy] getSearchedProductsStart',
-    getSearchedProductsSuccess: '[dairy] getSearchedProductsSuccess',
-    getSearchedProductsFailure: '[dairy] getSearchedProductsFailure',
+    getSearchedProductsStart: "[dairy] getSearchedProductsStart",
+    getSearchedProductsSuccess: "[dairy] getSearchedProductsSuccess",
+    getSearchedProductsFailure: "[dairy] getSearchedProductsFailure",
 
-    clearProducts: '[dairy] clearProducts',
+    clearProducts: "[dairy] clearProducts",
 
-    setCaloriesPerDay: '[dairy] setCaloriesPerDay',
+    setCaloriesPerDay: "[dairy] setCaloriesPerDay",
 
-    setCaloriesPerDayPart: '[dairy] setCaloriesPerDayPart',
+    setCaloriesPerDayPart: "[dairy] setCaloriesPerDayPart",
 
-    clearCaloriesCounter: '[dairy] clearCaloriesCounter',
+    clearCaloriesCounter: "[dairy] clearCaloriesCounter",
 
-    setDateFromCalendar: '[dairy] setDateFromCalendar',
+    setDateFromCalendar: "[dairy] setDateFromCalendar",
 
-    deleteDateFromCalendar: '[dairy] deleteDateFromCalendar',
-}
+    deleteDateFromCalendar: "[dairy] deleteDateFromCalendar",
+};
 
 const mutations = {
     [mutationTypes.getPopularStart](state) {
@@ -113,13 +113,12 @@ const mutations = {
         state.currentDate = payload;
     },
 
-
     [mutationTypes.getCurrentProductsStart](state) {
         state.currentProducts = [];
         state.isSybmiting = true;
     },
     [mutationTypes.getCurrentProductsSuccess](state, payload) {
-        payload.forEach(product => {
+        payload.forEach((product) => {
             state.currentProducts.push(product);
         });
         state.isSybmiting = false;
@@ -129,14 +128,15 @@ const mutations = {
         state.isSybmiting = false;
     },
 
-
     [mutationTypes.deleteCurrentProductsStart](state) {
         state.isSybmiting = true;
     },
     [mutationTypes.deleteCurrentProductsSuccess](state, payload) {
         const productIdToRemove = payload.id;
 
-        state.currentProducts = state.currentProducts.filter(product => product.id !== productIdToRemove);
+        state.currentProducts = state.currentProducts.filter(
+            (product) => product.id !== productIdToRemove
+        );
 
         state.isSybmiting = false;
     },
@@ -145,26 +145,25 @@ const mutations = {
         state.isSybmiting = false;
     },
 
-
     [mutationTypes.updateCurrentProductsStart](state) {
         state.isSybmiting = true;
     },
     [mutationTypes.updateCurrentProductsSuccess](state, payload) {
-        const {id, quantity} = payload;
+        const { id, quantity } = payload;
 
-        const productIndex = state.currentProducts.findIndex(product => product.id === id);
+        const productIndex = state.currentProducts.findIndex(
+            (product) => product.id === id
+        );
 
         if (productIndex !== -1) {
             state.currentProducts[productIndex].quantity = quantity;
         }
         state.isSuccess = true;
-
     },
     [mutationTypes.updateCurrentProductsFailure](state, payload) {
         state.errors = payload;
         state.isSybmiting = false;
     },
-
 
     [mutationTypes.getSearchedProductsStart](state) {
         state.isSybmiting = true;
@@ -173,7 +172,7 @@ const mutations = {
         if (payload.currentPage === 1) {
             state.productsInMenu = [];
         }
-        payload.products.forEach(product => {
+        payload.products.forEach((product) => {
             state.productsInMenu.push(product);
         });
         state.isSybmiting = false;
@@ -202,58 +201,68 @@ const mutations = {
     [mutationTypes.deleteDateFromCalendar](state) {
         state.dateFromCalendar = null;
     },
-}
+};
 
 export const actionTypes = {
-    getPopularProducts: '[dairy] getPopularProducts',
-    saveCurrentProducts: '[dairy] saveCurrentProducts',
-    saveUsersCurrentProducts: '[dairy] saveUsersCurrentProducts',
-    initialization: '[dairy] initialization',
-    dateToggle: '[dairy] dateToggle',
-    getCurrentProducts: '[dairy] getCurrentProducts',
-    deleteCurrentProducts: '[dairy] deleteCurrentProducts',
-    updateCurrentProducts: '[dairy] updateCurrentProducts',
-    getSearchedProducts: '[dairy] getSearchedProducts',
-    calculateCaloriesPerDay: '[dairy] calculateCaloriesPerDay',
-    calculateCaloriesPerDayPart: '[dairy] calculateCaloriesPerDayPart',
-    setPartOfDay: '[dairy] setPartOfDay',
-    setDateFromCalendar: '[dairy] setDateFromCalendar',
-}
+    getPopularProducts: "[dairy] getPopularProducts",
+    saveCurrentProducts: "[dairy] saveCurrentProducts",
+    saveUsersCurrentProducts: "[dairy] saveUsersCurrentProducts",
+    initialization: "[dairy] initialization",
+    dateToggle: "[dairy] dateToggle",
+    getCurrentProducts: "[dairy] getCurrentProducts",
+    deleteCurrentProducts: "[dairy] deleteCurrentProducts",
+    updateCurrentProducts: "[dairy] updateCurrentProducts",
+    getSearchedProducts: "[dairy] getSearchedProducts",
+    calculateCaloriesPerDay: "[dairy] calculateCaloriesPerDay",
+    calculateCaloriesPerDayPart: "[dairy] calculateCaloriesPerDayPart",
+    setPartOfDay: "[dairy] setPartOfDay",
+    setDateFromCalendar: "[dairy] setDateFromCalendar",
+};
 
 const actions = {
     [actionTypes.getPopularProducts](context) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             const currentLocale = context.rootState.changeLocale.selectedLocale;
             const cachedDataKey = `cachedPopularProducts_${currentLocale}`;
             const cachedData = JSON.parse(localStorage.getItem(cachedDataKey));
             const currentTime = new Date().getTime();
 
-            if (cachedData && (currentTime - cachedData.timestamp < 36000)) {
-                context.commit(mutationTypes.getPopularSuccess, cachedData.popularProducts);
+            if (cachedData && currentTime - cachedData.timestamp < 36000) {
+                context.commit(
+                    mutationTypes.getPopularSuccess,
+                    cachedData.popularProducts
+                );
                 resolve(cachedData.popularProducts);
                 return;
             }
 
             context.commit(mutationTypes.getPopularStart);
-            authApi.getPopularProducts(currentLocale)
-                .then(response => {
+            authApi
+                .getPopularProducts(currentLocale)
+                .then((response) => {
                     const popularProducts = response.data;
-                    context.commit(mutationTypes.getPopularSuccess, popularProducts);
-                    localStorage.setItem(cachedDataKey, JSON.stringify({
-                        popularProducts: popularProducts,
-                        timestamp: new Date().getTime()
-                    }));
+                    context.commit(
+                        mutationTypes.getPopularSuccess,
+                        popularProducts
+                    );
+                    localStorage.setItem(
+                        cachedDataKey,
+                        JSON.stringify({
+                            popularProducts: popularProducts,
+                            timestamp: new Date().getTime(),
+                        })
+                    );
                     resolve(popularProducts);
                 })
                 .catch(() => {
                     context.commit(mutationTypes.getPopularFailure);
                 });
-        })
+        });
     },
     [actionTypes.saveCurrentProducts](context, payload) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             context.commit(mutationTypes.saveCurrentProductsStart);
-            const {product, quantity} = payload;
+            const { product, quantity } = payload;
 
             const consumed_at = state.currentDate;
 
@@ -261,8 +270,14 @@ const actions = {
 
             const food_id = product.id;
 
-            authApi.saveCurrentProducts({food_id, quantity, consumed_at, part_of_day})
-                .then(response => {
+            authApi
+                .saveCurrentProducts({
+                    food_id,
+                    quantity,
+                    consumed_at,
+                    part_of_day,
+                })
+                .then((response) => {
                     const id = response.data.id;
 
                     const fullProduct = {
@@ -271,31 +286,45 @@ const actions = {
                         consumed_at: consumed_at,
                         part_of_day: part_of_day,
                         id: id,
-                    }
+                    };
 
-                    context.commit(mutationTypes.saveCurrentProductsSuccess, fullProduct);
+                    context.commit(
+                        mutationTypes.saveCurrentProductsSuccess,
+                        fullProduct
+                    );
 
-                    context.dispatch(actionTypes.calculateCaloriesPerDay)
+                    context
+                        .dispatch(actionTypes.calculateCaloriesPerDay)
                         .then(() => {
-                            const message = i18n.global.t('Notification.Success.ProductWasAdded');
-                            context.dispatch('setSuccess', message, { root: true });
-                            return context.dispatch(actionTypes.calculateCaloriesPerDayPart);
-                        })
+                            const message = i18n.global.t(
+                                "Notification.Success.ProductWasAdded"
+                            );
+                            context.dispatch("setSuccess", message, {
+                                root: true,
+                            });
+                            return context.dispatch(
+                                actionTypes.calculateCaloriesPerDayPart
+                            );
+                        });
 
                     resolve(response);
-
                 })
-                .catch(error => {
-                    const message = i18n.global.t('Notification.Error.ProductAdditionFailed');
-                    context.dispatch('setError', message, { root: true });
-                    context.commit(mutationTypes.saveCurrentProductsFailure, error);
+                .catch((error) => {
+                    const message = i18n.global.t(
+                        "Notification.Error.ProductAdditionFailed"
+                    );
+                    context.dispatch("setError", message, { root: true });
+                    context.commit(
+                        mutationTypes.saveCurrentProductsFailure,
+                        error
+                    );
                 });
-        })
+        });
     },
     [actionTypes.saveUsersCurrentProducts](context, payload) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             context.commit(mutationTypes.saveCurrentProductsStart);
-            const {product, quantity} = payload;
+            const { product, quantity } = payload;
 
             product.quantity = quantity;
 
@@ -303,39 +332,53 @@ const actions = {
 
             product.part_of_day = state.part_of_day;
 
-            authApi.saveUsersCurrentProducts(product)
-                .then(response => {
-
+            authApi
+                .saveUsersCurrentProducts(product)
+                .then((response) => {
                     const fullProduct = {
                         ...product,
                         quantity: quantity,
                         consumed_at: product.consumed_at,
                         part_of_day: product.part_of_day,
                         id: response.data.consumption_id,
-                        food_id: response.data.food_id
-                    }
+                        food_id: response.data.food_id,
+                    };
 
-                    context.commit(mutationTypes.saveCurrentProductsSuccess, fullProduct);
+                    context.commit(
+                        mutationTypes.saveCurrentProductsSuccess,
+                        fullProduct
+                    );
 
-                    context.dispatch(actionTypes.calculateCaloriesPerDay)
+                    context
+                        .dispatch(actionTypes.calculateCaloriesPerDay)
                         .then(() => {
-                            const message = i18n.global.t('Notification.Success.ProductWasAdded');
-                            context.dispatch('setSuccess', message, {root: true});
-                            return context.dispatch(actionTypes.calculateCaloriesPerDayPart);
-                        })
+                            const message = i18n.global.t(
+                                "Notification.Success.ProductWasAdded"
+                            );
+                            context.dispatch("setSuccess", message, {
+                                root: true,
+                            });
+                            return context.dispatch(
+                                actionTypes.calculateCaloriesPerDayPart
+                            );
+                        });
 
                     resolve(response);
-
                 })
-                .catch(error => {
-                    const message = i18n.global.t('Notification.Error.ProductAdditionFailed');
-                    context.dispatch('setError', message, {root: true});
-                    context.commit(mutationTypes.saveCurrentProductsFailure, error);
+                .catch((error) => {
+                    const message = i18n.global.t(
+                        "Notification.Error.ProductAdditionFailed"
+                    );
+                    context.dispatch("setError", message, { root: true });
+                    context.commit(
+                        mutationTypes.saveCurrentProductsFailure,
+                        error
+                    );
                 });
-        })
+        });
     },
     [actionTypes.initialization](context) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             let currentTime;
             if (context.state.dateFromCalendar) {
                 currentTime = new Date(context.state.dateFromCalendar);
@@ -344,158 +387,207 @@ const actions = {
             }
             const hours = currentTime.getHours();
 
-            const currentDate = currentTime.toISOString().split('T')[0]; // Формат YYYY-MM-DD
+            const currentDate = currentTime.toISOString().split("T")[0]; // Формат YYYY-MM-DD
 
             let partOfTheDay;
 
             if (hours >= 6 && hours < 12) {
-                partOfTheDay = 'morning';
+                partOfTheDay = "morning";
             } else if (hours >= 12 && hours < 18) {
-                partOfTheDay = 'dinner';
+                partOfTheDay = "dinner";
             } else {
-                partOfTheDay = 'supper';
+                partOfTheDay = "supper";
             }
 
             context.commit(mutationTypes.setPartOfDay, partOfTheDay);
 
             context.commit(mutationTypes.setDate, currentDate);
 
-            context.dispatch(actionTypes.getCurrentProducts)
+            context
+                .dispatch(actionTypes.getCurrentProducts)
                 .then(() => {
-                    return context.dispatch(actionTypes.calculateCaloriesPerDay);
+                    return context.dispatch(
+                        actionTypes.calculateCaloriesPerDay
+                    );
                 })
                 .then(() => {
-                    return context.dispatch(actionTypes.calculateCaloriesPerDayPart);
-                })
-            resolve({partOfTheDay, currentDate});
+                    return context.dispatch(
+                        actionTypes.calculateCaloriesPerDayPart
+                    );
+                });
+            resolve({ partOfTheDay, currentDate });
         });
     },
     [actionTypes.dateToggle](context, direction) {
-        return new Promise(resolve => {
-
+        return new Promise((resolve) => {
             const currentDateStr = context.state.currentDate;
             const currentDate = new Date(currentDateStr);
 
-            if (direction === 'next') {
+            if (direction === "next") {
                 currentDate.setDate(currentDate.getDate() + 1);
-            } else if (direction === 'previous') {
+            } else if (direction === "previous") {
                 currentDate.setDate(currentDate.getDate() - 1);
             } else {
-                throw new Error('Invalid direction for dateToggle action');
+                throw new Error("Invalid direction for dateToggle action");
             }
 
-            const updatedDateStr = currentDate.toISOString().split('T')[0]; // Формат YYYY-MM-DD
+            const updatedDateStr = currentDate.toISOString().split("T")[0]; // Формат YYYY-MM-DD
 
             context.commit(mutationTypes.setDate, updatedDateStr);
 
-
-            context.dispatch(actionTypes.getCurrentProducts)
+            context
+                .dispatch(actionTypes.getCurrentProducts)
                 .then(() => {
-                    return context.dispatch(actionTypes.calculateCaloriesPerDay);
+                    return context.dispatch(
+                        actionTypes.calculateCaloriesPerDay
+                    );
                 })
                 .then(() => {
-                    return context.dispatch(actionTypes.calculateCaloriesPerDayPart);
+                    return context.dispatch(
+                        actionTypes.calculateCaloriesPerDayPart
+                    );
                 })
                 .then(() => {
                     resolve(updatedDateStr);
-                })
+                });
         });
     },
     [actionTypes.getCurrentProducts](context) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             context.commit(mutationTypes.getCurrentProductsStart);
 
             const date = state.currentDate;
-            authApi.getCurrentProducts(date)
-                .then(response => {
-                    context.commit(mutationTypes.getCurrentProductsSuccess, response.data);
+            authApi
+                .getCurrentProducts(date)
+                .then((response) => {
+                    context.commit(
+                        mutationTypes.getCurrentProductsSuccess,
+                        response.data
+                    );
                     resolve(response.data);
                 })
-                .catch(error => {
-                    context.commit(mutationTypes.getCurrentProductsFailure, error);
+                .catch((error) => {
+                    context.commit(
+                        mutationTypes.getCurrentProductsFailure,
+                        error
+                    );
                 });
-
-        })
+        });
     },
     [actionTypes.deleteCurrentProducts](context, id) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             context.commit(mutationTypes.deleteCurrentProductsStart);
 
-
-            authApi.deleteCurrentProducts(id)
+            authApi
+                .deleteCurrentProducts(id)
                 .then(() => {
-                    context.commit(mutationTypes.deleteCurrentProductsSuccess, {id: id});
+                    context.commit(mutationTypes.deleteCurrentProductsSuccess, {
+                        id: id,
+                    });
 
-                    context.dispatch(actionTypes.calculateCaloriesPerDay)
+                    context
+                        .dispatch(actionTypes.calculateCaloriesPerDay)
                         .then(() => {
-                            const message = i18n.global.t('Notification.Success.ProductWasDeleted');
-                            context.dispatch('setSuccess', message, { root: true });
-                            return context.dispatch(actionTypes.calculateCaloriesPerDayPart);
-                        })
-
+                            const message = i18n.global.t(
+                                "Notification.Success.ProductWasDeleted"
+                            );
+                            context.dispatch("setSuccess", message, {
+                                root: true,
+                            });
+                            return context.dispatch(
+                                actionTypes.calculateCaloriesPerDayPart
+                            );
+                        });
                 })
-                .catch(error => {
-                    const message = i18n.global.t('Notification.Success.ProductDeletionFailed');
-                    context.dispatch('setError', message, { root: true });
-                    context.commit(mutationTypes.deleteCurrentProductsFailure, error);
+                .catch((error) => {
+                    const message = i18n.global.t(
+                        "Notification.Success.ProductDeletionFailed"
+                    );
+                    context.dispatch("setError", message, { root: true });
+                    context.commit(
+                        mutationTypes.deleteCurrentProductsFailure,
+                        error
+                    );
                 });
-        })
+        });
     },
     [actionTypes.updateCurrentProducts](context, payload) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             context.commit(mutationTypes.updateCurrentProductsStart);
 
-            const {product, quantity} = payload;
+            const { product, quantity } = payload;
 
             const id = product.id;
 
-            authApi.updateCurrentProducts(id, quantity)
-                .then(response => {
-                    context.commit(mutationTypes.updateCurrentProductsSuccess, {id, quantity});
+            authApi
+                .updateCurrentProducts(id, quantity)
+                .then((response) => {
+                    context.commit(mutationTypes.updateCurrentProductsSuccess, {
+                        id,
+                        quantity,
+                    });
                     resolve(response);
 
-                    context.dispatch(actionTypes.calculateCaloriesPerDay)
+                    context
+                        .dispatch(actionTypes.calculateCaloriesPerDay)
                         .then(() => {
-                            const message = i18n.global.t('Notification.Success.ProductWasUpdated');
-                            context.dispatch('setSuccess', message, { root: true });
-                            return context.dispatch(actionTypes.calculateCaloriesPerDayPart);
-                        })
+                            const message = i18n.global.t(
+                                "Notification.Success.ProductWasUpdated"
+                            );
+                            context.dispatch("setSuccess", message, {
+                                root: true,
+                            });
+                            return context.dispatch(
+                                actionTypes.calculateCaloriesPerDayPart
+                            );
+                        });
                 })
-                .catch(error => {
-                    const message = i18n.global.t('Notification.Success.ProductUpdateFailed');
-                    context.dispatch('setError', message, { root: true });
-                    context.commit(mutationTypes.updateCurrentProductsFailure, error);
+                .catch((error) => {
+                    const message = i18n.global.t(
+                        "Notification.Success.ProductUpdateFailed"
+                    );
+                    context.dispatch("setError", message, { root: true });
+                    context.commit(
+                        mutationTypes.updateCurrentProductsFailure,
+                        error
+                    );
                 });
-        })
+        });
     },
     [actionTypes.getSearchedProducts](context, payload) {
-        return new Promise(resolve => {
-
+        return new Promise((resolve) => {
             context.commit(mutationTypes.getSearchedProductsStart);
 
-            const trimedQuery = payload.query.trim()
+            const trimedQuery = payload.query.trim();
 
-            authApi.getSearchedProducts(trimedQuery, payload.page)
-                .then(response => {
+            authApi
+                .getSearchedProducts(trimedQuery, payload.page)
+                .then((response) => {
                     console.log(response.data);
                     const products = response.data.products;
                     const currentPage = response.data.current_page;
-                    context.commit(mutationTypes.getSearchedProductsSuccess, {products, currentPage});
+                    context.commit(mutationTypes.getSearchedProductsSuccess, {
+                        products,
+                        currentPage,
+                    });
                     resolve(response.data.total);
                 })
-                .catch(error => {
-                    context.commit(mutationTypes.getSearchedProductsFailure, error);
+                .catch((error) => {
+                    context.commit(
+                        mutationTypes.getSearchedProductsFailure,
+                        error
+                    );
                 });
-        })
+        });
     },
     [actionTypes.calculateCaloriesPerDay](context) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             const products = context.state.currentProducts;
 
             let totalCalories = products.reduce((total, product) => {
-                const quantity = parseFloat((product.quantity));
+                const quantity = parseFloat(product.quantity);
                 const calories = product.calories;
-                return total + (quantity / 100 * calories);
+                return total + (quantity / 100) * calories;
             }, 0);
 
             totalCalories = parseFloat(totalCalories.toFixed(0));
@@ -508,15 +600,15 @@ const actions = {
         });
     },
     [actionTypes.calculateCaloriesPerDayPart](context) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             const products = context.state.currentProducts;
             const partOfDay = context.state.part_of_day;
             let totalCalories = products
-                .filter(product => product.part_of_day === partOfDay)
+                .filter((product) => product.part_of_day === partOfDay)
                 .reduce((total, product) => {
                     const quantity = parseFloat(product.quantity);
                     const calories = product.calories;
-                    return total + (quantity / 100 * calories);
+                    return total + (quantity / 100) * calories;
                 }, 0);
 
             totalCalories = parseFloat(totalCalories.toFixed(0));
@@ -529,26 +621,25 @@ const actions = {
         });
     },
     [actionTypes.setPartOfDay](context, payload) {
-        return new Promise(resolve => {
-
+        return new Promise((resolve) => {
             context.commit(mutationTypes.setPartOfDay, payload);
 
             context.dispatch(actionTypes.calculateCaloriesPerDayPart);
 
             resolve(payload);
-
         });
     },
     [actionTypes.setDateFromCalendar](context, payload) {
-        return new Promise(resolve => {
-
+        return new Promise((resolve) => {
             context.commit(mutationTypes.setDateFromCalendar, payload);
 
             resolve(payload);
-
         });
-    }
-}
+    },
+};
 export default {
-    state, mutations, actions, getters,
-}
+    state,
+    mutations,
+    actions,
+    getters,
+};

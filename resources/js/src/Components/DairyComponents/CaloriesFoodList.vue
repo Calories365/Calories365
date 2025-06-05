@@ -2,21 +2,29 @@
 import CaloriesNavbar from "@/Components/DairyComponents/CaloriesNavbar.vue";
 import CaloriesIndication from "@/Components/DairyComponents/CaloriesIndication.vue";
 import CaloriesAddBtn from "@/UI/CaloriesAddBtn.vue";
-import {actionTypes, getterTypes as dairyGetterTypes} from "@/store/modules/dairy.js";
-import {mapGetters} from "vuex";
+import {
+    actionTypes,
+    getterTypes as dairyGetterTypes,
+} from "@/store/modules/dairy.js";
+import { mapGetters } from "vuex";
 import CaloriesSlideProductMenu from "@/Components/DairyComponents/CaloriesSlideProductMenu.vue";
 import CaloriesCross from "@/Components/DairyComponents/CaloriesCross.vue";
 
-
 export default {
     name: "CaloriesFoodList",
-    components: {CaloriesCross, CaloriesSlideProductMenu, CaloriesAddBtn, CaloriesIndication, CaloriesNavbar},
+    components: {
+        CaloriesCross,
+        CaloriesSlideProductMenu,
+        CaloriesAddBtn,
+        CaloriesIndication,
+        CaloriesNavbar,
+    },
     data() {
         return {
             product: {},
             ProductMenuisOpen: false,
-            action: 'update',
-        }
+            action: "update",
+        };
     },
     methods: {
         deleteProduct(event, id) {
@@ -26,7 +34,7 @@ export default {
         toggleProduct(product) {
             this.ProductMenuisOpen = !this.ProductMenuisOpen;
             this.product = product;
-        }
+        },
     },
 
     computed: {
@@ -35,70 +43,85 @@ export default {
             part_of_day: dairyGetterTypes.part_of_day,
         }),
         filteredProducts() {
-            return this.currentProducts.filter(product => product.part_of_day === this.part_of_day);
+            return this.currentProducts.filter(
+                (product) => product.part_of_day === this.part_of_day
+            );
         },
     },
-}
+};
 </script>
 
 <template>
     <ul class="added-product__list">
-<!--        <li-->
-<!--            class="added-product__item"-->
-<!--        >-->
+        <!--        <li-->
+        <!--            class="added-product__item"-->
+        <!--        >-->
         <li
             class="added-product__item"
-            v-for="product in filteredProducts" :key="product.id"
+            v-for="product in filteredProducts"
+            :key="product.id"
             @click="toggleProduct(product)"
         >
             <div class="added-product__content desktop">
-
                 <div class="added-product__left">
                     <div>
-                        <img class="added-product__img"
-                             src="@/images/burger.png" alt="">
+                        <img
+                            class="added-product__img"
+                            src="@/images/burger.png"
+                            alt=""
+                        />
                     </div>
                     <div class="added-product__title">{{ product.name }}</div>
                 </div>
                 <div class="added-product__right">
-                    <div class="added-product__calories"> {{ $t('Diary.KCAL') }}
-                        {{ Math.ceil(product.calories / 100 * product.quantity) }}
+                    <div class="added-product__calories">
+                        {{ $t("Diary.KCAL") }}
+                        {{
+                            Math.ceil(
+                                (product.calories / 100) * product.quantity
+                            )
+                        }}
                     </div>
-                    <div class="added-product__quantity">{{ $t('Diary.Grams') }} {{ product.quantity }}</div>
+                    <div class="added-product__quantity">
+                        {{ $t("Diary.Grams") }} {{ product.quantity }}
+                    </div>
                 </div>
             </div>
-
 
             <div class="added-product__content mobile">
                 <div class="added-product__content-container">
                     <div class="added-product__left">
                         <div>
-                            <img class="added-product__img"
-                                 src="@/images/burger.png" alt="">
+                            <img
+                                class="added-product__img"
+                                src="@/images/burger.png"
+                                alt=""
+                            />
                         </div>
-                        <div class="added-product__title">{{ product.name }}</div>
+                        <div class="added-product__title">
+                            {{ product.name }}
+                        </div>
                     </div>
 
                     <div class="added-product__right">
                         <div class="added-product__calories">
-                            {{ $t('Diary.KCAL') }}
-                            {{ Math.ceil(product.calories / 100 * product.quantity) }}
+                            {{ $t("Diary.KCAL") }}
+                            {{
+                                Math.ceil(
+                                    (product.calories / 100) * product.quantity
+                                )
+                            }}
                         </div>
                         <div class="added-product__calories">
-                            {{ $t('Diary.Grams') }}
+                            {{ $t("Diary.Grams") }}
                             {{ Math.ceil(product.quantity) }}
                         </div>
                     </div>
                 </div>
-
             </div>
 
-
             <calories-cross @click="deleteProduct($event, product.id)" />
-
-
         </li>
-
     </ul>
 
     <calories-slide-product-menu
@@ -106,12 +129,10 @@ export default {
         :product="product"
         @update="ProductMenuisOpen = $event"
         :action="action"
-        :productFromFoodList=true
+        :productFromFoodList="true"
     >
-        {{ $t('Diary.Update') }}
+        {{ $t("Diary.Update") }}
     </calories-slide-product-menu>
-
-
 </template>
 
 <style scoped lang="scss">
@@ -265,6 +286,4 @@ export default {
         }
     }
 }
-
-
 </style>

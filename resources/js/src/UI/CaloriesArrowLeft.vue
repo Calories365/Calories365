@@ -1,12 +1,11 @@
 <script>
 export default {
-    name: "CaloriesArrowLeft"
-}
+    name: "CaloriesArrowLeft",
+};
 </script>
 
 <template>
     <div class="arrow-left"></div>
-
 </template>
 
 <style scoped lang="scss">

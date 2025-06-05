@@ -1,0 +1,5 @@
+node_modules
+public
+resources/css/admin.css
+resources/js/admin.js
+build

@@ -1,15 +1,11 @@
 <script>
 export default {
-    name: "Recipes"
-}
+    name: "Recipes",
+};
 </script>
 
 <template>
-    <h1 class="text-3xl font-bold underline">
-        Hello world!
-    </h1>
+    <h1 class="text-3xl font-bold underline">Hello world!</h1>
 </template>
 
-<style scoped lang="scss">
-
-</style>
+<style scoped lang="scss"></style>

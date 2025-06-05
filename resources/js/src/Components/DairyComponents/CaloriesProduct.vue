@@ -1,27 +1,31 @@
 <script>
-import {mapState} from "vuex";
+import { mapState } from "vuex";
 
 export default {
     name: "CaloriesProduct",
     props: {
         product: {
             type: Object,
-            required: true
-        }
+            required: true,
+        },
     },
     computed: {
         ...mapState({
-            currentUser: state => state.auth.currentUser,
+            currentUser: (state) => state.auth.currentUser,
         }),
     },
-}
+};
 </script>
 
 <template>
     <li class="product-card">
         <div class="product-card__body">
             <h2 class="product-card__title">{{ product.name }}</h2>
-            <span class="product-card__user" v-if="product.user_id == currentUser.id">({{ $t('Diary.YourProduct') }})</span>
+            <span
+                class="product-card__user"
+                v-if="product.user_id == currentUser.id"
+                >({{ $t("Diary.YourProduct") }})</span
+            >
         </div>
     </li>
 </template>

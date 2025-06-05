@@ -15,16 +15,14 @@ export default {
         imageSrc() {
             return new URL(`../assets/${this.link}.png`, import.meta.url).href;
         },
-    }
-}
+    },
+};
 </script>
 <template>
-
     <div class="content-layout_card card-layout">
-        <router-link :to="{name: link}"
-                     class="card-layout_link">
+        <router-link :to="{ name: link }" class="card-layout_link">
             <div class="card-layout_header">
-                <img :src="imageSrc" alt="Image in card" class="card-day_img">
+                <img :src="imageSrc" alt="Image in card" class="card-day_img" />
             </div>
 
             <div class="card-layout_text">
@@ -32,7 +30,6 @@ export default {
             </div>
         </router-link>
     </div>
-
 </template>
 <style scoped lang="scss">
 .card-day_img {

@@ -1,15 +1,14 @@
 <script>
 export default {
-    name: "CaloriesLoader"
-}
+    name: "CaloriesLoader",
+};
 </script>
 
 <template>
-<span class="loader"></span>
+    <span class="loader"></span>
 </template>
 
 <style scoped lang="scss">
-
 .hide {
     opacity: 0.33;
 }

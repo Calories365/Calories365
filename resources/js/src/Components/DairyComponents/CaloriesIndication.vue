@@ -1,45 +1,45 @@
 <script>
 import CaloriesAddBtn from "@/UI/CaloriesAddBtn.vue";
-import {mapState} from "vuex";
+import { mapState } from "vuex";
 
 export default {
     name: "CaloriesIndication",
-    components: {CaloriesAddBtn},
+    components: { CaloriesAddBtn },
     computed: {
         ...mapState({
-            currentUser: state => state.auth.currentUser,
-            caloriesPerDay: state => state.dairy.caloriesPerDay,
-            caloriesPerDayPart: state => state.dairy.caloriesPerDayPart,
-            part_of_day: state => state.dairy.part_of_day,
+            currentUser: (state) => state.auth.currentUser,
+            caloriesPerDay: (state) => state.dairy.caloriesPerDay,
+            caloriesPerDayPart: (state) => state.dairy.caloriesPerDayPart,
+            part_of_day: (state) => state.dairy.part_of_day,
 
             localedPart_of_day() {
-                if (this.part_of_day === 'morning') {
-                    return this.$t('Diary.morning');
+                if (this.part_of_day === "morning") {
+                    return this.$t("Diary.morning");
                 }
-                if (this.part_of_day === 'dinner') {
-                    return this.$t('Diary.dinner');
+                if (this.part_of_day === "dinner") {
+                    return this.$t("Diary.dinner");
                 }
-                if (this.part_of_day === 'supper') {
-                    return this.$t('Diary.supper');
+                if (this.part_of_day === "supper") {
+                    return this.$t("Diary.supper");
                 }
-            }
-
+            },
         }),
     },
-}
+};
 </script>
 
 <template>
     <div class="indication-container">
         <ul class="indication-container__list">
-            <li class="indication-container__element">{{ localedPart_of_day }}: {{ caloriesPerDayPart }} {{
-                    $t('Diary.KCAL')
-                }}
+            <li class="indication-container__element">
+                {{ localedPart_of_day }}: {{ caloriesPerDayPart }}
+                {{ $t("Diary.KCAL") }}
             </li>
-            <li class="indication-container__element"> {{ $t('Diary.summary') }}: {{
-                    caloriesPerDay
-                }}/{{ currentUser.calories_limit }}
-                {{ $t('Diary.KCAL') }}
+            <li class="indication-container__element">
+                {{ $t("Diary.summary") }}: {{ caloriesPerDay }}/{{
+                    currentUser.calories_limit
+                }}
+                {{ $t("Diary.KCAL") }}
             </li>
         </ul>
     </div>

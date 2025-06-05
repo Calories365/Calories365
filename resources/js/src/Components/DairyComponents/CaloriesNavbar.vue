@@ -1,21 +1,23 @@
 <script>
 import CaloriesArrowLeft from "@/UI/CaloriesArrowLeft.vue";
 import CaloriesArrowRight from "@/UI/CaloriesArrowRight.vue";
-import {actionTypes, getterTypes as diaryGetterTypes, mutationTypes} from "@/store/modules/dairy.js";
-import {mapGetters} from "vuex";
-
+import {
+    actionTypes,
+    getterTypes as diaryGetterTypes,
+    mutationTypes,
+} from "@/store/modules/dairy.js";
+import { mapGetters } from "vuex";
 
 export default {
     name: "CaloriesNavbar",
-    components: {CaloriesArrowRight, CaloriesArrowLeft},
+    components: { CaloriesArrowRight, CaloriesArrowLeft },
     methods: {
         dayPartToggle(dayPart) {
             this.$store.dispatch(actionTypes.setPartOfDay, dayPart);
         },
         dateToggle(direction) {
             this.$store.dispatch(actionTypes.dateToggle, direction);
-        }
-
+        },
     },
     computed: {
         ...mapGetters({
@@ -28,31 +30,42 @@ export default {
     },
     beforeUnmount() {
         this.$store.commit(mutationTypes.deleteDateFromCalendar);
-    }
-}
+    },
+};
 </script>
 
 <template>
     <div class="navbar-container">
         <div class="date">
-            <calories-arrow-left @click="dateToggle('previous')"/>
+            <calories-arrow-left @click="dateToggle('previous')" />
 
             <span class="date__span">
                 {{ currentDate }}
             </span>
-            <calories-arrow-right @click="dateToggle('next')"/>
-
+            <calories-arrow-right @click="dateToggle('next')" />
         </div>
         <div class="navbar">
             <ul class="navbar__list">
-                <li class="navbar__element" :class="{ active: part_of_day === 'morning'}"
-                    @click="dayPartToggle('morning')">{{ $t('Diary.morning') }}
+                <li
+                    class="navbar__element"
+                    :class="{ active: part_of_day === 'morning' }"
+                    @click="dayPartToggle('morning')"
+                >
+                    {{ $t("Diary.morning") }}
                 </li>
-                <li class="navbar__element" :class="{ active: part_of_day === 'dinner'}"
-                    @click="dayPartToggle('dinner')">{{ $t('Diary.dinner') }}
+                <li
+                    class="navbar__element"
+                    :class="{ active: part_of_day === 'dinner' }"
+                    @click="dayPartToggle('dinner')"
+                >
+                    {{ $t("Diary.dinner") }}
                 </li>
-                <li class="navbar__element" :class="{ active: part_of_day === 'supper'}"
-                    @click="dayPartToggle('supper')">{{ $t('Diary.supper') }}
+                <li
+                    class="navbar__element"
+                    :class="{ active: part_of_day === 'supper' }"
+                    @click="dayPartToggle('supper')"
+                >
+                    {{ $t("Diary.supper") }}
                 </li>
             </ul>
         </div>
@@ -60,7 +73,6 @@ export default {
 </template>
 
 <style scoped lang="scss">
-
 .navbar-container {
     font-family: "Roboto", sans-serif;
     font-weight: 700;

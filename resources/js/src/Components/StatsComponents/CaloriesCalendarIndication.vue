@@ -1,19 +1,26 @@
 <script setup>
-import {computed} from 'vue';
-import {useI18n} from 'vue-i18n';
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
-const {t} = useI18n();
+const { t } = useI18n();
 
 const colors = computed(() => [
-    {class: 'nice', description: t('Stats.ColorDescriptions.Nice')},
-    {class: 'overreach', description: t('Stats.ColorDescriptions.Overreach')},
-    {class: 'significant-overreach', description: t('Stats.ColorDescriptions.SignificantOverreach')},
+    { class: "nice", description: t("Stats.ColorDescriptions.Nice") },
+    { class: "overreach", description: t("Stats.ColorDescriptions.Overreach") },
+    {
+        class: "significant-overreach",
+        description: t("Stats.ColorDescriptions.SignificantOverreach"),
+    },
 ]);
 </script>
 
 <template>
     <div class="color-explanations">
-        <div v-for="color in colors" :key="color.class" class="color-explanation">
+        <div
+            v-for="color in colors"
+            :key="color.class"
+            class="color-explanation"
+        >
             <div :class="['color-box', color.class]"></div>
             <span>- {{ color.description }}</span>
         </div>

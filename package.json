@@ -4,13 +4,15 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "build-and-push": "npm run build && git add -A && git commit -m \"$COMMIT_MSG\" && git push"
+        "build-and-push": "npm run build && git add -A && git commit -m \"$COMMIT_MSG\" && git push",
+        "format": "prettier --write \"resources/js/src/**/*.{js,vue}\""
     },
     "devDependencies": {
         "autoprefixer": "^10.4.16",
         "axios": "^1.6.2",
         "laravel-vite-plugin": "^0.8.0",
         "postcss": "^8.4.32",
+        "prettier-plugin-vue": "^1.1.6",
         "sass": "^1.69.5",
         "scss": "^0.2.4",
         "tailwindcss": "^3.3.6",

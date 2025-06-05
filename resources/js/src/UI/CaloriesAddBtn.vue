@@ -1,7 +1,7 @@
 <script>
 export default {
-    name: "CaloriesAddBtn"
-}
+    name: "CaloriesAddBtn",
+};
 </script>
 
 <template>
@@ -53,4 +53,3 @@ export default {
     transition: all 0.3s ease 0s;
 }
 </style>
-
