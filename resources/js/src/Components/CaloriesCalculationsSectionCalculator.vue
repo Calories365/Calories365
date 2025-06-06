@@ -1,15 +1,20 @@
 <script>
-import {debounce} from 'lodash';
+import { debounce } from "lodash";
 import CaloriesCard from "@/Components/CaloriesCard.vue";
 import CaloriesCalculationSlider from "@/Components/CaloriesCalculationSlider.vue";
 import CaloriesCalculationDropdown from "@/Components/CaloriesCalculationDropdown.vue";
-import {actionTypes} from "@/store/modules/calculation.js";
-import {mapState} from "vuex";
+import { actionTypes } from "@/store/modules/calculation.js";
+import { mapState } from "vuex";
 import CaloriesButton from "./CaloriesButton.vue";
 
 export default {
     name: "CaloriesCalculationsSectionCalculator",
-    components: {CaloriesButton, CaloriesCalculationDropdown, CaloriesCalculationSlider, CaloriesCard},
+    components: {
+        CaloriesButton,
+        CaloriesCalculationDropdown,
+        CaloriesCalculationSlider,
+        CaloriesCard,
+    },
     data() {
         return {
             isActive: false,
@@ -22,14 +27,23 @@ export default {
             activity: 0,
             goal: 0,
             checkboxActive: false,
-            properties: ['gender', 'birthYear', 'weight', 'height',
-                'goalWeight', 'fat', 'activity', 'goal', 'checkboxActive']
+            properties: [
+                "gender",
+                "birthYear",
+                "weight",
+                "height",
+                "goalWeight",
+                "fat",
+                "activity",
+                "goal",
+                "checkboxActive",
+            ],
         };
     },
     methods: {
         transformData() {
             let transformedData = {};
-            this.properties.forEach(key => {
+            this.properties.forEach((key) => {
                 transformedData[key] = this[key];
             });
             return transformedData;
@@ -42,140 +56,160 @@ export default {
         },
         saveData() {
             if (this.currentUser) {
-                this.$store.dispatch(actionTypes.saveCalculationData).then(() => {
-                    this.$store.dispatch(userActionTypes.getCurrentUser);
-                })
+                this.$store
+                    .dispatch(actionTypes.saveCalculationData)
+                    .then(() => {
+                        this.$store.dispatch(userActionTypes.getCurrentUser);
+                    });
             } else {
-                const message = i18n.global.t('Notification.Error.NeedAuth');
-                store.dispatch('setError', message, {root: true});
+                const message = i18n.global.t("Notification.Error.NeedAuth");
+                store.dispatch("setError", message, { root: true });
             }
         },
         calculateResults: debounce(function () {
-            this.$store.dispatch(actionTypes.countResults, this.transformData());
+            this.$store.dispatch(
+                actionTypes.countResults,
+                this.transformData()
+            );
         }, 1000),
     },
     computed: {
         ...mapState({
-            currentUser: state => state.auth.currentUser,
-            userData: state => state.calculation.userData,
+            currentUser: (state) => state.auth.currentUser,
+            userData: (state) => state.calculation.userData,
         }),
         translatedActivityOptions() {
             return [
-                this.$t('message.activityOptionLow'),
-                this.$t('message.activityOptionModerate'),
-                this.$t('message.activityOptionAverage'),
-                this.$t('message.activityOptionHigh'),
-                this.$t('message.activityOptionVeryHigh')
+                this.$t("message.activityOptionLow"),
+                this.$t("message.activityOptionModerate"),
+                this.$t("message.activityOptionAverage"),
+                this.$t("message.activityOptionHigh"),
+                this.$t("message.activityOptionVeryHigh"),
             ];
         },
         translatedGoals() {
             return [
-                this.$t('message.goalLoseWeight'),
-                this.$t('message.goalStayFit'),
-                this.$t('message.goalGainMass')
+                this.$t("message.goalLoseWeight"),
+                this.$t("message.goalStayFit"),
+                this.$t("message.goalGainMass"),
             ];
-        }
+        },
     },
     mounted() {
         if (this.currentUser) {
-            this.$store.dispatch(actionTypes.getCalculationData)
+            this.$store
+                .dispatch(actionTypes.getCalculationData)
                 .then((data) => {
                     for (const key in data) {
-                        this[key] = data[key]
+                        this[key] = data[key];
                     }
-                    this.$store.dispatch(actionTypes.countResults, data)
+                    this.$store.dispatch(actionTypes.countResults, data);
                 });
         } else {
-            this.$store.dispatch(actionTypes.getCalculationDataNotAuth)
+            this.$store
+                .dispatch(actionTypes.getCalculationDataNotAuth)
                 .then((data) => {
                     for (const key in data) {
-                        this[key] = data[key]
+                        this[key] = data[key];
                     }
-                    this.$store.dispatch(actionTypes.countResults, data)
+                    this.$store.dispatch(actionTypes.countResults, data);
                 });
         }
-        this.properties.forEach(property => {
+        this.properties.forEach((property) => {
             this.$watch(property, this.calculateResults);
         });
     },
-}
+};
 </script>
 
 <template>
     <section class="calculator-section">
-        <p class="calculator-section_head">{{ $t('message.calculatorSectionHead') }}</p>
-<!--        <p class="calculator-section_description">-->
-<!--            {{ $t('message.calculatorSectionDescription') }}-->
-<!--        </p>-->
+        <p class="calculator-section_head">
+            {{ $t("message.calculatorSectionHead") }}
+        </p>
+        <!--        <p class="calculator-section_description">-->
+        <!--            {{ $t('message.calculatorSectionDescription') }}-->
+        <!--        </p>-->
         <div class="calculator-section_gender-buttons-container">
             <button
                 class="calculator-section_gender-button"
-                :class="{ 'disabled': gender === 'male' }"
+                :class="{ disabled: gender === 'male' }"
                 @click="toggleActive('female')"
             >
-                {{ $t('message.calculatorSectionGenderButtonFemale') }}
+                {{ $t("message.calculatorSectionGenderButtonFemale") }}
             </button>
             <button
                 class="calculator-section_gender-button"
-                :class="{ 'disabled': gender === 'female' }"
+                :class="{ disabled: gender === 'female' }"
                 @click="toggleActive('male')"
             >
-                {{ $t('message.calculatorSectionGenderButtonMale') }}
+                {{ $t("message.calculatorSectionGenderButtonMale") }}
             </button>
-
         </div>
 
         <div class="calculator-section_users-data">
-            <calories-calculation-slider :from="1900" :to="2024"
-                                         :name="$t('message.caloriesCalculationSliderBirthYear')"
-                                         :value="birthYear"
-                                         @update="birthYear = $event"
+            <calories-calculation-slider
+                :from="1900"
+                :to="2024"
+                :name="$t('message.caloriesCalculationSliderBirthYear')"
+                :value="birthYear"
+                @update="birthYear = $event"
             />
 
-            <calories-calculation-slider :from="10" :to="200"
-                                         :name="$t('message.caloriesCalculationSliderWeight')"
-                                         :value="weight"
-                                         @update="weight = $event"/>
+            <calories-calculation-slider
+                :from="10"
+                :to="200"
+                :name="$t('message.caloriesCalculationSliderWeight')"
+                :value="weight"
+                @update="weight = $event"
+            />
 
-            <calories-calculation-slider :from="20" :to="300"
-                                         :name="$t('message.caloriesCalculationSliderHeight')"
-                                         :value="height"
-                                         @update="height = $event"/>
+            <calories-calculation-slider
+                :from="20"
+                :to="300"
+                :name="$t('message.caloriesCalculationSliderHeight')"
+                :value="height"
+                @update="height = $event"
+            />
 
-            <calories-calculation-slider :from="10" :to="200"
-                                         :name="$t('message.caloriesCalculationSliderTargetWeight')"
-                                         :value="goalWeight"
-                                         @update="goalWeight = $event"/>
+            <calories-calculation-slider
+                :from="10"
+                :to="200"
+                :name="$t('message.caloriesCalculationSliderTargetWeight')"
+                :value="goalWeight"
+                @update="goalWeight = $event"
+            />
 
-            <calories-calculation-slider :from="0" :to="100"
-                                         :name="$t('message.caloriesCalculationSliderFatPercentage')"
-                                         :value="fat"
-                                         :checkBox="true"
-                                         :checkBoxActive="Boolean(checkboxActive)"
-                                         @update="fat = $event"
-                                         @checkboxChanged="handleCheckboxChange"
+            <calories-calculation-slider
+                :from="0"
+                :to="100"
+                :name="$t('message.caloriesCalculationSliderFatPercentage')"
+                :value="fat"
+                :checkBox="true"
+                :checkBoxActive="Boolean(checkboxActive)"
+                @update="fat = $event"
+                @checkboxChanged="handleCheckboxChange"
             />
             <div class="calculator-section_dropdowns">
-                <calories-calculation-dropdown class="calculator-section_dropdown"
-                                               :name="$t('message.caloriesCalculationDropdownActivity')"
-                                               :subName="$t('message.caloriesCalculationDropdownActivity')"
-                                               :options="translatedActivityOptions"
-                                               :value="Number(activity)"
-                                               @update="activity = $event"
+                <calories-calculation-dropdown
+                    class="calculator-section_dropdown"
+                    :name="$t('message.caloriesCalculationDropdownActivity')"
+                    :subName="$t('message.caloriesCalculationDropdownActivity')"
+                    :options="translatedActivityOptions"
+                    :value="Number(activity)"
+                    @update="activity = $event"
                 />
-
             </div>
         </div>
-<!--        <div class="res-button">-->
-<!--        <calories-button-->
-<!--            passed-class="extra-padding"-->
-<!--            @click="saveData()" class="calculator-section_head-button">-->
-<!--            {{ $t('calculationResult.Save') }}-->
-<!--        </calories-button>-->
-<!--        </div>-->
+        <!--        <div class="res-button">-->
+        <!--        <calories-button-->
+        <!--            passed-class="extra-padding"-->
+        <!--            @click="saveData()" class="calculator-section_head-button">-->
+        <!--            {{ $t('calculationResult.Save') }}-->
+        <!--        </calories-button>-->
+        <!--        </div>-->
     </section>
 </template>
-
 
 <style scoped lang="scss">
 .second-section {
@@ -297,7 +331,4 @@ export default {
 
 
 }
-
-
 </style>
-

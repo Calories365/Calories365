@@ -1,25 +1,36 @@
 <script>
-import {actionTypes} from "@/store/modules/auth";
-import {mapState} from "vuex";
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import { actionTypes } from "@/store/modules/auth";
+import { mapState } from "vuex";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import caloriesCalculationLocaleChanger from "@/Components/CaloriesCalculationLocaleChanger.vue";
 import CaloriesBurgerMenu from "@/Components/CaloriesBurgerMenu.vue";
 import CaloriesCalculationDropdown from "@/Components/CaloriesCalculationDropdown.vue";
 
-
 export default {
     name: "CaloriesHeaderV2",
-    components: {CaloriesCalculationDropdown, CaloriesBurgerMenu, FontAwesomeIcon, caloriesCalculationLocaleChanger},
+    components: {
+        CaloriesCalculationDropdown,
+        CaloriesBurgerMenu,
+        FontAwesomeIcon,
+        caloriesCalculationLocaleChanger,
+    },
     data() {
         return {
             isBurgerOpen: false,
             // menuItems: ['home', 'calculation', 'diary', 'stats', 'recipes', 'instructions', 'cabinet', 'goals'],
-            menuItems: ['home', 'calculation', 'diary', 'cabinet', 'stats', 'voice'],
+            menuItems: [
+                "home",
+                "calculation",
+                "diary",
+                "cabinet",
+                "stats",
+                "voice",
+            ],
         };
     },
     computed: {
         ...mapState({
-            currentUser: state => state.auth.currentUser,
+            currentUser: (state) => state.auth.currentUser,
             isEmailVerified() {
                 if (this.currentUser && this.currentUser.email_verified_at) {
                     return true;
@@ -38,21 +49,22 @@ export default {
         logout() {
             this.isBurgerOpen = false;
             this.$store.dispatch(actionTypes.logout).then((errors) => {
-                this.$router.push({name: 'login'})
-            })
+                this.$router.push({ name: "login" });
+            });
         },
         resendVerificationEmail() {
             this.isBurgerOpen = false;
-            this.$store.dispatch(actionTypes.resendVerificationEmail).then((errors) => {
-            })
+            this.$store
+                .dispatch(actionTypes.resendVerificationEmail)
+                .then((errors) => {});
         },
     },
     mounted() {
         this.handleScroll = () => {
             const headerBottom = this.$refs.headerBottom;
-            const mainWrapper = document.querySelector('.main-wrapper');
-            const fixedClass = 'fixed-header';
-            const layoutFixedMarginClass = 'layout-fixed-margin';
+            const mainWrapper = document.querySelector(".main-wrapper");
+            const fixedClass = "fixed-header";
+            const layoutFixedMarginClass = "layout-fixed-margin";
 
             // const threshold = (this.$route.name === 'register') ? 100 : 80;
             const threshold = 200;
@@ -72,87 +84,100 @@ export default {
             }
         };
 
-        window.addEventListener('scroll', this.handleScroll);
+        window.addEventListener("scroll", this.handleScroll);
         this.handleScroll();
     },
 
-    beforeDestroy() { // Используйте beforeUnmount в Vue 3
+    beforeDestroy() {
+        // Используйте beforeUnmount в Vue 3
         // Удаляем обработчик прокрутки при уничтожении компонента
-        window.removeEventListener('scroll', this.handleScroll);
+        window.removeEventListener("scroll", this.handleScroll);
     },
-
 };
 </script>
 
 <template>
     <header class="main-header">
         <!--<header class="main-header fixed-header">-->
-        <div class="main-header_top ">
+        <div class="main-header_top">
             <div class="main-header_container">
                 <div class="main-header_box">
-
                     <div class="main-header_logo logo-in-header">
                         <a href="#" rel="home">
-                            <img class="logo-in-header_whole" src="../assets/CALORIES365vectorgreen.png"
-                                 alt="logo">
+                            <img
+                                class="logo-in-header_whole"
+                                src="../assets/CALORIES365vectorgreen.png"
+                                alt="logo"
+                            />
                         </a>
                     </div>
 
                     <div class="main-header_info">
-
-
-                        <calories-calculation-locale-changer/>
-
+                        <calories-calculation-locale-changer />
 
                         <!--                        <div class="main-header_auth" v-if="!currentUser">-->
                         <router-link
                             v-if="!currentUser"
                             @click="closeBurger"
-                            :to="{name: 'login'}" href="" class="main-header_login">{{
-                                $t('message.signIn')
-                            }}
+                            :to="{ name: 'login' }"
+                            href=""
+                            class="main-header_login"
+                            >{{ $t("message.signIn") }}
                         </router-link>
                         <router-link
                             v-if="!currentUser"
                             @click="closeBurger"
-                            :to="{name: 'register'}" href="" class="main-header_signin">
-                            {{ $t('message.signUp') }}
+                            :to="{ name: 'register' }"
+                            href=""
+                            class="main-header_signin"
+                        >
+                            {{ $t("message.signUp") }}
                         </router-link>
                         <!--                        </div>-->
 
                         <div class="main-header_auth" v-else>
                             <a
-                                v-if="!isEmailVerified" href="" @click="resendVerificationEmail"
-                                class="main-header_resend-email">{{ $t('message.resendVerificationEmail') }}</a>
-                            <a @click="logout" class="main-header_login main-header_logout">{{
-                                    $t('message.logOut')
-                                }}</a>
+                                v-if="!isEmailVerified"
+                                href=""
+                                @click="resendVerificationEmail"
+                                class="main-header_resend-email"
+                                >{{ $t("message.resendVerificationEmail") }}</a
+                            >
+                            <a
+                                @click="logout"
+                                class="main-header_login main-header_logout"
+                                >{{ $t("message.logOut") }}</a
+                            >
                         </div>
 
                         <div
                             @click="toggleBurger"
                             id="burger"
-                            class="main-header_burger" :class="{ 'active': isBurgerOpen }">
-                            <span>
-                            </span>
+                            class="main-header_burger"
+                            :class="{ active: isBurgerOpen }"
+                        >
+                            <span> </span>
                         </div>
-
-
                     </div>
                 </div>
             </div>
         </div>
 
-
-        <div ref="headerBottom" class="main-header_bottom ">
+        <div ref="headerBottom" class="main-header_bottom">
             <div class="main-header_container">
                 <div class="main-header_box">
                     <nav class="main-header_nav main-nav">
                         <ul id="menu-main-menu-in-header" class="main-nav_list">
-                            <li v-if="true" v-for="menuItem in menuItems" :key="menuItem"
-                                class="menu-item menu-item-type-custom menu-item-object-custom">
-                                <router-link class="calories-menu-item-link"
-                                             :to="{name: menuItem}">{{ $t(`message.${menuItem}`) }}
+                            <li
+                                v-if="true"
+                                v-for="menuItem in menuItems"
+                                :key="menuItem"
+                                class="menu-item menu-item-type-custom menu-item-object-custom"
+                            >
+                                <router-link
+                                    class="calories-menu-item-link"
+                                    :to="{ name: menuItem }"
+                                    >{{ $t(`message.${menuItem}`) }}
                                 </router-link>
                             </li>
                         </ul>
@@ -166,11 +191,9 @@ export default {
             @update="isBurgerOpen = $event"
         />
     </header>
-
 </template>
 
 <style scoped lang="scss">
-
 /*sticky header*/
 .fixed-header {
     @media (min-width: $bp-medium + 0.1em) {
@@ -489,5 +512,4 @@ export default {
 .calories-menu-item-link-active {
     color: $pink_color !important;
 }
-
 </style>

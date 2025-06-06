@@ -1,23 +1,23 @@
 <script>
-
-import {mapState} from "vuex";
-import {actionTypes} from "@/store/modules/auth.js";
+import { mapState } from "vuex";
+import { actionTypes } from "@/store/modules/auth.js";
 import CaloriesErrors from "@/Components/CaloriesErrors.vue";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import CaloriesLoader from "@/Components/CaloriesLoader.vue";
 
 export default {
     name: "RecoveryWithToken",
-    components: {CaloriesLoader, CaloriesButton, CaloriesErrors},
+    components: { CaloriesLoader, CaloriesButton, CaloriesErrors },
     data() {
         return {
-            password: '',
-            response: '',
-            token: '',
-            email: '',
-            password_confirmation: '',
-        }
-    }, mounted() {
+            password: "",
+            response: "",
+            token: "",
+            email: "",
+            password_confirmation: "",
+        };
+    },
+    mounted() {
         this.token = this.$route.params.token;
 
         this.email = decodeURIComponent(this.$route.query.email);
@@ -27,76 +27,94 @@ export default {
     },
     computed: {
         ...mapState({
-            isSybmiting: state => state.auth.isSybmiting,
-            validationErrors: state => state.auth.validationErrors
+            isSybmiting: (state) => state.auth.isSybmiting,
+            validationErrors: (state) => state.auth.validationErrors,
         }),
     },
     methods: {
         onSubmit() {
-            this.$store.dispatch(actionTypes.recoveryWithToken,
-                {
+            this.$store
+                .dispatch(actionTypes.recoveryWithToken, {
                     email: this.email,
                     password: this.password,
                     password_confirmation: this.password_confirmation,
                     token: this.token,
-                }
-            ).then(response => {
-                this.$router.push({name: 'login'})
-            })
+                })
+                .then((response) => {
+                    this.$router.push({ name: "login" });
+                });
         },
-    }
-}
+    },
+};
 </script>
 
 <template>
-    <calories-loader
-        v-if="isSybmiting"/>
+    <calories-loader v-if="isSybmiting" />
     <div
-        :class="{ 'hide': isSybmiting }"
-        class="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        :class="{ hide: isSybmiting }"
+        class="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
+    >
         <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-
-            <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+            <h2
+                class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"
+            >
                 {{ $t(`Recovery.RecoveryYourPassword`) }}
             </h2>
         </div>
 
         <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
             <form class="space-y-6" @submit.prevent="onSubmit">
-
-                <calories-errors :validation-errors=validationErrors v-if="validationErrors"></calories-errors>
+                <calories-errors
+                    :validation-errors="validationErrors"
+                    v-if="validationErrors"
+                ></calories-errors>
 
                 <div>
                     <div class="flex items-center justify-between">
-                        <label for="password" class="block text-sm font-medium leading-6 text-gray-900">
+                        <label
+                            for="password"
+                            class="block text-sm font-medium leading-6 text-gray-900"
+                        >
                             {{ $t(`Recovery.Password`) }}
                         </label>
                     </div>
                     <div class="mt-2">
-<!--                        <input id="password" name="password" type="password" autocomplete="current-password" required=""-->
-<!--                               v-model="password"-->
-<!--                               class="calories_input block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"/>-->
+                        <!--                        <input id="password" name="password" type="password" autocomplete="current-password" required=""-->
+                        <!--                               v-model="password"-->
+                        <!--                               class="calories_input block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"/>-->
                         <input
                             class="password-input"
-                            id="password" name="password" type="password" autocomplete="current-password" required=""
-                            v-model="password"/>
+                            id="password"
+                            name="password"
+                            type="password"
+                            autocomplete="current-password"
+                            required=""
+                            v-model="password"
+                        />
                     </div>
                 </div>
                 <div>
                     <div class="flex items-center justify-between">
-                        <label for="password" class="block text-sm font-medium leading-6 text-gray-900">
+                        <label
+                            for="password"
+                            class="block text-sm font-medium leading-6 text-gray-900"
+                        >
                             {{ $t(`Recovery.ConfirmPassword`) }}
                         </label>
-
                     </div>
                     <div class="mt-2">
-<!--                        <input id="password" name="password" type="password" autocomplete="current-password" required=""-->
-<!--                               v-model="password_confirmation"-->
-<!--                               class="calories_input block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"/>-->
+                        <!--                        <input id="password" name="password" type="password" autocomplete="current-password" required=""-->
+                        <!--                               v-model="password_confirmation"-->
+                        <!--                               class="calories_input block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"/>-->
                         <input
                             class="password-input"
-                            id="password" name="password" type="password" autocomplete="current-password" required=""
-                            v-model="password_confirmation"/>
+                            id="password"
+                            name="password"
+                            type="password"
+                            autocomplete="current-password"
+                            required=""
+                            v-model="password_confirmation"
+                        />
                     </div>
                 </div>
 
@@ -104,14 +122,16 @@ export default {
                     <calories-button
                         type="submit"
                         :disabled="isSybmiting"
-                        :class="{'opacity-50 cursor-not-allowed': isSybmiting}"
+                        :class="{
+                            'opacity-50 cursor-not-allowed': isSybmiting,
+                        }"
                         passed-class="recovery"
-                        class="button">
+                        class="button"
+                    >
                         {{ $t(`Recovery.RecoverPassword`) }}
                     </calories-button>
                 </div>
             </form>
-
         </div>
     </div>
 </template>
@@ -153,5 +173,4 @@ export default {
 .hide {
     opacity: 0.33;
 }
-
 </style>

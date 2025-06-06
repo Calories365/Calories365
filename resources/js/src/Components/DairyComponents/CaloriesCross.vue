@@ -1,7 +1,7 @@
 <script>
 export default {
-    name: "CaloriesCross"
-}
+    name: "CaloriesCross",
+};
 </script>
 
 <template>
@@ -39,5 +39,4 @@ export default {
         transform: rotate(-45deg);
     }
 }
-
 </style>

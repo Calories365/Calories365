@@ -5,9 +5,8 @@
 </template>
 
 <script>
-
 export default {
-    name: 'CaloriesChart',
+    name: "CaloriesChart",
     // props: {
     //     protein: {
     //         type: Number,
@@ -32,31 +31,33 @@ export default {
     },
     methods: {
         createChart() {
-            const ctx = this.$refs.donutChart.getContext('2d');
+            const ctx = this.$refs.donutChart.getContext("2d");
             this.chart = new Chart(ctx, {
-                type: 'doughnut',
+                type: "doughnut",
                 data: {
-                    datasets: [{
-                        data: [35, 45, 20],
-                        backgroundColor: ['red', 'blue', 'yellow'],
-                        borderColor: ['white', 'white', 'white'],
-                        borderWidth: 2
-                    }]
+                    datasets: [
+                        {
+                            data: [35, 45, 20],
+                            backgroundColor: ["red", "blue", "yellow"],
+                            borderColor: ["white", "white", "white"],
+                            borderWidth: 2,
+                        },
+                    ],
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    legend: { position: 'right' },
+                    legend: { position: "right" },
                     tooltips: {
-                        enabled: false
-                    }
-                }
+                        enabled: false,
+                    },
+                },
             });
         },
         updateChart() {
             // this.chart.data.datasets[0].data = [this.protein, this.carbs, this.fats];
             // this.chart.update();
-        }
+        },
     },
     watch: {
         protein() {
@@ -67,9 +68,9 @@ export default {
         },
         fats() {
             this.updateChart();
-        }
-    }
-}
+        },
+    },
+};
 </script>
 
 <style scoped lang="scss">

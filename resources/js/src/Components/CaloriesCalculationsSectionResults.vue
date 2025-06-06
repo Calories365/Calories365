@@ -4,16 +4,21 @@ import CaloriesCalculationSlider from "@/Components/CaloriesCalculationSlider.vu
 import CaloriesCalculationDropdown from "@/Components/CaloriesCalculationDropdown.vue";
 import CalorieChart from "@/Components/CalorieChart.vue";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
-import {mapState} from "vuex";
-import {actionTypes} from "@/store/modules/calculation.js";
-import {actionTypes as userActionTypes} from "@/store/modules/auth.js";
+import { mapState } from "vuex";
+import { actionTypes } from "@/store/modules/calculation.js";
+import { actionTypes as userActionTypes } from "@/store/modules/auth.js";
 import i18n from "@/i18n.js";
 import store from "@/store/store.js";
 
-
 export default {
     name: "CaloriesCalculationsSectionResults",
-    components: {CaloriesButton, CalorieChart, CaloriesCalculationDropdown, CaloriesCalculationSlider, CaloriesCard},
+    components: {
+        CaloriesButton,
+        CalorieChart,
+        CaloriesCalculationDropdown,
+        CaloriesCalculationSlider,
+        CaloriesCard,
+    },
     data() {
         return {
             isActive: false,
@@ -22,8 +27,8 @@ export default {
     props: {},
     computed: {
         ...mapState({
-            userResults: state => state.calculation.userResults,
-            currentUser: state => state.auth.currentUser,
+            userResults: (state) => state.calculation.userResults,
+            currentUser: (state) => state.auth.currentUser,
         }),
     },
     methods: {
@@ -32,178 +37,266 @@ export default {
         },
         saveData() {
             if (this.currentUser) {
-                this.$store.dispatch(actionTypes.saveCalculationData).then(() => {
-                    this.$store.dispatch(userActionTypes.getCurrentUser);
-                })
+                this.$store
+                    .dispatch(actionTypes.saveCalculationData)
+                    .then(() => {
+                        this.$store.dispatch(userActionTypes.getCurrentUser);
+                    });
             } else {
-                const message = i18n.global.t('Notification.Error.NeedAuth');
-                store.dispatch('setError', message, {root: true});
+                const message = i18n.global.t("Notification.Error.NeedAuth");
+                store.dispatch("setError", message, { root: true });
             }
         },
-    }
-}
-
+    },
+};
 </script>
 
 <template>
     <section class="calculator-section">
-
-       <div class="results_with_arrows">
-           <div class="arrow_mobile">↓</div>
-           <p class="calculator-section_head">
-            {{ $t('calculationResult.calculatorSectionHeadOne') }}</p>
-           <div class="arrow_mobile">↓</div>
-       </div>
+        <div class="results_with_arrows">
+            <div class="arrow_mobile">↓</div>
+            <p class="calculator-section_head">
+                {{ $t("calculationResult.calculatorSectionHeadOne") }}
+            </p>
+            <div class="arrow_mobile">↓</div>
+        </div>
         <div class="res-button">
             <calories-button
                 passed-class="extra-padding"
-                @click="saveData()" class="calculator-section_head-button">
-                {{ $t('calculationResult.Save') }}
+                @click="saveData()"
+                class="calculator-section_head-button"
+            >
+                {{ $t("calculationResult.Save") }}
             </calories-button>
         </div>
 
-        <p class="calculator-section_head calories-padding-top">{{
-                $t('calculationResult.calculatorSectionHeadTwo')
-            }}</p>
+        <p class="calculator-section_head calories-padding-top">
+            {{ $t("calculationResult.calculatorSectionHeadTwo") }}
+        </p>
 
-        <p class="calculator-section_calories">{{ userResults.bmr ? userResults.bmr : 0 }} {{
-                $t('calculationResult.calculatorSectionCalories')
-            }}</p>
+        <p class="calculator-section_calories">
+            {{ userResults.bmr ? userResults.bmr : 0 }}
+            {{ $t("calculationResult.calculatorSectionCalories") }}
+        </p>
 
-        <p class="calculator-section_joules">({{ Math.round(userResults.bmr * 4, 1868) }}
-            {{ $t('calculationResult.calculatorSectionJoules') }})</p>
+        <p class="calculator-section_joules">
+            ({{ Math.round(userResults.bmr * 4, 1868) }}
+            {{ $t("calculationResult.calculatorSectionJoules") }})
+        </p>
         <div class="info-block">
             <div class="info-icon">?</div>
             <div class="info-text">
-                {{ $t('calculationResult.infoBlockText') }}
+                {{ $t("calculationResult.infoBlockText") }}
             </div>
         </div>
 
-        <p class="calculator-section_head calories-padding-top ">{{
-                $t('calculationResult.calculatorSectionHeadOneBMI')
-            }}</p>
+        <p class="calculator-section_head calories-padding-top">
+            {{ $t("calculationResult.calculatorSectionHeadOneBMI") }}
+        </p>
 
         <p class="calculator-section_calories calories-padding-bottom">
             {{ userResults.bmi ? userResults.bmi : 0 }}
         </p>
 
         <div class="calculator-section_IMT">
-
             <div class="IMT-block-container">
-                <div class="IMT-block"
-                     :class="{ 'active-block-bad': userResults.humanWeightClassifications === 1 }"></div>
-                <span class="IMT-block-text" :class="{ 'active': userResults.humanWeightClassifications === 1 }">{{
-                        $t('calculationResult.IMTBlockTextUnderweight')
-                    }}</span>
+                <div
+                    class="IMT-block"
+                    :class="{
+                        'active-block-bad':
+                            userResults.humanWeightClassifications === 1,
+                    }"
+                ></div>
+                <span
+                    class="IMT-block-text"
+                    :class="{
+                        active: userResults.humanWeightClassifications === 1,
+                    }"
+                    >{{ $t("calculationResult.IMTBlockTextUnderweight") }}</span
+                >
             </div>
 
             <div class="IMT-block-container">
-                <div class="IMT-block"
-                     :class="{ 'active-block-good': userResults.humanWeightClassifications === 2 }"></div>
-                <span class="IMT-block-text" :class="{ 'active': userResults.humanWeightClassifications === 2 }">{{
-                        $t('calculationResult.IMTBlockTextNormal')
-                    }}</span>
+                <div
+                    class="IMT-block"
+                    :class="{
+                        'active-block-good':
+                            userResults.humanWeightClassifications === 2,
+                    }"
+                ></div>
+                <span
+                    class="IMT-block-text"
+                    :class="{
+                        active: userResults.humanWeightClassifications === 2,
+                    }"
+                    >{{ $t("calculationResult.IMTBlockTextNormal") }}</span
+                >
             </div>
 
             <div class="IMT-block-container">
-                <div class="IMT-block"
-                     :class="{ 'active-block-not-good': userResults.humanWeightClassifications === 3 }"></div>
-                <span class="IMT-block-text" :class="{ 'active': userResults.humanWeightClassifications === 3 }">{{
-                        $t('calculationResult.IMTBlockTextOverweight')
-                    }}</span>
+                <div
+                    class="IMT-block"
+                    :class="{
+                        'active-block-not-good':
+                            userResults.humanWeightClassifications === 3,
+                    }"
+                ></div>
+                <span
+                    class="IMT-block-text"
+                    :class="{
+                        active: userResults.humanWeightClassifications === 3,
+                    }"
+                    >{{ $t("calculationResult.IMTBlockTextOverweight") }}</span
+                >
             </div>
 
             <div class="IMT-block-container">
-                <div class="IMT-block"
-                     :class="{ 'active-block-bad': userResults.humanWeightClassifications === 4 }"></div>
-                <span class="IMT-block-text" :class="{ 'active': userResults.humanWeightClassifications === 4 }">{{
-                        $t('calculationResult.IMTBlockTextObesity1')
-                    }}</span>
+                <div
+                    class="IMT-block"
+                    :class="{
+                        'active-block-bad':
+                            userResults.humanWeightClassifications === 4,
+                    }"
+                ></div>
+                <span
+                    class="IMT-block-text"
+                    :class="{
+                        active: userResults.humanWeightClassifications === 4,
+                    }"
+                    >{{ $t("calculationResult.IMTBlockTextObesity1") }}</span
+                >
             </div>
 
             <div class="IMT-block-container">
-                <div class="IMT-block"
-                     :class="{ 'active-block-bad': userResults.humanWeightClassifications === 5 }"></div>
-                <span class="IMT-block-text" :class="{ 'active': userResults.humanWeightClassifications === 5 }">{{
-                        $t('calculationResult.IMTBlockTextObesity2')
-                    }}</span>
+                <div
+                    class="IMT-block"
+                    :class="{
+                        'active-block-bad':
+                            userResults.humanWeightClassifications === 5,
+                    }"
+                ></div>
+                <span
+                    class="IMT-block-text"
+                    :class="{
+                        active: userResults.humanWeightClassifications === 5,
+                    }"
+                    >{{ $t("calculationResult.IMTBlockTextObesity2") }}</span
+                >
             </div>
 
             <div class="IMT-block-container">
-                <div class="IMT-block"
-                     :class="{ 'active-block-very-bad': userResults.humanWeightClassifications === 6 }"></div>
-                <span class="IMT-block-text" :class="{ 'active': userResults.humanWeightClassifications === 6 }">{{
-                        $t('calculationResult.IMTBlockTextObesity3')
-                    }}</span>
+                <div
+                    class="IMT-block"
+                    :class="{
+                        'active-block-very-bad':
+                            userResults.humanWeightClassifications === 6,
+                    }"
+                ></div>
+                <span
+                    class="IMT-block-text"
+                    :class="{
+                        active: userResults.humanWeightClassifications === 6,
+                    }"
+                    >{{ $t("calculationResult.IMTBlockTextObesity3") }}</span
+                >
             </div>
         </div>
 
         <div class="info-block">
             <div class="info-icon">?</div>
             <div class="info-text">
-                {{ $t('calculationResult.infoBlockTextBMI') }}
+                {{ $t("calculationResult.infoBlockTextBMI") }}
             </div>
         </div>
-        <p class="calculator-section_head">{{
-                $t('calculationResult.goalWeight')
-            }}</p>
-        <p class="calculator-section_calories-blue calories-padding-top calories-padding-bottom">
+        <p class="calculator-section_head">
+            {{ $t("calculationResult.goalWeight") }}
+        </p>
+        <p
+            class="calculator-section_calories-blue calories-padding-top calories-padding-bottom"
+        >
             {{ userResults.daysRequired ? userResults.daysRequired : 0 }}
-            {{ $t('calculationResult.days') }}</p>
+            {{ $t("calculationResult.days") }}
+        </p>
 
-
-        <p class="calculator-section_head">{{
-                $t('calculationResult.calculatorSectionHeadTwoCaloriesRecommendation')
-            }}</p>
+        <p class="calculator-section_head">
+            {{
+                $t(
+                    "calculationResult.calculatorSectionHeadTwoCaloriesRecommendation"
+                )
+            }}
+        </p>
 
         <p class="calculator-section_calories-blue calories-padding-top">
             {{ userResults.dailyCalories ? userResults.dailyCalories : 0 }}
-            {{ $t('calculationResult.calculatorSectionCaloriesBlue') }}</p>
+            {{ $t("calculationResult.calculatorSectionCaloriesBlue") }}
+        </p>
 
         <p class="calculator-section_joules-blue calories-padding-bottom">
             ({{ Math.round(userResults.dailyCalories * 4, 1868) }}
-            {{ $t('calculationResult.calculatorSectionJoulesBlue') }})</p>
+            {{ $t("calculationResult.calculatorSectionJoulesBlue") }})
+        </p>
         <div class="info-block">
             <div class="info-icon">?</div>
             <div class="info-text">
-                {{ $t('calculationResult.calculatorSectionCalorieReason') }}
+                {{ $t("calculationResult.calculatorSectionCalorieReason") }}
             </div>
         </div>
 
-        <p class="calculator-section_head" style="padding-bottom: 20px">{{
-                $t('calculationResult.calculatorSectionHeadTwoCaloriesRecommendationDistribution')
-            }}:</p>
+        <p class="calculator-section_head" style="padding-bottom: 20px">
+            {{
+                $t(
+                    "calculationResult.calculatorSectionHeadTwoCaloriesRecommendationDistribution"
+                )
+            }}:
+        </p>
 
         <div class="nutrient-legend">
             <div class="nutrient-item">
-                <span class="color-box" style="background-color: red;"></span>
-                <p class="nutrient-item_text">{{ $t('calculationResult.protein') }}
-                    {{ userResults.PFC.proteinPercent ? userResults.PFC.proteinPercent : 0 }}%</p>
+                <span class="color-box" style="background-color: red"></span>
+                <p class="nutrient-item_text">
+                    {{ $t("calculationResult.protein") }}
+                    {{
+                        userResults.PFC.proteinPercent
+                            ? userResults.PFC.proteinPercent
+                            : 0
+                    }}%
+                </p>
             </div>
             <div class="nutrient-item">
-                <span class="color-box" style="background-color: blue;"></span>
-                <p class="nutrient-item_text"> {{ $t('calculationResult.carbohydrates') }}
-                    {{ userResults.PFC.carbsPercent ? userResults.PFC.carbsPercent : 0 }}%</p>
+                <span class="color-box" style="background-color: blue"></span>
+                <p class="nutrient-item_text">
+                    {{ $t("calculationResult.carbohydrates") }}
+                    {{
+                        userResults.PFC.carbsPercent
+                            ? userResults.PFC.carbsPercent
+                            : 0
+                    }}%
+                </p>
             </div>
             <div class="nutrient-item">
-                <span class="color-box" style="background-color: yellow;"></span>
-                <p class="nutrient-item_text">{{ $t('calculationResult.fats') }}
-                    {{ userResults.PFC.fatPercent ? userResults.PFC.fatPercent : 0 }}%</p>
+                <span class="color-box" style="background-color: yellow"></span>
+                <p class="nutrient-item_text">
+                    {{ $t("calculationResult.fats") }}
+                    {{
+                        userResults.PFC.fatPercent
+                            ? userResults.PFC.fatPercent
+                            : 0
+                    }}%
+                </p>
             </div>
         </div>
 
-        <CalorieChart class="calculator-section_chart"/>
+        <CalorieChart class="calculator-section_chart" />
 
-        <p class="calculator-section_head calories-padding-bottom calories-padding-top">
-            {{ $t('calculationResult.calorieDiaryAppHeading') }}
+        <p
+            class="calculator-section_head calories-padding-bottom calories-padding-top"
+        >
+            {{ $t("calculationResult.calorieDiaryAppHeading") }}
         </p>
-
     </section>
 </template>
 
 <style scoped lang="scss">
-
-
 .nutrient-legend {
     display: flex;
     justify-content: space-around;
@@ -451,4 +544,3 @@ export default {
     padding-bottom: 25px;
 }
 </style>
-

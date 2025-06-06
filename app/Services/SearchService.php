@@ -13,6 +13,6 @@ class SearchService
     {
         $encodedQuery = $this->customDoubleMetaphone($query);
 
-        return Product::getSearchedProducts($encodedQuery, $pagination, $count);
+        return Product::getSearchedProductsViaMeili($encodedQuery, $pagination, $count);
     }
 }

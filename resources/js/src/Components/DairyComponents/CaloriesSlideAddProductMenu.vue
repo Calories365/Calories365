@@ -1,8 +1,8 @@
 <script setup>
-import {defineEmits, defineProps, reactive, ref, watchEffect} from 'vue';
-import {actionTypes} from "@/store/modules/dairy.js";
+import { defineEmits, defineProps, reactive, ref, watchEffect } from "vue";
+import { actionTypes } from "@/store/modules/dairy.js";
 import CaloriesInput from "@/Components/DairyComponents/CaloriesInput.vue";
-import {useStore} from 'vuex';
+import { useStore } from "vuex";
 
 const props = defineProps({
     isOpen: {
@@ -15,7 +15,7 @@ const props = defineProps({
     },
 });
 
-const emits = defineEmits(['update']);
+const emits = defineEmits(["update"]);
 
 const store = useStore();
 const quantity = ref(1);
@@ -24,7 +24,7 @@ const product = reactive({
     carbohydrates: 0,
     fats: 0,
     fibers: 0,
-    name: '',
+    name: "",
     proteins: 0,
     quantity: 0,
 });
@@ -32,43 +32,45 @@ watchEffect(() => {
     product.name = props.name;
 });
 const toggleProduct = () => {
-    emits('update', !props.isOpen);
+    emits("update", !props.isOpen);
     quantity.value = 1;
 };
 
 const addProduct = () => {
     if (quantity.value > 0 && quantity.value < 1250) {
-        store.dispatch(actionTypes.saveUsersCurrentProducts, {
-            product: product, quantity: quantity.value,
-        }).then(() => {
-            quantity.value = 1;
-            product.calories = 0;
-            product.carbohydrates = 0;
-            product.fats = 0;
-            product.proteins = 0;
-            emits('update', !props.isOpen);
-        });
+        store
+            .dispatch(actionTypes.saveUsersCurrentProducts, {
+                product: product,
+                quantity: quantity.value,
+            })
+            .then(() => {
+                quantity.value = 1;
+                product.calories = 0;
+                product.carbohydrates = 0;
+                product.fats = 0;
+                product.proteins = 0;
+                emits("update", !props.isOpen);
+            });
     } else {
-        store.dispatch('setError', this.$t('Notification.Error.invalidData'));
+        store.dispatch("setError", this.$t("Notification.Error.invalidData"));
     }
 };
-
 </script>
 <template>
-    <div :class="{ 'product-counter': true, 'product-counter_active': isOpen}">
+    <div :class="{ 'product-counter': true, 'product-counter_active': isOpen }">
         <div v-if="product" class="product-counter__body">
             <div class="product-counter__arrow-back" @click="toggleProduct">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
                     <path
                         d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
-                        fill="darkgrey"/>
+                        fill="darkgrey"
+                    />
                 </svg>
             </div>
             <div class="product-counter__out">
                 <div class="product-counter__card" data-id="1">
                     <div class="product-counter__wrapper1">
-                        <div class="product-counter__img">
-                        </div>
+                        <div class="product-counter__img"></div>
                         <h2 class="product-counter__title">
                             {{ name }}
                         </h2>
@@ -76,7 +78,7 @@ const addProduct = () => {
                     <div class="product-counter__wrapper2">
                         <div class="product-counter__info-card">
                             <div class="product-counter__portion desktop">
-                                {{ $t('Diary.Portion') }}
+                                {{ $t("Diary.Portion") }}
                             </div>
                             <div class="product-counter__portion mobile">
                                 {{ name }}
@@ -84,110 +86,196 @@ const addProduct = () => {
                             <div class="users-data-section">
                                 <div class="slider-container">
                                     <form @submit.prevent="addProduct">
-                                        <input type="range" :min="1" :max="1250" class="slider" id="myRange"
-                                               v-model="quantity">
+                                        <input
+                                            type="range"
+                                            :min="1"
+                                            :max="1250"
+                                            class="slider"
+                                            id="myRange"
+                                            v-model="quantity"
+                                        />
                                     </form>
                                 </div>
                                 <div class="input-container">
-                                    <input type="text" class="styled-input" v-model="quantity">
-                                    <span class="input_description">{{ $t('Diary.Grams') }}</span>
+                                    <input
+                                        type="text"
+                                        class="styled-input"
+                                        v-model="quantity"
+                                    />
+                                    <span class="input_description">{{
+                                        $t("Diary.Grams")
+                                    }}</span>
                                 </div>
-
                             </div>
                             <ul class="product-counter__portions desktop">
                                 <li class="product-counter__one-portion">
-                                    <div class="product-counter__gramm">{{ $t('Diary.In100GramsOfProduct') }}</div>
+                                    <div class="product-counter__gramm">
+                                        {{ $t("Diary.In100GramsOfProduct") }}
+                                    </div>
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
                                         <div>
-                                            <calories-input v-model="product.calories"/>
-                                            {{ $t('Diary.KCAL') }}
+                                            <calories-input
+                                                v-model="product.calories"
+                                            />
+                                            {{ $t("Diary.KCAL") }}
                                         </div>
                                         <div>
-                                            <calories-input v-model="product.proteins"/>
-                                            {{ $t('Diary.Protein') }}
+                                            <calories-input
+                                                v-model="product.proteins"
+                                            />
+                                            {{ $t("Diary.Protein") }}
                                         </div>
                                         <div>
-                                            <calories-input v-model="product.carbohydrates"/>
-                                            {{ $t('Diary.Carbohydrates') }}
+                                            <calories-input
+                                                v-model="product.carbohydrates"
+                                            />
+                                            {{ $t("Diary.Carbohydrates") }}
                                         </div>
                                         <div>
-                                            <calories-input v-model="product.fats"/>
-                                            {{ $t('Diary.Fats') }}
+                                            <calories-input
+                                                v-model="product.fats"
+                                            />
+                                            {{ $t("Diary.Fats") }}
                                         </div>
                                     </div>
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
-                                        {{ $t('Diary.YouAte') }}
-                                        {{ Math.ceil(product.calories / 100 * quantity) }} {{ $t('Diary.KCAL') }}
-                                        {{ Math.ceil(quantity / 100 * product.proteins) }}г {{
-                                            $t('Diary.Protein')
+                                        {{ $t("Diary.YouAte") }}
+                                        {{
+                                            Math.ceil(
+                                                (product.calories / 100) *
+                                                    quantity
+                                            )
                                         }}
-                                        {{ Math.ceil(quantity / 100 * product.carbohydrates) }}г
-                                        {{ $t('Diary.Carbohydrates') }}
-                                        {{ Math.ceil(quantity / 100 * product.fats) }}г {{ $t('Diary.Fats') }}
+                                        {{ $t("Diary.KCAL") }}
+                                        {{
+                                            Math.ceil(
+                                                (quantity / 100) *
+                                                    product.proteins
+                                            )
+                                        }}г {{ $t("Diary.Protein") }}
+                                        {{
+                                            Math.ceil(
+                                                (quantity / 100) *
+                                                    product.carbohydrates
+                                            )
+                                        }}г
+                                        {{ $t("Diary.Carbohydrates") }}
+                                        {{
+                                            Math.ceil(
+                                                (quantity / 100) * product.fats
+                                            )
+                                        }}г {{ $t("Diary.Fats") }}
                                     </div>
                                 </li>
                             </ul>
 
                             <ul class="product-counter__portions mobile">
                                 <li class="product-counter__one-portion">
-                                    <span class="product-counter__portion-title">
-                                    {{ $t('Diary.In100GramsOfProduct') }}:
+                                    <span
+                                        class="product-counter__portion-title"
+                                    >
+                                        {{ $t("Diary.In100GramsOfProduct") }}:
                                     </span>
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
                                         <div class="product-counter__span">
-                                            <calories-input v-model="product.calories"/>
-                                            <span> {{ $t('Diary.KCAL') }}</span>
+                                            <calories-input
+                                                v-model="product.calories"
+                                            />
+                                            <span> {{ $t("Diary.KCAL") }}</span>
                                         </div>
                                         <div class="product-counter__span">
-                                            <calories-input v-model="product.proteins"/>
-                                            <span>{{ $t('Diary.Protein') }}</span></div>
+                                            <calories-input
+                                                v-model="product.proteins"
+                                            />
+                                            <span>{{
+                                                $t("Diary.Protein")
+                                            }}</span>
+                                        </div>
                                     </div>
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
                                         <div class="product-counter__span">
-                                            <calories-input v-model="product.carbohydrates"/>
+                                            <calories-input
+                                                v-model="product.carbohydrates"
+                                            />
                                             <span>{{
-                                                    $t('Diary.Carbohydrates')
-                                                }}</span></div>
+                                                $t("Diary.Carbohydrates")
+                                            }}</span>
+                                        </div>
                                         <div class="product-counter__span">
-                                            <calories-input v-model="product.fats"/>
-                                            <span> {{ $t('Diary.Fats') }}</span></div>
+                                            <calories-input
+                                                v-model="product.fats"
+                                            />
+                                            <span> {{ $t("Diary.Fats") }}</span>
+                                        </div>
                                     </div>
                                 </li>
                                 <li class="product-counter__one-portion">
-                                    <span class="product-counter__portion-title">
-                                    {{ $t('Diary.YouAte') }}
+                                    <span
+                                        class="product-counter__portion-title"
+                                    >
+                                        {{ $t("Diary.YouAte") }}
                                     </span>
                                 </li>
 
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
-                                        <span> {{
-                                                Math.ceil(product.calories / 100 * quantity)
-                                            }} {{ $t('Diary.KCAL') }}</span>
-                                        <span> {{ Math.ceil(quantity / 100 * product.proteins) }}
-                                        {{ $t('Diary.Protein') }}</span>
+                                        <span>
+                                            {{
+                                                Math.ceil(
+                                                    (product.calories / 100) *
+                                                        quantity
+                                                )
+                                            }}
+                                            {{ $t("Diary.KCAL") }}</span
+                                        >
+                                        <span>
+                                            {{
+                                                Math.ceil(
+                                                    (quantity / 100) *
+                                                        product.proteins
+                                                )
+                                            }}
+                                            {{ $t("Diary.Protein") }}</span
+                                        >
                                     </div>
                                 </li>
                                 <li class="product-counter__one-portion">
                                     <div class="product-counter__gramm">
-                                        <span> {{ Math.ceil(quantity / 100 * product.carbohydrates) }}
-                                        {{ $t('Diary.Carbohydrates') }}</span>
-                                        <span> {{ Math.ceil(quantity / 100 * product.fats) }}{{
-                                                $t('Diary.Fats')
-                                            }}</span>
+                                        <span>
+                                            {{
+                                                Math.ceil(
+                                                    (quantity / 100) *
+                                                        product.carbohydrates
+                                                )
+                                            }}
+                                            {{
+                                                $t("Diary.Carbohydrates")
+                                            }}</span
+                                        >
+                                        <span>
+                                            {{
+                                                Math.ceil(
+                                                    (quantity / 100) *
+                                                        product.fats
+                                                )
+                                            }}{{ $t("Diary.Fats") }}</span
+                                        >
                                     </div>
                                 </li>
                             </ul>
-                            <button class="product-counter__btn button-addProduct" @click="addProduct">
-                                {{ $t('Diary.AddProduct') }}
+                            <button
+                                class="product-counter__btn button-addProduct"
+                                @click="addProduct"
+                            >
+                                {{ $t("Diary.AddProduct") }}
                             </button>
                         </div>
                     </div>

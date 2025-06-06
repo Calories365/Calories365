@@ -5,27 +5,25 @@ import CaloriesAddBtn from "@/UI/CaloriesAddBtn.vue";
 
 export default {
     name: "CaloriesFoodList",
-    components: {CaloriesAddBtn, CaloriesIndication, CaloriesNavbar}
-}
+    components: { CaloriesAddBtn, CaloriesIndication, CaloriesNavbar },
+};
 </script>
 
 <template>
     <div class="food-container">
-
         <div class="food-container__element">
-            <img class="food-container__image" src="@/images/burger.png">
+            <img class="food-container__image" src="@/images/burger.png" />
             <span class="food-container__name">Яблоко</span>
             <span class="food-container__weight">100 грам</span>
             <span class="food-container__calories">100 ККАЛ</span>
         </div>
 
         <div class="food-container__element">
-            <img class="food-container__image" src="@/images/burger.png">
+            <img class="food-container__image" src="@/images/burger.png" />
             <span class="food-container__name">Яблоко</span>
             <span class="food-container__weight">100 грам</span>
             <span class="food-container__calories">100 ККАЛ</span>
         </div>
-
     </div>
 </template>
 

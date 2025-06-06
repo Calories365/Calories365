@@ -1,7 +1,7 @@
 <script>
 export default {
-    name: "CaloriesSuccessNotification"
-}
+    name: "CaloriesSuccessNotification",
+};
 </script>
 
 <template>
@@ -52,7 +52,4 @@ export default {
         cursor: pointer;
     }
 }
-
-
 </style>
-

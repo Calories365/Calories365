@@ -1,22 +1,21 @@
 <script>
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import clickOutside from "@/directives/clickOutside.js";
-
 
 export default {
     name: "CaloriesCalculationLocaleChanger",
-    components: {FontAwesomeIcon},
+    components: { FontAwesomeIcon },
     directives: {
-        'click-outside': clickOutside
+        "click-outside": clickOutside,
     },
     data() {
         return {
             isOpen: false,
             isActive: false,
             isHiding: false,
-            selectedLocale: localStorage.getItem('locale') || 'en',
-            locales: ['en', 'ua', 'ru'],
-        }
+            selectedLocale: localStorage.getItem("locale") || "en",
+            locales: ["en", "ua", "ru"],
+        };
     },
     methods: {
         toggleActive() {
@@ -41,54 +40,56 @@ export default {
         changeLocale(locale) {
             this.selectedLocale = locale;
             this.$i18n.locale = locale;
-            localStorage.setItem('locale', locale);
+            localStorage.setItem("locale", locale);
             this.isOpen = false;
         },
-
     },
     computed: {
         filteredLocales() {
-            return this.locales.filter(locale => locale !== this.selectedLocale);
+            return this.locales.filter(
+                (locale) => locale !== this.selectedLocale
+            );
         },
     },
 
     mounted() {
-        this.changeLocale(localStorage.getItem('locale') || 'en');
-        document.addEventListener('click', this.handleClickOutside);
+        this.changeLocale(localStorage.getItem("locale") || "en");
+        document.addEventListener("click", this.handleClickOutside);
     },
     beforeUnmount() {
-        document.removeEventListener('click', this.handleClickOutside);
-    }
-
-
-}
-
+        document.removeEventListener("click", this.handleClickOutside);
+    },
+};
 </script>
 
 <template>
     <div class="dropdown-section">
-
         <div class="calculation-select" @click.stop="toggleActive">
             <div class="calculation-select_text">{{ selectedLocale }}</div>
 
-            <div class="calculation-select_active"
-                 :class="{ 'calculation-select_show': isActive, 'calculation-select_hide': isHiding }">
+            <div
+                class="calculation-select_active"
+                :class="{
+                    'calculation-select_show': isActive,
+                    'calculation-select_hide': isHiding,
+                }"
+            >
                 <ul class="calculation-select_list">
-                    <li @click="changeLocale(locale)" class="calculation-select_li" v-for="locale in filteredLocales">{{
-                            locale
-                        }}
+                    <li
+                        @click="changeLocale(locale)"
+                        class="calculation-select_li"
+                        v-for="locale in filteredLocales"
+                    >
+                        {{ locale }}
                     </li>
                 </ul>
             </div>
 
             <div class="calculation-select_arrow">
-                <font-awesome-icon :icon="['fas', 'angle-down']"/>
+                <font-awesome-icon :icon="['fas', 'angle-down']" />
             </div>
         </div>
-
-
     </div>
-
 </template>
 
 <style scoped lang="scss">
@@ -206,6 +207,4 @@ export default {
         opacity: 0;
     }
 }
-
-
 </style>

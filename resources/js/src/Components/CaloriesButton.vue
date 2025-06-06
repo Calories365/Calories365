@@ -4,19 +4,17 @@ export default {
     props: {
         passedClass: {
             type: String,
-            default: 'default',
+            default: "default",
         },
         type: {
             type: String,
-            default: 'button'
+            default: "button",
         },
-        style:{
+        style: {
             type: String,
-        }
-
+        },
     },
-
-}
+};
 </script>
 
 <template>
@@ -24,7 +22,8 @@ export default {
         class="calories-button"
         :type="type"
         @click="$emit('click')"
-        :class="passedClass">
+        :class="passedClass"
+    >
         <span class="calories-button_text"><slot></slot></span>
     </button>
 </template>
@@ -80,6 +79,4 @@ export default {
         background-color: #9d1111;
     }
 }
-
-
 </style>

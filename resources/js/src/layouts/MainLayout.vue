@@ -1,3 +1,3 @@
-                    <SidebarLink to="/voice" v-if="isLoggedIn" :icon="faWaveformCircle">
+<SidebarLink to="/voice" v-if="isLoggedIn" :icon="faWaveformCircle">
                         {{ $t('message.voice') }}
-                    </SidebarLink> 
+                    </SidebarLink>

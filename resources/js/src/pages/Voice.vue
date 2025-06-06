@@ -1,43 +1,57 @@
 <script>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faMicrophone, faMicrophoneSlash, faSpinner, faTrash, faMagic, faSave, faCheckCircle, faExclamationTriangle, faSearch } from '@fortawesome/free-solid-svg-icons';
-import { mapState, mapActions } from 'vuex';
-import { actionTypes } from '@/store/modules/voice';
-import { saveVoiceProducts, generateProductData, searchProduct } from '@/api/voice';
-import i18n from '@/i18n';
-import CaloriesSuccessNotification from '@/Components/CaloriesSuccessNotification.vue';
-import CaloriesErrorNotification from '@/Components/CaloriesErrorNotification.vue';
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import {
+    faMicrophone,
+    faMicrophoneSlash,
+    faSpinner,
+    faTrash,
+    faMagic,
+    faSave,
+    faCheckCircle,
+    faExclamationTriangle,
+    faSearch,
+} from "@fortawesome/free-solid-svg-icons";
+import { mapState, mapActions } from "vuex";
+import { actionTypes } from "@/store/modules/voice";
+import {
+    saveVoiceProducts,
+    generateProductData,
+    searchProduct,
+} from "@/api/voice";
+import i18n from "@/i18n";
+import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
+import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vue";
 
 export default {
     name: "Voice",
     components: {
         FontAwesomeIcon,
         CaloriesSuccessNotification,
-        CaloriesErrorNotification
+        CaloriesErrorNotification,
     },
     data() {
         return {
-            transcription: '',
+            transcription: "",
             products: [],
-            successMessage: '',
+            successMessage: "",
             showSuccessMessage: false,
-            errorMessage: '',
+            errorMessage: "",
             showErrorMessage: false,
             mediaRecorder: null,
             audioChunks: [],
             stream: null,
             browserSupportsRecording: false,
-            originalProducts: {} // Хранит оригинальные значения продуктов для сравнения
-        }
+            originalProducts: {}, // Хранит оригинальные значения продуктов для сравнения
+        };
     },
     computed: {
         ...mapState({
-            isRecording: state => state.voice.isRecording,
-            isProcessing: state => state.voice.isProcessing,
-            audioBlob: state => state.voice.audioBlob,
-            isUploading: state => state.voice.isUploading,
-            currentUser: state => state.auth.currentUser
-        })
+            isRecording: (state) => state.voice.isRecording,
+            isProcessing: (state) => state.voice.isProcessing,
+            audioBlob: (state) => state.voice.audioBlob,
+            isUploading: (state) => state.voice.isUploading,
+            currentUser: (state) => state.auth.currentUser,
+        }),
     },
     created() {
         // Проверка поддержки MediaDevices API
@@ -48,7 +62,7 @@ export default {
             voiceStartRecording: actionTypes.startRecording,
             voiceStopRecording: actionTypes.stopRecording,
             voiceUploadRecording: actionTypes.uploadRecording,
-            voiceResetRecording: actionTypes.resetRecording
+            voiceResetRecording: actionTypes.resetRecording,
         }),
         showSuccess(message) {
             this.successMessage = message;
@@ -67,35 +81,35 @@ export default {
             }, 3000);
         },
         faSpinner() {
-            return faSpinner
+            return faSpinner;
         },
         faMicrophoneSlash() {
-            return faMicrophoneSlash
+            return faMicrophoneSlash;
         },
         faMicrophone() {
-            return faMicrophone
+            return faMicrophone;
         },
         faTrash() {
-            return faTrash
+            return faTrash;
         },
         faMagic() {
-            return faMagic
+            return faMagic;
         },
         faSave() {
-            return faSave
+            return faSave;
         },
         faCheckCircle() {
-            return faCheckCircle
+            return faCheckCircle;
         },
         faExclamationTriangle() {
-            return faExclamationTriangle
+            return faExclamationTriangle;
         },
         faSearch() {
-            return faSearch
+            return faSearch;
         },
         async toggleRecording() {
             if (!this.browserSupportsRecording) {
-                this.showError(this.$t('Voice.browserWarning'));
+                this.showError(this.$t("Voice.browserWarning"));
                 return;
             }
 
@@ -108,34 +122,47 @@ export default {
         async startRecording() {
             try {
                 if (!this.browserSupportsRecording) {
-                    throw new Error(this.$t('Voice.browserWarning'));
+                    throw new Error(this.$t("Voice.browserWarning"));
                 }
 
                 // Используем современный API, если доступен
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                if (
+                    navigator.mediaDevices &&
+                    navigator.mediaDevices.getUserMedia
+                ) {
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        audio: true,
+                    });
                 }
                 // Используем старый API, если современный недоступен
                 else if (navigator.getUserMedia) {
                     this.stream = await new Promise((resolve, reject) => {
-                        navigator.getUserMedia({ audio: true }, resolve, reject);
+                        navigator.getUserMedia(
+                            { audio: true },
+                            resolve,
+                            reject
+                        );
                     });
                 } else {
-                    throw new Error(this.$t('Voice.errors.micPermission'));
+                    throw new Error(this.$t("Voice.errors.micPermission"));
                 }
                 const preferedTypes = [
-                    'audio/mp4',                     // iOS Safari
-                    'audio/webm;codecs=opus',        // Chrome, Firefox
-                    'audio/webm',
+                    "audio/mp4", // iOS Safari
+                    "audio/webm;codecs=opus", // Chrome, Firefox
+                    "audio/webm",
                 ];
-                const mimeType = preferedTypes.find(t => MediaRecorder.isTypeSupported(t));
+                const mimeType = preferedTypes.find((t) =>
+                    MediaRecorder.isTypeSupported(t)
+                );
                 if (!mimeType) {
                     this.browserSupportsRecording = false;
                     return;
                 }
 
                 // Создаем MediaRecorder
-                this.mediaRecorder = new MediaRecorder(this.stream, { mimeType });
+                this.mediaRecorder = new MediaRecorder(this.stream, {
+                    mimeType,
+                });
                 this.chosenMimeType = mimeType;
                 this.audioChunks = [];
 
@@ -149,33 +176,41 @@ export default {
                 // Обработчик события stop
                 this.mediaRecorder.onstop = async () => {
                     // Создаем Blob из записанных данных
-                    const audioBlob = new Blob(this.audioChunks, { type: this.chosenMimeType });
+                    const audioBlob = new Blob(this.audioChunks, {
+                        type: this.chosenMimeType,
+                    });
 
                     // Сохраняем Blob в Vuex и устанавливаем состояние обработки
-                    this.$store.commit('voice/RECORDING_COMPLETE', audioBlob);
-                    this.$store.commit('voice/RECORDING_PROCESS'); // Показываем индикатор загрузки
+                    this.$store.commit("voice/RECORDING_COMPLETE", audioBlob);
+                    this.$store.commit("voice/RECORDING_PROCESS"); // Показываем индикатор загрузки
 
                     // Загружаем запись на сервер
                     try {
                         const response = await this.voiceUploadRecording();
                         const message = response.message;
 
-                        if(message === 'please_buy_premium'){
-                            this.showError( this.$t('Voice.please_buy_premium'));
+                        if (message === "please_buy_premium") {
+                            this.showError(this.$t("Voice.please_buy_premium"));
                         }
 
                         // Для демонстрации UI добавим несколько продуктов после обработки
                         if (response && response.transcription) {
                             this.transcription = response.transcription;
                         } else {
-                            this.transcription = '';
+                            this.transcription = "";
                         }
 
                         // Добавляем продукты из ответа или демо-продукты
-                        if (response && response.products && response.products.length > 0) {
-                            this.products = response.products.map(item => {
+                        if (
+                            response &&
+                            response.products &&
+                            response.products.length > 0
+                        ) {
+                            this.products = response.products.map((item) => {
                                 return {
-                                    name: item.product_translation?.name || "Неизвестный продукт",
+                                    name:
+                                        item.product_translation?.name ||
+                                        "Неизвестный продукт",
                                     calories: item.product?.calories || 0,
                                     protein: item.product?.proteins || 0,
                                     fats: item.product?.fats || 0,
@@ -186,8 +221,10 @@ export default {
                                     isModified: false,
                                     nameModified: false,
                                     needsSearch: false,
-                                    originalName: item.product_translation?.name || "Неизвестный продукт",
-                                    searchedBefore: false
+                                    originalName:
+                                        item.product_translation?.name ||
+                                        "Неизвестный продукт",
+                                    searchedBefore: false,
                                 };
                             });
 
@@ -202,12 +239,18 @@ export default {
                         }
 
                         // Завершаем обработку после получения и обработки данных
-                        this.$store.commit('voice/RECORDING_COMPLETE', audioBlob);
+                        this.$store.commit(
+                            "voice/RECORDING_COMPLETE",
+                            audioBlob
+                        );
                     } catch (error) {
-                        console.error('Ошибка при отправке записи:', error);
-                        this.showError('Не удалось отправить аудиозапись');
+                        console.error("Ошибка при отправке записи:", error);
+                        this.showError("Не удалось отправить аудиозапись");
                         // Завершаем обработку при ошибке
-                        this.$store.commit('voice/RECORDING_COMPLETE', audioBlob);
+                        this.$store.commit(
+                            "voice/RECORDING_COMPLETE",
+                            audioBlob
+                        );
                     }
                 };
 
@@ -215,19 +258,31 @@ export default {
                 this.mediaRecorder.start();
                 this.voiceStartRecording();
             } catch (error) {
-                console.error('Ошибка при запуске записи:', error);
-                let errorMessage = this.$t('Voice.errors.micPermission');
+                console.error("Ошибка при запуске записи:", error);
+                let errorMessage = this.$t("Voice.errors.micPermission");
 
-                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                    errorMessage = this.$t('Voice.errors.micPermission');
-                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                    errorMessage = this.$t('Voice.errors.micNotFound');
-                } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                    errorMessage = this.$t('Voice.errors.micInUse');
-                } else if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
-                    errorMessage = this.$t('Voice.errors.micSettings');
-                } else if (error.name === 'TypeError') {
-                    errorMessage = this.$t('Voice.errors.notSecure');
+                if (
+                    error.name === "NotAllowedError" ||
+                    error.name === "PermissionDeniedError"
+                ) {
+                    errorMessage = this.$t("Voice.errors.micPermission");
+                } else if (
+                    error.name === "NotFoundError" ||
+                    error.name === "DevicesNotFoundError"
+                ) {
+                    errorMessage = this.$t("Voice.errors.micNotFound");
+                } else if (
+                    error.name === "NotReadableError" ||
+                    error.name === "TrackStartError"
+                ) {
+                    errorMessage = this.$t("Voice.errors.micInUse");
+                } else if (
+                    error.name === "OverconstrainedError" ||
+                    error.name === "ConstraintNotSatisfiedError"
+                ) {
+                    errorMessage = this.$t("Voice.errors.micSettings");
+                } else if (error.name === "TypeError") {
+                    errorMessage = this.$t("Voice.errors.notSecure");
                 } else if (error.message) {
                     errorMessage = error.message;
                 }
@@ -243,7 +298,7 @@ export default {
 
                 // Останавливаем все треки медиапотока
                 if (this.stream) {
-                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream.getTracks().forEach((track) => track.stop());
                 }
             }
         },
@@ -252,20 +307,23 @@ export default {
         },
         processProductData(index) {
             // Проверяем, есть ли у продукта имя
-            if (!this.products[index].name || this.products[index].name.trim() === '') {
-                this.showError(this.$t('Voice.errors.emptyProductName'));
+            if (
+                !this.products[index].name ||
+                this.products[index].name.trim() === ""
+            ) {
+                this.showError(this.$t("Voice.errors.emptyProductName"));
                 return;
             }
 
             const product = this.products[index];
-            
+
             // Если имя продукта было изменено, убеждаемся, что обнулен product_id
             if (product.nameModified) {
                 product.product_id = null;
             }
 
             // Устанавливаем состояние обработки
-            this.$store.commit('voice/RECORDING_PROCESS');
+            this.$store.commit("voice/RECORDING_PROCESS");
 
             // Всегда генерируем данные для продукта
             this.generateProductData(index);
@@ -283,14 +341,19 @@ export default {
 
                     // Обновляем данные продукта
                     this.products[index].product_id = productData.product.id;
-                    this.products[index].calories = productData.product.calories || 0;
-                    this.products[index].protein = productData.product.proteins || 0;
+                    this.products[index].calories =
+                        productData.product.calories || 0;
+                    this.products[index].protein =
+                        productData.product.proteins || 0;
                     this.products[index].fats = productData.product.fats || 0;
-                    this.products[index].carbs = productData.product.carbohydrates || 0;
+                    this.products[index].carbs =
+                        productData.product.carbohydrates || 0;
 
                     // Обновляем название продукта найденным в базе данных
-                    this.products[index].name = productData.product_translation.name;
-                    this.products[index].originalName = productData.product_translation.name;
+                    this.products[index].name =
+                        productData.product_translation.name;
+                    this.products[index].originalName =
+                        productData.product_translation.name;
 
                     // Сбрасываем флаги
                     this.products[index].needsSearch = false;
@@ -301,9 +364,17 @@ export default {
 
                     // Если рейтинг низкий, предлагаем сгенерировать данные
                     if (response.should_generate) {
-                        this.showSuccess(this.$t('Voice.success.productFoundLowMatch', { product: productData.product_translation.name }));
+                        this.showSuccess(
+                            this.$t("Voice.success.productFoundLowMatch", {
+                                product: productData.product_translation.name,
+                            })
+                        );
                     } else {
-                        this.showSuccess(this.$t('Voice.success.productFound', { product: productData.product_translation.name }));
+                        this.showSuccess(
+                            this.$t("Voice.success.productFound", {
+                                product: productData.product_translation.name,
+                            })
+                        );
                     }
                 } else {
                     // Продукт не найден, предлагаем сгенерировать данные
@@ -316,10 +387,12 @@ export default {
                     await this.generateProductData(index);
                 }
             } catch (error) {
-                this.showError(error.message || this.$t('Voice.errors.searchError'));
-                console.error('Ошибка при поиске продукта:', error);
+                this.showError(
+                    error.message || this.$t("Voice.errors.searchError")
+                );
+                console.error("Ошибка при поиске продукта:", error);
             } finally {
-                this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
+                this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
             }
         },
         // Генерация данных о продукте
@@ -328,8 +401,8 @@ export default {
 
             try {
                 // Показываем индикатор загрузки
-                this.$store.commit('voice/RECORDING_PROCESS');
-                
+                this.$store.commit("voice/RECORDING_PROCESS");
+
                 const response = await generateProductData(productName);
 
                 // Проверяем успешность запроса
@@ -338,7 +411,8 @@ export default {
                     this.products[index].calories = response.data.calories || 0;
                     this.products[index].protein = response.data.proteins || 0;
                     this.products[index].fats = response.data.fats || 0;
-                    this.products[index].carbs = response.data.carbohydrates || 0;
+                    this.products[index].carbs =
+                        response.data.carbohydrates || 0;
                     this.products[index].isGenerated = true;
 
                     // Если имя продукта было изменено, убеждаемся что это новый продукт
@@ -350,26 +424,35 @@ export default {
                     this.products[index].needsSearch = false;
 
                     // Показываем сообщение об успехе
-                    this.showSuccess(this.$t('Voice.success.dataGenerated', { product: productName }));
+                    this.showSuccess(
+                        this.$t("Voice.success.dataGenerated", {
+                            product: productName,
+                        })
+                    );
                 } else {
                     // Если запрос неуспешен
-                    throw new Error(response.message || this.$t('Voice.errors.generateError'));
+                    throw new Error(
+                        response.message ||
+                            this.$t("Voice.errors.generateError")
+                    );
                 }
             } catch (error) {
                 // Обработка ошибок
-                this.showError(error.message || this.$t('Voice.errors.generateError'));
-                console.error('Ошибка при генерации данных:', error);
+                this.showError(
+                    error.message || this.$t("Voice.errors.generateError")
+                );
+                console.error("Ошибка при генерации данных:", error);
             } finally {
                 // В любом случае завершаем обработку
-                this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
+                this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
             }
         },
         saveToMeal(mealType, mealLabel) {
             // Преобразование русских названий частей дня в английские
             const mealTypeMap = {
-                'завтрак': 'morning',
-                'обед': 'dinner',
-                'ужин': 'supper'
+                завтрак: "morning",
+                обед: "dinner",
+                ужин: "supper",
             };
 
             // Получаем английское название части дня (если это русское слово)
@@ -377,12 +460,12 @@ export default {
 
             // Проверка на наличие продуктов
             if (!this.products.length) {
-                this.showError(this.$t('Voice.errors.noProducts'));
+                this.showError(this.$t("Voice.errors.noProducts"));
                 return;
             }
 
             // Проверяем и подготавливаем продукты перед отправкой
-            const productsToSave = this.products.map(product => {
+            const productsToSave = this.products.map((product) => {
                 // Создаем копию продукта, чтобы не изменять оригинал
                 const preparedProduct = { ...product };
 
@@ -391,7 +474,7 @@ export default {
                     preparedProduct.product_id = null; // Гарантированно обнуляем ID
                     preparedProduct.isGenerated = false; // Устанавливаем как пользовательский продукт
                 }
-                
+
                 // Проверяем, есть ли у продукта вес
                 if (!preparedProduct.weight || preparedProduct.weight <= 0) {
                     preparedProduct.weight = 100; // Устанавливаем вес по умолчанию
@@ -401,65 +484,89 @@ export default {
             });
 
             // Устанавливаем состояние обработки
-            this.$store.commit('voice/RECORDING_PROCESS');
+            this.$store.commit("voice/RECORDING_PROCESS");
 
             // Отправляем продукты на сохранение
             saveVoiceProducts(productsToSave, englishMealType)
-                .then(response => {
+                .then((response) => {
                     // Обновляем состояние после успешного сохранения
-                    this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
+                    this.$store.commit(
+                        "voice/RECORDING_COMPLETE",
+                        this.audioBlob
+                    );
 
                     // Показываем сообщение об успехе с названием приема пищи
-                    this.showSuccess(this.$t('Voice.success.productsSaved', { meal: mealLabel || mealType }));
+                    this.showSuccess(
+                        this.$t("Voice.success.productsSaved", {
+                            meal: mealLabel || mealType,
+                        })
+                    );
 
                     // Очищаем список продуктов и расшифровку
                     this.products = [];
-                    this.transcription = '';
+                    this.transcription = "";
                     this.voiceResetRecording();
                 })
-                .catch(error => {
+                .catch((error) => {
                     // Обработка ошибок
-                    this.$store.commit('voice/RECORDING_COMPLETE', this.audioBlob);
-                    this.showError(error.response?.data?.message || this.$t('Voice.errors.saveError'));
-                    console.error('Ошибка при сохранении продуктов:', error);
+                    this.$store.commit(
+                        "voice/RECORDING_COMPLETE",
+                        this.audioBlob
+                    );
+                    this.showError(
+                        error.response?.data?.message ||
+                            this.$t("Voice.errors.saveError")
+                    );
+                    console.error("Ошибка при сохранении продуктов:", error);
                 });
         },
         cancel() {
-            this.showSuccess(this.$t('Voice.success.productsDeleted'));
+            this.showSuccess(this.$t("Voice.success.productsDeleted"));
             this.products = [];
-            this.transcription = '';
+            this.transcription = "";
             this.voiceResetRecording();
         },
         // Проверка поддержки браузером необходимых API
         checkBrowserSupport() {
             // Проверяем поддержку современных API
-            const hasNavigator = typeof navigator !== 'undefined';
+            const hasNavigator = typeof navigator !== "undefined";
             const hasMediaDevices = hasNavigator && navigator.mediaDevices;
-            const hasGetUserMedia = hasMediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function';
-            const hasMediaRecorder = typeof window !== 'undefined' && typeof window.MediaRecorder !== 'undefined';
+            const hasGetUserMedia =
+                hasMediaDevices &&
+                typeof navigator.mediaDevices.getUserMedia === "function";
+            const hasMediaRecorder =
+                typeof window !== "undefined" &&
+                typeof window.MediaRecorder !== "undefined";
 
             this.browserSupportsRecording = hasGetUserMedia && hasMediaRecorder;
 
             // Для более старых браузеров можно попробовать найти альтернативные API
             if (!this.browserSupportsRecording && hasNavigator) {
                 // Проверяем устаревшие методы для доступа к медиа-устройствам
-                navigator.getUserMedia = navigator.getUserMedia ||
-                                       navigator.webkitGetUserMedia ||
-                                       navigator.mozGetUserMedia ||
-                                       navigator.msGetUserMedia;
+                navigator.getUserMedia =
+                    navigator.getUserMedia ||
+                    navigator.webkitGetUserMedia ||
+                    navigator.mozGetUserMedia ||
+                    navigator.msGetUserMedia;
 
-                if (navigator.getUserMedia && typeof window.MediaRecorder !== 'undefined') {
+                if (
+                    navigator.getUserMedia &&
+                    typeof window.MediaRecorder !== "undefined"
+                ) {
                     this.browserSupportsRecording = true;
                 }
             }
 
-            console.log('Browser supports recording:', this.browserSupportsRecording);
+            console.log(
+                "Browser supports recording:",
+                this.browserSupportsRecording
+            );
         },
         saveOriginalValues() {
             // Сохраняем оригинальные значения продуктов по product_id
             this.originalProducts = {};
 
-            this.products.forEach(item => {
+            this.products.forEach((item) => {
                 if (item.product_id) {
                     this.originalProducts[item.product_id] = {
                         name: item.name,
@@ -467,12 +574,15 @@ export default {
                         protein: item.protein,
                         fats: item.fats,
                         carbs: item.carbs,
-                        weight: item.weight
+                        weight: item.weight,
                     };
                 }
             });
 
-            console.log('Сохранены оригинальные значения продуктов:', this.originalProducts);
+            console.log(
+                "Сохранены оригинальные значения продуктов:",
+                this.originalProducts
+            );
         },
         checkModifiedProducts() {
             // Проходим по всем продуктам и проверяем изменения
@@ -482,28 +592,32 @@ export default {
                     const original = this.originalProducts[product.product_id];
 
                     // Проверяем, изменились ли питательные вещества
-                    if (original && (
-                        product.calories !== original.calories ||
-                        product.protein !== original.protein ||
-                        product.fats !== original.fats ||
-                        product.carbs !== original.carbs
-                    )) {
+                    if (
+                        original &&
+                        (product.calories !== original.calories ||
+                            product.protein !== original.protein ||
+                            product.fats !== original.fats ||
+                            product.carbs !== original.carbs)
+                    ) {
                         // Устанавливаем флаг "модифицирован"
                         this.products[index].isModified = true;
-                        console.log(`Продукт "${product.name}" был модифицирован:`, {
-                            original: {
-                                calories: original.calories,
-                                protein: original.protein,
-                                fats: original.fats,
-                                carbs: original.carbs
-                            },
-                            modified: {
-                                calories: product.calories,
-                                protein: product.protein,
-                                fats: product.fats,
-                                carbs: product.carbs
+                        console.log(
+                            `Продукт "${product.name}" был модифицирован:`,
+                            {
+                                original: {
+                                    calories: original.calories,
+                                    protein: original.protein,
+                                    fats: original.fats,
+                                    carbs: original.carbs,
+                                },
+                                modified: {
+                                    calories: product.calories,
+                                    protein: product.protein,
+                                    fats: product.fats,
+                                    carbs: product.carbs,
+                                },
                             }
-                        });
+                        );
                     }
                 }
             });
@@ -511,34 +625,39 @@ export default {
         onProductChanged(index) {
             // Проверяем, есть ли у продукта ID (существующий продукт)
             if (this.products[index].product_id) {
-                const original = this.originalProducts[this.products[index].product_id];
+                const original =
+                    this.originalProducts[this.products[index].product_id];
 
                 // Проверяем, изменились ли питательные вещества
-                if (original && (
-                    this.products[index].calories !== original.calories ||
-                    this.products[index].protein !== original.protein ||
-                    this.products[index].fats !== original.fats ||
-                    this.products[index].carbs !== original.carbs ||
-                    this.products[index].weight !== original.weight
-                )) {
+                if (
+                    original &&
+                    (this.products[index].calories !== original.calories ||
+                        this.products[index].protein !== original.protein ||
+                        this.products[index].fats !== original.fats ||
+                        this.products[index].carbs !== original.carbs ||
+                        this.products[index].weight !== original.weight)
+                ) {
                     // Устанавливаем флаг "модифицирован"
                     this.products[index].isModified = true;
-                    console.log(`Продукт "${this.products[index].name}" был модифицирован:`, {
-                        original: {
-                            calories: original.calories,
-                            protein: original.protein,
-                            fats: original.fats,
-                            carbs: original.carbs,
-                            weight: original.weight
-                        },
-                        modified: {
-                            calories: this.products[index].calories,
-                            protein: this.products[index].protein,
-                            fats: this.products[index].fats,
-                            carbs: this.products[index].carbs,
-                            weight: this.products[index].weight
+                    console.log(
+                        `Продукт "${this.products[index].name}" был модифицирован:`,
+                        {
+                            original: {
+                                calories: original.calories,
+                                protein: original.protein,
+                                fats: original.fats,
+                                carbs: original.carbs,
+                                weight: original.weight,
+                            },
+                            modified: {
+                                calories: this.products[index].calories,
+                                protein: this.products[index].protein,
+                                fats: this.products[index].fats,
+                                carbs: this.products[index].carbs,
+                                weight: this.products[index].weight,
+                            },
                         }
-                    });
+                    );
                 }
             } else if (this.products[index].nameModified) {
                 // Если это продукт с измененным названием, отмечаем его как isModified
@@ -565,11 +684,13 @@ export default {
             product.isGenerated = false;
             // 4. Устанавливаем флаг isModified в true чтобы продукт визуально выделялся
             product.isModified = true;
-            
+
             // Установливаем needsSearch в false, чтобы при нажатии generate всегда использовалась генерация
             product.needsSearch = false;
-            console.log(`Изменение имени продукта с "${product.originalName}" на "${product.name}". Создан новый пользовательский продукт.`);
-            
+            console.log(
+                `Изменение имени продукта с "${product.originalName}" на "${product.name}". Создан новый пользовательский продукт.`
+            );
+
             // Обновляем originalName, чтобы отслеживать дальнейшие изменения
             product.originalName = product.name;
         },
@@ -577,15 +698,15 @@ export default {
     beforeUnmount() {
         // Освобождаем ресурсы при удалении компонента
         if (this.stream) {
-            this.stream.getTracks().forEach(track => track.stop());
+            this.stream.getTracks().forEach((track) => track.stop());
         }
-    }
-}
+    },
+};
 </script>
 <template>
     <div class="voice-page">
         <div class="voice-container">
-            <h1>{{ $t('Voice.title') }}</h1>
+            <h1>{{ $t("Voice.title") }}</h1>
 
             <!-- Сообщение об успешном действии -->
             <CaloriesSuccessNotification v-if="showSuccessMessage">
@@ -598,14 +719,17 @@ export default {
             </CaloriesErrorNotification>
 
             <div class="voice-description">
-                <p>{{ $t('Voice.description') }}</p>
+                <p>{{ $t("Voice.description") }}</p>
             </div>
 
             <div class="voice-controls">
                 <button
                     v-if="browserSupportsRecording"
                     @click="toggleRecording"
-                    :class="['record-button', { 'recording': isRecording, 'processing': isProcessing }]"
+                    :class="[
+                        'record-button',
+                        { recording: isRecording, processing: isProcessing },
+                    ]"
                     :disabled="isProcessing"
                 >
                     <FontAwesomeIcon
@@ -623,43 +747,80 @@ export default {
                         :icon="faSpinner()"
                         class="mic-icon fa-spin"
                     />
-                    <span v-if="!isRecording && !isProcessing">{{ $t('Voice.startRecording') }}</span>
-                    <span v-if="isRecording && !isProcessing">{{ $t('Voice.stopRecording') }}</span>
-                    <span v-if="isProcessing">{{ $t('Voice.processing') }}</span>
+                    <span v-if="!isRecording && !isProcessing">{{
+                        $t("Voice.startRecording")
+                    }}</span>
+                    <span v-if="isRecording && !isProcessing">{{
+                        $t("Voice.stopRecording")
+                    }}</span>
+                    <span v-if="isProcessing">{{
+                        $t("Voice.processing")
+                    }}</span>
                 </button>
 
                 <div v-if="!browserSupportsRecording" class="browser-warning">
                     <p>
-                        <FontAwesomeIcon :icon="faExclamationTriangle()" class="warning-icon" />
-                        {{ $t('Voice.browserWarning') }}
+                        <FontAwesomeIcon
+                            :icon="faExclamationTriangle()"
+                            class="warning-icon"
+                        />
+                        {{ $t("Voice.browserWarning") }}
                     </p>
                 </div>
             </div>
 
             <div class="transcription-container" v-if="transcription">
-                <h2>{{ $t('Voice.transcriptionTitle') }}</h2>
+                <h2>{{ $t("Voice.transcriptionTitle") }}</h2>
                 <div class="transcription-box">
                     {{ transcription }}
                 </div>
             </div>
 
             <div class="products-container" v-if="products.length > 0">
-                <h2>{{ $t('Voice.productsList') }}</h2>
+                <h2>{{ $t("Voice.productsList") }}</h2>
 
                 <div class="products-list">
-                    <div class="product-item" v-for="(product, index) in products" :key="index" :class="{'modified-product': product.isModified}">
+                    <div
+                        class="product-item"
+                        v-for="(product, index) in products"
+                        :key="index"
+                        :class="{ 'modified-product': product.isModified }"
+                    >
                         <div class="product-header">
                             <div class="product-name">
-                                <input type="text" v-model="product.name" :placeholder="$t('Voice.productName')" @change="onProductNameChanged(index)" />
-                                <span v-if="product.isModified" class="modified-tag">{{ $t('Voice.modifiedTag') }}</span>
-                                <span v-if="product.nameModified" class="name-modified-tag">{{ $t('Voice.nameModifiedTag') }}</span>
+                                <input
+                                    type="text"
+                                    v-model="product.name"
+                                    :placeholder="$t('Voice.productName')"
+                                    @change="onProductNameChanged(index)"
+                                />
+                                <span
+                                    v-if="product.isModified"
+                                    class="modified-tag"
+                                    >{{ $t("Voice.modifiedTag") }}</span
+                                >
+                                <span
+                                    v-if="product.nameModified"
+                                    class="name-modified-tag"
+                                    >{{ $t("Voice.nameModifiedTag") }}</span
+                                >
                             </div>
                             <div class="product-actions">
-                                <button class="generate-btn" @click="processProductData(index)" :title="$t('Voice.generateButton')">
+                                <button
+                                    class="generate-btn"
+                                    @click="processProductData(index)"
+                                    :title="$t('Voice.generateButton')"
+                                >
                                     <FontAwesomeIcon :icon="faMagic()" />
-                                    <span>{{ $t('Voice.generateButton') }}</span>
+                                    <span>{{
+                                        $t("Voice.generateButton")
+                                    }}</span>
                                 </button>
-                                <button class="remove-btn" @click="removeProduct(index)" :title="$t('Voice.deleteProduct')">
+                                <button
+                                    class="remove-btn"
+                                    @click="removeProduct(index)"
+                                    :title="$t('Voice.deleteProduct')"
+                                >
                                     <FontAwesomeIcon :icon="faTrash()" />
                                 </button>
                             </div>
@@ -667,55 +828,92 @@ export default {
 
                         <div class="product-details">
                             <div class="nutrition-item">
-                                <label>{{ $t('Voice.weight') }}</label>
-                                <input type="number" v-model="product.weight" min="0" @change="onProductChanged(index)" />
+                                <label>{{ $t("Voice.weight") }}</label>
+                                <input
+                                    type="number"
+                                    v-model="product.weight"
+                                    min="0"
+                                    @change="onProductChanged(index)"
+                                />
                             </div>
                             <div class="nutrition-item">
-                                <label>{{ $t('Voice.calories') }}</label>
-                                <input type="number" v-model="product.calories" min="0" @change="onProductChanged(index)" />
+                                <label>{{ $t("Voice.calories") }}</label>
+                                <input
+                                    type="number"
+                                    v-model="product.calories"
+                                    min="0"
+                                    @change="onProductChanged(index)"
+                                />
                             </div>
                             <div class="nutrition-item">
-                                <label>{{ $t('Voice.protein') }}</label>
-                                <input type="number" v-model="product.protein" min="0" step="0.1" @change="onProductChanged(index)" />
+                                <label>{{ $t("Voice.protein") }}</label>
+                                <input
+                                    type="number"
+                                    v-model="product.protein"
+                                    min="0"
+                                    step="0.1"
+                                    @change="onProductChanged(index)"
+                                />
                             </div>
                             <div class="nutrition-item">
-                                <label>{{ $t('Voice.fats') }}</label>
-                                <input type="number" v-model="product.fats" min="0" step="0.1" @change="onProductChanged(index)" />
+                                <label>{{ $t("Voice.fats") }}</label>
+                                <input
+                                    type="number"
+                                    v-model="product.fats"
+                                    min="0"
+                                    step="0.1"
+                                    @change="onProductChanged(index)"
+                                />
                             </div>
                             <div class="nutrition-item">
-                                <label>{{ $t('Voice.carbs') }}</label>
-                                <input type="number" v-model="product.carbs" min="0" step="0.1" @change="onProductChanged(index)" />
+                                <label>{{ $t("Voice.carbs") }}</label>
+                                <input
+                                    type="number"
+                                    v-model="product.carbs"
+                                    min="0"
+                                    step="0.1"
+                                    @change="onProductChanged(index)"
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="save-actions">
-                    <button class="save-btn breakfast" @click="saveToMeal('завтрак', $t('Diary.morning'))">
+                    <button
+                        class="save-btn breakfast"
+                        @click="saveToMeal('завтрак', $t('Diary.morning'))"
+                    >
                         <FontAwesomeIcon :icon="faSave()" />
-                        <span>{{ $t('Voice.saveBreakfast') }}</span>
+                        <span>{{ $t("Voice.saveBreakfast") }}</span>
                     </button>
-                    <button class="save-btn lunch" @click="saveToMeal('обед', $t('Diary.dinner'))">
+                    <button
+                        class="save-btn lunch"
+                        @click="saveToMeal('обед', $t('Diary.dinner'))"
+                    >
                         <FontAwesomeIcon :icon="faSave()" />
-                        <span>{{ $t('Voice.saveLunch') }}</span>
+                        <span>{{ $t("Voice.saveLunch") }}</span>
                     </button>
-                    <button class="save-btn dinner" @click="saveToMeal('ужин', $t('Diary.supper'))">
+                    <button
+                        class="save-btn dinner"
+                        @click="saveToMeal('ужин', $t('Diary.supper'))"
+                    >
                         <FontAwesomeIcon :icon="faSave()" />
-                        <span>{{ $t('Voice.saveDinner') }}</span>
+                        <span>{{ $t("Voice.saveDinner") }}</span>
                     </button>
                     <button class="cancel-btn" @click="cancel">
-                        <span>{{ $t('Voice.cancel') }}</span>
+                        <span>{{ $t("Voice.cancel") }}</span>
                     </button>
                 </div>
             </div>
 
             <div class="voice-tips" v-if="!products.length">
-                <h3>{{ $t('Voice.tips.title') }}</h3>
+                <h3>{{ $t("Voice.tips.title") }}</h3>
                 <ul>
-                    <li>{{ $t('Voice.tips.tip1') }}</li>
-                    <li>{{ $t('Voice.tips.tip2') }}</li>
-                    <li>{{ $t('Voice.tips.tip3') }}</li>
-                    <li>{{ $t('Voice.tips.tip4') }}</li>
+                    <li>{{ $t("Voice.tips.tip1") }}</li>
+                    <li>{{ $t("Voice.tips.tip2") }}</li>
+                    <li>{{ $t("Voice.tips.tip3") }}</li>
+                    <li>{{ $t("Voice.tips.tip4") }}</li>
                 </ul>
             </div>
         </div>

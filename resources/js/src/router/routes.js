@@ -1,4 +1,4 @@
-import Home from '@/pages/Home.vue';
+import Home from "@/pages/Home.vue";
 import Login from "@/pages/Login.vue";
 import Register from "@/pages/register.vue";
 import Recovery from "@/pages/Recovery.vue";
@@ -18,131 +18,141 @@ import Voice from "@/pages/Voice.vue";
 
 const routes = [
     {
-        path: '/',
+        path: "/",
         component: Home,
-        name: 'home',
+        name: "home",
         meta: {
             needAuth: false,
         },
     },
     {
-        path: '/privacy-policy',
+        path: "/privacy-policy",
         component: PrivacyPolicy,
-        name: 'privacyPolicy',
+        name: "privacyPolicy",
         meta: {
             needAuth: false,
         },
-    },{
-        path: '/terms-of-service',
+    },
+    {
+        path: "/terms-of-service",
         component: TermsOfService,
-        name: 'termsOfService',
+        name: "termsOfService",
         meta: {
             needAuth: false,
         },
-    },{
-        path: '/faq',
+    },
+    {
+        path: "/faq",
         component: FAQ,
-        name: 'faq',
+        name: "faq",
         meta: {
             needAuth: false,
         },
     },
     {
-        path: '/login',
+        path: "/login",
         component: Login,
-        name: 'login',
+        name: "login",
         meta: {
             needNotAuth: true,
         },
-    }, {
-        path: '/register',
+    },
+    {
+        path: "/register",
         component: Register,
-        name: 'register',
+        name: "register",
         meta: {
             needNotAuth: true,
         },
-    }, {
-        path: '/recovery',
+    },
+    {
+        path: "/recovery",
         component: Recovery,
-        name: 'recovery',
+        name: "recovery",
         meta: {
             needNotAuth: true,
         },
-    }, {
-        path: '/reset-password/:token',
+    },
+    {
+        path: "/reset-password/:token",
         component: RecoveryWithToken,
-        name: 'recoveryWithToken',
+        name: "recoveryWithToken",
         meta: {
             needNotAuth: true,
         },
-    }, {
-        path: '/calculation',
+    },
+    {
+        path: "/calculation",
         component: Calculation,
-        name: 'calculation',
+        name: "calculation",
         meta: {
             needAuth: false,
         },
-    }, {
-        path: '/stats',
+    },
+    {
+        path: "/stats",
         component: Stats,
-        name: 'stats',
+        name: "stats",
         meta: {
             needAuth: true,
         },
-    }, {
-        path: '/diary',
+    },
+    {
+        path: "/diary",
         component: Dairy,
-        name: 'diary',
+        name: "diary",
         meta: {
             needAuth: true,
         },
-    }, {
-        path: '/recipes',
+    },
+    {
+        path: "/recipes",
         component: Recipes,
-        name: 'recipes',
+        name: "recipes",
         meta: {
             needAuth: true,
         },
-    }, {
-        path: '/instructions',
+    },
+    {
+        path: "/instructions",
         component: Instructions,
-        name: 'instructions',
+        name: "instructions",
         meta: {
             needAuth: true,
         },
-    }, {
-        path: '/cabinet',
+    },
+    {
+        path: "/cabinet",
         component: Cabinet,
-        name: 'cabinet',
+        name: "cabinet",
         meta: {
             needAuth: true,
         },
-    }, {
-        path: '/goals',
+    },
+    {
+        path: "/goals",
         component: Goals,
-        name: 'goals',
+        name: "goals",
         meta: {
             needAuth: true,
         },
-
     },
     {
-        path: '/cabinet/change-password',
+        path: "/cabinet/change-password",
         component: ChangePassword,
-        name: 'change-password',
+        name: "change-password",
         meta: {
             needAuth: true,
         },
     },
     {
-        path: '/voice',
+        path: "/voice",
         component: Voice,
-        name: 'voice',
+        name: "voice",
         meta: {
             needAuth: true,
         },
     },
 ];
-
 
 export default routes;

@@ -10,8 +10,8 @@ export default {
         currentUser: Object,
         isHomePage: {
             type: Boolean,
-            default: false
-        }
+            default: false,
+        },
     },
     data() {
         return {
@@ -21,20 +21,28 @@ export default {
     methods: {
         buyPremium() {
             if (!this.termsAgreed) {
-                this.$store.dispatch('setError', this.$t('Home.AgreeToTermsRequired'));
+                this.$store.dispatch(
+                    "setError",
+                    this.$t("Home.AgreeToTermsRequired")
+                );
                 return;
             }
             if (!this.currentUser) {
                 this.$router.push({ name: "cabinet" });
                 return;
             }
-            this.$store.dispatch(actionTypes.buyPremium).then((premium_until) => {
-                // window.location.href = url;
-                this.currentUser.premium_until = premium_until;
-            });
+            this.$store
+                .dispatch(actionTypes.buyPremium)
+                .then((premium_until) => {
+                    // window.location.href = url;
+                    this.currentUser.premium_until = premium_until;
+                });
         },
         cancelPremium() {
-            this.$store.dispatch('setSuccess', this.$t('Notification.Success.CanceledSub'));
+            this.$store.dispatch(
+                "setSuccess",
+                this.$t("Notification.Success.CanceledSub")
+            );
         },
     },
 };
@@ -47,18 +55,21 @@ export default {
             <p v-if="!isPremium">{{ $t("Home.PremiumDesc") }}</p>
             <p v-else>{{ $t("Home.PremiumAlreadyHaveDesc") }}</p>
         </div>
-        <div class="top-info_premium" :class="{ 'top-info_premium-cabinet': !isHomePage }">
+        <div
+            class="top-info_premium"
+            :class="{ 'top-info_premium-cabinet': !isHomePage }"
+        >
             <div v-if="!isPremium">
                 <span class="top-info_premium_text" @click="buyPremium">
                     {{ $t("Home.BuyPremium") }}
                 </span>
                 <label>
                     <input type="checkbox" v-model="termsAgreed" />
-                    {{ $t('Home.AgreeToTermsPart1') }}
+                    {{ $t("Home.AgreeToTermsPart1") }}
                     <router-link :to="{ name: 'termsOfService' }">
-                        {{ $t('Home.TermsOfService2') }}
+                        {{ $t("Home.TermsOfService2") }}
                     </router-link>
-                    {{ $t('Home.AgreeToTermsPart2') }}
+                    {{ $t("Home.AgreeToTermsPart2") }}
                 </label>
             </div>
             <div v-else>

@@ -1,13 +1,12 @@
 <script>
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import clickOutside from "@/directives/clickOutside.js";
-
 
 export default {
     name: "CaloriesCalculationDropdown",
-    components: {FontAwesomeIcon},
+    components: { FontAwesomeIcon },
     directives: {
-        'click-outside': clickOutside
+        "click-outside": clickOutside,
     },
     props: {
         options: {
@@ -32,13 +31,13 @@ export default {
             isActive: false,
             isActiveArrow: false,
             isHiding: false,
-        }
+        };
     },
     computed: {
         selectedOptionComputed() {
             const optionIndex = this.value - 1;
             return this.options[optionIndex];
-        }
+        },
     },
     methods: {
         toggleActive() {
@@ -65,52 +64,59 @@ export default {
         },
         selectOption(option, event) {
             this.selectedOption = option;
-            const dataIndex = event.currentTarget.getAttribute('data-attribute');
+            const dataIndex =
+                event.currentTarget.getAttribute("data-attribute");
             this.updateVariable(dataIndex);
         },
         updateVariable(option) {
-            this.$emit('update', option);
+            this.$emit("update", option);
         },
     },
-}
+};
 </script>
 
 <template>
     <div class="dropdown-section" v-click-outside="handleClickOutside">
         <div class="calculation-select" @click.stop="toggleActive">
             <div class="calculation-select_text">
-                {{ selectedOptionComputed
-                ? (selectedOptionComputed + ' ' + subName.toLowerCase())
-                : name
+                {{
+                    selectedOptionComputed
+                        ? selectedOptionComputed + " " + subName.toLowerCase()
+                        : name
                 }}
             </div>
 
-            <div class="calculation-select_active"
-                 :class="{ 'calculation-select_show': isActive, 'calculation-select_hide': isHiding }">
+            <div
+                class="calculation-select_active"
+                :class="{
+                    'calculation-select_show': isActive,
+                    'calculation-select_hide': isHiding,
+                }"
+            >
                 <ul class="calculation-select_list">
-                    <li v-for="(option, index) in options"
+                    <li
+                        v-for="(option, index) in options"
                         :key="index"
                         :data-attribute="index + 1"
                         @click="selectOption(option, $event)"
-                        class="calculation-select_li">
+                        class="calculation-select_li"
+                    >
                         {{ option }}
                     </li>
                 </ul>
             </div>
 
             <div class="calculation-select_arrow">
-                <span class="dropdown-arrow"
-                      :class="{ 'active': isActiveArrow}"></span>
+                <span
+                    class="dropdown-arrow"
+                    :class="{ active: isActiveArrow }"
+                ></span>
             </div>
         </div>
-
-
     </div>
-
 </template>
 
 <style scoped lang="scss">
-
 .dropdown-arrow {
     display: inline-block;
     //position: absolute;ч
@@ -236,6 +242,4 @@ export default {
         opacity: 0;
     }
 }
-
-
 </style>

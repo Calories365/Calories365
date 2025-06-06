@@ -1,24 +1,24 @@
-import { uploadVoiceRecord } from '@/api/voice.js';
+import { uploadVoiceRecord } from "@/api/voice.js";
 
 // Types мутаций
 export const mutationTypes = {
-    RECORDING_START: 'voice/RECORDING_START',
-    RECORDING_STOP: 'voice/RECORDING_STOP',
-    RECORDING_PROCESS: 'voice/RECORDING_PROCESS',
-    RECORDING_COMPLETE: 'voice/RECORDING_COMPLETE',
-    RECORDING_ERROR: 'voice/RECORDING_ERROR',
-    RECORDING_RESET: 'voice/RECORDING_RESET',
-    UPLOAD_START: 'voice/UPLOAD_START',
-    UPLOAD_SUCCESS: 'voice/UPLOAD_SUCCESS',
-    UPLOAD_FAILURE: 'voice/UPLOAD_FAILURE'
+    RECORDING_START: "voice/RECORDING_START",
+    RECORDING_STOP: "voice/RECORDING_STOP",
+    RECORDING_PROCESS: "voice/RECORDING_PROCESS",
+    RECORDING_COMPLETE: "voice/RECORDING_COMPLETE",
+    RECORDING_ERROR: "voice/RECORDING_ERROR",
+    RECORDING_RESET: "voice/RECORDING_RESET",
+    UPLOAD_START: "voice/UPLOAD_START",
+    UPLOAD_SUCCESS: "voice/UPLOAD_SUCCESS",
+    UPLOAD_FAILURE: "voice/UPLOAD_FAILURE",
 };
 
 // Types действий
 export const actionTypes = {
-    startRecording: 'voice/startRecording',
-    stopRecording: 'voice/stopRecording',
-    uploadRecording: 'voice/uploadRecording',
-    resetRecording: 'voice/resetRecording'
+    startRecording: "voice/startRecording",
+    stopRecording: "voice/stopRecording",
+    uploadRecording: "voice/uploadRecording",
+    resetRecording: "voice/resetRecording",
 };
 
 const state = {
@@ -27,7 +27,7 @@ const state = {
     audioBlob: null,
     isUploading: false,
     uploadSuccess: false,
-    uploadError: null
+    uploadError: null,
 };
 
 const mutations = {
@@ -72,7 +72,7 @@ const mutations = {
     [mutationTypes.UPLOAD_FAILURE](state, error) {
         state.isUploading = false;
         state.uploadError = error;
-    }
+    },
 };
 
 const actions = {
@@ -84,7 +84,7 @@ const actions = {
     },
     async [actionTypes.uploadRecording]({ commit, state }) {
         if (!state.audioBlob) {
-            commit(mutationTypes.UPLOAD_FAILURE, 'Нет записи для отправки');
+            commit(mutationTypes.UPLOAD_FAILURE, "Нет записи для отправки");
             return;
         }
 
@@ -93,32 +93,35 @@ const actions = {
         try {
             const response = await uploadVoiceRecord(state.audioBlob);
             commit(mutationTypes.UPLOAD_SUCCESS);
-            
+
             // Возвращаем данные для использования в компоненте
             return response;
         } catch (error) {
-            commit(mutationTypes.UPLOAD_FAILURE, error.response?.data?.message || 'Ошибка при отправке записи');
+            commit(
+                mutationTypes.UPLOAD_FAILURE,
+                error.response?.data?.message || "Ошибка при отправке записи"
+            );
             throw error;
         }
     },
     [actionTypes.resetRecording]({ commit }) {
         commit(mutationTypes.RECORDING_RESET);
-    }
+    },
 };
 
 const getters = {
-    isRecording: state => state.isRecording,
-    isProcessing: state => state.isProcessing,
-    audioBlob: state => state.audioBlob,
-    isUploading: state => state.isUploading,
-    uploadSuccess: state => state.uploadSuccess,
-    uploadError: state => state.uploadError,
-    hasRecording: state => !!state.audioBlob
+    isRecording: (state) => state.isRecording,
+    isProcessing: (state) => state.isProcessing,
+    audioBlob: (state) => state.audioBlob,
+    isUploading: (state) => state.isUploading,
+    uploadSuccess: (state) => state.uploadSuccess,
+    uploadError: (state) => state.uploadError,
+    hasRecording: (state) => !!state.audioBlob,
 };
 
 export default {
     state,
     mutations,
     actions,
-    getters
-}; 
+    getters,
+};

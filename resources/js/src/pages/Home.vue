@@ -3,7 +3,7 @@ import { mapState } from "vuex";
 import { actionTypes } from "@/store/modules/auth.js";
 import CaloriesButton from "../Components/CaloriesButton.vue";
 import PremiumSection from "../Components/PremiumSection.vue";
-import { useAcademic } from '@/composables/useAcademic';
+import { useAcademic } from "@/composables/useAcademic";
 
 export default {
     name: "LandingPage",
@@ -12,12 +12,12 @@ export default {
         return {
             telegramAuth: null,
             telegramLink: null,
-            termsAgreed: false
+            termsAgreed: false,
         };
     },
     computed: {
         ...mapState({
-            currentUser: state => state.auth.currentUser,
+            currentUser: (state) => state.auth.currentUser,
         }),
 
         /**
@@ -25,22 +25,22 @@ export default {
          */
         videoUrl() {
             const locale = this.$i18n.locale;
-            if (locale === 'ua') {
-                return 'https://www.youtube.com/embed/UJO-9fank5c';
-            } else if (locale === 'ru') {
-                return 'https://www.youtube.com/embed/_-fZHn5Xv8c';
+            if (locale === "ua") {
+                return "https://www.youtube.com/embed/UJO-9fank5c";
+            } else if (locale === "ru") {
+                return "https://www.youtube.com/embed/_-fZHn5Xv8c";
             } else {
-                return 'https://www.youtube.com/embed/q-42W0YCldk';
+                return "https://www.youtube.com/embed/q-42W0YCldk";
             }
         },
-        voiceInput(){
+        voiceInput() {
             const locale = this.$i18n.locale;
-            if (locale === 'ua') {
-                return 'Голосове введення';
-            } else if (locale === 'ru') {
-                return 'Голосовой ввод';
+            if (locale === "ua") {
+                return "Голосове введення";
+            } else if (locale === "ru") {
+                return "Голосовой ввод";
             } else {
-                return 'Voice input';
+                return "Voice input";
             }
         },
         telegramLinkText() {
@@ -60,13 +60,13 @@ export default {
             }
             const premiumUntil = new Date(this.currentUser.premium_until);
             return premiumUntil > new Date();
-        }
+        },
     },
     methods: {
         goToCalculator() {
             this.$router.push({ name: "calculation" });
         },
-        goToVoiceInput(){
+        goToVoiceInput() {
             this.$router.push({ name: "voice" });
         },
         goToDiary() {
@@ -91,7 +91,10 @@ export default {
         },
         buyPremium() {
             if (!this.termsAgreed) {
-                this.$store.dispatch('setError', this.$t('Home.AgreeToTermsRequired'));
+                this.$store.dispatch(
+                    "setError",
+                    this.$t("Home.AgreeToTermsRequired")
+                );
                 return;
             }
             if (!this.currentUser) {
@@ -104,37 +107,40 @@ export default {
         },
         goToPremium() {
             this.$router.push({ name: "premium" });
-        }
+        },
     },
     mounted() {
-        const savedLocale = localStorage.getItem('locale');
+        const savedLocale = localStorage.getItem("locale");
         if (!savedLocale) {
-            this.$i18n.locale = 'uk';
-            localStorage.setItem('locale', 'uk');
+            this.$i18n.locale = "uk";
+            localStorage.setItem("locale", "uk");
         } else {
             this.$i18n.locale = savedLocale;
         }
 
         const paymentStatus = this.$route.query.payment;
         if (paymentStatus === "success") {
-            this.$store.dispatch("setSuccess", this.$t("Cabinet.PaymentSuccess"));
+            this.$store.dispatch(
+                "setSuccess",
+                this.$t("Cabinet.PaymentSuccess")
+            );
         } else if (paymentStatus === "error") {
             const errorMessage = this.$t("Cabinet.PaymentError");
             this.$store.dispatch("setError", errorMessage);
         }
 
-
         if (this.currentUser) {
             this.telegramAuth = this.currentUser.telegram_auth;
-            this.$store.dispatch(actionTypes.getTelegramLink)
-                .then(link => {
+            this.$store
+                .dispatch(actionTypes.getTelegramLink)
+                .then((link) => {
                     this.telegramLink = link;
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error("Error fetching telegram link:", error);
                 });
         }
-    }
+    },
 };
 </script>
 
@@ -143,20 +149,35 @@ export default {
         <section class="hero">
             <div class="container hero-content">
                 <div class="hero-image-container" id="hero-picture">
-<!--                    <img v-if="!$isAcademic" src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />-->
-<!--                    <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />-->
-                    <img src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />
+                    <!--                    <img v-if="!$isAcademic" src="@/assets/miaaa33.jpg" alt="Главное фото" class="hero-image" />-->
+                    <!--                    <img v-if="$isAcademic" src="@/assets/111111.jpg" alt="Главное фото" class="hero-image" />-->
+                    <img
+                        src="@/assets/111111.jpg"
+                        alt="Главное фото"
+                        class="hero-image"
+                    />
                 </div>
                 <div class="hero-action" id="voice-input">
-                    <h2>{{ $t("Home.Title") }}</h2 >
+                    <h2>{{ $t("Home.Title") }}</h2>
                     <p>
                         {{ $t("Home.DescriptionP1") }}
-                        <span class="hero-action__desc-link telegram_link" @click="openTelegramLink">Telegram bot</span>
+                        <span
+                            class="hero-action__desc-link telegram_link"
+                            @click="openTelegramLink"
+                            >Telegram bot</span
+                        >
                         {{ $t("Home.DescriptionP2") }}
-                        <span class="hero-action__desc-link voice_page_link" @click="goToVoiceInput">{{voiceInput}}</span>.
+                        <span
+                            class="hero-action__desc-link voice_page_link"
+                            @click="goToVoiceInput"
+                            >{{ voiceInput }}</span
+                        >.
                     </p>
                     <div class="hero-buttons">
-                        <calories-button @click="goToCalculator" class="calculator-section_head-button">
+                        <calories-button
+                            @click="goToCalculator"
+                            class="calculator-section_head-button"
+                        >
                             {{ $t("Home.LoseWeight") }}
                         </calories-button>
                     </div>
@@ -167,9 +188,14 @@ export default {
         <section class="features" id="voice-input-section">
             <div class="container features-grid">
                 <div class="feature" id="telegram-bot-block">
-                    <h3 class="telegram-section-title">{{ $t("Home.TelegramBotTitle") }}</h3>
+                    <h3 class="telegram-section-title">
+                        {{ $t("Home.TelegramBotTitle") }}
+                    </h3>
                     <p>{{ $t("Home.TelegramBotDesc") }}</p>
-                    <calories-button @click="openTelegramLink" class="mid-info_button">
+                    <calories-button
+                        @click="openTelegramLink"
+                        class="mid-info_button"
+                    >
                         {{ telegramLinkText }}
                     </calories-button>
                 </div>
@@ -209,17 +235,28 @@ export default {
             </div>
         </section>
 
-
         <section class="transformation">
             <div class="container transformation-content">
                 <div class="transformation-images">
-                    <img src="@/assets/SadAndFat.jpg" alt="До" class="transformation-image" />
+                    <img
+                        src="@/assets/SadAndFat.jpg"
+                        alt="До"
+                        class="transformation-image"
+                    />
                     <div class="arrow_desktop">→</div>
                     <div class="arrow_mobile">↓</div>
-                    <img src="@/assets/HappyAndFit.jpg" alt="После" class="transformation-image" />
+                    <img
+                        src="@/assets/HappyAndFit.jpg"
+                        alt="После"
+                        class="transformation-image"
+                    />
                 </div>
                 <div class="hero-buttons">
-                    <calories-button @click="goToCalculator" class="calculator-section_head-button" passed-class="extra-padding">
+                    <calories-button
+                        @click="goToCalculator"
+                        class="calculator-section_head-button"
+                        passed-class="extra-padding"
+                    >
                         {{ $t("Home.LoseWeight") }}
                     </calories-button>
                 </div>
@@ -227,15 +264,29 @@ export default {
         </section>
 
         <section class="premium" id="premium-section" v-if="!$isAcademic">
-            <PremiumSection :isPremium="isPremium" :currentUser="currentUser" :is-home-page="true" />
+            <PremiumSection
+                :isPremium="isPremium"
+                :currentUser="currentUser"
+                :is-home-page="true"
+            />
         </section>
 
         <footer class="main-footer" v-if="$route.name === 'home'">
             <div class="container">
                 <div class="footer-links">
-                    <router-link :to="{ name: 'privacyPolicy' }" class="privacy-link">{{ $t("Home.PrivacyPolicy") }}</router-link>
-                    <router-link :to="{ name: 'termsOfService' }" class="privacy-link">{{ $t("Home.TermsOfService") }}</router-link>
-                    <router-link :to="{ name: 'faq' }" class="privacy-link">{{ $t("Home.FAQ") }}</router-link>
+                    <router-link
+                        :to="{ name: 'privacyPolicy' }"
+                        class="privacy-link"
+                        >{{ $t("Home.PrivacyPolicy") }}</router-link
+                    >
+                    <router-link
+                        :to="{ name: 'termsOfService' }"
+                        class="privacy-link"
+                        >{{ $t("Home.TermsOfService") }}</router-link
+                    >
+                    <router-link :to="{ name: 'faq' }" class="privacy-link">{{
+                        $t("Home.FAQ")
+                    }}</router-link>
                 </div>
                 <div class="main-footer_info-for-payment">
                     <div class="contact-info">

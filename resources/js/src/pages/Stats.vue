@@ -1,15 +1,19 @@
 <script setup>
-import {computed, onMounted} from 'vue';
-import {useStore} from 'vuex';
-import {actionTypes, getterTypes} from "@/store/modules/stats.js";
+import { computed, onMounted } from "vue";
+import { useStore } from "vuex";
+import { actionTypes, getterTypes } from "@/store/modules/stats.js";
 import CaloriesCalendar from "@/Components/StatsComponents/CaloriesCalendar.vue";
 import CaloriesArrowLeft from "@/UI/CaloriesArrowLeft.vue";
 import CaloriesArrowRight from "@/UI/CaloriesArrowRight.vue";
 import formatDate from "@/helpers/formatDate.js";
 
 const store = useStore();
-const currentDate = computed(() => formatDate(store.getters[`${getterTypes.currentDate}`]));
-const calendarInfo = computed(() => store.getters[`${getterTypes.calendarInfo}`]);
+const currentDate = computed(() =>
+    formatDate(store.getters[`${getterTypes.currentDate}`])
+);
+const calendarInfo = computed(
+    () => store.getters[`${getterTypes.calendarInfo}`]
+);
 const currentData = computed(() => store.getters[`${getterTypes.currentData}`]);
 onMounted(() => {
     store.dispatch(actionTypes.dataInitialization);
@@ -23,27 +27,25 @@ function dateToggle(direction) {
 
 <template>
     <section class="stats">
-        <p class="stats_head">{{ $t('Stats.Stats') }}</p>
+        <p class="stats_head">{{ $t("Stats.Stats") }}</p>
 
         <div class="stats_date">
             <div class="stats_arrow-left">
-                <calories-arrow-left @click="dateToggle('previous')"/>
+                <calories-arrow-left @click="dateToggle('previous')" />
             </div>
 
             <span class="stats_date-span">
-               {{ currentDate }}
+                {{ currentDate }}
             </span>
             <div class="stats_arrow-right">
-                <calories-arrow-right @click="dateToggle('next')"/>
+                <calories-arrow-right @click="dateToggle('next')" />
             </div>
-
         </div>
         <div class="stats_calendar">
-            <CaloriesCalendar :currentDate="currentDate"/>
+            <CaloriesCalendar :currentDate="currentDate" />
         </div>
     </section>
 </template>
-
 
 <style scoped lang="scss">
 .stats {

@@ -1,15 +1,15 @@
 <script>
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 export default {
     name: "CaloriesTestLocale",
-    components: {FontAwesomeIcon},
+    components: { FontAwesomeIcon },
     data() {
         return {
             isOpen: false,
             isActive: false,
-            selectedLocale: localStorage.getItem('locale') || 'en',
-            locales: ['en', 'ua'],
+            selectedLocale: localStorage.getItem("locale") || "en",
+            locales: ["en", "ua"],
         };
     },
     methods: {
@@ -30,7 +30,7 @@ export default {
         changeLocale(locale) {
             this.selectedLocale = locale;
             this.$i18n.locale = locale;
-            localStorage.setItem('locale', locale);
+            localStorage.setItem("locale", locale);
             this.isOpen = false;
         },
         handleClickOutside(event) {
@@ -40,13 +40,12 @@ export default {
         },
     },
     mounted() {
-        document.addEventListener('click', this.handleClickOutside);
+        document.addEventListener("click", this.handleClickOutside);
     },
     beforeUnmount() {
-        document.removeEventListener('click', this.handleClickOutside);
-    }
-}
-
+        document.removeEventListener("click", this.handleClickOutside);
+    },
+};
 </script>
 
 <template>
@@ -55,23 +54,24 @@ export default {
             <div class="calculation-select_text">{{ selectedLocale }}</div>
             <div class="calculation-select_active" v-if="isOpen">
                 <ul class="calculation-select_list">
-                    <li v-for="locale in locales" :key="locale"
+                    <li
+                        v-for="locale in locales"
+                        :key="locale"
                         @click="changeLocale(locale)"
-                        class="calculation-select_li">
+                        class="calculation-select_li"
+                    >
                         {{ locale.toUpperCase() }}
                     </li>
                 </ul>
             </div>
             <div class="calculation-select_arrow">
-                <font-awesome-icon :icon="['fas', 'angle-down']"/>
+                <font-awesome-icon :icon="['fas', 'angle-down']" />
             </div>
         </div>
     </div>
 </template>
 
-
 <style scoped lang="scss">
-
 .dropdown-section {
     cursor: pointer;
     margin: 0 auto;
@@ -159,8 +159,4 @@ export default {
         opacity: 0;
     }
 }
-
-
 </style>
-
-

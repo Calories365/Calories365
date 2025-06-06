@@ -12,7 +12,7 @@ class FoodConsumption extends Model
     use HasFactory;
 
     /**
-     * @var int|mixed|string|null
+     * @var array<int, string>
      */
     protected $fillable = [
         'user_id', 'food_id', 'quantity', 'consumed_at', 'part_of_day',

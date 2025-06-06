@@ -1,10 +1,10 @@
 <script setup>
-import {defineEmits, defineProps} from 'vue';
+import { defineEmits, defineProps } from "vue";
 
 const props = defineProps({
-    modelValue: Number
+    modelValue: Number,
 });
-const emits = defineEmits(['update:modelValue']);
+const emits = defineEmits(["update:modelValue"]);
 </script>
 
 <template>
@@ -13,9 +13,8 @@ const emits = defineEmits(['update:modelValue']);
         class="styled-input"
         :value="modelValue !== null ? modelValue.toString() : ''"
         @input="emits('update:modelValue', $event.target.valueAsNumber)"
-    >
+    />
 </template>
-
 
 <style scoped lang="scss">
 .styled-input {

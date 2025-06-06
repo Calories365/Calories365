@@ -4,21 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Jobs\SendNewUserToBotPanelJob;
 use App\Models\User;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
 {
-    public function redirectToGoogle(): RedirectResponse
+    public function redirectToGoogle(): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         return Socialite::driver('google')->redirect();
     }
 
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(): \Illuminate\Http\RedirectResponse
     {
-        $socialUser = Socialite::driver('google')->stateless()->user();
-        $user = $this->findOrCreateUser($socialUser, 'google');
+        $googleUser = Socialite::driver('google')
+            ->stateless()
+            ->user();
+        $user = $this->findOrCreateUser($googleUser, 'google');
 
         if (is_null($user->email_verified_at)) {
             $user->email_verified_at = now();

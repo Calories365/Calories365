@@ -1,7 +1,7 @@
 <script>
 import { mapState } from "vuex";
 import { actionTypes } from "@/store/modules/auth.js";
-import { useAcademic } from '@/composables/useAcademic';
+import { useAcademic } from "@/composables/useAcademic";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
 import router from "@/router/router.js";
 import PremiumSection from "../Components/PremiumSection.vue";
@@ -73,7 +73,10 @@ export default {
         const paymentStatus = this.$route.query.payment;
 
         if (paymentStatus === "success") {
-            this.$store.dispatch("setSuccess", this.$t("Cabinet.PaymentSuccess"));
+            this.$store.dispatch(
+                "setSuccess",
+                this.$t("Cabinet.PaymentSuccess")
+            );
         } else if (paymentStatus === "error") {
             const errorMessage = this.$t("Cabinet.PaymentError");
             this.$store.dispatch("setError", errorMessage);
@@ -100,7 +103,9 @@ export default {
     <section class="page-cabinet_section">
         <div class="page-cabinet_container">
             <div class="page-cabinet_header">
-                <h1 class="page-cabinet_title">{{ $t("Cabinet.PersonalCabinet") }}</h1>
+                <h1 class="page-cabinet_title">
+                    {{ $t("Cabinet.PersonalCabinet") }}
+                </h1>
             </div>
             <div class="page-cabinet_content">
                 <div class="page-cabinet_top top-info">
@@ -108,34 +113,59 @@ export default {
                         <img src="@/assets/valera.png" />
                     </div>
                     <div class="top-info_premium" v-if="!$isAcademic">
-                        <PremiumSection :isPremium="isPremium" :currentUser="currentUser" />
+                        <PremiumSection
+                            :isPremium="isPremium"
+                            :currentUser="currentUser"
+                        />
                     </div>
                 </div>
                 <div class="page-cabinet_mid mid-info">
                     <div class="mid-info_email">
-                        <div class="mid-info_text">{{ $t("Cabinet.Mail") }}:</div>
-                        <input v-model="email" disabled class="mid-info_credentials" />
+                        <div class="mid-info_text">
+                            {{ $t("Cabinet.Mail") }}:
+                        </div>
+                        <input
+                            v-model="email"
+                            disabled
+                            class="mid-info_credentials"
+                        />
                     </div>
                     <div class="mid-info_login">
-                        <div class="mid-info_text">{{ $t("Cabinet.Name") }}:</div>
+                        <div class="mid-info_text">
+                            {{ $t("Cabinet.Name") }}:
+                        </div>
                         <input v-model="name" class="mid-info_credentials" />
                     </div>
                     <div class="mid-info_link">
-                        <div class="mid-info_text"><a href="#" @click.prevent="openTelegramLink" class="telegram-bot-link">{{ $t("Cabinet.TelegramBot") }}</a>:</div>
+                        <div class="mid-info_text">
+                            <a
+                                href="#"
+                                @click.prevent="openTelegramLink"
+                                class="telegram-bot-link"
+                                >{{ $t("Cabinet.TelegramBot") }}</a
+                            >:
+                        </div>
                         <span
                             class="mid-info_credentials link"
                             @click="openTelegramLink"
-                            style="cursor: pointer;"
+                            style="cursor: pointer"
                         >
                             {{ telegramLinkText }}
                         </span>
                     </div>
                     <div class="mid-info_login">
-                        <div class="mid-info_text">{{ $t("Cabinet.CaloriesLimit") }}:</div>
-                        <input v-model="caloriesLimit" class="mid-info_credentials" />
+                        <div class="mid-info_text">
+                            {{ $t("Cabinet.CaloriesLimit") }}:
+                        </div>
+                        <input
+                            v-model="caloriesLimit"
+                            class="mid-info_credentials"
+                        />
                     </div>
                     <div class="mid-info_link">
-                        <div class="mid-info_text">{{ $t("Cabinet.Password") }}:</div>
+                        <div class="mid-info_text">
+                            {{ $t("Cabinet.Password") }}:
+                        </div>
                         <router-link :to="{ name: 'change-password' }">
                             <span class="mid-info_credentials link">
                                 {{ $t("Cabinet.ChangingPassword") }}
@@ -143,7 +173,10 @@ export default {
                         </router-link>
                     </div>
                     <div class="mid-info_buttons new-password">
-                        <calories-button @click="changeName" class="mid-info_button">
+                        <calories-button
+                            @click="changeName"
+                            class="mid-info_button"
+                        >
                             {{ $t("Cabinet.Save") }}
                         </calories-button>
                         <calories-button
@@ -160,9 +193,7 @@ export default {
     </section>
 </template>
 
-
 <style scoped lang="scss">
-
 .telegram-bot-link {
     color: inherit;
     text-decoration: none;
@@ -401,5 +432,4 @@ export default {
         color: $pink_color;
     }
 }
-
 </style>

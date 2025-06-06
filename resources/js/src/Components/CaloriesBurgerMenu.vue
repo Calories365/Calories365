@@ -13,33 +13,35 @@ export default {
     },
     methods: {
         toggleBurger() {
-            this.$emit('update', false);
-        }
-    }
-}
+            this.$emit("update", false);
+        },
+    },
+};
 </script>
 
 <template>
-    <div class="burger-menu_wrapper" :class="{ 'opened': isBurgerOpen }">
+    <div class="burger-menu_wrapper" :class="{ opened: isBurgerOpen }">
         <div class="burger-menu_container">
             <ul id="menu-burger-menu" class="menu">
-                <li v-if="true" v-for="menuItem in menuItems" :key="menuItem"
-                    class="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-has-children menu-item-1201">
+                <li
+                    v-if="true"
+                    v-for="menuItem in menuItems"
+                    :key="menuItem"
+                    class="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-has-children menu-item-1201"
+                >
                     <router-link
                         @click="toggleBurger"
-                        :to="{name: menuItem}" aria-current="page">{{
-                            $t(`message.${menuItem}`)
-                        }}
+                        :to="{ name: menuItem }"
+                        aria-current="page"
+                        >{{ $t(`message.${menuItem}`) }}
                     </router-link>
                 </li>
             </ul>
         </div>
     </div>
-
 </template>
 
 <style scoped lang="scss">
-
 /*New burger menu with sidebar*/
 .lock-scroll {
     overflow: hidden; /* Запрещает прокрутку на всем документе */

@@ -1,6 +1,6 @@
-import {createStore} from 'vuex';
+import { createStore } from "vuex";
 
-import auth from '@/store/modules/auth';
+import auth from "@/store/modules/auth";
 import calculation from "@/store/modules/calculation.js";
 import dairy from "@/store/modules/dairy.js";
 import changeLocale from "@/store/modules/changeLocale.js";
@@ -36,27 +36,33 @@ export default createStore({
         },
     },
     actions: {
-        setSuccess({commit}, payload) {
-            commit('SET_SUCCESS', payload);
-            commit('RESET_ERROR');
+        setSuccess({ commit }, payload) {
+            commit("SET_SUCCESS", payload);
+            commit("RESET_ERROR");
 
             if (payload !== null) {
                 setTimeout(() => {
-                    commit('RESET_NOTIFICATION');
+                    commit("RESET_NOTIFICATION");
                 }, 3000);
             }
         },
-        setError({commit}, payload) {
-            commit('SET_ERROR', payload);
-            commit('RESET_SUCCESS');
+        setError({ commit }, payload) {
+            commit("SET_ERROR", payload);
+            commit("RESET_SUCCESS");
             if (payload !== null) {
                 setTimeout(() => {
-                    commit('RESET_NOTIFICATION');
+                    commit("RESET_NOTIFICATION");
                 }, 3000);
             }
         },
     },
     modules: {
-        auth, calculation, dairy, changeLocale, stats, language, voice
-    }
+        auth,
+        calculation,
+        dairy,
+        changeLocale,
+        stats,
+        language,
+        voice,
+    },
 });

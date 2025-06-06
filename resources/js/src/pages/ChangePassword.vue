@@ -1,103 +1,110 @@
 <script>
-import {mapState} from "vuex";
+import { mapState } from "vuex";
 import CaloriesButton from "@/Components/CaloriesButton.vue";
-import {actionTypes} from "@/store/modules/auth.js";
+import { actionTypes } from "@/store/modules/auth.js";
 import router from "@/router/router.js";
 
 export default {
     name: "Cabinet",
-    components: {CaloriesButton},
+    components: { CaloriesButton },
     data() {
         return {
             currentPassword: null,
             password: null,
             passwordConfirmation: null,
-        }
+        };
     },
     methods: {
-        play() {
-
-        },
+        play() {},
         goBack() {
-            router.push({name: 'cabinet'});
+            router.push({ name: "cabinet" });
         },
         changePassword() {
-            this.$store.dispatch(actionTypes.updateUsersPassword,
-                {
+            this.$store
+                .dispatch(actionTypes.updateUsersPassword, {
                     current_password: this.currentPassword,
                     password: this.password,
-                    password_confirmation: this.passwordConfirmation
-                }).then(() => {
-                router.push({name: 'login'});
-            })
+                    password_confirmation: this.passwordConfirmation,
+                })
+                .then(() => {
+                    router.push({ name: "login" });
+                });
         },
     },
     computed: {
         ...mapState({
-            currentUser: state => state.auth.currentUser,
+            currentUser: (state) => state.auth.currentUser,
         }),
     },
-}
+};
 </script>
 <template>
     <section class="page-cabinet_section">
         <div class="page-cabinet_container">
             <div class="page-cabinet_header">
                 <div class="page-cabinet_arrow-back" @click="goBack">
-<!--                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">-->
-<!--                        <path-->
-<!--                            d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"-->
-<!--                            fill="darkgrey"/>-->
-<!--                    </svg>-->
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                    <!--                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">-->
+                    <!--                        <path-->
+                    <!--                            d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"-->
+                    <!--                            fill="darkgrey"/>-->
+                    <!--                    </svg>-->
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 448 512"
+                    >
                         <path
                             d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"
-                            fill="darkgrey"/>
+                            fill="darkgrey"
+                        />
                     </svg>
                 </div>
                 <h1 class="page-cabinet_title">
                     {{ $t("Cabinet.ChangingPassword") }}
                 </h1>
-
             </div>
             <div class="page-cabinet_content">
                 <div class="page-cabinet_top top-info">
-                    <div class="top-info_avatar"
-                         @click="play">
-                        <img src="@/assets/valera.png">
+                    <div class="top-info_avatar" @click="play">
+                        <img src="@/assets/valera.png" />
                     </div>
                 </div>
                 <div class="page-cabinet_mid mid-info">
-                    <div
-                        class="mid-info_email">
-                        <div
-                            class="mid-info_text">{{ $t("Cabinet.CurrentPassword") }}:
+                    <div class="mid-info_email">
+                        <div class="mid-info_text">
+                            {{ $t("Cabinet.CurrentPassword") }}:
                         </div>
                         <input
                             type="password"
                             v-model="currentPassword"
-                            class="mid-info_credentials">
+                            class="mid-info_credentials"
+                        />
                     </div>
                     <div class="mid-info_login">
-                        <div class="mid-info_text">{{ $t("Cabinet.NewPassword") }}:</div>
+                        <div class="mid-info_text">
+                            {{ $t("Cabinet.NewPassword") }}:
+                        </div>
                         <input
                             type="password"
                             v-model="password"
-                            class="mid-info_credentials">
+                            class="mid-info_credentials"
+                        />
                     </div>
                     <div class="mid-info_login">
-                        <div class="mid-info_text">{{ $t("Cabinet.RepeatPassword") }}:</div>
+                        <div class="mid-info_text">
+                            {{ $t("Cabinet.RepeatPassword") }}:
+                        </div>
                         <input
                             type="password"
                             v-model="passwordConfirmation"
-                            class="mid-info_credentials">
+                            class="mid-info_credentials"
+                        />
                     </div>
                     <div class="mid-info_buttons new-password">
                         <calories-button
                             @click="changePassword"
-                            class="mid-info_button"> {{
-                                $t("Cabinet.Update")
-                            }}
+                            class="mid-info_button"
+                        >
+                            {{ $t("Cabinet.Update") }}
                         </calories-button>
                     </div>
                 </div>

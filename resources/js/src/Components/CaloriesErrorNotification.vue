@@ -1,7 +1,7 @@
 <script>
 export default {
-    name: "CaloriesErrorNotification"
-}
+    name: "CaloriesErrorNotification",
+};
 </script>
 
 <template>
@@ -10,7 +10,6 @@ export default {
             <slot></slot>
         </div>
     </div>
-
 </template>
 
 <style scoped lang="scss">
@@ -53,5 +52,4 @@ export default {
         cursor: pointer;
     }
 }
-
 </style>

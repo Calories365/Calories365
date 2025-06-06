@@ -2,21 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SearchValidationRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
-use App\Services\SearchService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SearchProductController extends Controller
 {
-    private SearchService $searchService;
-
-    public function __construct(SearchService $searchService)
-    {
-        $this->searchService = $searchService;
-    }
-
-    public function search(SearchValidationRequest $request): \Illuminate\Http\JsonResponse
+    public function search(Request $request): JsonResponse
     {
         $query = $request->input('query');
         $count = $request->input('count', 10);
