@@ -28,7 +28,6 @@ const updateCurrentUser = (credentials) => {
     return axios.put("/user/profile-information", credentials);
 };
 const getTelegramLink = () => {
-    // Get the current locale from localStorage
     const locale = localStorage.getItem("locale") || "ua";
     return axios.get("/api/telegram-link", { params: { locale } });
 };
