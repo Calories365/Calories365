@@ -112,7 +112,6 @@ class ProductService
                     ['converted' => $validatedData['part_of_day']]);
             }
 
-            // Создаем запись о потреблении
             $consumption = FoodConsumption::createFoodConsumption($validatedData, $product);
 
             DB::commit();
@@ -132,7 +131,6 @@ class ProductService
     }
 
     /**
-     * Создание записи о потреблении продукта
      *
      * @throws \Exception
      */
