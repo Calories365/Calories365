@@ -27,7 +27,7 @@ class StoreFoodConsumptionRequest extends FormRequest
             'quantity' => 'required|numeric|min:0',
             'consumed_at' => 'required|date_format:Y-m-d',
             'part_of_day' => 'required|in:morning,dinner,supper',
-            'user_id' => 'nullable|integer|exists:users,id',
+//            'user_id' => 'nullable|integer|exists:users,id',
         ];
     }
 }
