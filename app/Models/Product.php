@@ -76,6 +76,8 @@ class Product extends Model
 
         $results = $builder->take(30)->get();
 
+        Log::info(print_r($results, true));
+
         /**
          * Sort the resulting collection so that
          *  goods of the current user (user_id = $user_id) go first.
@@ -105,77 +107,135 @@ class Product extends Model
         }
     }
 
-    public static function getRawProduct($query, $user_id, $locale): array|bool
+    //    public static function getRawProduct($query, $user_id, $locale): array|bool
+    //    {
+    //        $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
+    //
+    //        $filters = "active = 1 AND locale = '{$locale}' AND (user_id = {$user_id} OR user_id IS NULL)";
+    //
+    //        try {
+    //            $res = $client->index('products')->search($query, [
+    //                'showRankingScore' => true,
+    //                'limit' => 3,
+    //                'filter' => $filters,
+    //            ]);
+    //
+    //            $hits = $res->getHits();
+    //            Log::info('hits');
+    //            Log::info(print_r($hits, true));
+    //            // Если массив hits пуст, сразу возвращаем false
+    //            if (empty($hits)) {
+    //                Log::info('No products found.');
+    //
+    //                return false;
+    //            }
+    //
+    //            // Если есть только один результат, сразу используем его
+    //            if (count($hits) == 1) {
+    //                $firstProduct = $hits[0];
+    //                $rankingScore = $firstProduct['_rankingScore'] ?? 0;
+    //
+    //                if ($rankingScore) {
+    //                    return $firstProduct;
+    //                } else {
+    //                    return false;
+    //                }
+    //            }
+    //
+    //            ProductTranslation::search($query)
+    //                ->where('locale', $locale)
+    //                ->where('active', 1);
+    //
+    //            $client->index('products')->search($query, [
+    //                'showRankingScore' => true,
+    //                'limit' => 2,
+    //                'filter' => $filters,
+    //            ]);
+    //
+    //            // Если есть два и более результата, сравниваем их
+    //            if (isset($hits[0]['_rankingScore']) && isset($hits[1]['_rankingScore']) &&
+    //                $hits[0]['_rankingScore'] == $hits[1]['_rankingScore']) {
+    //                // Если рейтинги равны, предпочитаем продукт пользователя
+    //                if (isset($hits[0]['user_id']) && $hits[0]['user_id']) {
+    //                    $firstProduct = $hits[0];
+    //                } else {
+    //                    $firstProduct = $hits[1];
+    //                }
+    //            } else {
+    //                // Иначе используем первый результат
+    //                $firstProduct = $hits[0];
+    //            }
+    //
+    //            $rankingScore = $firstProduct['_rankingScore'] ?? 0;
+    //
+    //            if ($rankingScore) {
+    //                return $firstProduct;
+    //            } else {
+    //                return false;
+    //            }
+    //        } catch (\Exception $e) {
+    //            Log::error('Error in getRawProduct: '.$e->getMessage(), [
+    //                'query' => $query,
+    //                'user_id' => $user_id,
+    //                'locale' => $locale,
+    //                'trace' => $e->getTraceAsString(),
+    //            ]);
+    //
+    //            return false;
+    //        }
+    //    }
+    public static function getRawProduct(string $query, ?int $user_id, string $locale): array|bool
     {
         $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
 
-        $filters = "active = 1 AND locale = '{$locale}' AND (user_id = {$user_id} OR user_id IS NULL)";
+        $parts = [];
+        if ($user_id !== null) {
+            $parts[] = "(user_id = {$user_id} AND active = 1 AND verified IN [0,1])";
+        }
+        $parts[] = '(user_id IS NULL)';
+        $parts[] = $user_id !== null
+            ? "(verified = 1 AND user_id != {$user_id})"
+            : '(verified = 1)';
+        $filter = "locale = '{$locale}' AND (".implode(' OR ', $parts).')';
 
         try {
             $res = $client->index('products')->search($query, [
                 'showRankingScore' => true,
-                'limit' => 2,
-                'filter' => $filters,
+                'filter' => $filter,
+                'limit' => 10,
             ]);
 
             $hits = $res->getHits();
-
-            // Если массив hits пуст, сразу возвращаем false
             if (empty($hits)) {
-                Log::info('No products found.');
+                Log::info('Meili raw: no products');
 
                 return false;
             }
 
-            // Если есть только один результат, сразу используем его
-            if (count($hits) == 1) {
-                $firstProduct = $hits[0];
-                $rankingScore = $firstProduct['_rankingScore'] ?? 0;
+            usort($hits, function ($a, $b) use ($user_id) {
+                $scoreA = $a['_rankingScore'] ?? 0;
+                $scoreB = $b['_rankingScore'] ?? 0;
 
-                if ($rankingScore) {
-                    return $firstProduct;
-                } else {
-                    return false;
+                if ($scoreA !== $scoreB) {
+                    return $scoreB <=> $scoreA;
                 }
-            }
 
-            ProductTranslation::search($query)
-                ->where('locale', $locale)
-                ->where('active', 1);
+                $isOwnA = isset($a['user_id']) && $a['user_id'] == $user_id;
+                $isOwnB = isset($b['user_id']) && $b['user_id'] == $user_id;
 
-            $client->index('products')->search($query, [
-                'showRankingScore' => true,
-                'limit' => 2,
-                'filter' => $filters,
-            ]);
+                return $isOwnB <=> $isOwnA;
+            });
 
-            // Если есть два и более результата, сравниваем их
-            if (isset($hits[0]['_rankingScore']) && isset($hits[1]['_rankingScore']) &&
-                $hits[0]['_rankingScore'] == $hits[1]['_rankingScore']) {
-                // Если рейтинги равны, предпочитаем продукт пользователя
-                if (isset($hits[0]['user_id']) && $hits[0]['user_id']) {
-                    $firstProduct = $hits[0];
-                } else {
-                    $firstProduct = $hits[1];
-                }
-            } else {
-                // Иначе используем первый результат
-                $firstProduct = $hits[0];
-            }
+            $best = $hits[0];
+            $ranking = $best['_rankingScore'] ?? 0;
 
-            $rankingScore = $firstProduct['_rankingScore'] ?? 0;
+            return $ranking ? $best : false;
 
-            if ($rankingScore) {
-                return $firstProduct;
-            } else {
-                return false;
-            }
-        } catch (\Exception $e) {
-            Log::error('Error in getRawProduct: '.$e->getMessage(), [
+        } catch (\Throwable $e) {
+            Log::error('getRawProduct error: '.$e->getMessage(), [
                 'query' => $query,
-                'user_id' => $user_id,
-                'locale' => $locale,
-                'trace' => $e->getTraceAsString(),
+                'user' => $user_id,
+                'loc' => $locale,
             ]);
 
             return false;
