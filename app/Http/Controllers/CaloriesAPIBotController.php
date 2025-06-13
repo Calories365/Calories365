@@ -78,6 +78,11 @@ class CaloriesAPIBotController extends BaseController
 
                                 if ($searchedProducts->isNotEmpty()) {
                                     $productTranslation = $searchedProducts->first();
+
+                                    Log::info(print_r($searchedProducts, true));
+                                    //                                    if ($productTranslation['_rankingScore'] < 0.9) {
+                                    // //                                        return false;
+                                    //                                    }
                                     $productModel = $productTranslation->product;
 
                                     if ($productModel && $productModel->calories !== null) {
@@ -139,12 +144,172 @@ class CaloriesAPIBotController extends BaseController
                     'message' => 'Products found',
                     'products' => $productsInfo,
                 ];
+                //                return false;
             }
         }
 
         //        Log::info('products: ');
         //        Log::info(print_r($productsInfo, true));
         return response()->json($response);
+    }
+
+    /**
+     * Отдаёт только те продукты, у которых _rankingScore ≥ 0.9.
+     * Если ни один не прошёл фильтр — products = [] и message = "Products not found".
+     */
+    public function storeFiltered(Request $request): JsonResponse
+    {
+        $text = $request->input('text', '');
+        Log::info('Filtered store. Received text: '.$text);
+
+        $response = [
+            'message'  => 'Products not found',
+            'products' => [],
+        ];
+
+        if (trim($text) === '' || trim($text) === 'No products') {
+            return response()->json($response);
+        }
+
+        /* ---------- подготовка ---------- */
+        $locale     = app()->getLocale();
+        $suffixMap  = ['en'=>'grams','uk'=>'грам','ru'=>'грамм'];
+        $suffix     = $suffixMap[$locale] ?? 'грамм';
+        $delimiter  = str_contains($text,';') ? ';' : $suffix;
+        $rawItems   = array_filter(array_map('trim', explode($delimiter,$text)));
+
+        Log::info('Raw products:', $rawItems);
+
+        $productsInfo = [];
+        $userId       = auth()->id() ?? null;
+
+        /* ---------- цикл по каждой позиции ---------- */
+        foreach ($rawItems as $raw) {
+            $parts = array_map('trim', explode(' - ', $raw));
+
+            if (count($parts) !== 2 || !preg_match('/(\d+(\.\d+)?)/', $parts[1], $m)) {
+                Log::warning("Incorrect format: {$raw}");
+                $productsInfo[] = false;          // ← запись-«пустышка»
+                continue;
+            }
+
+            [$productName, $quantityStr] = $parts;
+            $quantity = (float) $m[1];
+
+            if ($quantity <= 0) {
+                Log::warning("Quantity ≤ 0 for {$productName}");
+                $productsInfo[] = false;          // ← «пустышка»
+                continue;
+            }
+
+            $candidate = Product::getRawProduct($productName, $userId, $locale);
+
+            if (!$candidate || (($candidate['_rankingScore'] ?? 0) < 0.9)) {
+                $ranking = $candidate['_rankingScore'] ?? 'none';
+                Log::info("Low ranking ({$ranking}) for {$productName}");
+                $productsInfo[] = false;          // ← «пустышка»
+                continue;
+            }
+
+            /** @var \App\Models\Product $productModel */
+            $productModel = Product::find($candidate['product_id']);
+            if (!$productModel || $productModel->calories === null) {
+                Log::warning("No nutritional data for {$productName}");
+                $productsInfo[] = false;          // ← «пустышка»
+                continue;
+            }
+
+            /* ---------- успешный результат ---------- */
+            $productsInfo[] = [
+                'product_translation' => [
+                    'id'            => $candidate['id'],
+                    'product_id'    => $candidate['product_id'],
+                    'locale'        => $candidate['locale'],
+                    'name'          => $candidate['name'],
+                    'said_name'     => $productName,
+                    'original_name' => $productName,
+                ],
+                'product' => [
+                    'id'              => $productModel->id,
+                    'user_id'         => $productModel->user_id,
+                    'calories'        => $productModel->calories,
+                    'proteins'        => $productModel->proteins,
+                    'carbohydrates'   => $productModel->carbohydrates,
+                    'fats'            => $productModel->fats,
+                    'fibers'          => $productModel->fibers ?? 0,
+                    'quantity_grams'  => $quantity,
+                ],
+                'quantity_grams' => $quantity,
+            ];
+        }
+
+        /* ---------- формируем ответ ---------- */
+        if ($productsInfo) {
+            $response = [
+                'message'  => 'Products found',
+                'products' => $productsInfo,
+            ];
+        }
+
+        return response()->json($response);
+    }
+
+
+    public function getTheMostRelevantProduct(Request $request)
+    {
+        Log::info('getTheMostRelevantProduct');
+        $text = $request->input('text');
+        $parts = explode(' - ', $text);
+
+        if (count($parts) > 1) {
+            $productName = trim($parts[0]);
+            $quantityStr = trim($parts[1]);
+        }
+        if (preg_match('/(\d+(\.\d+)?)/', $quantityStr, $matches)) {
+            $quantity = floatval($matches[1]);
+        }
+
+        $user_id = auth()->id();
+        $locale = app()->getLocale();
+
+        $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
+        $product = Product::where('id', $productTranslation['product_id'])->first();
+
+        if ($productTranslation['_rankingScore'] < 0.9) {
+            return false;
+        }
+
+        if ($productTranslation) {
+            $productInfo = [
+                'product_translation' => [
+                    'id' => $productTranslation['id'],
+                    'product_id' => $productTranslation['product_id'],
+                    'locale' => $productTranslation['locale'],
+                    'name' => $productTranslation['name'],
+                    'said_name' => $productName,
+                    'original_name' => $productName,
+                ],
+                'product' => [
+                    'id' => $product->id,
+                    'user_id' => $product->user_id,
+                    'calories' => $product->calories,
+                    'proteins' => $product->proteins,
+                    'carbohydrates' => $product->carbohydrates,
+                    'fats' => $product->fats,
+                    'fibers' => $product->fibers,
+                    'quantity_grams' => $quantity,
+                ],
+                'quantity_grams' => $quantity,
+            ];
+            Log::info(print_r($productInfo, true));
+
+            return response()->json([
+                'message' => 'Product found',
+                'product' => $productInfo,
+            ]);
+        } else {
+            return false;
+        }
     }
 
     public function saveProduct(StoreUsersFoodConsumptionsRequest $request, ProductService $productService): JsonResponse

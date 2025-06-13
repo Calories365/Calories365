@@ -1,0 +1,27 @@
+{
+  "update_id": 123456789,
+  "message": {
+    "message_id": 100,
+    "from": {
+      "id": 111111,
+      "is_bot": false,
+      "first_name": "Максим",
+      "username": "calories365_admin",
+      "language_code": "ru"
+    },
+    "chat": {
+      "id": 111111,
+      "first_name": "Максим",
+      "username": "calories365_admin",
+      "type": "private"
+    },
+    "date": 1700000000,
+    "voice": {
+      "duration": 3,
+      "mime_type": "audio/ogg",
+      "file_id": "AwACAgIAAxkBAAIV3mhLGBvSvtoQ4H1nfXw5O0AI6ytYAAKsewACe5VYSmz2pNDBemQ2NgQ",
+      "file_unique_id": "AgADrHsAAnuVWEo",
+      "file_size": 12439
+    }
+  }
+} 
