@@ -107,83 +107,6 @@ class Product extends Model
         }
     }
 
-    //    public static function getRawProduct($query, $user_id, $locale): array|bool
-    //    {
-    //        $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
-    //
-    //        $filters = "active = 1 AND locale = '{$locale}' AND (user_id = {$user_id} OR user_id IS NULL)";
-    //
-    //        try {
-    //            $res = $client->index('products')->search($query, [
-    //                'showRankingScore' => true,
-    //                'limit' => 3,
-    //                'filter' => $filters,
-    //            ]);
-    //
-    //            $hits = $res->getHits();
-    //            Log::info('hits');
-    //            Log::info(print_r($hits, true));
-    //            // Если массив hits пуст, сразу возвращаем false
-    //            if (empty($hits)) {
-    //                Log::info('No products found.');
-    //
-    //                return false;
-    //            }
-    //
-    //            // Если есть только один результат, сразу используем его
-    //            if (count($hits) == 1) {
-    //                $firstProduct = $hits[0];
-    //                $rankingScore = $firstProduct['_rankingScore'] ?? 0;
-    //
-    //                if ($rankingScore) {
-    //                    return $firstProduct;
-    //                } else {
-    //                    return false;
-    //                }
-    //            }
-    //
-    //            ProductTranslation::search($query)
-    //                ->where('locale', $locale)
-    //                ->where('active', 1);
-    //
-    //            $client->index('products')->search($query, [
-    //                'showRankingScore' => true,
-    //                'limit' => 2,
-    //                'filter' => $filters,
-    //            ]);
-    //
-    //            // Если есть два и более результата, сравниваем их
-    //            if (isset($hits[0]['_rankingScore']) && isset($hits[1]['_rankingScore']) &&
-    //                $hits[0]['_rankingScore'] == $hits[1]['_rankingScore']) {
-    //                // Если рейтинги равны, предпочитаем продукт пользователя
-    //                if (isset($hits[0]['user_id']) && $hits[0]['user_id']) {
-    //                    $firstProduct = $hits[0];
-    //                } else {
-    //                    $firstProduct = $hits[1];
-    //                }
-    //            } else {
-    //                // Иначе используем первый результат
-    //                $firstProduct = $hits[0];
-    //            }
-    //
-    //            $rankingScore = $firstProduct['_rankingScore'] ?? 0;
-    //
-    //            if ($rankingScore) {
-    //                return $firstProduct;
-    //            } else {
-    //                return false;
-    //            }
-    //        } catch (\Exception $e) {
-    //            Log::error('Error in getRawProduct: '.$e->getMessage(), [
-    //                'query' => $query,
-    //                'user_id' => $user_id,
-    //                'locale' => $locale,
-    //                'trace' => $e->getTraceAsString(),
-    //            ]);
-    //
-    //            return false;
-    //        }
-    //    }
     public static function getRawProduct(string $query, ?int $user_id, string $locale): array|bool
     {
         $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
@@ -202,9 +125,11 @@ class Product extends Model
             $res = $client->index('products')->search($query, [
                 'showRankingScore' => true,
                 'filter' => $filter,
-                'limit' => 10,
+                'limit' => 1,
             ]);
 
+//            Log::info('res: ');
+//            Log::info(print_r($res, true));
             $hits = $res->getHits();
             if (empty($hits)) {
                 Log::info('Meili raw: no products');
@@ -227,7 +152,16 @@ class Product extends Model
             });
 
             $best = $hits[0];
+//            foreach ($hits as $hit) {
+//                if (mb_strtolower(trim($hit['name'])) === mb_strtolower(trim($query))) {
+//                    $best = $hit;
+//                    break;
+//                }
+//            }
             $ranking = $best['_rankingScore'] ?? 0;
+
+            Log::info('$best: ');
+            Log::info(print_r($best, true));
 
             return $ranking ? $best : false;
 
