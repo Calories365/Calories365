@@ -55,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::middleware('check.bot.key')->group(function () {
     Route::group(['namespace' => 'App\Http\Controllers'], function () {
-        Route::post('/caloriesEndPoint', [\App\Http\Controllers\CaloriesAPIBotController::class, 'store'])
+        Route::post('/caloriesEndPoint', [\App\Http\Controllers\CaloriesAPIBotController::class, 'storeFiltered'])
             ->name('calculations.store2');
 
         Route::post('/caloriesEndPoint/saveProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'saveProduct'])
@@ -77,6 +77,9 @@ Route::middleware('check.bot.key')->group(function () {
 
         Route::post('/caloriesEndPoint/toggleRussianLanguage', [\App\Http\Controllers\LanguageSettingController::class, 'toggleRussianLanguage'])
             ->name('language.toggleRussian');
+
+        Route::post('/caloriesEndPoint/getTheMostRelevantProduct', [\App\Http\Controllers\CaloriesAPIBotController::class, 'getTheMostRelevantProduct'])
+            ->name('calculations.getTheMostRelevantProduct');
 
         Route::get('/caloriesEndPoint/all-users', [\App\Http\Controllers\UserController::class, 'showAllUsers']);
     });
