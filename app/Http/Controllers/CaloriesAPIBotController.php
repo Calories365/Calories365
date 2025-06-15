@@ -82,7 +82,6 @@ class CaloriesAPIBotController extends BaseController
             $candidate = Product::getRawProduct($productName, $userId, $locale);
 
             if (! $candidate || (($candidate['_rankingScore'] ?? 0) < 0.6)) {
-//                Log::info('low rank score');
                 $productsInfo[] = [
                     'product_translation' => null,
                     'product' => null,
