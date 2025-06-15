@@ -131,7 +131,6 @@ class ProductService
     }
 
     /**
-     *
      * @throws \Exception
      */
     public function createFoodConsumption(array $data): array
