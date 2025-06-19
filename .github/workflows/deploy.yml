@@ -24,4 +24,4 @@ jobs:
 
             - name: Laravel migrate --force
               working-directory: /home/maxim/var/www/calories365
-              run: docker compose exec -T bot_panel_php php artisan migrate --force
+              run: docker compose exec -T calculator_php php artisan migrate --force
