@@ -305,7 +305,7 @@ class VoiceController extends Controller
     {
         $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
 
-        if (is_array($productTranslation) && isset($productTranslation['_rankingScore']) && $productTranslation['_rankingScore'] < 0.9) {
+        if (is_array($productTranslation) && isset($productTranslation['_rankingScore']) && $productTranslation['_rankingScore'] < 0.6) {
             Log::info("Продукт не найден (низкий рейтинг): {$productName}");
 
             return null;
