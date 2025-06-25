@@ -61,7 +61,6 @@
         <h2>{{ $t("PrivacyPolicy.Section4") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section4Text") }}</p>
 
-        5. Хранение данных
         <h2>{{ $t("PrivacyPolicy.Section5") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section5Text") }}</p>
 

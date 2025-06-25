@@ -84,7 +84,7 @@
         <h2>{{ $t("FAQ.Section13") }}</h2>
         <ul>
             <li>{{ $t("FAQ.List13_1") }} calories365.diary@gmail.com</li>
-            <li>{{ $t("FAQ.List13_2") }}</li>
+<!--            <li>{{ $t("FAQ.List13_2") }}</li>-->
             <li>{{ $t("FAQ.List13_3") }}</li>
         </ul>
 

@@ -72,7 +72,7 @@
             {{ $t("TermsOfService.Section12Text") }} calories365.diary@gmail.com
         </p>
 
-        <!-- New Sections for Portmone Compliance -->
+        <!-- New Sections for WayForPay Compliance -->
 
         <!-- 13. Privacy Policy -->
         <h2>{{ $t("TermsOfService.Section13") }}</h2>

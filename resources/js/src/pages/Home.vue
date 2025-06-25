@@ -81,6 +81,10 @@ export default {
                 return;
             }
             if (!this.currentUser?.email_verified_at) {
+                this.$store.dispatch(
+                    "setError",
+                    this.$t("Home.ConfirmEmail")
+                );
                 return;
             }
             if (this.telegramLink) {
