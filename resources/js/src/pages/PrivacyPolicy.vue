@@ -79,9 +79,7 @@
             <li>{{ $t("PrivacyPolicy.List7_5") }}</li>
         </ul>
         <p>
-            {{
-                $t("PrivacyPolicy.AdditionalText7")
-            }}
+            {{ $t("PrivacyPolicy.AdditionalText7") }}
             calories365.diary@gmail.com.
         </p>
 

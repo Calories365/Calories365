@@ -167,13 +167,14 @@ class VoiceController extends Controller
 
                 $productData['verified'] = 0;
                 $productData['active'] = 1;
+                $productData['isGenerated'] = $product['isGenerated'];
 
                 Log::info('product data');
                 Log::info(print_r($productData, true));
 
                 $wasModified = isset($product['isModified']) && $product['isModified'] === true;
 
-                if (! empty($product['product_id']) && ! $wasModified) {
+                if (! empty($product['product_id']) && ! $wasModified && ! $product['isGenerated']) {
                     Log::info('Using existing product ID', ['product_id' => $product['product_id']]);
                     Log::info('Saving product with weight', [
                         'name' => $product['name'],
@@ -192,17 +193,17 @@ class VoiceController extends Controller
                         'hasProductId' => ! empty($product['product_id']),
                     ]);
 
-                    if ($wasModified && ! empty($product['product_id'])) {
-                        Log::info('Creating custom version of existing product', [
-                            'original_id' => $product['product_id'],
-                            'new_values' => [
-                                'calories' => $product['calories'],
-                                'protein' => $product['protein'],
-                                'fats' => $product['fats'],
-                                'carbs' => $product['carbs'],
-                            ],
-                        ]);
-                    }
+                    //                    if ($wasModified && ! empty($product['product_id'])) {
+                    Log::info('Creating custom version of existing product', [
+                        'original_id' => $product['product_id'],
+                        'new_values' => [
+                            'calories' => $product['calories'],
+                            'protein' => $product['protein'],
+                            'fats' => $product['fats'],
+                            'carbs' => $product['carbs'],
+                        ],
+                    ]);
+                    //                    }
 
                     $result = $this->productService->createProductWithTranslationsAndConsumption($productData);
                 }

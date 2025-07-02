@@ -480,6 +480,7 @@ export default {
                     preparedProduct.weight = 100; // Устанавливаем вес по умолчанию
                 }
 
+                console.log("preparedProduct: ", preparedProduct);
                 return preparedProduct;
             });
 
