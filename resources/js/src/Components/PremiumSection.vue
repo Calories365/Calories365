@@ -21,23 +21,47 @@ export default {
     methods: {
         buyPremium() {
             if (!this.termsAgreed) {
-                this.$store.dispatch(
-                    "setError",
-                    this.$t("Home.AgreeToTermsRequired")
-                );
+                this.$store.dispatch("setError", this.$t("Home.AgreeToTermsRequired"));
                 return;
             }
             if (!this.currentUser) {
                 this.$router.push({ name: "cabinet" });
                 return;
             }
-            this.$store
-                .dispatch(actionTypes.buyPremium)
-                .then((premium_until) => {
-                    // window.location.href = url;
-                    this.currentUser.premium_until = premium_until;
-                });
+
+            // Vuex-action вернёт pay_url + fields
+            this.$store.dispatch(actionTypes.buyPremium).then(({ pay_url, fields }) => {
+                console.log(pay_url)
+                console.log(fields)
+                this.submitWayForPayForm(pay_url, fields);
+            });
         },
+
+        /** Собираем и отправляем HTML-форму на pay_url */
+        submitWayForPayForm(payUrl, fields) {
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = payUrl;
+            form.acceptCharset = "utf-8";
+            form.target = "_blank";
+
+            const append = (name, value) => {
+                if (Array.isArray(value)) {
+                    value.forEach((v) => append(`${name}[]`, v));
+                } else {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = name;
+                    input.value = value;
+                    form.appendChild(input);
+                }
+            };
+
+            Object.entries(fields).forEach(([k, v]) => append(k, v));
+            document.body.appendChild(form);
+            form.submit();
+        },
+
         cancelPremium() {
             this.$store.dispatch(
                 "setSuccess",

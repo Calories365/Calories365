@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\VoiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/telegram-link', [\App\Http\Controllers\TelegramLinkController::class, 'getLink'])
             ->name('telegram.link');
 
-        Route::post('/buy-premium', [\App\Http\Controllers\PaymentController::class, 'generatePaymentLink'])->name('buyPremium');
+        Route::post('/buy-premium', [\App\Http\Controllers\PaymentController::class, 'prepareWayForPay'])->name('buyPremium');
 
         // Маршрут для загрузки голосовых записей
         Route::post('/voice/upload', [VoiceController::class, 'upload'])->name('voice.upload');
@@ -92,3 +93,9 @@ Route::get('/language/status', [\App\Http\Controllers\LanguageSettingController:
 
 Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
     ->name('social.google.redirect');
+
+//Route::post('/wayforpay/callback', [PaymentController::class, 'callback'])
+//    ->name('wayforpay.callback');
+
+//Route::get('/wayforpay/callback', [PaymentController::class, 'callback'])
+//    ->name('wayforpay.callback');

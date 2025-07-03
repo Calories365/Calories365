@@ -498,23 +498,21 @@ const actions = {
         });
     },
 
-    [actionTypes.buyPremium](context, credentials) {
-        return new Promise((resolve) => {
+    [actionTypes.buyPremium](context) {
+        return new Promise((resolve, reject) => {
             context.commit(mutationTypes.buyPremiumStart);
             authApi
-                .buyPremium(credentials)
-                .then((response) => {
-                    context.commit(
-                        mutationTypes.buyPremiumSuccess,
-                        response.data.portmone_url
-                    );
-                    resolve(response.data.premium_until);
+                .buyPremium()
+                .then(({ data }) => {
+                    context.commit(mutationTypes.buyPremiumSuccess, data);
+                    resolve(data);
                 })
-                .catch((result) => {
+                .catch((error) => {
                     context.commit(
                         mutationTypes.buyPremiumFailure,
-                        result.response.data.errors
+                        error.response?.data?.errors || {}
                     );
+                    reject(error);
                 });
         });
     },
