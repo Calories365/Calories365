@@ -16,9 +16,9 @@ class PaymentController extends Controller
      */
     public function prepareWayForPay(): JsonResponse
     {
-        $merchantAccount = config('services.wayforpay.merchant', 'test_merch_n1');
-        $merchantSecret = config('services.wayforpay.secret', 'flk3409refn54t54t*FNJRET');
-        $merchantDomain = config('services.wayforpay.domain', 'www.market.ua');
+        $merchantAccount = config('wayforpay.merchant', 'test_merch_n1');
+        $merchantSecret = config('wayforpay.secret', 'flk3409refn54t54t*FNJRET');
+        $merchantDomain = config('wayforpay.domain', 'www.market.ua');
 
         $amount = '10';
         $currency = 'UAH';
@@ -130,40 +130,52 @@ class PaymentController extends Controller
     {
         $user = Auth::user();
 
-        $payment = Payment::where('user_id', $user->id)
-            ->where('status', 'Approved')
+        $payment = Payment::query()
+            ->where('user_id', $user->id)
+//            ->where('status', 'Approved')
             ->whereRaw("order_reference NOT LIKE '%_WFPREG-%'")
-            ->orderBy('id')
+            ->latest('id')
             ->first();
 
         if (! $payment) {
-            Log::error('Original payment not found for user', $user->id);
+            Log::error('Original WFP payment not found', ['user_id' => $user->id]);
 
             return response()->json(['error' => 'Original payment not found'], 404);
         }
 
-        $merchant = config('services.wayforpay.merchant');
-        $secret = config('services.wayforpay.secret');
-
+        Log::info(config('wayforpay.merchant', 'test_merch_n1'));
         $payload = [
             'requestType' => 'REMOVE',
-            'merchantAccount' => $merchant,
-            'merchantPassword' => md5($secret),
+            'merchantAccount' => config('wayforpay.merchant', 'test_merch_n1'),
+            'merchantPassword' => config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2'),  // см. доки
             'orderReference' => $payment->order_reference,
         ];
 
-        $resp = Http::post('https://api.wayforpay.com/regularApi', $payload)
-            ->json();
+        $response = Http::post('https://api.wayforpay.com/regularApi', $payload);
 
-        if (($resp['reasonCode'] ?? null) !== 1100) {
-            Log::error('Subscription did not remove for user', $user->id);
+        if ($response->failed()) {
+            Log::error('WFP REMOVE network error', [
+                'user_id' => $user->id,
+                'http_code' => $response->status(),
+                'body' => $response->body(),
+            ]);
 
-            return response()->json($resp, 422);
+            return response()->json(['error' => 'WayForPay request failed'], 502);
+        }
+
+        $respJson = $response->json();
+        if (! in_array($respJson['reasonCode'] ?? null, [1100, 4100], true)) {
+            Log::error('WFP REMOVE declined', [
+                'user_id' => $respJson->id,
+                'orderRef' => $payment->order_reference,
+                'reasonCode' => $respJson['reasonCode'] ?? null,
+                'reason' => $respJson['reason'] ?? null,
+            ]);
+
+            return response()->json($respJson, 422);
         }
 
         $payment->update(['status' => 'Deleted']);
-
-        //         $user->subscription()->update(['rule_status' => 'Suspended']);
 
         return response()->json(['message' => 'success']);
     }
