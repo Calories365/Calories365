@@ -34,6 +34,9 @@ const getTelegramLink = () => {
 const buyPremium = () => {
     return axios.post("/api/buy-premium");
 };
+const cancelPremium = () => {
+    return axios.post("/api/cancel-premium");
+};
 
 export default {
     register,
@@ -47,4 +50,5 @@ export default {
     updateCurrentUser,
     getTelegramLink,
     buyPremium,
+    cancelPremium,
 };

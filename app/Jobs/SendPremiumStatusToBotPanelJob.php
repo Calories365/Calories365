@@ -18,17 +18,13 @@ class SendPremiumStatusToBotPanelJob implements ShouldQueue
 
     protected User $user;
 
-    /**
-     * Принимаем пользователя, у которого обновился премиум
-     */
+
     public function __construct(User $user)
     {
         $this->user = $user;
     }
 
-    /**
-     * Логика, которую выполняет Job.
-     */
+
     public function handle()
     {
         $botPanelUrl = env('BOT_PANEL_URL');
@@ -36,7 +32,7 @@ class SendPremiumStatusToBotPanelJob implements ShouldQueue
         $host = env('BOT_HOST');
 
         if (! $botPanelUrl || ! $botApiKey) {
-            Log::warning('Bot panel URL или API key не настроены');
+            Log::warning('Bot panel URL or API key not set');
 
             return;
         }
@@ -54,8 +50,6 @@ class SendPremiumStatusToBotPanelJob implements ShouldQueue
         ];
 
         try {
-            Log::info('$payload: ');
-            Log::info(print_r($payload, true));
             $response = $client->post($botPanelUrl.'/api/update-premium-status', [
                 'headers' => $headers,
                 'json' => [

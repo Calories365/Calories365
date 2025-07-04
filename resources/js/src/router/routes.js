@@ -15,6 +15,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy.vue";
 import TermsOfService from "@/pages/TermsOfService.vue";
 import FAQ from "@/pages/FAQ.vue";
 import Voice from "@/pages/Voice.vue";
+import ThankYou from "../pages/ThankYou.vue";
 
 const routes = [
     {
@@ -149,6 +150,14 @@ const routes = [
         path: "/voice",
         component: Voice,
         name: "voice",
+        meta: {
+            needAuth: true,
+        },
+    },
+    {
+        path: "/thank-you",
+        component: ThankYou,
+        name: "thank-you",
         meta: {
             needAuth: true,
         },

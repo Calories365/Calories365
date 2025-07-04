@@ -79,6 +79,10 @@ export const mutationTypes = {
     buyPremiumStart: "[auth] buyPremiumStart",
     buyPremiumSuccess: "[auth] buyPremiumSuccess",
     buyPremiumFailure: "[auth] buyPremiumFailure",
+
+    cancelPremiumStart: "[auth] cancelPremiumStart",
+    cancelPremiumSuccess: "[auth] cancelPremiumSuccess",
+    cancelPremiumFailure: "[auth] cancelPremiumFailure",
 };
 
 const mutations = {
@@ -222,6 +226,19 @@ const mutations = {
         state.validationErrors = payload;
         state.isSybmiting = false;
     },
+
+    [mutationTypes.cancelPremiumStart](state) {
+        state.isSybmiting = true;
+        state.validationErrors = null;
+    },
+    [mutationTypes.cancelPremiumSuccess](state) {
+        state.currentUser.premium_until = null;
+        state.isSybmiting = false;
+    },
+    [mutationTypes.cancelPremiumFailure](state, payload) {
+        state.validationErrors = payload;
+        state.isSybmiting = false;
+    },
 };
 
 export const actionTypes = {
@@ -238,6 +255,7 @@ export const actionTypes = {
     updateUsersData: "[auth] updateUsersData",
     getTelegramLink: "[auth] getTelegramLink",
     buyPremium: "[auth] buyPremium",
+    cancelPremium: "[auth] cancelPremium",
 };
 
 const actions = {
@@ -498,18 +516,25 @@ const actions = {
         });
     },
 
-    [actionTypes.buyPremium](context) {
+    [actionTypes.cancelPremium](context) {
         return new Promise((resolve, reject) => {
-            context.commit(mutationTypes.buyPremiumStart);
+            context.commit(mutationTypes.cancelPremiumStart);
             authApi
-                .buyPremium()
+                .cancelPremium()
                 .then(({ data }) => {
-                    context.commit(mutationTypes.buyPremiumSuccess, data);
-                    resolve(data);
+                    if (data.message === "success") {
+                        context.commit(
+                            mutationTypes.cancelPremiumSuccess,
+                            data.message
+                        );
+                        resolve(data.message);
+                    } else {
+                        reject("error");
+                    }
                 })
                 .catch((error) => {
                     context.commit(
-                        mutationTypes.buyPremiumFailure,
+                        mutationTypes.cancelPremiumFailure,
                         error.response?.data?.errors || {}
                     );
                     reject(error);

@@ -21,7 +21,10 @@ export default {
     methods: {
         buyPremium() {
             if (!this.termsAgreed) {
-                this.$store.dispatch("setError", this.$t("Home.AgreeToTermsRequired"));
+                this.$store.dispatch(
+                    "setError",
+                    this.$t("Home.AgreeToTermsRequired")
+                );
                 return;
             }
             if (!this.currentUser) {
@@ -30,11 +33,13 @@ export default {
             }
 
             // Vuex-action вернёт pay_url + fields
-            this.$store.dispatch(actionTypes.buyPremium).then(({ pay_url, fields }) => {
-                console.log(pay_url)
-                console.log(fields)
-                this.submitWayForPayForm(pay_url, fields);
-            });
+            this.$store
+                .dispatch(actionTypes.buyPremium)
+                .then(({ pay_url, fields }) => {
+                    // console.log(pay_url)
+                    // console.log(fields)
+                    this.submitWayForPayForm(pay_url, fields);
+                });
         },
 
         /** Собираем и отправляем HTML-форму на pay_url */
@@ -63,10 +68,19 @@ export default {
         },
 
         cancelPremium() {
-            this.$store.dispatch(
-                "setSuccess",
-                this.$t("Notification.Success.CanceledSub")
-            );
+            this.$store.dispatch(actionTypes.cancelPremium).then((msg) => {
+                if (msg === "success") {
+                    this.$store.dispatch(
+                        "setSuccess",
+                        this.$t("Notification.Success.CanceledSub")
+                    );
+                } else {
+                    this.$store.dispatch(
+                        "setError",
+                        this.$t("Notification.Error.CanceledSub")
+                    );
+                }
+            });
         },
     },
 };

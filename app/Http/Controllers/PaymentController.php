@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Predis\Command\Redis\AUTH;
 
 class PaymentController extends Controller
 {
@@ -13,13 +16,11 @@ class PaymentController extends Controller
      */
     public function prepareWayForPay(): JsonResponse
     {
-        /* 1. Конфиг */
         $merchantAccount = config('services.wayforpay.merchant', 'test_merch_n1');
         $merchantSecret  = config('services.wayforpay.secret',  'flk3409refn54t54t*FNJRET');
         $merchantDomain  = config('services.wayforpay.domain',  'www.market.ua');
 
-        /* 2. Параметры заказа */
-        $amount     = '10';      // 10 ₴ за сутки премиума
+        $amount     = '10';
         $currency   = 'UAH';
         $orderDate  = time();
         $orderRef   = 'DH' . $orderDate . random_int(100, 999);
@@ -28,7 +29,6 @@ class PaymentController extends Controller
         $productCount = ['1'];
         $productPrice = [$amount];
 
-        /* 3. Подпись (по документации) */
         $sigParts = array_merge(
             [$merchantAccount, $merchantDomain, $orderRef, $orderDate, $amount, $currency],
             $productName,
@@ -37,7 +37,17 @@ class PaymentController extends Controller
         );
         $merchantSignature = hash_hmac('md5', implode(';', $sigParts), $merchantSecret);
 
-        /* 4. Поля формы */
+        Payment::create([
+            'user_id'        => Auth::id(),
+            'order_reference'=> $orderRef,
+            'status'         => 'Pending',
+            'signature'      => $merchantSignature,
+        ]);
+
+        $user = Auth::user();
+        $clientName  = ($user->name ?? '');
+        $clientEmail = $user->email;
+
         $fields = [
             'merchantAccount'    => $merchantAccount,
             'merchantAuthType'   => 'SimpleSignature',
@@ -51,17 +61,18 @@ class PaymentController extends Controller
             'productName'    => $productName,
             'productCount'   => $productCount,
             'productPrice'   => $productPrice,
-
-            /* ←–---   автосписание 1 раз в день   ---→ */
             'regularMode'    => 'daily',   // daily | weekly | monthly | yearly
-            'regularAmount'  => $amount,   // сумма каждого авто-дебета
+            'regularAmount'  => $amount,
             'regularCount' => 10,
             'regularBehavior' => 'preset',
-            // (dateNext можно не указывать — возьмётся +1 день от оплаты)
 
             'serviceUrl' => 'https://calculator.calories365.com/wayforpay/callback',
             'returnUrl'  => 'https://calculator.calories365.com/thank-you',
 
+            'clientEmail'      => $clientEmail,
+            'clientName'       => $clientName,
+
+            'language'         => app()->getLocale(),
             'paymentSystems'    => 'card;googlePay;applePay;privat24',
             'merchantSignature' => $merchantSignature,
         ];
@@ -73,11 +84,11 @@ class PaymentController extends Controller
     }
 
     /**
-     * WayForPay POST-callback — успех / ошибка любой транзакции.
+     * WayForPay POST-callback
      */
     public function callback(Request $r)
     {
-        /* ваша бизнес-логика здесь — продлить premium, записать токен и т.п. */
+        \App\Models\Payment::processCallback($r->all());
 
         $status = 'accept';
         $time   = time();
@@ -94,5 +105,46 @@ class PaymentController extends Controller
             'signature'      => $sig,
         ]);
     }
+
+    public function cancelPremium(): JsonResponse
+    {
+        $user = Auth::user();
+
+        $payment = Payment::where('user_id', $user->id)
+            ->where('status', 'Approved')
+            ->whereRaw("order_reference NOT LIKE '%_WFPREG-%'")
+            ->orderBy('id')
+            ->first();
+
+        if (!$payment) {
+            Log::error('Original payment not found for user', $user->id);
+            return response()->json(['error' => 'Original payment not found'], 404);
+        }
+
+        $merchant = config('services.wayforpay.merchant');
+        $secret   = config('services.wayforpay.secret');
+
+        $payload = [
+            'requestType'      => 'REMOVE',
+            'merchantAccount'  => $merchant,
+            'merchantPassword' => md5($secret),
+            'orderReference'   => $payment->order_reference,
+        ];
+
+        $resp = Http::post('https://api.wayforpay.com/regularApi', $payload)
+            ->json();
+
+        if (($resp['reasonCode'] ?? null) !== 1100) {
+            Log::error('Subscription did not remove for user', $user->id);
+            return response()->json($resp, 422);
+        }
+
+        $payment->update(['status' => 'Deleted']);
+
+//         $user->subscription()->update(['rule_status' => 'Suspended']);
+
+        return response()->json(['message' => 'success']);
+    }
+
 
 }

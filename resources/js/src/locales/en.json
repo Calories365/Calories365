@@ -178,7 +178,8 @@
             "invalidGoalWeight": "Invalid goal weight.",
             "invalidHeight": "Invalid height.",
             "invalidWeight": "Invalid weight.",
-            "invalidData": "Invalid data."
+            "invalidData": "Invalid data.",
+            "CanceledSub": "We couldn't cancel your subscription. Please contact the administrator for assistance."
         }
     },
     "Cabinet": {
@@ -467,5 +468,10 @@
             "productsSaved": "Products successfully saved to {meal}",
             "productsDeleted": "Products deleted"
         }
+    },
+    "ThankYou": {
+    "Title" : "Thank you for purchase!",
+    "Message" : "Thank you for choosing Premium! Make the most of our service and reach amazing results!",
+    "GoHome" : "Go home"
     }
 }

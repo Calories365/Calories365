@@ -41,6 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/buy-premium', [\App\Http\Controllers\PaymentController::class, 'prepareWayForPay'])->name('buyPremium');
 
+        Route::post('/cancel-premium', [\App\Http\Controllers\PaymentController::class, 'cancelPremium'])->name('cancelPremium');
+
         // Маршрут для загрузки голосовых записей
         Route::post('/voice/upload', [VoiceController::class, 'upload'])->name('voice.upload');
 
