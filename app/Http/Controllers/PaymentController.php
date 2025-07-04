@@ -63,7 +63,7 @@ class PaymentController extends Controller
             'productPrice'   => $productPrice,
             'regularMode'    => 'daily',   // daily | weekly | monthly | yearly
             'regularAmount'  => $amount,
-            'regularCount' => 10,
+            'regularCount' => 2,
             'regularBehavior' => 'preset',
 
             'serviceUrl' => 'https://calculator.calories365.com/wayforpay/callback',

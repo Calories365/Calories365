@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Jobs\SendPremiumStatusToBotPanelJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 
 class Payment extends Model
 {
@@ -23,9 +24,10 @@ class Payment extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public static function processCallback(array $wfp): void
     {
+        Log::info(print_r($wfp, true));
         $statusMap = [
             'Approved' => 'Approved',
             'Pending'  => 'Pending',
