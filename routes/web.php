@@ -21,13 +21,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
     ->name('social.google.callback');
 
-Route::post('/wayforpay/callback',  [PaymentController::class, 'callback'])
+Route::post('/wayforpay/callback', [PaymentController::class, 'callback'])
     ->name('wayforpay.callback');
 
 Route::post('/thank-you', function () {
     return redirect('/thank-you');
 })->name('payment.thankyou');
-
 
 /* GET /thank-you — отдаём SPA-обёртку (view app.blade.php) */
 Route::get('/thank-you', fn () => view('app'));

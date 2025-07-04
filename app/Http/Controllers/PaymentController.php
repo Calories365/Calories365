@@ -17,15 +17,15 @@ class PaymentController extends Controller
     public function prepareWayForPay(): JsonResponse
     {
         $merchantAccount = config('services.wayforpay.merchant', 'test_merch_n1');
-        $merchantSecret  = config('services.wayforpay.secret',  'flk3409refn54t54t*FNJRET');
-        $merchantDomain  = config('services.wayforpay.domain',  'www.market.ua');
+        $merchantSecret = config('services.wayforpay.secret', 'flk3409refn54t54t*FNJRET');
+        $merchantDomain = config('services.wayforpay.domain', 'www.market.ua');
 
-        $amount     = '10';
-        $currency   = 'UAH';
-        $orderDate  = time();
-        $orderRef   = 'DH' . $orderDate . random_int(100, 999);
+        $amount = '10';
+        $currency = 'UAH';
+        $orderDate = time();
+        $orderRef = 'DH'.$orderDate.random_int(100, 999);
 
-        $productName  = ['Підписка'];
+        $productName = ['Підписка'];
         $productCount = ['1'];
         $productPrice = [$amount];
 
@@ -38,48 +38,48 @@ class PaymentController extends Controller
         $merchantSignature = hash_hmac('md5', implode(';', $sigParts), $merchantSecret);
 
         Payment::create([
-            'user_id'        => Auth::id(),
-            'order_reference'=> $orderRef,
-            'status'         => 'Pending',
-            'signature'      => $merchantSignature,
+            'user_id' => Auth::id(),
+            'order_reference' => $orderRef,
+            'status' => 'Pending',
+            'signature' => $merchantSignature,
         ]);
 
         $user = Auth::user();
-        $clientName  = ($user->name ?? '');
+        $clientName = ($user->name ?? '');
         $clientEmail = $user->email;
 
         $fields = [
-            'merchantAccount'    => $merchantAccount,
-            'merchantAuthType'   => 'SimpleSignature',
+            'merchantAccount' => $merchantAccount,
+            'merchantAuthType' => 'SimpleSignature',
             'merchantDomainName' => $merchantDomain,
 
             'orderReference' => $orderRef,
-            'orderDate'      => $orderDate,
-            'amount'         => $amount,
-            'currency'       => $currency,
+            'orderDate' => $orderDate,
+            'amount' => $amount,
+            'currency' => $currency,
 
-            'productName'    => $productName,
-            'productCount'   => $productCount,
-            'productPrice'   => $productPrice,
-            'regularMode'    => 'daily',   // daily | weekly | monthly | yearly
-            'regularAmount'  => $amount,
+            'productName' => $productName,
+            'productCount' => $productCount,
+            'productPrice' => $productPrice,
+            'regularMode' => 'daily',   // daily | weekly | monthly | yearly
+            'regularAmount' => $amount,
             'regularCount' => 2,
             'regularBehavior' => 'preset',
 
             'serviceUrl' => 'https://calculator.calories365.com/wayforpay/callback',
-            'returnUrl'  => 'https://calculator.calories365.com/thank-you',
+            'returnUrl' => 'https://calculator.calories365.com/thank-you',
 
-            'clientEmail'      => $clientEmail,
-            'clientName'       => $clientName,
+            'clientEmail' => $clientEmail,
+            'clientName' => $clientName,
 
-            'language'         => app()->getLocale(),
-            'paymentSystems'    => 'card;googlePay;applePay;privat24',
+            'language' => app()->getLocale(),
+            'paymentSystems' => 'card;googlePay;applePay;privat24',
             'merchantSignature' => $merchantSignature,
         ];
 
         return response()->json([
             'pay_url' => 'https://secure.wayforpay.com/pay',
-            'fields'  => $fields,
+            'fields' => $fields,
         ]);
     }
 
@@ -88,11 +88,31 @@ class PaymentController extends Controller
      */
     public function callback(Request $r)
     {
-        \App\Models\Payment::processCallback($r->all());
+
+        $raw = $r->getContent();
+
+        $data = json_decode($raw, true);
+
+        if (! is_array($data)) {
+            $data = json_decode(urldecode($raw), true);
+        }
+
+        if (! is_array($data)) {
+            Log::error('WFP: invalid callback payload', [
+                'raw' => $raw,
+                'json_err' => json_last_error_msg(),
+            ]);
+
+            return response('Invalid payload', 400);
+        }
+
+        Log::info('WFP callback parsed', $data);
+
+        Payment::processCallback($data);
 
         $status = 'accept';
-        $time   = time();
-        $sig    = hash_hmac(
+        $time = time();
+        $sig = hash_hmac(
             'md5',
             $r->orderReference.';'.$status.';'.$time,
             config('services.wayforpay.secret')
@@ -100,9 +120,9 @@ class PaymentController extends Controller
 
         return response()->json([
             'orderReference' => $r->orderReference,
-            'status'         => $status,
-            'time'           => $time,
-            'signature'      => $sig,
+            'status' => $status,
+            'time' => $time,
+            'signature' => $sig,
         ]);
     }
 
@@ -116,19 +136,20 @@ class PaymentController extends Controller
             ->orderBy('id')
             ->first();
 
-        if (!$payment) {
+        if (! $payment) {
             Log::error('Original payment not found for user', $user->id);
+
             return response()->json(['error' => 'Original payment not found'], 404);
         }
 
         $merchant = config('services.wayforpay.merchant');
-        $secret   = config('services.wayforpay.secret');
+        $secret = config('services.wayforpay.secret');
 
         $payload = [
-            'requestType'      => 'REMOVE',
-            'merchantAccount'  => $merchant,
+            'requestType' => 'REMOVE',
+            'merchantAccount' => $merchant,
             'merchantPassword' => md5($secret),
-            'orderReference'   => $payment->order_reference,
+            'orderReference' => $payment->order_reference,
         ];
 
         $resp = Http::post('https://api.wayforpay.com/regularApi', $payload)
@@ -136,15 +157,14 @@ class PaymentController extends Controller
 
         if (($resp['reasonCode'] ?? null) !== 1100) {
             Log::error('Subscription did not remove for user', $user->id);
+
             return response()->json($resp, 422);
         }
 
         $payment->update(['status' => 'Deleted']);
 
-//         $user->subscription()->update(['rule_status' => 'Suspended']);
+        //         $user->subscription()->update(['rule_status' => 'Suspended']);
 
         return response()->json(['message' => 'success']);
     }
-
-
 }

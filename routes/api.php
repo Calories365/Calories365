@@ -96,8 +96,8 @@ Route::get('/language/status', [\App\Http\Controllers\LanguageSettingController:
 Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])
     ->name('social.google.redirect');
 
-//Route::post('/wayforpay/callback', [PaymentController::class, 'callback'])
+// Route::post('/wayforpay/callback', [PaymentController::class, 'callback'])
 //    ->name('wayforpay.callback');
 
-//Route::get('/wayforpay/callback', [PaymentController::class, 'callback'])
+// Route::get('/wayforpay/callback', [PaymentController::class, 'callback'])
 //    ->name('wayforpay.callback');
