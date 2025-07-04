@@ -496,7 +496,6 @@ const actions = {
                 });
         });
     },
-
     [actionTypes.getTelegramLink](context) {
         return new Promise((resolve, reject) => {
             context.commit(mutationTypes.getTelegramLinkStart);
@@ -515,7 +514,24 @@ const actions = {
                 });
         });
     },
-
+    [actionTypes.buyPremium](context) {
+        return new Promise((resolve, reject) => {
+            context.commit(mutationTypes.buyPremiumStart);
+            authApi
+                .buyPremium()
+                .then(({ data }) => {
+                    context.commit(mutationTypes.buyPremiumSuccess, data);
+                    resolve(data);
+                })
+                .catch((error) => {
+                    context.commit(
+                        mutationTypes.buyPremiumFailure,
+                        error.response?.data?.errors || {}
+                    );
+                    reject(error);
+                });
+        });
+    },
     [actionTypes.cancelPremium](context) {
         return new Promise((resolve, reject) => {
             context.commit(mutationTypes.cancelPremiumStart);

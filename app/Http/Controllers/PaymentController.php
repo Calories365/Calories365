@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Predis\Command\Redis\AUTH;
 
 class PaymentController extends Controller
 {
