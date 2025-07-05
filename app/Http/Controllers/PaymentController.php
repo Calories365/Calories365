@@ -132,26 +132,42 @@ class PaymentController extends Controller
 
         $payment = Payment::query()
             ->where('user_id', $user->id)
-//            ->where('status', 'Approved')
+            ->where(function ($query) {
+                $query->where('status', 'Approved')
+                    ->orWhere('status', 'Refunded');
+            })
             ->whereRaw("order_reference NOT LIKE '%_WFPREG-%'")
             ->latest('id')
             ->first();
 
         if (! $payment) {
+            $deletedPayment = Payment::query()
+                ->where('user_id', $user->id)
+                ->where('status', 'Deleted')
+                ->whereRaw("order_reference NOT LIKE '%_WFPREG-%'")
+                ->latest('id')
+                ->first();
+
+            if ($deletedPayment) {
+                Log::error('Payment was deleted', ['user_id' => $user->id]);
+
+                return response()->json(['message' => 'success']);
+            }
             Log::error('Original WFP payment not found', ['user_id' => $user->id]);
 
-            return response()->json(['error' => 'Original payment not found'], 404);
+            return response()->json(['error' => 'Original payment not found '], 404);
         }
 
-        Log::info(config('wayforpay.merchant', 'test_merch_n1'));
         $payload = [
             'requestType' => 'REMOVE',
             'merchantAccount' => config('wayforpay.merchant', 'test_merch_n1'),
-            'merchantPassword' => config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2'),  // см. доки
+            'merchantPassword' => config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2'),
             'orderReference' => $payment->order_reference,
         ];
 
         $response = Http::post('https://api.wayforpay.com/regularApi', $payload);
+
+        Log::info(print_r($response, true));
 
         if ($response->failed()) {
             Log::error('WFP REMOVE network error', [
@@ -166,7 +182,7 @@ class PaymentController extends Controller
         $respJson = $response->json();
         if (! in_array($respJson['reasonCode'] ?? null, [1100, 4100], true)) {
             Log::error('WFP REMOVE declined', [
-                'user_id' => $respJson->id,
+                'user_id' => $user->id,
                 'orderRef' => $payment->order_reference,
                 'reasonCode' => $respJson['reasonCode'] ?? null,
                 'reason' => $respJson['reason'] ?? null,

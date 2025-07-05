@@ -158,7 +158,7 @@
             "NameWasUpdated": "Name was updated",
             "PasswordUpdated": "Password updated",
             "Result": "The data is accounted for, your result is below",
-            "CanceledSub": "Subscription canceled"
+            "CanceledSub": "Subscription canceled.\nAccess will remain available until the end of the current period."
 
         },
         "Error": {
