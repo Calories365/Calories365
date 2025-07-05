@@ -30,13 +30,15 @@ class Payment extends Model
     {
         Log::info(print_r($wfp, true));
         $statusMap = [
-            'Approved' => 'Approved',
-            'Pending' => 'Pending',
+            'Approved'     => 'Approved',
+            'Pending'      => 'Pending',
             'InProcessing' => 'Pending',
-            'Declined' => 'Declined',
-            'Expired' => 'Expired',
-            'Refunded' => 'Refunded',
-            'Reversed' => 'Reversed',
+            'Declined'     => 'Declined',
+            'Expired'      => 'Expired',
+            'Refunded'     => 'Refunded',
+            'Reversed'     => 'Reversed',
+            'Removed'      => 'Deleted',
+            'Suspended'    => 'Suspended',
         ];
         $status = $statusMap[$wfp['transactionStatus']] ?? 'Declined';
 

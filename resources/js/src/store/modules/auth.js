@@ -232,7 +232,6 @@ const mutations = {
         state.validationErrors = null;
     },
     [mutationTypes.cancelPremiumSuccess](state) {
-        state.currentUser.premium_until = null;
         state.isSybmiting = false;
     },
     [mutationTypes.cancelPremiumFailure](state, payload) {

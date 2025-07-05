@@ -88,43 +88,64 @@ class PaymentController extends Controller
      */
     public function callback(Request $r)
     {
+        try {
+            $raw  = $r->getContent();
+            $data = json_decode($raw, true);
 
-        $raw = $r->getContent();
+            if (! is_array($data)) {
+                $data = json_decode(urldecode($raw), true);
+            }
 
-        $data = json_decode($raw, true);
+            if (! is_array($data)) {
+                Log::error('WFP: invalid callback payload', [
+                    'raw'      => $raw,
+                    'json_err' => json_last_error_msg(),
+                ]);
 
-        if (! is_array($data)) {
-            $data = json_decode(urldecode($raw), true);
-        }
+                return response('Invalid payload', 400);
+            }
 
-        if (! is_array($data)) {
-            Log::error('WFP: invalid callback payload', [
-                'raw' => $raw,
-                'json_err' => json_last_error_msg(),
+            Log::info('WFP callback parsed', $data);
+
+            Payment::processCallback($data);
+
+            $status = 'accept';
+            $time   = time();
+            $sig    = hash_hmac(
+                'md5',
+                $r->orderReference.';'.$status.';'.$time,
+                config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2')
+            );
+
+            return response()->json([
+                'orderReference' => $r->orderReference,
+                'status'         => $status,
+                'time'           => $time,
+                'signature'      => $sig,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('WFP callback exception', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
             ]);
 
-            return response('Invalid payload', 400);
+            $status = 'accept';
+            $time   = time();
+            $sig    = hash_hmac(
+                'md5',
+                $r->orderReference.';'.$status.';'.$time,
+                config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2')
+            );
+
+            return response()->json([
+                'orderReference' => $r->orderReference ?? null,
+                'status'         => $status,
+                'time'           => $time,
+                'signature'      => $sig,
+            ]);
         }
-
-        Log::info('WFP callback parsed', $data);
-
-        Payment::processCallback($data);
-
-        $status = 'accept';
-        $time = time();
-        $sig = hash_hmac(
-            'md5',
-            $r->orderReference.';'.$status.';'.$time,
-            config('services.wayforpay.secret')
-        );
-
-        return response()->json([
-            'orderReference' => $r->orderReference,
-            'status' => $status,
-            'time' => $time,
-            'signature' => $sig,
-        ]);
     }
+
 
     public function cancelPremium(): JsonResponse
     {
@@ -167,7 +188,7 @@ class PaymentController extends Controller
 
         $response = Http::post('https://api.wayforpay.com/regularApi', $payload);
 
-        Log::info(print_r($response, true));
+        Log::info('WFP REMOVE raw response', ['body' => $response->body()]);
 
         if ($response->failed()) {
             Log::error('WFP REMOVE network error', [
