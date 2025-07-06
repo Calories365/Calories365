@@ -89,7 +89,7 @@ class PaymentController extends Controller
     public function callback(Request $r)
     {
         try {
-            $raw  = $r->getContent();
+            $raw = $r->getContent();
             $data = json_decode($raw, true);
 
             if (! is_array($data)) {
@@ -98,7 +98,7 @@ class PaymentController extends Controller
 
             if (! is_array($data)) {
                 Log::error('WFP: invalid callback payload', [
-                    'raw'      => $raw,
+                    'raw' => $raw,
                     'json_err' => json_last_error_msg(),
                 ]);
 
@@ -108,44 +108,44 @@ class PaymentController extends Controller
             Log::info('WFP callback parsed', $data);
 
             Payment::processCallback($data);
-
+            $orderReference = $data['orderReference'];
             $status = 'accept';
-            $time   = time();
-            $sig    = hash_hmac(
+            $time = time();
+            $sig = hash_hmac(
                 'md5',
-                $r->orderReference.';'.$status.';'.$time,
-                config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2')
+                $orderReference.';'.$status.';'.$time,
+                config('wayforpay.secret', 'flk3409refn54t54t*FNJRET')
             );
 
             return response()->json([
-                'orderReference' => $r->orderReference,
-                'status'         => $status,
-                'time'           => $time,
-                'signature'      => $sig,
+                'orderReference' => $orderReference,
+                'status' => $status,
+                'time' => $time,
+                'signature' => $sig,
             ]);
         } catch (\Throwable $e) {
             Log::error('WFP callback exception', [
                 'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
             ]);
+            $orderReference = $data['orderReference'];
 
             $status = 'accept';
-            $time   = time();
-            $sig    = hash_hmac(
+            $time = time();
+            $sig = hash_hmac(
                 'md5',
-                $r->orderReference.';'.$status.';'.$time,
-                config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2')
+                $orderReference.';'.$status.';'.$time,
+                config('wayforpay.secret', 'flk3409refn54t54t*FNJRET')
             );
 
             return response()->json([
                 'orderReference' => $r->orderReference ?? null,
-                'status'         => $status,
-                'time'           => $time,
-                'signature'      => $sig,
+                'status' => $status,
+                'time' => $time,
+                'signature' => $sig,
             ]);
         }
     }
-
 
     public function cancelPremium(): JsonResponse
     {

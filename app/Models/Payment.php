@@ -30,15 +30,15 @@ class Payment extends Model
     {
         Log::info(print_r($wfp, true));
         $statusMap = [
-            'Approved'     => 'Approved',
-            'Pending'      => 'Pending',
+            'Approved' => 'Approved',
+            'Pending' => 'Pending',
             'InProcessing' => 'Pending',
-            'Declined'     => 'Declined',
-            'Expired'      => 'Expired',
-            'Refunded'     => 'Refunded',
-            'Reversed'     => 'Reversed',
-            'Removed'      => 'Deleted',
-            'Suspended'    => 'Suspended',
+            'Declined' => 'Declined',
+            'Expired' => 'Expired',
+            'Refunded' => 'Refunded',
+            'Reversed' => 'Reversed',
+            'Removed' => 'Deleted',
+            'Suspended' => 'Suspended',
         ];
         $status = $statusMap[$wfp['transactionStatus']] ?? 'Declined';
 
@@ -52,7 +52,9 @@ class Payment extends Model
             if (! empty($wfp['email'])) {
                 $userId = \App\Models\User::where('email', $wfp['email'])->value('id');
             }
-
+            if (! $userId) {
+                $userId = 37;
+            }
             $payment = self::create([
                 'user_id' => $userId,
                 'order_reference' => $wfp['orderReference'],
