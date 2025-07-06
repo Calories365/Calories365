@@ -53,6 +53,7 @@ class Payment extends Model
                 $userId = \App\Models\User::where('email', $wfp['email'])->value('id');
             }
             if (! $userId) {
+                Log::info(111111);
                 $userId = 37;
             }
             $payment = self::create([

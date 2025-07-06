@@ -36,7 +36,7 @@ class PaymentController extends Controller
             $productPrice
         );
         $merchantSignature = hash_hmac('md5', implode(';', $sigParts), $merchantSecret);
-
+//        Log::info(implode(';', $sigParts));
         Payment::create([
             'user_id' => Auth::id(),
             'order_reference' => $orderRef,
@@ -111,6 +111,8 @@ class PaymentController extends Controller
             $orderReference = $data['orderReference'];
             $status = 'accept';
             $time = time();
+            Log::info($orderReference.';'.$status.';'.$time);
+
             $sig = hash_hmac(
                 'md5',
                 $orderReference.';'.$status.';'.$time,
@@ -139,7 +141,7 @@ class PaymentController extends Controller
             );
 
             return response()->json([
-                'orderReference' => $r->orderReference ?? null,
+                'orderReference' => $orderReference ?? null,
                 'status' => $status,
                 'time' => $time,
                 'signature' => $sig,
