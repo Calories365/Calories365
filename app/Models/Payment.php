@@ -17,6 +17,12 @@ class Payment extends Model
         'signature',
     ];
 
+    public const STATUS_APPROVED = 'Approved';
+
+    public const STATUS_REFUNDED = 'Refunded';
+
+    public const STATUS_DELETED = 'Deleted';
+
     protected $casts = [
         'payload' => 'array',
     ];
@@ -24,6 +30,21 @@ class Payment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeNonSubscription($q)
+    {
+        return $q->whereRaw("order_reference NOT LIKE '%_WFPREG-%'");
+    }
+
+    public function scopeActivePremium($q)
+    {
+        return $q->whereIn('status', [self::STATUS_APPROVED, self::STATUS_REFUNDED]);
+    }
+
+    public function scopeDeletedPremium($q)
+    {
+        return $q->where('status', self::STATUS_DELETED);
     }
 
     public static function processCallback(array $wfp): void
@@ -76,5 +97,25 @@ class Payment extends Model
         }
 
         SendPremiumStatusToBotPanelJob::dispatch($payment->user);
+    }
+
+    public static function latestActiveFor(int $userId): ?self
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->nonSubscription()
+            ->activePremium()
+            ->latest('id')
+            ->first();
+    }
+
+    public static function latestDeletedFor(int $userId): ?self
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->nonSubscription()
+            ->deletedPremium()
+            ->latest('id')
+            ->first();
     }
 }

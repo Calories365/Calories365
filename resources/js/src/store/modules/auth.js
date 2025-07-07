@@ -531,31 +531,22 @@ const actions = {
                 });
         });
     },
-    [actionTypes.cancelPremium](context) {
-        return new Promise((resolve, reject) => {
-            context.commit(mutationTypes.cancelPremiumStart);
-            authApi
-                .cancelPremium()
-                .then(({ data }) => {
-                    if (data.message === "success") {
-                        context.commit(
-                            mutationTypes.cancelPremiumSuccess,
-                            data.message
-                        );
-                        resolve(data.message);
-                    } else {
-                        reject("error");
-                    }
-                })
-                .catch((error) => {
-                    context.commit(
-                        mutationTypes.cancelPremiumFailure,
-                        error.response?.data?.errors || {}
-                    );
-                    reject(error);
-                });
-        });
-    },
+    [actionTypes.cancelPremium]({ commit }) {
+        commit(mutationTypes.cancelPremiumStart);
+
+        return authApi.cancelPremium()
+            .then(({ data }) => {
+                commit(mutationTypes.cancelPremiumSuccess);
+                return data.message;
+            })
+            .catch((error) => {
+                commit(
+                    mutationTypes.cancelPremiumFailure,
+                    error.response?.data?.code ?? 'UNKNOWN_ERROR'
+                );
+                throw error;
+            });
+    }
 };
 export default {
     state,

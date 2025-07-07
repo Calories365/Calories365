@@ -79,13 +79,20 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
-     * WayForPay POST-callback
-     */
     public function callback(Request $r): JsonResponse
     {
-        $data = json_decode($r->getContent(), true);
+        $raw = $r->getContent();
+
+        $data = json_decode($raw, true) ?: $r->all();
+
         $orderReference = $data['orderReference'];
+
+        if (! $this->verifyWfpSignature($data)) {
+            Log::warning('WFP invalid signature', [
+                'orderReference' => $data['orderReference'] ?? null,
+            ]);
+            return $this->responseToWFP($orderReference, 'reject');
+        }
 
         Log::info('WFP callback parsed', $data);
 
@@ -101,9 +108,81 @@ class PaymentController extends Controller
         return $this->responseToWFP($orderReference);
     }
 
-    private function responseToWFP(string $orderReference): JsonResponse
+    public function cancelPremium(): JsonResponse
     {
-        $status = 'accept';
+        $userId = Auth::id();
+        $payment = Payment::latestActiveFor($userId);
+
+        if (! $payment) {
+            if (Payment::latestDeletedFor($userId)) {
+                Log::info('Payment already deleted', ['user_id' => $userId]);
+
+                return response()->json(['message' => 'success']);
+            }
+
+            Log::warning('Original payment not found', ['user_id' => $userId]);
+
+            return response()->json([
+                'code' => 'PAYMENT_NOT_FOUND',
+                'message' => 'Original payment not found',
+            ], 404);
+        }
+
+        try {
+            $wfpResponse = $this->sendRemoveRequestToWfp($payment->order_reference);
+        } catch (\Throwable $e) {
+            Log::error('WayForPay network error', [
+                'user_id' => $userId,
+                'order_reference' => $payment->order_reference,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'code' => 'WFP_NETWORK_ERROR',
+                'message' => 'WayForPay request failed',
+            ], 502);
+        }
+
+        if (! in_array($wfpResponse['reasonCode'] ?? null, [1100, 4100], true)) {
+            Log::notice('WayForPay refused to cancel', [
+                'user_id' => $userId,
+                'order_reference' => $payment->order_reference,
+                'reasonCode' => $wfpResponse['reasonCode'] ?? null,
+            ]);
+
+            return response()->json([
+                'code' => 'CANCEL_NOT_ALLOWED',
+                'message' => 'Unable to cancel payment',
+            ], 422);
+        }
+
+        $payment->update(['status' => Payment::STATUS_DELETED]);
+
+        return response()->json(['message' => 'success']);
+    }
+
+    private function verifyWfpSignature(array $p): bool
+    {
+        $secret = config('wayforpay.secret', 'flk3409refn54t54t*FNJRET');
+
+        $parts = [
+            $p['merchantAccount'] ?? '',
+            $p['orderReference'] ?? '',
+            $p['amount'] ?? '',
+            $p['currency'] ?? '',
+            $p['authCode'] ?? '',
+            $p['cardPan'] ?? '',
+            $p['transactionStatus'] ?? '',
+            $p['reasonCode'] ?? '',
+        ];
+
+        $calc = hash_hmac('md5', implode(';', $parts), $secret);
+
+        return hash_equals($calc, $p['merchantSignature'] ?? '');
+    }
+
+    private function responseToWFP(string $orderReference, $status = 'accept'): JsonResponse
+    {
         $time = time();
         $signature = hash_hmac(
             'md5',
@@ -120,73 +199,34 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function cancelPremium(): JsonResponse
+    private function sendRemoveRequestToWfp(string $orderReference): array
     {
-        $user = Auth::user();
-
-        $payment = Payment::query()
-            ->where('user_id', $user->id)
-            ->where(function ($query) {
-                $query->where('status', 'Approved')
-                    ->orWhere('status', 'Refunded');
-            })
-            ->whereRaw("order_reference NOT LIKE '%_WFPREG-%'")
-            ->latest('id')
-            ->first();
-
-        if (! $payment) {
-            $deletedPayment = Payment::query()
-                ->where('user_id', $user->id)
-                ->where('status', 'Deleted')
-                ->whereRaw("order_reference NOT LIKE '%_WFPREG-%'")
-                ->latest('id')
-                ->first();
-
-            if ($deletedPayment) {
-                Log::error('Payment was deleted', ['user_id' => $user->id]);
-
-                return response()->json(['message' => 'success']);
-            }
-            Log::error('Original WFP payment not found', ['user_id' => $user->id]);
-
-            return response()->json(['error' => 'Original payment not found '], 404);
-        }
-
         $payload = [
             'requestType' => 'REMOVE',
             'merchantAccount' => config('wayforpay.merchant', 'test_merch_n1'),
             'merchantPassword' => config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2'),
-            'orderReference' => $payment->order_reference,
+            'orderReference' => $orderReference,
         ];
 
-        $response = Http::post('https://api.wayforpay.com/regularApi', $payload);
-
-        Log::info('WFP REMOVE raw response', ['body' => $response->body()]);
+        try {
+            $response = Http::timeout(15)
+                ->post('https://api.wayforpay.com/regularApi', $payload);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Transport error: {$e->getMessage()}", 0, $e);
+        }
 
         if ($response->failed()) {
-            Log::error('WFP REMOVE network error', [
-                'user_id' => $user->id,
-                'http_code' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
-            return response()->json(['error' => 'WayForPay request failed'], 502);
+            throw new \RuntimeException(
+                "HTTP {$response->status()} {$response->body()}"
+            );
         }
 
-        $respJson = $response->json();
-        if (! in_array($respJson['reasonCode'] ?? null, [1100, 4100], true)) {
-            Log::error('WFP REMOVE declined', [
-                'user_id' => $user->id,
-                'orderRef' => $payment->order_reference,
-                'reasonCode' => $respJson['reasonCode'] ?? null,
-                'reason' => $respJson['reason'] ?? null,
-            ]);
+        $json = $response->json();
 
-            return response()->json($respJson, 422);
+        if (! is_array($json)) {
+            throw new \RuntimeException('Invalid JSON from WayForPay');
         }
 
-        $payment->update(['status' => 'Deleted']);
-
-        return response()->json(['message' => 'success']);
+        return $json;
     }
 }

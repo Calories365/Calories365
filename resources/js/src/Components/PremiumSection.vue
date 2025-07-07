@@ -68,20 +68,14 @@ export default {
         },
 
         cancelPremium() {
-            this.$store.dispatch(actionTypes.cancelPremium).then((msg) => {
-                if (msg === "success") {
-                    this.$store.dispatch(
-                        "setSuccess",
-                        this.$t("Notification.Success.CanceledSub")
-                    );
-                } else {
-                    this.$store.dispatch(
-                        "setError",
-                        this.$t("Notification.Error.CanceledSub")
-                    );
-                }
-            });
-        },
+            this.$store.dispatch(actionTypes.cancelPremium)
+                .then(() => {
+                    this.$store.dispatch('setSuccess', this.$t('Notification.Success.CanceledSub'));
+                })
+                .catch(() => {
+                    this.$store.dispatch('setError', this.$t('Notification.Error.CanceledSub'));
+                });
+        }
     },
 };
 </script>
