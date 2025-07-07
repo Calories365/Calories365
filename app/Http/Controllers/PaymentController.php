@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    /**
-     * Отдаём фронту pay_url + fields для автодебета (daily, 10 UAH).
-     */
     public function prepareWayForPay(): JsonResponse
     {
         $merchantAccount = config('wayforpay.merchant', 'test_merch_n1');
@@ -36,7 +33,6 @@ class PaymentController extends Controller
             $productPrice
         );
         $merchantSignature = hash_hmac('md5', implode(';', $sigParts), $merchantSecret);
-//        Log::info(implode(';', $sigParts));
         Payment::create([
             'user_id' => Auth::id(),
             'order_reference' => $orderRef,
@@ -66,7 +62,7 @@ class PaymentController extends Controller
             'regularCount' => 2,
             'regularBehavior' => 'preset',
 
-            'serviceUrl' => 'https://calculator.calories365.com/wayforpay/callback',
+            'serviceUrl' => 'https://calculator.calories365.com/wayforpay/callback-v2',
             'returnUrl' => 'https://calculator.calories365.com/thank-you',
 
             'clientEmail' => $clientEmail,
@@ -86,67 +82,42 @@ class PaymentController extends Controller
     /**
      * WayForPay POST-callback
      */
-    public function callback(Request $r)
+    public function callback(Request $r): JsonResponse
     {
+        $data = json_decode($r->getContent(), true);
+        $orderReference = $data['orderReference'];
+
+        Log::info('WFP callback parsed', $data);
+
         try {
-            $raw = $r->getContent();
-            $data = json_decode($raw, true);
-
-            if (! is_array($data)) {
-                $data = json_decode(urldecode($raw), true);
-            }
-
-            if (! is_array($data)) {
-                Log::error('WFP: invalid callback payload', [
-                    'raw' => $raw,
-                    'json_err' => json_last_error_msg(),
-                ]);
-
-                return response('Invalid payload', 400);
-            }
-
-            Log::info('WFP callback parsed', $data);
-
             Payment::processCallback($data);
-            $orderReference = $data['orderReference'];
-            $status = 'accept';
-            $time = time();
-            Log::info($orderReference.';'.$status.';'.$time);
-
-            $sig = hash_hmac(
-                'md5',
-                $orderReference.';'.$status.';'.$time,
-                config('wayforpay.secret', 'flk3409refn54t54t*FNJRET')
-            );
-
-            return response()->json([
-                'orderReference' => $orderReference,
-                'status' => $status,
-                'time' => $time,
-                'signature' => $sig,
-            ]);
         } catch (\Throwable $e) {
             Log::error('WFP callback exception', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            $orderReference = $data['orderReference'];
-
-            $status = 'accept';
-            $time = time();
-            $sig = hash_hmac(
-                'md5',
-                $orderReference.';'.$status.';'.$time,
-                config('wayforpay.secret', 'flk3409refn54t54t*FNJRET')
-            );
-
-            return response()->json([
-                'orderReference' => $orderReference ?? null,
-                'status' => $status,
-                'time' => $time,
-                'signature' => $sig,
-            ]);
         }
+
+        return $this->responseToWFP($orderReference);
+    }
+
+    private function responseToWFP(string $orderReference): JsonResponse
+    {
+        $status = 'accept';
+        $time = time();
+        $signature = hash_hmac(
+            'md5',
+            "{$orderReference};{$status};{$time}",
+            config('wayforpay.secret', 'flk3409refn54t54t*FNJRET'),
+            false
+        );
+
+        return response()->json([
+            'orderReference' => $orderReference,
+            'status' => $status,
+            'time' => $time,
+            'signature' => $signature,
+        ]);
     }
 
     public function cancelPremium(): JsonResponse

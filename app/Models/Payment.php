@@ -53,7 +53,6 @@ class Payment extends Model
                 $userId = \App\Models\User::where('email', $wfp['email'])->value('id');
             }
             if (! $userId) {
-                Log::info(111111);
                 $userId = 37;
             }
             $payment = self::create([
@@ -65,9 +64,15 @@ class Payment extends Model
         }
 
         if ($status === 'Approved' && $payment->user) {
-            Log::info($status);
-            $payment->user->premium_until = Carbon::now()->addMonth();
-            $payment->user->save();
+            $user = $payment->user;
+
+            if (is_null($user->premium_until)) {
+                $user->premium_until = Carbon::now()->addDay();
+            } else {
+                $user->premium_until = Carbon::parse($user->premium_until)->addDay();
+            }
+
+            $user->save();
         }
 
         SendPremiumStatusToBotPanelJob::dispatch($payment->user);

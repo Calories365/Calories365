@@ -12,7 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        '/wayforpay/callback',
+        '/wayforpay/callback-v2',
         '/thank-you',
     ];
 }
