@@ -94,9 +94,9 @@ class Payment extends Model
             }
 
             $user->save();
+            SendPremiumStatusToBotPanelJob::dispatch($payment->user);
         }
 
-        SendPremiumStatusToBotPanelJob::dispatch($payment->user);
     }
 
     public static function latestActiveFor(int $userId): ?self
