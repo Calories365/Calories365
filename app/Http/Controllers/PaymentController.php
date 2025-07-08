@@ -13,19 +13,20 @@ class PaymentController extends Controller
 {
     public function prepareWayForPay(): JsonResponse
     {
-        $merchantAccount = config('wayforpay.merchant', 'test_merch_n1');
-        $merchantSecret = config('wayforpay.secret', 'flk3409refn54t54t*FNJRET');
-        $merchantDomain = config('wayforpay.domain', 'www.market.ua');
+        $merchantAccount = env('WFP_MERCHANT');
+        $merchantSecret = env('WFP_SECRET');
+        $merchantDomain = env('WFP_DOMAIN');
 
-        $amount = '15';
+        $amount = env('WFP_PRODUCT_PRICE');
         $currency = 'UAH';
         $orderDate = time();
         $orderRef = 'DH'.$orderDate.random_int(100, 999);
 
-        $productName = ['Підписка'];
+        $productName = [env('WFP_PRODUCT_NAME')];
         $productCount = ['1'];
         $productPrice = [$amount];
-
+        $regularMode = env('WFP_REGULAR_MODE');
+        $regularCount = env('WFP_REGULAR_COUNT');
         $sigParts = array_merge(
             [$merchantAccount, $merchantDomain, $orderRef, $orderDate, $amount, $currency],
             $productName,
@@ -57,9 +58,9 @@ class PaymentController extends Controller
             'productName' => $productName,
             'productCount' => $productCount,
             'productPrice' => $productPrice,
-            'regularMode' => 'daily',   // daily | weekly | monthly | yearly
+            'regularMode' => $regularMode,   // daily | weekly | monthly | yearly
             'regularAmount' => $amount,
-            'regularCount' => 120,
+            'regularCount' => $regularCount,
             'regularBehavior' => 'preset',
 
             'serviceUrl' => 'https://calculator.calories365.com/wayforpay/callback-v2',
@@ -164,7 +165,7 @@ class PaymentController extends Controller
 
     private function verifyWfpSignature(array $p): bool
     {
-        $secret = config('wayforpay.secret', 'flk3409refn54t54t*FNJRET');
+        $secret = env('WFP_SECRET');
 
         $parts = [
             $p['merchantAccount'] ?? '',
@@ -188,7 +189,7 @@ class PaymentController extends Controller
         $signature = hash_hmac(
             'md5',
             "{$orderReference};{$status};{$time}",
-            config('wayforpay.secret', 'flk3409refn54t54t*FNJRET'),
+            env('WFP_SECRET'),
             false
         );
 
@@ -204,8 +205,9 @@ class PaymentController extends Controller
     {
         $payload = [
             'requestType' => 'REMOVE',
-            'merchantAccount' => config('wayforpay.merchant', 'test_merch_n1'),
-            'merchantPassword' => config('wayforpay.secret', 'd485396ae413eb60dc251b0899b261c2'),
+            'merchantAccount' => env('WFP_MERCHANT'),
+            'merchantPassword' => env('WFP_PASSWORD'),
+
             'orderReference' => $orderReference,
         ];
 

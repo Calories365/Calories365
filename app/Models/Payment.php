@@ -63,7 +63,7 @@ class Payment extends Model
             'Suspended' => 'Suspended',
         ];
         $status = $statusMap[$wfp['transactionStatus']] ?? 'Declined';
-        $activeFlag = ! ($status === 'Deleted');
+        $activeFlag = ! in_array($status, ['Deleted', 'Expired'], true);
         $payment = self::where('order_reference', $wfp['orderReference'])->first();
 
         Log::info(print_r($wfp['orderReference'], true));
