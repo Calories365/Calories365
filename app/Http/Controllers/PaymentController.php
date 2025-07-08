@@ -17,7 +17,7 @@ class PaymentController extends Controller
         $merchantSecret = config('wayforpay.secret', 'flk3409refn54t54t*FNJRET');
         $merchantDomain = config('wayforpay.domain', 'www.market.ua');
 
-        $amount = '10';
+        $amount = '15';
         $currency = 'UAH';
         $orderDate = time();
         $orderRef = 'DH'.$orderDate.random_int(100, 999);
@@ -59,7 +59,6 @@ class PaymentController extends Controller
             'productPrice' => $productPrice,
             'regularMode' => 'daily',   // daily | weekly | monthly | yearly
             'regularAmount' => $amount,
-            'regularCount' => 2,
             'regularBehavior' => 'preset',
 
             'serviceUrl' => 'https://calculator.calories365.com/wayforpay/callback-v2',
@@ -91,6 +90,7 @@ class PaymentController extends Controller
             Log::warning('WFP invalid signature', [
                 'orderReference' => $data['orderReference'] ?? null,
             ]);
+
             return $this->responseToWFP($orderReference, 'reject');
         }
 
@@ -156,7 +156,7 @@ class PaymentController extends Controller
             ], 422);
         }
 
-        $payment->update(['status' => Payment::STATUS_DELETED]);
+        $payment->update(['status' => Payment::STATUS_DELETED, 'active' => false]);
 
         return response()->json(['message' => 'success']);
     }

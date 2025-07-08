@@ -14,6 +14,7 @@ class Payment extends Model
         'user_id',
         'order_reference',
         'status',
+        'active',
         'signature',
     ];
 
@@ -62,12 +63,12 @@ class Payment extends Model
             'Suspended' => 'Suspended',
         ];
         $status = $statusMap[$wfp['transactionStatus']] ?? 'Declined';
-
+        $activeFlag = ! ($status === 'Deleted');
         $payment = self::where('order_reference', $wfp['orderReference'])->first();
 
         Log::info(print_r($wfp['orderReference'], true));
         if ($payment) {
-            $payment->update(['status' => $status, 'signature' => $wfp['merchantSignature']]);
+            $payment->update(['status' => $status, 'signature' => $wfp['merchantSignature'], 'active' => $activeFlag]);
         } else {
             $userId = null;
             if (! empty($wfp['email'])) {
