@@ -490,5 +490,9 @@
     "Title" : "Thank you for purchase!",
     "Message" : "Thank you for choosing Premium! Make the most of our service and reach amazing results!",
     "GoHome" : "Go home"
+    },
+    "CookieBanner": {
+        "Cookies": "We use cookies to improve your experience.",
+        "Approve": "Accept"
     }
 }

@@ -41,7 +41,7 @@ export default {
             audioChunks: [],
             stream: null,
             browserSupportsRecording: false,
-            originalProducts: {}, // Хранит оригинальные значения продуктов для сравнения
+            originalProducts: {},
         };
     },
     computed: {
@@ -54,7 +54,6 @@ export default {
         }),
     },
     created() {
-        // Проверка поддержки MediaDevices API
         this.checkBrowserSupport();
     },
     methods: {
@@ -125,7 +124,6 @@ export default {
                     throw new Error(this.$t("Voice.browserWarning"));
                 }
 
-                // Используем современный API, если доступен
                 if (
                     navigator.mediaDevices &&
                     navigator.mediaDevices.getUserMedia
@@ -133,9 +131,7 @@ export default {
                     this.stream = await navigator.mediaDevices.getUserMedia({
                         audio: true,
                     });
-                }
-                // Используем старый API, если современный недоступен
-                else if (navigator.getUserMedia) {
+                } else if (navigator.getUserMedia) {
                     this.stream = await new Promise((resolve, reject) => {
                         navigator.getUserMedia(
                             { audio: true },
@@ -147,8 +143,8 @@ export default {
                     throw new Error(this.$t("Voice.errors.micPermission"));
                 }
                 const preferedTypes = [
-                    "audio/mp4", // iOS Safari
-                    "audio/webm;codecs=opus", // Chrome, Firefox
+                    "audio/mp4",
+                    "audio/webm;codecs=opus",
                     "audio/webm",
                 ];
                 const mimeType = preferedTypes.find((t) =>
@@ -159,32 +155,26 @@ export default {
                     return;
                 }
 
-                // Создаем MediaRecorder
                 this.mediaRecorder = new MediaRecorder(this.stream, {
                     mimeType,
                 });
                 this.chosenMimeType = mimeType;
                 this.audioChunks = [];
 
-                // Обработчик события dataavailable
                 this.mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) {
                         this.audioChunks.push(event.data);
                     }
                 };
 
-                // Обработчик события stop
                 this.mediaRecorder.onstop = async () => {
-                    // Создаем Blob из записанных данных
                     const audioBlob = new Blob(this.audioChunks, {
                         type: this.chosenMimeType,
                     });
 
-                    // Сохраняем Blob в Vuex и устанавливаем состояние обработки
                     this.$store.commit("voice/RECORDING_COMPLETE", audioBlob);
-                    this.$store.commit("voice/RECORDING_PROCESS"); // Показываем индикатор загрузки
+                    this.$store.commit("voice/RECORDING_PROCESS");
 
-                    // Загружаем запись на сервер
                     try {
                         const response = await this.voiceUploadRecording();
                         const message = response.message;
@@ -193,14 +183,12 @@ export default {
                             this.showError(this.$t("Voice.please_buy_premium"));
                         }
 
-                        // Для демонстрации UI добавим несколько продуктов после обработки
                         if (response && response.transcription) {
                             this.transcription = response.transcription;
                         } else {
                             this.transcription = "";
                         }
 
-                        // Добавляем продукты из ответа или демо-продукты
                         if (
                             response &&
                             response.products &&
@@ -228,17 +216,11 @@ export default {
                                 };
                             });
 
-                            // Сохраняем оригинальные значения для отслеживания изменений
                             this.saveOriginalValues();
-
-                            // Выводим в консоль найденные продукты
-                            console.log("Найденные продукты:", this.products);
                         } else {
-                            // Добавляем демо-продукты если нужно
                             this.products = [];
                         }
 
-                        // Завершаем обработку после получения и обработки данных
                         this.$store.commit(
                             "voice/RECORDING_COMPLETE",
                             audioBlob
@@ -246,7 +228,6 @@ export default {
                     } catch (error) {
                         console.error("Ошибка при отправке записи:", error);
                         this.showError("Не удалось отправить аудиозапись");
-                        // Завершаем обработку при ошибке
                         this.$store.commit(
                             "voice/RECORDING_COMPLETE",
                             audioBlob
@@ -254,7 +235,6 @@ export default {
                     }
                 };
 
-                // Начинаем запись
                 this.mediaRecorder.start();
                 this.voiceStartRecording();
             } catch (error) {
@@ -292,11 +272,9 @@ export default {
         },
         async stopRecording() {
             if (this.mediaRecorder && this.isRecording) {
-                // Останавливаем запись
                 this.mediaRecorder.stop();
                 this.voiceStopRecording();
 
-                // Останавливаем все треки медиапотока
                 if (this.stream) {
                     this.stream.getTracks().forEach((track) => track.stop());
                 }
@@ -306,7 +284,6 @@ export default {
             this.products.splice(index, 1);
         },
         processProductData(index) {
-            // Проверяем, есть ли у продукта имя
             if (
                 !this.products[index].name ||
                 this.products[index].name.trim() === ""
@@ -317,18 +294,14 @@ export default {
 
             const product = this.products[index];
 
-            // Если имя продукта было изменено, убеждаемся, что обнулен product_id
             if (product.nameModified) {
                 product.product_id = null;
             }
 
-            // Устанавливаем состояние обработки
             this.$store.commit("voice/RECORDING_PROCESS");
 
-            // Всегда генерируем данные для продукта
             this.generateProductData(index);
         },
-        // Поиск продукта по названию
         async searchProductByName(index) {
             const productName = this.products[index].name;
 
@@ -336,10 +309,8 @@ export default {
                 const response = await searchProduct(productName);
 
                 if (response.success && response.product) {
-                    // Продукт найден в базе данных
                     const productData = response.product;
 
-                    // Обновляем данные продукта
                     this.products[index].product_id = productData.product.id;
                     this.products[index].calories =
                         productData.product.calories || 0;
@@ -349,20 +320,16 @@ export default {
                     this.products[index].carbs =
                         productData.product.carbohydrates || 0;
 
-                    // Обновляем название продукта найденным в базе данных
                     this.products[index].name =
                         productData.product_translation.name;
                     this.products[index].originalName =
                         productData.product_translation.name;
 
-                    // Сбрасываем флаги
                     this.products[index].needsSearch = false;
                     this.products[index].nameModified = false;
 
-                    // Устанавливаем флаг, что поиск был выполнен
                     this.products[index].searchedBefore = true;
 
-                    // Если рейтинг низкий, предлагаем сгенерировать данные
                     if (response.should_generate) {
                         this.showSuccess(
                             this.$t("Voice.success.productFoundLowMatch", {
@@ -377,13 +344,10 @@ export default {
                         );
                     }
                 } else {
-                    // Продукт не найден, предлагаем сгенерировать данные
-                    this.products[index].needsSearch = false; // Поиск выполнен, но безуспешно
+                    this.products[index].needsSearch = false;
 
-                    // Устанавливаем флаг, что поиск был выполнен
                     this.products[index].searchedBefore = true;
 
-                    // Генерируем данные автоматически
                     await this.generateProductData(index);
                 }
             } catch (error) {
@@ -395,19 +359,15 @@ export default {
                 this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
             }
         },
-        // Генерация данных о продукте
         async generateProductData(index) {
             const productName = this.products[index].name;
 
             try {
-                // Показываем индикатор загрузки
                 this.$store.commit("voice/RECORDING_PROCESS");
 
                 const response = await generateProductData(productName);
 
-                // Проверяем успешность запроса
                 if (response.success && response.data) {
-                    // Обновляем данные продукта
                     this.products[index].calories = response.data.calories || 0;
                     this.products[index].protein = response.data.proteins || 0;
                     this.products[index].fats = response.data.fats || 0;
@@ -415,101 +375,82 @@ export default {
                         response.data.carbohydrates || 0;
                     this.products[index].isGenerated = true;
 
-                    // Если имя продукта было изменено, убеждаемся что это новый продукт
                     if (this.products[index].nameModified) {
                         this.products[index].product_id = null;
                     }
 
-                    // Сбрасываем флаг поиска
                     this.products[index].needsSearch = false;
 
-                    // Показываем сообщение об успехе
                     this.showSuccess(
                         this.$t("Voice.success.dataGenerated", {
                             product: productName,
                         })
                     );
                 } else {
-                    // Если запрос неуспешен
                     throw new Error(
                         response.message ||
                             this.$t("Voice.errors.generateError")
                     );
                 }
             } catch (error) {
-                // Обработка ошибок
                 this.showError(
                     error.message || this.$t("Voice.errors.generateError")
                 );
                 console.error("Ошибка при генерации данных:", error);
             } finally {
-                // В любом случае завершаем обработку
                 this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
             }
         },
         saveToMeal(mealType, mealLabel) {
-            // Преобразование русских названий частей дня в английские
             const mealTypeMap = {
                 завтрак: "morning",
                 обед: "dinner",
                 ужин: "supper",
             };
 
-            // Получаем английское название части дня (если это русское слово)
             const englishMealType = mealTypeMap[mealType] || mealType;
 
-            // Проверка на наличие продуктов
             if (!this.products.length) {
                 this.showError(this.$t("Voice.errors.noProducts"));
                 return;
             }
 
-            // Проверяем и подготавливаем продукты перед отправкой
             const productsToSave = this.products.map((product) => {
-                // Создаем копию продукта, чтобы не изменять оригинал
                 const preparedProduct = { ...product };
 
-                // Если название продукта было изменено, убеждаемся что это новый продукт
                 if (preparedProduct.nameModified) {
-                    preparedProduct.product_id = null; // Гарантированно обнуляем ID
-                    preparedProduct.isGenerated = false; // Устанавливаем как пользовательский продукт
+                    preparedProduct.product_id = null;
+                    preparedProduct.isGenerated = false;
                 }
 
-                // Проверяем, есть ли у продукта вес
                 if (!preparedProduct.weight || preparedProduct.weight <= 0) {
-                    preparedProduct.weight = 100; // Устанавливаем вес по умолчанию
+                    preparedProduct.weight = 100;
                 }
 
                 console.log("preparedProduct: ", preparedProduct);
                 return preparedProduct;
             });
 
-            // Устанавливаем состояние обработки
             this.$store.commit("voice/RECORDING_PROCESS");
 
-            // Отправляем продукты на сохранение
             saveVoiceProducts(productsToSave, englishMealType)
                 .then((response) => {
-                    // Обновляем состояние после успешного сохранения
                     this.$store.commit(
                         "voice/RECORDING_COMPLETE",
                         this.audioBlob
                     );
 
-                    // Показываем сообщение об успехе с названием приема пищи
                     this.showSuccess(
                         this.$t("Voice.success.productsSaved", {
                             meal: mealLabel || mealType,
                         })
                     );
 
-                    // Очищаем список продуктов и расшифровку
                     this.products = [];
                     this.transcription = "";
                     this.voiceResetRecording();
                 })
                 .catch((error) => {
-                    // Обработка ошибок
                     this.$store.commit(
                         "voice/RECORDING_COMPLETE",
                         this.audioBlob
@@ -527,9 +468,7 @@ export default {
             this.transcription = "";
             this.voiceResetRecording();
         },
-        // Проверка поддержки браузером необходимых API
         checkBrowserSupport() {
-            // Проверяем поддержку современных API
             const hasNavigator = typeof navigator !== "undefined";
             const hasMediaDevices = hasNavigator && navigator.mediaDevices;
             const hasGetUserMedia =
@@ -541,9 +480,7 @@ export default {
 
             this.browserSupportsRecording = hasGetUserMedia && hasMediaRecorder;
 
-            // Для более старых браузеров можно попробовать найти альтернативные API
             if (!this.browserSupportsRecording && hasNavigator) {
-                // Проверяем устаревшие методы для доступа к медиа-устройствам
                 navigator.getUserMedia =
                     navigator.getUserMedia ||
                     navigator.webkitGetUserMedia ||
@@ -564,7 +501,6 @@ export default {
             );
         },
         saveOriginalValues() {
-            // Сохраняем оригинальные значения продуктов по product_id
             this.originalProducts = {};
 
             this.products.forEach((item) => {
@@ -586,13 +522,10 @@ export default {
             );
         },
         checkModifiedProducts() {
-            // Проходим по всем продуктам и проверяем изменения
             this.products.forEach((product, index) => {
-                // Проверяем, есть ли у продукта ID (существующий продукт)
                 if (product.product_id) {
                     const original = this.originalProducts[product.product_id];
 
-                    // Проверяем, изменились ли питательные вещества
                     if (
                         original &&
                         (product.calories !== original.calories ||
@@ -600,7 +533,6 @@ export default {
                             product.fats !== original.fats ||
                             product.carbs !== original.carbs)
                     ) {
-                        // Устанавливаем флаг "модифицирован"
                         this.products[index].isModified = true;
                         console.log(
                             `Продукт "${product.name}" был модифицирован:`,
@@ -624,12 +556,10 @@ export default {
             });
         },
         onProductChanged(index) {
-            // Проверяем, есть ли у продукта ID (существующий продукт)
             if (this.products[index].product_id) {
                 const original =
                     this.originalProducts[this.products[index].product_id];
 
-                // Проверяем, изменились ли питательные вещества
                 if (
                     original &&
                     (this.products[index].calories !== original.calories ||
@@ -638,7 +568,6 @@ export default {
                         this.products[index].carbs !== original.carbs ||
                         this.products[index].weight !== original.weight)
                 ) {
-                    // Устанавливаем флаг "модифицирован"
                     this.products[index].isModified = true;
                     console.log(
                         `Продукт "${this.products[index].name}" был модифицирован:`,
@@ -661,7 +590,6 @@ export default {
                     );
                 }
             } else if (this.products[index].nameModified) {
-                // Если это продукт с измененным названием, отмечаем его как isModified
                 this.products[index].isModified = true;
             }
         },
@@ -669,35 +597,26 @@ export default {
         onProductNameChanged(index) {
             const product = this.products[index];
 
-            // Если имя не изменилось, ничего не делаем
             if (product.originalName === product.name) {
                 product.nameModified = false;
                 product.needsSearch = false;
                 return;
             }
 
-            // Создаем новый пользовательский продукт:
-            // 1. Устанавливаем флаг изменения имени
             product.nameModified = true;
-            // 2. Обнуляем product_id, чтобы продукт был сохранен как новый
             product.product_id = null;
-            // 3. Устанавливаем флаг isGenerated в false чтобы система знала, что это пользовательский продукт
             product.isGenerated = false;
-            // 4. Устанавливаем флаг isModified в true чтобы продукт визуально выделялся
             product.isModified = true;
 
-            // Установливаем needsSearch в false, чтобы при нажатии generate всегда использовалась генерация
             product.needsSearch = false;
             console.log(
                 `Изменение имени продукта с "${product.originalName}" на "${product.name}". Создан новый пользовательский продукт.`
             );
 
-            // Обновляем originalName, чтобы отслеживать дальнейшие изменения
             product.originalName = product.name;
         },
     },
     beforeUnmount() {
-        // Освобождаем ресурсы при удалении компонента
         if (this.stream) {
             this.stream.getTracks().forEach((track) => track.stop());
         }
@@ -709,12 +628,10 @@ export default {
         <div class="voice-container">
             <h1>{{ $t("Voice.title") }}</h1>
 
-            <!-- Сообщение об успешном действии -->
             <CaloriesSuccessNotification v-if="showSuccessMessage">
                 {{ successMessage }}
             </CaloriesSuccessNotification>
 
-            <!-- Сообщение об ошибке -->
             <CaloriesErrorNotification v-if="showErrorMessage">
                 {{ errorMessage }}
             </CaloriesErrorNotification>

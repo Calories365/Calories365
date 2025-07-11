@@ -2,7 +2,6 @@
 export default {
     name: "CookieBanner",
     data() {
-        // читаем флаг из localStorage
         return {
             cookiesApproved: localStorage.getItem("cookiesAccepted") === "1",
         };
@@ -17,12 +16,13 @@ export default {
 </script>
 
 <template>
-    <!-- баннер показан, пока пользователь не принял cookies -->
     <div v-if="!cookiesApproved" class="cookie-banner">
         <span class="cookie-text">
-            Ми використовуємо файли cookies, щоб покращити ваш досвід.
+            {{ $t("CookieBanner.Cookies") }}
         </span>
-        <button class="cookie-btn" @click="approveCookies">Прийняти</button>
+        <button class="cookie-btn" @click="approveCookies">
+            {{ $t("CookieBanner.Approve") }}
+        </button>
     </div>
 </template>
 
