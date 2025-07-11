@@ -68,7 +68,7 @@
         "StatsDesc": "Track your calorie intake trends by day and month with convenient data visualization.",
         "StatsButton": "View Statistics",
         "PremiumTitle": "Premium Subscription",
-        "PremiumDesc": "Get unlimited bot access for maximum results for 100 UAH per month.",
+        "PremiumDesc": "Get unlimited bot access for maximum results for 125 UAH per month.",
         "PremiumAlreadyHaveDesc": "You have unlimited access to the bot for maximum results.",
         "Connected": "Connected",
         "Connect": "Connect",
@@ -78,6 +78,7 @@
         "PrivacyPolicy": "Privacy Policy",
         "TermsOfService": "Terms of Service",
         "FAQ": "FAQ",
+        "PaymentAndDelivery": "Payment and Delivery",
         "AgreeToTerms": "I agree to the terms and conditions",
         "AgreeToTermsRequired": "Please agree to the terms and conditions before proceeding.",
         "AgreeToTermsPart1": "I agree to the",
@@ -362,7 +363,7 @@
         "Section19": "19. Refund Process",
         "Section19Text": "If eligible, refunds will be processed through WayForPay and returned to your payment method within 10 business days. Please allow additional time for the transaction to appear on your statement.",
         "Section20": "20. Full Cost Disclosure",
-        "Section20Text": "The total cost of the premium subscription is 100 UAH per month, inclusive of all fees. There are no additional charges or hidden costs."
+        "Section20Text": "The total cost of the premium subscription is 125 UAH per month, inclusive of all fees. There are no additional charges or hidden costs."
     },
     "FAQ": {
         "Title": "FAQ (Frequently Asked Questions)",
@@ -412,6 +413,22 @@
         "Conclusion": "Conclusion",
         "ConclusionText": "We hope this FAQ covers your main questions about Calories365. If you have more questions or ideas, feel free to reach out via any of our contact channels. Thank you for using Calories365 to track your diet and health!"
     },
+    "PaymentDelivery": {
+        "Title": "Payment and Delivery",
+        "LastUpdated": "Last updated: 25.06.2025",
+        "Intro": "This page describes all payment methods and service terms for Calories365.",
+        "SectionPayment": "Payment Methods",
+        "PaymentIntro": "We accept the following payment methods:",
+        "PaymentMethodCard": "• Bank cards Visa and Mastercard (via WayForPay)",
+        "PaymentMethodGPay": "• Google Pay",
+        "PaymentMethodAPay": "• Apple Pay",
+        "SectionService": "Service Provision",
+        "ServiceParagraph1": "After a successful premium subscription payment, you will immediately gain unlimited access to voice input, including the Telegram bot. In the free version, voice input is available only 10 times; afterward, a subscription is required.",
+        "RefundParagraph": "You may request a refund <strong>within 14 days</strong> of payment if you have not used premium features. To do so, send an email to <a href=\"mailto:calories365.diary@gmail.com\">calories365.diary@gmail.com</a> — we will process the request and issue a refund via WayForPay within 10 business days. The full procedure is described in our <a href=\"/refund-policy\" target=\"_blank\">Refund Policy</a>.",
+        "ServiceParagraph2": "As this is digital content, no physical delivery is provided.",
+        "SectionRefund": "Refunds"
+    },
+
     "Voice": {
         "title": "Voice Input for Products",
         "description": "Click the button and dictate what you ate. For example: «For breakfast I had oatmeal with an apple and a cup of coffee».",

@@ -1,8 +1,9 @@
-<script setup></script>
+<script setup>
+import MainFooter from "../Components/MainFooter.vue";
+</script>
 
 <template>
     <div class="privacy-policy-wrapper">
-        <!--        111-->
         <h1>{{ $t("PrivacyPolicy.Title") }}</h1>
         <p class="last-updated">
             <strong>{{ $t("PrivacyPolicy.LastUpdated") }}</strong>
@@ -10,7 +11,6 @@
 
         <p>{{ $t("PrivacyPolicy.Intro") }}</p>
 
-        <!-- 1. Информация, которую мы собираем -->
         <h2>{{ $t("PrivacyPolicy.Section1") }}</h2>
         <h3>{{ $t("PrivacyPolicy.Subsection1_1") }}</h3>
         <p>{{ $t("PrivacyPolicy.Subsection1_1Text") }}</p>
@@ -32,7 +32,6 @@
         </ul>
         <p>{{ $t("PrivacyPolicy.AdditionalText1_2") }}</p>
 
-        <!-- 2. Как мы используем вашу информацию -->
         <h2>{{ $t("PrivacyPolicy.Section2") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section2Text") }}</p>
         <ol>
@@ -44,7 +43,6 @@
             <li>{{ $t("PrivacyPolicy.List2_6") }}</li>
         </ol>
 
-        <!-- 3. Как мы делимся вашей информацией -->
         <h2>{{ $t("PrivacyPolicy.Section3") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section3Text") }}</p>
 
@@ -57,18 +55,15 @@
         <h3>{{ $t("PrivacyPolicy.Subsection3_3") }}</h3>
         <p>{{ $t("PrivacyPolicy.Subsection3_3Text") }}</p>
 
-        <!-- 4. Куки и технологии отслеживания -->
         <h2>{{ $t("PrivacyPolicy.Section4") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section4Text") }}</p>
 
         <h2>{{ $t("PrivacyPolicy.Section5") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section5Text") }}</p>
 
-        <!-- 6. Безопасность данных -->
         <h2>{{ $t("PrivacyPolicy.Section6") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section6Text") }}</p>
 
-        <!-- 7. Ваши права и выбор -->
         <h2>{{ $t("PrivacyPolicy.Section7") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section7Text") }}</p>
         <ul>
@@ -83,24 +78,21 @@
             calories365.diary@gmail.com.
         </p>
 
-        <!-- 8. Конфиденциальность детей -->
         <h2>{{ $t("PrivacyPolicy.Section8") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section8Text") }}</p>
 
-        <!-- 9. Ссылки на сторонние ресурсы -->
         <h2>{{ $t("PrivacyPolicy.Section9") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section9Text") }}</p>
 
-        <!-- 10. Изменения в Политике конфиденциальности -->
         <h2>{{ $t("PrivacyPolicy.Section10") }}</h2>
         <p>{{ $t("PrivacyPolicy.Section10Text") }}</p>
 
-        <!-- 11. Свяжитесь с нами -->
         <h2>{{ $t("PrivacyPolicy.Section11") }}</h2>
         <p>
             {{ $t("PrivacyPolicy.Section11Text") }} calories365.diary@gmail.com
         </p>
     </div>
+    <MainFooter />
 </template>
 
 <style scoped lang="scss">

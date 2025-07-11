@@ -16,6 +16,7 @@ import TermsOfService from "@/pages/TermsOfService.vue";
 import FAQ from "@/pages/FAQ.vue";
 import Voice from "@/pages/Voice.vue";
 import ThankYou from "../pages/ThankYou.vue";
+import PaymentAndDelivery from "../pages/PaymentAndDelivery.vue";
 
 const routes = [
     {
@@ -46,6 +47,14 @@ const routes = [
         path: "/faq",
         component: FAQ,
         name: "faq",
+        meta: {
+            needAuth: false,
+        },
+    },
+    {
+        path: "/payment-and-delivery",
+        component: PaymentAndDelivery,
+        name: "payment-and-delivery",
         meta: {
             needAuth: false,
         },

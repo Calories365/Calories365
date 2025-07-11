@@ -534,7 +534,8 @@ const actions = {
     [actionTypes.cancelPremium]({ commit }) {
         commit(mutationTypes.cancelPremiumStart);
 
-        return authApi.cancelPremium()
+        return authApi
+            .cancelPremium()
             .then(({ data }) => {
                 commit(mutationTypes.cancelPremiumSuccess);
                 return data.message;
@@ -542,11 +543,11 @@ const actions = {
             .catch((error) => {
                 commit(
                     mutationTypes.cancelPremiumFailure,
-                    error.response?.data?.code ?? 'UNKNOWN_ERROR'
+                    error.response?.data?.code ?? "UNKNOWN_ERROR"
                 );
                 throw error;
             });
-    }
+    },
 };
 export default {
     state,

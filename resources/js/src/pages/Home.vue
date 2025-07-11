@@ -4,10 +4,11 @@ import { actionTypes } from "@/store/modules/auth.js";
 import CaloriesButton from "../Components/CaloriesButton.vue";
 import PremiumSection from "../Components/PremiumSection.vue";
 import { useAcademic } from "@/composables/useAcademic";
+import MainFooter from "../Components/MainFooter.vue";
 
 export default {
     name: "LandingPage",
-    components: { PremiumSection, CaloriesButton },
+    components: { MainFooter, PremiumSection, CaloriesButton },
     data() {
         return {
             telegramAuth: null,
@@ -272,33 +273,50 @@ export default {
             />
         </section>
 
-        <footer class="main-footer" v-if="$route.name === 'home'">
-            <div class="container">
-                <div class="footer-links">
-                    <router-link
-                        :to="{ name: 'privacyPolicy' }"
-                        class="privacy-link"
-                        >{{ $t("Home.PrivacyPolicy") }}</router-link
-                    >
-                    <router-link
-                        :to="{ name: 'termsOfService' }"
-                        class="privacy-link"
-                        >{{ $t("Home.TermsOfService") }}</router-link
-                    >
-                    <router-link :to="{ name: 'faq' }" class="privacy-link">{{
-                        $t("Home.FAQ")
-                    }}</router-link>
-                </div>
-                <div class="main-footer_info-for-payment">
-                    <div class="contact-info">
-                        <p>Email: calories365.diary@gmail.com</p>
-                    </div>
-                    <div class="payment-logos">
-                        <!-- <img src="@/assets/1159x220.svg" alt="Visa" /> -->
-                    </div>
-                </div>
-            </div>
-        </footer>
+        <!--        <footer class="main-footer" v-if="$route.name === 'home'">-->
+        <!--            <div class="container">-->
+        <!--                <div class="footer-links">-->
+        <!--                    <router-link-->
+        <!--                        :to="{ name: 'privacyPolicy' }"-->
+        <!--                        class="privacy-link"-->
+        <!--                        >{{ $t("Home.PrivacyPolicy") }}</router-link-->
+        <!--                    >-->
+        <!--                    <router-link-->
+        <!--                        :to="{ name: 'termsOfService' }"-->
+        <!--                        class="privacy-link"-->
+        <!--                        >{{ $t("Home.TermsOfService") }}</router-link-->
+        <!--                    >-->
+        <!--                    <router-link :to="{ name: 'faq' }" class="privacy-link">{{-->
+        <!--                        $t("Home.FAQ")-->
+        <!--                    }}</router-link>-->
+        <!--                    <router-link :to="{ name: 'payment-and-delivery' }" class="privacy-link">{{-->
+        <!--                        $t("Home.PaymentAndDelivery")-->
+        <!--                    }}</router-link>-->
+        <!--                </div>-->
+        <!--                <div class="main-footer_info-for-payment">-->
+        <!--&lt;!&ndash;                    <div class="contact-info">&ndash;&gt;-->
+        <!--&lt;!&ndash;                        <p>Email: calories365.diary@gmail.com</p>&ndash;&gt;-->
+        <!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+        <!--                    <div class="payment-logos">-->
+        <!--                        <div class="payment-logos__main">-->
+        <!--                            <img media="" src="https://wfpstorage.s3-eu-west-1.amazonaws.com/help/1746550624_%D0%B4%D0%BB%D1%8F%20%D1%82%D0%B5%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D1%84%D0%BE%D0%BD%D1%83.png" alt="" width="500" height="67" href="https://wfpstorage.s3-eu-west-1.amazonaws.com/help/1746550624_%D0%B4%D0%BB%D1%8F%20%D1%82%D0%B5%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%20%D1%84%D0%BE%D0%BD%D1%83.png">-->
+        <!--                        </div>-->
+        <!--                        <div class="payment-logos__minor">-->
+        <!--                            <img media="" src="https://wfpstorage.s3-eu-west-1.amazonaws.com/help/1746549935_GPay-logo.png" alt="" width="100" height="40" href="https://wfpstorage.s3-eu-west-1.amazonaws.com/help/1746549935_GPay-logo.png">-->
+        <!--                            <img media="" src="https://wfpstorage.s3-eu-west-1.amazonaws.com/help/1746549949_Group.png" alt="" width="100" height="42" href="https://wfpstorage.s3-eu-west-1.amazonaws.com/help/1746549949_Group.png">-->
+        <!--                        </div>-->
+        <!--                    </div>-->
+        <!--                    <div class="contact-info">-->
+        <!--                        <p>ФОП Панченко Гліб Станіславович</p>-->
+        <!--                        <p>02068, Україна, місто Київ, вулиця Драгоманова, будинок 23 б</p>-->
+        <!--                        <p>ІПН: 3733906719</p>-->
+        <!--                        <p>Тел: +380 50 171 56 24</p>-->
+        <!--                        <p>Email: calories365.diary@gmail.com</p>-->
+        <!--                    </div>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--        </footer>-->
+        <MainFooter />
     </div>
 </template>
 
@@ -560,65 +578,71 @@ export default {
     }
 
     /* Footer*/
-    .main-footer {
-        background-color: #333;
-        color: #fff;
-        text-align: center;
-        padding: 20px 0;
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-
-            @media (max-width: $bp-medium) {
-                flex-direction: column;
-            }
-        }
-
-        .privacy-link {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.2rem;
-            transition: color 0.3s ease;
-
-            @media (max-width: $bp-medium) {
-                font-size: 1rem;
-            }
-
-            &:hover {
-                color: #aaa;
-            }
-        }
-
-        &_info-for-payment {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 30px;
-
-            @media (max-width: $bp-medium) {
-                flex-direction: column;
-            }
-
-            .contact-info {
-                font-size: 0.85rem;
-
-                p {
-                    margin: 5px 0;
-                }
-            }
-
-            .payment-logos {
-                display: flex;
-                justify-content: center;
-                gap: 20px;
-                margin: 10px 0;
-
-                img {
-                    height: 100px;
-                }
-            }
-        }
-    }
+    //.main-footer {
+    //    background-color: #333;
+    //    color: #fff;
+    //    text-align: center;
+    //    padding: 20px 0;
+    //
+    //    .footer-links {
+    //        display: flex;
+    //        justify-content: center;
+    //        gap: 20px;
+    //
+    //        @media (max-width: $bp-medium) {
+    //            flex-direction: column;
+    //        }
+    //    }
+    //
+    //    .privacy-link {
+    //        color: #fff;
+    //        text-decoration: none;
+    //        font-size: 1.2rem;
+    //        transition: color 0.3s ease;
+    //
+    //        @media (max-width: $bp-medium) {
+    //            font-size: 1rem;
+    //        }
+    //
+    //        &:hover {
+    //            color: #aaa;
+    //        }
+    //    }
+    //
+    //    &_info-for-payment {
+    //        display: flex;
+    //        justify-content: space-between;
+    //        padding-top: 30px;
+    //
+    //        @media (max-width: $bp-medium) {
+    //            flex-direction: column;
+    //        }
+    //
+    //        .contact-info {
+    //            font-size: 0.85rem;
+    //
+    //            p {
+    //                margin: 5px 0;
+    //            }
+    //        }
+    //
+    //        .payment-logos {
+    //            display: flex;
+    //            flex-direction: column;
+    //            //justify-content: center;
+    //            gap: 20px;
+    //            //margin: 10px 0;
+    //
+    //            img {
+    //                //height: 20%;
+    //            }
+    //            &__minor{
+    //                display: flex;
+    //                gap: 20px;
+    //                justify-content: center;
+    //            }
+    //        }
+    //    }
+    //}
 }
 </style>

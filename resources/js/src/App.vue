@@ -8,6 +8,7 @@ import { actionTypes } from "@/store/modules/changeLocale.js";
 import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vue";
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
 import PremiumNotice from "@/Components/PremiumNotice.vue";
+import CookieBanner from "./Components/CookieBanner.vue";
 
 library.add(faAngleDown);
 
@@ -31,6 +32,7 @@ export default {
         };
     },
     components: {
+        CookieBanner,
         CaloriesSuccessNotification,
         CaloriesErrorNotification,
         CaloriesCalculationLocaleChanger,
@@ -92,30 +94,17 @@ export default {
             {{ errorMessage }}
         </calories-error-notification>
 
-        <!-- Шапка -->
         <calories-header-v2 />
 
-        <!-- Global premium notice -->
         <premium-notice />
+
+        <cookie-banner />
 
         <main id="primary" class="main-wrapper">
             <article class="main-article">
                 <router-view />
             </article>
         </main>
-
-        <!-- Показуємо футер тільки якщо поточний маршрут — 'home' -->
-        <!--        <footer class="main-footer" v-if="$route.name === 'home'">-->
-        <!--            <router-link :to="{ name: 'privacyPolicy' }" class="privacy-link">-->
-        <!--                Privacy Policy-->
-        <!--            </router-link>-->
-        <!--            <router-link :to="{ name: 'termsOfService' }" class="privacy-link">-->
-        <!--                Terms of Service-->
-        <!--            </router-link>-->
-        <!--            <router-link :to="{ name: 'faq' }" class="privacy-link">-->
-        <!--                FAQ-->
-        <!--            </router-link>-->
-        <!--        </footer>-->
     </div>
 </template>
 
@@ -127,7 +116,7 @@ export default {
 }
 
 .main-wrapper {
-    flex: 1; /* Додаємо, щоб основний вміст розтягувався */
+    flex: 1;
     font-family: 'Open Sans', sans-serif;
     font-style: normal;
     font-variant: normal;
