@@ -24,7 +24,7 @@ import MainFooter from "../Components/MainFooter.vue";
         <p>{{ $t("PaymentDelivery.ServiceParagraph2") }}</p>
 
         <h2>{{ $t("PaymentDelivery.SectionRefund") }}</h2>
-        <p v-html="$t('PaymentDelivery.RefundParagraph')"></p>
+        <p>{{ $t("PaymentDelivery.RefundParagraph") }}</p>
     </div>
 
     <MainFooter />

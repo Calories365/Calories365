@@ -424,7 +424,7 @@
         "PaymentMethodAPay": "• Apple Pay",
         "SectionService": "Service Provision",
         "ServiceParagraph1": "After a successful premium subscription payment, you will immediately gain unlimited access to voice input, including the Telegram bot. In the free version, voice input is available only 10 times; afterward, a subscription is required.",
-        "RefundParagraph": "You may request a refund <strong>within 14 days</strong> of payment if you have not used premium features. To do so, send an email to <a href=\"mailto:calories365.diary@gmail.com\">calories365.diary@gmail.com</a> — we will process the request and issue a refund via WayForPay within 10 business days. The full procedure is described in our <a href=\"/refund-policy\" target=\"_blank\">Refund Policy</a>.",
+        "RefundParagraph": "You may request a refund within 14 days of payment if you have not used premium features. To do so, send an email to {'calories365.diary@gmail.com'} — we will process the request and issue a refund within 10 business days.",
         "ServiceParagraph2": "As this is digital content, no physical delivery is provided.",
         "SectionRefund": "Refunds"
     },
