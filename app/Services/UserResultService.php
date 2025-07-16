@@ -14,8 +14,6 @@ class UserResultService
         return DB::transaction(function () use ($user, $validatedData) {
             $user->calories_limit = $validatedData['dailyCalories'];
             $user->save();
-            Log::info('calories updated');
-            Log::info(print_r($user, true));
             $validatedData['user_id'] = $user->id;
 
             $userResult = UserResult::updateOrCreate(

@@ -91,7 +91,6 @@ const actions = {
                 savedData = false;
             }
             if (savedData) {
-                // console.log('Данные взяты из локального хранилища. Запрос не отправлен.');
                 const parsedData = JSON.parse(savedData);
                 context.commit(
                     mutationTypes.getCalculationDataSuccess,
@@ -119,7 +118,6 @@ const actions = {
                             mutationTypes.getCalculationDataSuccess,
                             response.data
                         );
-                        // console.log('Ответ сервера:', response.data);
                         localStorage.setItem(
                             key,
                             JSON.stringify(response.data)
@@ -162,7 +160,6 @@ const actions = {
             const currentData = JSON.stringify(data);
 
             if (savedData === currentData) {
-                // console.log('Данные совпадают с сохраненными. Запрос не отправлен.');
                 resolve();
                 return;
             }
@@ -273,7 +270,7 @@ const actions = {
                     resolve(result);
                 })
                 .catch((error) => {
-                    resolve(false); // resolve with false instead of reject to indicate validation failure
+                    resolve(false);
                 });
 
             function validation(data) {
@@ -349,7 +346,6 @@ const actions = {
             function calculateBMI(weight, height) {
                 height = height / 100;
 
-                // Расчет ИМТ
                 return weight / (height * height);
             }
 
@@ -389,10 +385,11 @@ const actions = {
 
                 const DEFICIT = 0.15;
                 const SURPLUS = 0.15;
-                const MIN_SAFE = bmr * 1.1;
 
                 let dailyCalories = maintenance;
 
+                console.log('goal: ')
+                console.log(goal)
                 switch (goal) {
                     case 1:
                         dailyCalories = maintenance * (1 - DEFICIT);
@@ -406,36 +403,12 @@ const actions = {
                         throw new Error("Invalid goal");
                 }
 
-                if (dailyCalories < MIN_SAFE) {
-                    dailyCalories = MIN_SAFE;
-                }
                 return Math.round(dailyCalories);
             }
 
             function calculateMaintenanceCalories(bmr, activityLevel) {
-                let activityMultiplier;
-
-                switch (activityLevel) {
-                    case 1:
-                        activityMultiplier = 1;
-                        break;
-                    case 2:
-                        activityMultiplier = 1.2;
-                        break;
-                    case 3:
-                        activityMultiplier = 1.375;
-                        break;
-                    case 4:
-                        activityMultiplier = 1.55;
-                        break;
-                    case 5:
-                        activityMultiplier = 1.725;
-                        break;
-                    default:
-                        activityMultiplier = 1;
-                }
-
-                return bmr * activityMultiplier;
+                const multipliers = { 1: 1.2, 2: 1.375, 3: 1.55, 4: 1.725, 5: 1.9 };
+                return bmr * (multipliers[activityLevel] ?? 1.2);
             }
 
             function determineMacronutrientPercentages(fat, activity, goal) {
@@ -443,20 +416,16 @@ const actions = {
                 let fatPercent;
 
                 if (goal === 1) {
-                    // Похудение
                     proteinPercent = 35;
                     fatPercent = fat > 25 ? 20 : 25;
                 } else if (goal === 2) {
-                    // Поддержание формы
                     proteinPercent = 30;
                     fatPercent = 25;
                 } else if (goal === 3) {
-                    // Набор массы
                     proteinPercent = 30;
                     fatPercent = 30;
                 }
 
-                // Корректировка для высокоактивных людей
                 if (activity > 3) {
                     fatPercent = Math.max(20, fatPercent - 5);
                 }

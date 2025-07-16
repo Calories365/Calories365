@@ -27,8 +27,6 @@ class CalculationController extends Controller
 
         try {
             $userResult = $userResultService->saveUserResults($user, $validatedData);
-            Log::info('$userResult: ');
-            Log::info(print_r($userResult, true));
             $status = $userResult->wasRecentlyCreated ? 201 : 200;
 
             return response()->json('Result saved', $status);
