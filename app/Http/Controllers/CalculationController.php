@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserResult;
 use App\Services\UserResultService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class CalculationController extends Controller
 {
@@ -26,6 +27,8 @@ class CalculationController extends Controller
 
         try {
             $userResult = $userResultService->saveUserResults($user, $validatedData);
+            Log::info('$userResult: ');
+            Log::info(print_r($userResult, true));
             $status = $userResult->wasRecentlyCreated ? 201 : 200;
 
             return response()->json('Result saved', $status);

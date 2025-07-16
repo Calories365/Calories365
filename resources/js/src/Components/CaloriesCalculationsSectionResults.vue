@@ -41,6 +41,7 @@ export default {
                     .dispatch(actionTypes.saveCalculationData)
                     .then(() => {
                         this.$store.dispatch(userActionTypes.getCurrentUser);
+                        console.log(11111111)
                     });
             } else {
                 const message = i18n.global.t("Notification.Error.NeedAuth");

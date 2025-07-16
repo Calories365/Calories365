@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\UserResult;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserResultService
 {
@@ -13,7 +14,8 @@ class UserResultService
         return DB::transaction(function () use ($user, $validatedData) {
             $user->calories_limit = $validatedData['dailyCalories'];
             $user->save();
-
+            Log::info('calories updated');
+            Log::info(print_r($user, true));
             $validatedData['user_id'] = $user->id;
 
             $userResult = UserResult::updateOrCreate(
