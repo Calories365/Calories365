@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\UserResult;
 use App\Services\UserResultService;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class CalculationController extends Controller
 {

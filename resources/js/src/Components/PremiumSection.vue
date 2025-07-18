@@ -35,21 +35,22 @@ export default {
             const blankPage = window.open("", "_blank");
 
             try {
-                const { pay_url, fields } =
-                    await this.$store.dispatch(actionTypes.buyPremium);
+                const { pay_url, fields } = await this.$store.dispatch(
+                    actionTypes.buyPremium
+                );
 
-                const doc  = blankPage.document;
+                const doc = blankPage.document;
                 const form = doc.createElement("form");
-                form.method        = "POST";
-                form.action        = pay_url;
+                form.method = "POST";
+                form.action = pay_url;
                 form.acceptCharset = "utf-8";
 
                 Object.entries(fields).forEach(([name, value]) => {
-                    (Array.isArray(value) ? value : [value]).forEach(v => {
-                        const input   = doc.createElement("input");
-                        input.type    = "hidden";
-                        input.name    = name;
-                        input.value   = v;
+                    (Array.isArray(value) ? value : [value]).forEach((v) => {
+                        const input = doc.createElement("input");
+                        input.type = "hidden";
+                        input.name = name;
+                        input.value = v;
                         form.appendChild(input);
                     });
                 });
@@ -64,7 +65,6 @@ export default {
                 );
             }
         },
-
 
         cancelPremium() {
             this.$store

@@ -88,11 +88,7 @@ class Payment extends Model
         if ($status === 'Approved' && $payment->user) {
             $user = $payment->user;
 
-            if (is_null($user->premium_until)) {
-                $user->premium_until = Carbon::now()->addMonth();
-            } else {
-                $user->premium_until = Carbon::parse($user->premium_until)->addMonth();
-            }
+            $user->premium_until = Carbon::now()->addMonth();
 
             $user->save();
             SendPremiumStatusToBotPanelJob::dispatch($payment->user);

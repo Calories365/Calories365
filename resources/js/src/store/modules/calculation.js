@@ -388,8 +388,8 @@ const actions = {
 
                 let dailyCalories = maintenance;
 
-                console.log('goal: ')
-                console.log(goal)
+                console.log("goal: ");
+                console.log(goal);
                 switch (goal) {
                     case 1:
                         dailyCalories = maintenance * (1 - DEFICIT);
@@ -407,7 +407,13 @@ const actions = {
             }
 
             function calculateMaintenanceCalories(bmr, activityLevel) {
-                const multipliers = { 1: 1.2, 2: 1.375, 3: 1.55, 4: 1.725, 5: 1.9 };
+                const multipliers = {
+                    1: 1.2,
+                    2: 1.375,
+                    3: 1.55,
+                    4: 1.725,
+                    5: 1.9,
+                };
                 return bmr * (multipliers[activityLevel] ?? 1.2);
             }
 

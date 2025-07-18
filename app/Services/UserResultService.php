@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\UserResult;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class UserResultService
 {
