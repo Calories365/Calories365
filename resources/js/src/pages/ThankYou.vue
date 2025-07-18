@@ -46,14 +46,14 @@ $main-color: #73ae37;
 }
 
 .thank-title {
-    color: #fff;
+    color: #000000;
     margin-bottom: 1.2rem;
     font-size: 2rem;
     font-weight: 700;
 }
 
 .thank-text {
-    color: #fff;
+    color: #000000;
     font-size: 1.15rem;
     margin-bottom: 2.2rem;
 }

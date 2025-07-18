@@ -19,7 +19,7 @@ export default {
         };
     },
     methods: {
-        buyPremium() {
+        async buyPremium() {
             if (!this.termsAgreed) {
                 this.$store.dispatch(
                     "setError",
@@ -32,40 +32,39 @@ export default {
                 return;
             }
 
-            // Vuex-action вернёт pay_url + fields
-            this.$store
-                .dispatch(actionTypes.buyPremium)
-                .then(({ pay_url, fields }) => {
-                    // console.log(pay_url)
-                    // console.log(fields)
-                    this.submitWayForPayForm(pay_url, fields);
+            const blankPage = window.open("", "_blank");
+
+            try {
+                const { pay_url, fields } =
+                    await this.$store.dispatch(actionTypes.buyPremium);
+
+                const doc  = blankPage.document;
+                const form = doc.createElement("form");
+                form.method        = "POST";
+                form.action        = pay_url;
+                form.acceptCharset = "utf-8";
+
+                Object.entries(fields).forEach(([name, value]) => {
+                    (Array.isArray(value) ? value : [value]).forEach(v => {
+                        const input   = doc.createElement("input");
+                        input.type    = "hidden";
+                        input.name    = name;
+                        input.value   = v;
+                        form.appendChild(input);
+                    });
                 });
+
+                doc.body.appendChild(form);
+                form.submit();
+            } catch (e) {
+                blankPage.close();
+                this.$store.dispatch(
+                    "setError",
+                    this.$t("Notification.Error.PaymentInitFailed")
+                );
+            }
         },
 
-        /** Собираем и отправляем HTML-форму на pay_url */
-        submitWayForPayForm(payUrl, fields) {
-            const form = document.createElement("form");
-            form.method = "POST";
-            form.action = payUrl;
-            form.acceptCharset = "utf-8";
-            form.target = "_blank";
-
-            const append = (name, value) => {
-                if (Array.isArray(value)) {
-                    value.forEach((v) => append(`${name}[]`, v));
-                } else {
-                    const input = document.createElement("input");
-                    input.type = "hidden";
-                    input.name = name;
-                    input.value = value;
-                    form.appendChild(input);
-                }
-            };
-
-            Object.entries(fields).forEach(([k, v]) => append(k, v));
-            document.body.appendChild(form);
-            form.submit();
-        },
 
         cancelPremium() {
             this.$store
