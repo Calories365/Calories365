@@ -89,9 +89,9 @@ class Payment extends Model
             $user = $payment->user;
 
             if (is_null($user->premium_until)) {
-                $user->premium_until = Carbon::now()->addDay();
+                $user->premium_until = Carbon::now()->addMonth();
             } else {
-                $user->premium_until = Carbon::parse($user->premium_until)->addDay();
+                $user->premium_until = Carbon::parse($user->premium_until)->addMonth();
             }
 
             $user->save();
