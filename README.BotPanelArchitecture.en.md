@@ -1,98 +1,93 @@
 # Bot Panel
 
-Description of the service layer for Telegram bots.
+A service layer for handling Telegram bots, implemented using the **Strategy** pattern with lazy handler initialization via factories (closures). This ensures high flexibility and modularity of the architecture.
 
-## Main Idea
+## Core Idea
 
-1. **Service Layer**
-   All the logic of Telegram bots is located in the service layer. Requests from Telegram (via Webhook) are processed in the controller and forwarded to a special **TelegramHandler**.
+### 1. Controller and Central Handler
 
-2. **[TelegramHandler](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php)**
-    - Serves as the central point for deciding which bot (strategy) to invoke.
-    - If necessary, it launches the designated **middleware** (Laravel Pipeline) for the specific strategy.
-    - Transfers control to the selected strategy.
+Incoming Telegram Webhook requests first reach the controller, after which they are forwarded to the central handler — [`TelegramHandler`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php). Here, the request undergoes initial processing via middleware implemented through the Laravel Pipeline. The middleware handles logging, filtering, and authorization before the request is routed to a specific strategy.
 
-3. **Strategies**
-    - Each strategy is a "configuration file" for an individual bot.
-    - Example of a strategy for the calorie bot: [`CaloriesService.php`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/CaloriesService.php).
-    - Within the strategy, the necessary handlers for various types of updates (messages, callbacks, etc.) are specified.
+### 2. Strategies
 
-4. **[BaseService](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/BaseService.php)**
-    - All strategies inherit from this base class.
-    - In `BaseService`, the general logic for initializing **UpdateHandlers** is defined, as well as the distribution of incoming updates (message, callback_query, my_chat_member, etc.).
+After passing through the middleware, `TelegramHandler` selects the strategy corresponding to the current bot type. A strategy is a separate configuration class that extends the base class [`BaseService`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/BaseService.php).
 
-### Example of Initializing Update Handlers
+Each strategy inherits a standard set of handlers from `BaseService`, but can easily override or extend them as needed. For example, the calorie-bot strategy: [`CaloriesService.php`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/CaloriesService.php).
+
+### 3. Handler Hierarchy
+
+At the top of the hierarchy is the `getUpdateHandlers()` method of the [`BaseService`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/BaseService.php) class, whose task is to define handler factories for each update type (e.g., `message`, `my_chat_member`, `callback_query`):
 
 ```php
 protected function getUpdateHandlers(): array
 {
-    $messageUpdateHandler    = new MessageUpdateHandler($this->getMessageHandlers());
-    $myChatMemberUpdateHandler = new MyChatMemberUpdateHandler();
-    $callbackQueryHandler    = new CallbackQueryHandler($this->getCallbackQueryHandlers());
-
     return [
-        'message'        => $messageUpdateHandler,
-        'my_chat_member' => $myChatMemberUpdateHandler,
-        'callback_query' => $callbackQueryHandler
+        'message' => function () {
+            return app(MessageUpdateHandler::class, [
+                'messageHandlers' => $this->getMessageHandlers(),
+            ]);
+        },
+        'my_chat_member' => function () {
+            return app(MyChatMemberUpdateHandler::class);
+        },
+        'callback_query' => function () {
+            return app(CallbackQueryHandler::class, [
+                'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
+            ]);
+        },
     ];
 }
-```
+````
 
-In each strategy (e.g., `CaloriesService`), you can override or extend the base handlers from `BaseService`.
+Each factory creates the next-level handlers, initializing them only when they are actually needed.
 
-## Processing Pipeline
-
-1. **Controller** → **TelegramHandler**
-2. **TelegramHandler** (checks the bot type, invokes the necessary strategy, launches middleware)
-3. **Strategy** (inherits from `BaseService`, where handlers are initialized step by step)
-4. **Update Handlers** (e.g., `MessageUpdateHandler`, `CallbackQueryHandler`)
-5. **Message Handlers** (e.g., text messages `/start`, `/stats`, voice messages, photos, etc.)
-
-## Example of Extending Message Handlers
-
-In the base class (`BaseService`), there is a method:
+For example, for the `message` update type, the factory creates a `MessageUpdateHandler`, passing it factories for processing specific message types:
 
 ```php
 protected function getMessageHandlers(): array
 {
-    $textMessageHandler  = new TextMessageHandler($this->getTextMessageHandlers());
-    $audioMessageHandler = new AudioMessageHandler();
-
     return [
-        'text'  => $textMessageHandler,
-        'voice' => $audioMessageHandler,
+        'text' => function () {
+            return app(TextMessageHandler::class, [
+                'textMessageHandlers' => $this->getTextMessageHandlers(),
+            ]);
+        },
+        'voice' => function () {
+            return app(AudioMessageHandler::class);
+        },
     ];
 }
 ```
 
-In the **strategy**, we can extend it:
+Thus, the request-processing hierarchy looks like this:
+
+* **UpdateHandlers** (e.g., `MessageUpdateHandler`, `CallbackQueryHandler`)
+* **MessageHandlers** (e.g., `TextMessageHandler`, `AudioMessageHandler`)
+* Concrete commands and message types (e.g., `/start`, `/default`, voice messages, etc.)
+
+### 4. Overriding and Extending Handlers
+
+Strategies allow flexible customization of handlers at every level. For instance, the [`CaloriesService`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/CaloriesService.php) strategy can override `getMessageHandlers()` and specify its own handler for voice messages:
 
 ```php
 protected function getMessageHandlers(): array
 {
-    $messageHandlers = parent::getMessageHandlers();
+    $handlers = parent::getMessageHandlers();
 
-    // Override or add the necessary class
-    $messageHandlers['voice'] = app(AudioMessageHandler::class);
+    $handlers['voice'] = fn () => app(AudioMessageHandler::class);
 
-    return $messageHandlers;
+    return $handlers;
 }
 ```
 
-Thus, when a voice message (`voice`) is received, the overridden handler will be used. Similarly, you can register or change handlers for other types of updates.
+Strategies can also use additional methods and utilities, such as `Utilities::applySynonyms()`, to configure commands and enhance user interaction.
 
-## Example of a Processing Scenario
-- A user sends the `/start` command to the bot.
-- **TelegramHandler** determines which bot (strategy) the current `botName` is associated with and applies the required middleware.
-- Then, the `handle()` method of the strategy (e.g., `CaloriesService`) is called.
-- Inside `BaseService`, the type of update is determined: `message`.
-- `MessageUpdateHandler` looks for which specific Message Handler fits `text` — this is `TextMessageHandler`.
-- `TextMessageHandler` checks that the `/start` command is in the list and invokes the corresponding handler (e.g., `StartMessageHandler`).
-- As a result, the user receives the response defined in the logic of `StartMessageHandler`.
+## Architecture Advantages
 
-## Conclusion
-- **Flexibility**: Each bot is configured in a separate strategy class and can override/extend the necessary handlers.
-- **Modularity**: A unified `TelegramHandler` and middleware are connected to different strategies as needed.
-- **Extensibility**: Easily add new commands, new types of messages, and callbacks.
+* **Flexibility**: easily add or modify handlers for each bot.
+* **Modularity**: clear separation of concerns and reuse of base logic.
+* **Scalability**: rapidly scale and introduce new commands and message types.
 
-Thanks to this architecture, the project can be scaled without affecting the core structure and can create Telegram bots with different functionalities within a single application.
+Thanks to this approach, the project can be developed and maintained efficiently without touching the core structure, enabling the creation of Telegram bots with diverse functionality within a single application.
+
+```
