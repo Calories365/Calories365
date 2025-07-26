@@ -90,4 +90,3 @@ Strategies can also use additional methods and utilities, such as `Utilities::ap
 
 Thanks to this approach, the project can be developed and maintained efficiently without touching the core structure, enabling the creation of Telegram bots with diverse functionality within a single application.
 
-```
