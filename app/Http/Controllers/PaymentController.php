@@ -88,7 +88,7 @@ class PaymentController extends Controller
 
         $orderReference = $data['orderReference'];
 
-        //temp answer
+        // temp answer
         if ($orderReference == 'DH1752836321212') {
             return $this->responseToWFPTMP($orderReference);
         }

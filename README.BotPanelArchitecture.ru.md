@@ -1,98 +1,91 @@
 # Bot Panel
 
-Описание сервисного слоя для телеграм ботов.
+Сервисный слой для обработки Telegram-ботов, реализованный на основе паттерна «Стратегия» и ленивой инициализации обработчиков через фабрики (замыкания). Это обеспечивает высокую гибкость и модульность архитектуры.
 
 ## Основная идея
 
-1. **Слой сервисов (Service Layer)**
-   Вся логика Telegram-ботов расположена в сервисном слое. Запросы от Telegram (через Webhook) обрабатываются в контроллере и перенаправляются в специальный **TelegramHandler**.
+### 1. Контроллер и центральный обработчик
 
-2. **[TelegramHandler](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php)**
-   - Является центральной точкой принятия решения, какой бот (стратегию) вызывать.  
-   - При необходимости запускает назначенные **middleware** (Laravel Pipeline) для конкретной стратегии.  
-   - Передаёт управление выбранной стратегии.
+Входящие запросы от Telegram через Webhook попадают сначала в контроллер, после чего передаются в центральный обработчик — [`TelegramHandler`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php). Здесь запрос проходит первичную обработку при помощи middleware, реализованных через Laravel Pipeline. Middleware выполняют задачи логирования, фильтрации и авторизации до того, как запрос будет направлен к конкретной стратегии.
 
-3. **Стратегии**
-   - Каждая стратегия — это «конфигурационный файл» для отдельного бота.  
-   - Пример стратегии для бота калорий: [`CaloriesService.php`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/CaloriesService.php).  
-   - Внутри стратегии указываются нужные обработчики для различных типов апдейтов (сообщения, колбэки и т.д.).
+### 2. Стратегии
 
-4. **[BaseService](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/BaseService.php)**
-   - Все стратегии наследуют этот базовый класс.  
-   - В `BaseService` задаётся общая логика инициализации **UpdateHandlers**, а также распределения входящих обновлений (message, callback_query, my_chat_member и т.п.).
+После прохождения middleware `TelegramHandler` выбирает стратегию, соответствующую типу текущего бота. Стратегия представляет собой отдельный конфигурационный класс, наследующий общий базовый класс [`BaseService`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/BaseService.php).
 
-### Пример инициализации Update Handlers
+Каждая стратегия наследует стандартный набор обработчиков из `BaseService`, но может легко переопределить или дополнить их по необходимости. Например, стратегия для бота калорий: [`CaloriesService.php`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/CaloriesService.php).
+
+### 3. Иерархия обработчиков
+
+На верхнем уровне иерархии находится метод `getUpdateHandlers()` класса [`BaseService`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/BaseService.php), задача которого — определить фабрики обработчиков для каждого типа обновления (например, `message`, `my_chat_member`, `callback_query`):
 
 ```php
 protected function getUpdateHandlers(): array
 {
-    $messageUpdateHandler    = new MessageUpdateHandler($this->getMessageHandlers());
-    $myChatMemberUpdateHandler = new MyChatMemberUpdateHandler();
-    $callbackQueryHandler    = new CallbackQueryHandler($this->getCallbackQueryHandlers());
-
     return [
-        'message'        => $messageUpdateHandler,
-        'my_chat_member' => $myChatMemberUpdateHandler,
-        'callback_query' => $callbackQueryHandler
+        'message' => function () {
+            return app(MessageUpdateHandler::class, [
+                'messageHandlers' => $this->getMessageHandlers(),
+            ]);
+        },
+        'my_chat_member' => function () {
+            return app(MyChatMemberUpdateHandler::class);
+        },
+        'callback_query' => function () {
+            return app(CallbackQueryHandler::class, [
+                'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
+            ]);
+        },
     ];
 }
 ```
 
-В каждой стратегии (например, `CaloriesService`) можно переопределять или дополнять базовые хендлеры из `BaseService`.
+Каждая фабрика создаёт обработчики следующего уровня, инициализируя их только тогда, когда они действительно нужны.
 
-## Pipeline обработки
-
-1. **Контроллер** → **TelegramHandler**
-2. **TelegramHandler** (проверяет тип бота, вызывает нужную стратегию, запускает middleware)
-3. **Стратегия** (наследует `BaseService`, где поэтапно инициализируются хендлеры)
-4. **Update Handlers** (например, `MessageUpdateHandler`, `CallbackQueryHandler`)
-5. **Message Handlers** (например, текстовые сообщения `/start`, `/stats`, голосовые, фото и т.д.)
-
-## Пример расширения Message Handlers
-
-В базовом классе (`BaseService`) есть метод:
+Например, для типа сообщения `message` фабрика создаёт обработчик `MessageUpdateHandler`, передавая ему фабрики для обработки конкретных типов сообщений:
 
 ```php
 protected function getMessageHandlers(): array
 {
-    $textMessageHandler  = new TextMessageHandler($this->getTextMessageHandlers());
-    $audioMessageHandler = new AudioMessageHandler();
-
     return [
-        'text'  => $textMessageHandler,
-        'voice' => $audioMessageHandler,
+        'text' => function () {
+            return app(TextMessageHandler::class, [
+                'textMessageHandlers' => $this->getTextMessageHandlers(),
+            ]);
+        },
+        'voice' => function () {
+            return app(AudioMessageHandler::class);
+        },
     ];
 }
 ```
 
-В **стратегии** мы можем его дополнить:
+Таким образом, иерархия обработки запросов выглядит так:
+
+* **UpdateHandlers** (например, `MessageUpdateHandler`, `CallbackQueryHandler`)
+* **MessageHandlers** (например, `TextMessageHandler`, `AudioMessageHandler`)
+* Конкретные команды и типы сообщений (например, `/start`, `/default`, голосовые сообщения и др.)
+
+### 4. Переопределение и дополнение обработчиков
+
+Стратегии позволяют гибко настраивать обработчики на каждом уровне. Например, стратегия [`CaloriesService`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/CaloriesService.php) может переопределить метод `getMessageHandlers()` и указать собственный обработчик для голосовых сообщений:
 
 ```php
 protected function getMessageHandlers(): array
 {
-    $messageHandlers = parent::getMessageHandlers();
+    $handlers = parent::getMessageHandlers();
 
-    // Переопределяем или добавляем нужный класс
-    $messageHandlers['voice'] = app(AudioMessageHandler::class);
+    $handlers['voice'] = fn () => app(AudioMessageHandler::class);
 
-    return $messageHandlers;
+    return $handlers;
 }
 ```
 
-Таким образом, при получении голосового сообщения (`voice`) будет использоваться уже переопределённый обработчик. Аналогичным образом можно регистрировать или менять хендлеры для других типов апдейтов.
+Также стратегии могут использовать дополнительные методы и утилиты, такие как `Utilities::applySynonyms()`, для настройки команд и повышения удобства взаимодействия с пользователем.
 
-## Пример сценария обработки
-- Пользователь отправляет боту команду `/start`.
-- **TelegramHandler** определяет, к какому боту (стратегии) привязан текущий `botName`, и применяет требуемые middleware.
-- Затем вызывается `handle()` стратегии (например, `CaloriesService`).
-- Внутри `BaseService` определяется тип обновления: `message`.
-- `MessageUpdateHandler` ищет, какой именно Message Handler подходит для `text` — это `TextMessageHandler`.
-- `TextMessageHandler` проверяет, что команда `/start` есть в списке, и вызывает соответствующий обработчик (например, `StartMessageHandler`).
-- В итоге пользователь получает ответ, определённый в логике `StartMessageHandler`.
+## Преимущества архитектуры
 
-## Вывод
-- **Гибкость**: каждый бот конфигурируется в отдельном классе-стратегии и может переопределять/дополнять нужные обработчики.
-- **Модульность**: единый `TelegramHandler` и мидлвары по необходимости подключаются к разным стратегиям.
-- **Расширяемость**: легко добавлять новые команды, новые типы сообщений и колбэков.
+* **Гибкость**: лёгкое добавление и изменение обработчиков для каждого бота.
+* **Модульность**: чёткое разделение ответственности и возможность переиспользования базовой логики.
+* **Расширяемость**: быстрое масштабирование и добавление новых команд и типов сообщений.
 
-Благодаря такой архитектуре проект можно масштабировать, не затрагивая базовую структуру, и создавать Telegram-ботов с разным функционалом в рамках одного приложения.
+Благодаря такому подходу проект можно эффективно развивать и поддерживать, не затрагивая базовую структуру, а также создавать Telegram-ботов с разнообразным функционалом в рамках одного приложения.
