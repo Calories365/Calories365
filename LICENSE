@@ -1,0 +1,63 @@
+CALORIES365 SOURCE-AVAILABLE LICENSE, VERSION 1.0 (CSAL-1.0)
+Copyright (c) 2025, Calories365. All rights reserved.
+
+This license applies to the "Calories365" application and its source code.
+
+1. Definitions
+“Licensor” means the holder of the rights to the Software: Calories365.
+“Software” means the source code, binaries, assets, documentation, and other files in this repository.
+“You” (or “Your”) means any individual or entity exercising permissions under this License.
+“Evaluation Use” means using the Software solely to review, learn from, and test it locally on Your machines, without providing it to third parties and without any production, commercial, or revenue-generating purpose.
+“Non-Commercial Research/Education” means use by a natural person or accredited educational/research institution strictly for study, teaching, or academic research, with no production or commercial deployment.
+“Production Use” means any use in or for a live product or service, internal or external, including staging/pre-production environments intended for production.
+“Commercial Use” means any use intended for or resulting in monetary compensation or other commercial advantage, including Software-as-a-Service (SaaS) or services provided to third parties.
+
+2. Grant
+Subject to Your full compliance with this License, the Licensor grants You a limited, non-exclusive, worldwide, revocable, non-transferable, and non-sublicensable license to:
+  (a) view and locally run the Software for Evaluation Use;
+  (b) use the Software for Non-Commercial Research/Education;
+  (c) create and maintain a private or public fork on GitHub solely for (a)–(b) and for submitting patches via pull requests back to this repository;
+  (d) make modifications locally for (a)–(b), provided that any distribution of such modifications occurs only as patches in pull requests to this repository on GitHub.
+
+3. Restrictions
+Unless You obtain a separate written commercial license from the Licensor, You MUST NOT:
+  (1) use the Software for Production Use or Commercial Use;
+  (2) host, offer, or provide the Software or any derivative as a service (SaaS) or within any product;
+  (3) distribute, publish, sell, license, or otherwise make available the Software or derivatives outside GitHub, including by posting source or binaries to other platforms or package registries;
+  (4) remove or alter any copyright, license, or attribution notices;
+  (5) use the name “Calories365” or related trademarks to endorse or promote any product or service;
+  (6) use the Software or any part of it to train, fine-tune, or improve any machine learning or AI models, or to create datasets for such purposes;
+  (7) circumvent technical limits or use the Software in violation of applicable laws or GitHub’s Terms of Service.
+
+4. Contributions
+By submitting any contribution (code, docs, issues, or patches) to the Licensor, You grant the Licensor a perpetual, worldwide, irrevocable, royalty-free license to use, reproduce, prepare derivative works of, display, perform, sublicense, and distribute Your contribution as part of the Software or otherwise. You represent that You have the necessary rights to grant this license.
+
+5. Third-Party Components
+Third-party components included in or linked by the Software are licensed under their own terms. This License does not alter any third-party licenses. You must comply with those licenses.
+
+6. No Patent License
+No patent rights are granted under this License. If You (or any entity controlling You, controlled by You, or under common control with You) initiate or threaten patent litigation against the Licensor or any user of the Software alleging that the Software infringes a patent, this License terminates automatically as of the date such claim is filed or threatened.
+
+7. Termination
+This License terminates automatically upon any breach by You. The Licensor may also terminate this License at any time with written notice to You, effective immediately, if termination is necessary to prevent misuse or legal exposure. Upon termination, You must cease all use of the Software and destroy all copies in Your possession, except that prior contributions already merged into the repository remain licensed to the Licensor under Section 4.
+
+8. Disclaimer of Warranty
+THE SOFTWARE IS PROVIDED “AS IS” AND “AS AVAILABLE”, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+
+9. Limitation of Liability
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL THE LICENSOR OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES; LOSS OF PROFITS, REVENUE, DATA, OR GOODWILL; BUSINESS INTERRUPTION; OR PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, HOWEVER CAUSED AND UNDER ANY THEORY OF LIABILITY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+10. Indemnity
+You agree to indemnify and hold harmless the Licensor from and against any claims, liabilities, damages, losses, and expenses, including reasonable attorneys’ fees, arising out of or in any way connected with Your use of the Software in violation of this License.
+
+11. Trademarks; No Endorsement
+This License does not grant permission to use the Licensor’s names, logos, or trademarks. No endorsement is implied by Your use of the Software.
+
+12. Reservation of Rights
+Except for the limited rights expressly granted above, all rights are reserved by the Licensor. Any use not expressly permitted by this License is prohibited.
+
+13. Entire Agreement; Severability
+This License constitutes the entire agreement between You and the Licensor concerning the Software. If any provision is held unenforceable, the remaining provisions will remain in full force and effect.
+
+For commercial or production use, please obtain a separate license from the Licensor.
+END OF TERMS
