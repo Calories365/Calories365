@@ -1,0 +1,518 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "My Doc API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/": {},
+        "/api/meals": {
+            "post": {
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Create a meal entry",
+                "description": "Creates FoodConsumption for the current user.",
+                "operationId": "meals.store",
+                "requestBody": {
+                    "description": "Required payload to create FoodConsumption",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "food_id",
+                                    "quantity",
+                                    "consumed_at",
+                                    "part_of_day"
+                                ],
+                                "properties": {
+                                    "food_id": {
+                                        "description": "Existing product ID (must exist in products.id)",
+                                        "type": "integer",
+                                        "example": 123
+                                    },
+                                    "quantity": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "minimum": 0,
+                                        "example": 150
+                                    },
+                                    "consumed_at": {
+                                        "description": "Date in YYYY-MM-DD format",
+                                        "type": "string",
+                                        "format": "date",
+                                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                        "example": "2025-08-20"
+                                    },
+                                    "part_of_day": {
+                                        "type": "string",
+                                        "enum": [
+                                            "morning",
+                                            "dinner",
+                                            "supper"
+                                        ],
+                                        "example": "morning"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "food_id": 123,
+                                    "quantity": 150,
+                                    "consumed_at": "2025-08-20",
+                                    "part_of_day": "morning"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/meals/{date}": {
+            "get": {
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "List meals by date",
+                "description": "Returns user's meals for the given date, optionally filtered by part of day.",
+                "operationId": "meals.index",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "description": "Date in format YYYY-MM-DD",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-08-20"
+                        }
+                    },
+                    {
+                        "name": "partOfDay",
+                        "in": "query",
+                        "description": "Optional filter by part of day",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "morning",
+                                "dinner",
+                                "supper"
+                            ],
+                            "example": "dinner"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "required": [
+                                            "id",
+                                            "user_id",
+                                            "quantity",
+                                            "part_of_day",
+                                            "food_id",
+                                            "consumed_at",
+                                            "calories",
+                                            "proteins",
+                                            "carbohydrates",
+                                            "fats",
+                                            "fibers",
+                                            "name"
+                                        ],
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 101
+                                            },
+                                            "user_id": {
+                                                "type": "integer",
+                                                "example": 42
+                                            },
+                                            "quantity": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 150
+                                            },
+                                            "part_of_day": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "morning",
+                                                    "dinner",
+                                                    "supper"
+                                                ],
+                                                "example": "dinner"
+                                            },
+                                            "food_id": {
+                                                "type": "integer",
+                                                "example": 123
+                                            },
+                                            "consumed_at": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2025-08-20"
+                                            },
+                                            "calories": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 215.5
+                                            },
+                                            "proteins": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 12.3
+                                            },
+                                            "carbohydrates": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 28.7
+                                            },
+                                            "fats": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 7.4
+                                            },
+                                            "fibers": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 3.1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Овсянка"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "id": 101,
+                                        "user_id": 42,
+                                        "quantity": 150,
+                                        "part_of_day": "dinner",
+                                        "food_id": 123,
+                                        "consumed_at": "2025-08-20",
+                                        "calories": 215.5,
+                                        "proteins": 12.3,
+                                        "carbohydrates": 28.7,
+                                        "fats": 7.4,
+                                        "fibers": 3.1,
+                                        "name": "Овсянка"
+                                    },
+                                    {
+                                        "id": 102,
+                                        "user_id": 42,
+                                        "quantity": 80,
+                                        "part_of_day": "morning",
+                                        "food_id": 321,
+                                        "consumed_at": "2025-08-20",
+                                        "calories": 120,
+                                        "proteins": 6,
+                                        "carbohydrates": 14,
+                                        "fats": 3,
+                                        "fibers": 2,
+                                        "name": "Йогурт"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/meals/{meal}": {
+            "put": {
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Update meal quantity",
+                "description": "Updates the 'quantity' field for a FoodConsumption record.",
+                "operationId": "meals.update",
+                "parameters": [
+                    {
+                        "name": "meal",
+                        "in": "path",
+                        "description": "FoodConsumption ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Payload defined by QuantityValidationRequest",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "quantity": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "minimum": 0,
+                                        "example": 150
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "quantity": 150
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "quantity": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The quantity must be at least 0."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Delete a meal",
+                "description": "Deletes a FoodConsumption record.",
+                "operationId": "meals.destroy",
+                "parameters": [
+                    {
+                        "name": "meal",
+                        "in": "path",
+                        "description": "FoodConsumption ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "requestBodies": {
+            "StoreMealRequest": {
+                "description": "Required payload to create FoodConsumption",
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "required": [
+                                "food_id",
+                                "quantity",
+                                "consumed_at",
+                                "part_of_day"
+                            ],
+                            "properties": {
+                                "food_id": {
+                                    "description": "Existing product ID (must exist in products.id)",
+                                    "type": "integer",
+                                    "example": 123
+                                },
+                                "quantity": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "minimum": 0,
+                                    "example": 150
+                                },
+                                "consumed_at": {
+                                    "description": "Date in YYYY-MM-DD format",
+                                    "type": "string",
+                                    "format": "date",
+                                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                    "example": "2025-08-20"
+                                },
+                                "part_of_day": {
+                                    "type": "string",
+                                    "enum": [
+                                        "morning",
+                                        "dinner",
+                                        "supper"
+                                    ],
+                                    "example": "morning"
+                                }
+                            },
+                            "type": "object",
+                            "example": {
+                                "food_id": 123,
+                                "quantity": 150,
+                                "consumed_at": "2025-08-20",
+                                "part_of_day": "morning"
+                            }
+                        }
+                    }
+                }
+            },
+            "UpdateMealQuantityRequest": {
+                "description": "Payload defined by QuantityValidationRequest",
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "required": [
+                                "quantity"
+                            ],
+                            "properties": {
+                                "quantity": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "minimum": 0,
+                                    "example": 150
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "example": {
+                            "quantity": 150
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Laravel Sanctum: send token via Authorization: Bearer <token>",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Meals",
+            "description": "CRUD for FoodConsumption of the current user"
+        }
+    ]
+}
