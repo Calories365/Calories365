@@ -6,15 +6,14 @@ use App\Models\TelegramCode;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class TelegramLinkController extends Controller
 {
     /**
-     * Генерация кода для Telegram-бота и возврат готовой ссылки
+     * Generating code for Telegram bot and returning ready link
      */
-    public function getLink(Request $request)
+    public function getLink(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
 
@@ -37,14 +36,13 @@ class TelegramLinkController extends Controller
         }
 
         $finalLink = $baseUrl.'?start='.$newCode.'_'.$locale;
-        Log::info('Generated telegram link: '.$finalLink);
 
         return response()->json([
             'link' => $finalLink,
         ]);
     }
 
-    public function checkTelegramCode(Request $request)
+    public function checkTelegramCode(Request $request): \Illuminate\Http\JsonResponse
     {
         $code = $request->input('code');
         $telegram_id = $request->input('telegram_id');

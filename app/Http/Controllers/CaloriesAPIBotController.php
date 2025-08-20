@@ -14,7 +14,6 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Log;
 
 class CaloriesAPIBotController extends BaseController
 {
@@ -27,7 +26,6 @@ class CaloriesAPIBotController extends BaseController
     public function storeFiltered(Request $request): JsonResponse
     {
         $text = $request->input('text', '');
-        Log::info('Filtered store. Received text: '.$text);
 
         $response = [
             'message' => 'Products not found',
@@ -43,8 +41,6 @@ class CaloriesAPIBotController extends BaseController
         $suffix = $suffixMap[$locale] ?? 'грамм';
         $delimiter = str_contains($text, ';') ? ';' : $suffix;
         $rawItems = array_filter(array_map('trim', explode($delimiter, $text)));
-
-        Log::info('Raw products:', $rawItems);
 
         $productsInfo = [];
         $userId = auth()->id() ?? null;
@@ -142,7 +138,6 @@ class CaloriesAPIBotController extends BaseController
 
     public function getTheMostRelevantProduct(Request $request): bool|JsonResponse
     {
-        Log::info('getTheMostRelevantProduct');
         $text = $request->input('text');
         $parts = explode(' - ', $text);
 
@@ -186,7 +181,6 @@ class CaloriesAPIBotController extends BaseController
                 ],
                 'quantity_grams' => $quantity,
             ];
-            Log::info(print_r($productInfo, true));
 
             return response()->json([
                 'message' => 'Product found',

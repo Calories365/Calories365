@@ -101,8 +101,6 @@ class PaymentController extends Controller
             return $this->responseToWFP($orderReference, 'reject');
         }
 
-        Log::info('WFP callback parsed', $data);
-
         try {
             Payment::processCallback($data);
         } catch (\Throwable $e) {
@@ -122,7 +120,6 @@ class PaymentController extends Controller
 
         if (! $payment) {
             if (Payment::latestDeletedFor($userId)) {
-                Log::info('Payment already deleted', ['user_id' => $userId]);
 
                 return response()->json(['message' => 'success']);
             }

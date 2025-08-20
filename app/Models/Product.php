@@ -76,8 +76,6 @@ class Product extends Model
 
         $results = $builder->take(30)->get();
 
-        Log::info(print_r($results, true));
-
         /**
          * Sort the resulting collection so that
          *  goods of the current user (user_id = $user_id) go first.
@@ -128,11 +126,8 @@ class Product extends Model
                 'limit' => 1,
             ]);
 
-            //            Log::info('res: ');
-            //            Log::info(print_r($res, true));
             $hits = $res->getHits();
             if (empty($hits)) {
-                Log::info('Meili raw: no products');
 
                 return false;
             }
@@ -152,16 +147,7 @@ class Product extends Model
             });
 
             $best = $hits[0];
-            //            foreach ($hits as $hit) {
-            //                if (mb_strtolower(trim($hit['name'])) === mb_strtolower(trim($query))) {
-            //                    $best = $hit;
-            //                    break;
-            //                }
-            //            }
             $ranking = $best['_rankingScore'] ?? 0;
-
-            Log::info('$best: ');
-            Log::info(print_r($best, true));
 
             return $ranking ? $best : false;
 

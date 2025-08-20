@@ -6,7 +6,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
-use Illuminate\Support\Facades\Log;
 
 class FoodSelection
 {
@@ -52,7 +51,6 @@ class FoodSelection
 
     public function analyzeFoodIntake(string $text)
     {
-        Log::info('start analyze');
         $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
             'headers' => [
                 'Authorization' => 'Bearer '.$this->apiKey,
@@ -77,7 +75,6 @@ class FoodSelection
 
         try {
             $result = json_decode($response->getBody()->getContents(), true);
-            Log::info($result);
 
             $output = $result['choices'][0]['message']['content'] ?? 'Не удалось извлечь данные.';
 

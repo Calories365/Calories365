@@ -18,17 +18,11 @@ class SendNewUserToBotPanelJob implements ShouldQueue
 
     protected User $user;
 
-    /**
-     * Данные о новом пользователе
-     */
     public function __construct(User $user)
     {
         $this->user = $user;
     }
 
-    /**
-     * Логика, которую выполняет Job.
-     */
     public function handle()
     {
         $botPanelUrl = env('BOT_PANEL_URL');
@@ -36,7 +30,7 @@ class SendNewUserToBotPanelJob implements ShouldQueue
         $host = env('BOT_HOST');
 
         if (! $botPanelUrl || ! $botApiKey) {
-            Log::warning('Bot panel URL или API key не настроены');
+            Log::warning('Bot panel URL or API key did not set');
 
             return;
         }
