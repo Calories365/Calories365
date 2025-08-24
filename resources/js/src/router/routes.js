@@ -1,27 +1,7 @@
-import Home from "@/pages/Home.vue";
-import Login from "@/pages/Login.vue";
-import Register from "@/pages/register.vue";
-import Recovery from "@/pages/Recovery.vue";
-import RecoveryWithToken from "@/pages/RecoveryWithToken.vue";
-import Calculation from "@/pages/Calculation.vue";
-import Stats from "@/pages/Stats.vue";
-import Dairy from "@/pages/Dairy.vue";
-import Recipes from "@/pages/Recipes.vue";
-import Instructions from "@/pages/Instructions.vue";
-import Cabinet from "@/pages/Cabinet.vue";
-import Goals from "@/pages/Goals.vue";
-import ChangePassword from "@/pages/ChangePassword.vue";
-import PrivacyPolicy from "@/pages/PrivacyPolicy.vue";
-import TermsOfService from "@/pages/TermsOfService.vue";
-import FAQ from "@/pages/FAQ.vue";
-import Voice from "@/pages/Voice.vue";
-import ThankYou from "../pages/ThankYou.vue";
-import PaymentAndDelivery from "../pages/PaymentAndDelivery.vue";
-
 const routes = [
     {
         path: "/",
-        component: Home,
+        component: () => import("@/pages/Home.vue"),
         name: "home",
         meta: {
             needAuth: false,
@@ -29,7 +9,7 @@ const routes = [
     },
     {
         path: "/privacy-policy",
-        component: PrivacyPolicy,
+        component: () => import("@/pages/PrivacyPolicy.vue"),
         name: "privacyPolicy",
         meta: {
             needAuth: false,
@@ -37,7 +17,7 @@ const routes = [
     },
     {
         path: "/terms-of-service",
-        component: TermsOfService,
+        component: () => import("@/pages/TermsOfService.vue"),
         name: "termsOfService",
         meta: {
             needAuth: false,
@@ -45,7 +25,7 @@ const routes = [
     },
     {
         path: "/faq",
-        component: FAQ,
+        component: () => import("@/pages/FAQ.vue"),
         name: "faq",
         meta: {
             needAuth: false,
@@ -53,7 +33,7 @@ const routes = [
     },
     {
         path: "/payment-and-delivery",
-        component: PaymentAndDelivery,
+        component: () => import("../pages/PaymentAndDelivery.vue"),
         name: "payment-and-delivery",
         meta: {
             needAuth: false,
@@ -61,7 +41,7 @@ const routes = [
     },
     {
         path: "/login",
-        component: Login,
+        component: () => import("@/pages/Login.vue"),
         name: "login",
         meta: {
             needNotAuth: true,
@@ -69,7 +49,7 @@ const routes = [
     },
     {
         path: "/register",
-        component: Register,
+        component: () => import("@/pages/register.vue"),
         name: "register",
         meta: {
             needNotAuth: true,
@@ -77,7 +57,7 @@ const routes = [
     },
     {
         path: "/recovery",
-        component: Recovery,
+        component: () => import("@/pages/Recovery.vue"),
         name: "recovery",
         meta: {
             needNotAuth: true,
@@ -85,7 +65,7 @@ const routes = [
     },
     {
         path: "/reset-password/:token",
-        component: RecoveryWithToken,
+        component: () => import("@/pages/RecoveryWithToken.vue"),
         name: "recoveryWithToken",
         meta: {
             needNotAuth: true,
@@ -93,7 +73,7 @@ const routes = [
     },
     {
         path: "/calculation",
-        component: Calculation,
+        component: () => import("@/pages/Calculation.vue"),
         name: "calculation",
         meta: {
             needAuth: false,
@@ -101,7 +81,7 @@ const routes = [
     },
     {
         path: "/stats",
-        component: Stats,
+        component: () => import("@/pages/Stats.vue"),
         name: "stats",
         meta: {
             needAuth: true,
@@ -109,7 +89,7 @@ const routes = [
     },
     {
         path: "/diary",
-        component: Dairy,
+        component: () => import("@/pages/Dairy.vue"),
         name: "diary",
         meta: {
             needAuth: true,
@@ -117,7 +97,7 @@ const routes = [
     },
     {
         path: "/recipes",
-        component: Recipes,
+        component: () => import("@/pages/Recipes.vue"),
         name: "recipes",
         meta: {
             needAuth: true,
@@ -125,7 +105,7 @@ const routes = [
     },
     {
         path: "/instructions",
-        component: Instructions,
+        component: () => import("@/pages/Instructions.vue"),
         name: "instructions",
         meta: {
             needAuth: true,
@@ -133,7 +113,7 @@ const routes = [
     },
     {
         path: "/cabinet",
-        component: Cabinet,
+        component: () => import("@/pages/Cabinet.vue"),
         name: "cabinet",
         meta: {
             needAuth: true,
@@ -141,7 +121,7 @@ const routes = [
     },
     {
         path: "/goals",
-        component: Goals,
+        component: () => import("@/pages/Goals.vue"),
         name: "goals",
         meta: {
             needAuth: true,
@@ -149,7 +129,7 @@ const routes = [
     },
     {
         path: "/cabinet/change-password",
-        component: ChangePassword,
+        component: () => import("@/pages/ChangePassword.vue"),
         name: "change-password",
         meta: {
             needAuth: true,
@@ -157,7 +137,7 @@ const routes = [
     },
     {
         path: "/voice",
-        component: Voice,
+        component: () => import("@/pages/Voice.vue"),
         name: "voice",
         meta: {
             needAuth: true,
@@ -165,7 +145,7 @@ const routes = [
     },
     {
         path: "/thank-you",
-        component: ThankYou,
+        component: () => import("../pages/ThankYou.vue"),
         name: "thank-you",
         meta: {
             needAuth: true,
