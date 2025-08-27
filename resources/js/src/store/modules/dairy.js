@@ -582,7 +582,6 @@ const actions = {
             authApi
                 .getSearchedProducts(trimedQuery, payload.page)
                 .then((response) => {
-                    console.log(response.data);
                     const products = response.data.products;
                     const currentPage = response.data.current_page;
                     context.commit(mutationTypes.getSearchedProductsSuccess, {
@@ -703,7 +702,11 @@ const actions = {
                     );
                     await sleep(delay);
 
-                    const st = await authApi.getFeedbackStatus(rid);
+                    const st = await authApi.getFeedbackStatus({
+                        rid,
+                        date,
+                        part_of_day,
+                    });
                     if (st?.data?.ready) {
                         const data = st.data.data;
                         commit(mutationTypes.getFeedbackSuccess, data);

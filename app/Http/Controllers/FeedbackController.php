@@ -7,6 +7,7 @@ use App\Jobs\GenerateDietFeedbackJob;
 use App\Models\DietFeedback;
 use App\Models\FoodConsumption;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class FeedbackController extends Controller
@@ -68,17 +69,27 @@ class FeedbackController extends Controller
         ], 202);
     }
 
-    public function status(\Illuminate\Http\Request $request): JsonResponse
+    public function status(Request $request): JsonResponse
     {
         $user = $request->user();
         $rid = (string) $request->query('rid');
+        $date = (string) $request->query('date');
+        $partOfDay = $request->query('part_of_day');
 
-        $rec = DietFeedback::findLatestByUserAndSignature($user->id, $rid);
+        $rec = DietFeedback::findLatestByUserAndSignature($user->id, $rid, $date ?: null, $partOfDay ?: null);
 
-        if (! $rec || $rec->status !== 'ready' || ! $rec->feedback_text) {
-            return response()->json(['ready' => false], 200);
+        if (! $rec) {
+            return response()->json(['ready' => false, 'status' => 'pending'], 200);
         }
 
-        return response()->json(['ready' => true, 'data' => $rec->feedback_text], 200);
+        if ($rec->status === 'failed') {
+            return response()->json(['ready' => false, 'status' => 'failed'], 200);
+        }
+
+        if ($rec->status === 'ready' && $rec->feedback_text) {
+            return response()->json(['ready' => true, 'status' => 'ready', 'data' => $rec->feedback_text], 200);
+        }
+
+        return response()->json(['ready' => false, 'status' => 'pending'], 200);
     }
 }

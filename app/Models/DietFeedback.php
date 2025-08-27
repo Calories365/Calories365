@@ -87,9 +87,16 @@ class DietFeedback extends Model
         );
     }
 
-    public static function findLatestByUserAndSignature(int $userId, string $signature): ?self
+    public static function findLatestByUserAndSignature(int $userId, string $signature, ?string $date = null, ?string $partOfDay = null): ?self
     {
         return self::where('user_id', $userId)
+            ->when($date, fn ($q) => $q->where('feedback_date', $date))
+            ->when(
+                $partOfDay !== null,
+                fn ($q) => $q->where('part_of_day', $partOfDay),
+                fn ($q) => $q
+                    ->when($date !== null, fn ($qq) => $qq->whereNull('part_of_day'))
+            )
             ->where('meals_signature', $signature)
             ->latest('id')
             ->first();

@@ -37,8 +37,11 @@ const getFeedback = (date, part_of_day = null) => {
     return axios.get("/api/getFeedback", { params });
 };
 
-const getFeedbackStatus = (rid) => {
-    return axios.get("/api/getFeedback/status", { params: { rid } });
+const getFeedbackStatus = ({ rid, date, part_of_day } = {}) => {
+    const params = { rid };
+    if (date) params.date = date;
+    if (part_of_day) params.part_of_day = part_of_day;
+    return axios.get("/api/getFeedback/status", { params });
 };
 
 export default {
