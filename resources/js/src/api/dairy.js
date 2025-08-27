@@ -29,6 +29,18 @@ const saveUsersCurrentProducts = (product) => {
     return axios.post(`/api/user-meals`, product);
 };
 
+const getFeedback = (date, part_of_day = null) => {
+    const params = { date };
+    if (part_of_day) {
+        params.part_of_day = part_of_day;
+    }
+    return axios.get("/api/getFeedback", { params });
+};
+
+const getFeedbackStatus = (rid) => {
+    return axios.get("/api/getFeedback/status", { params: { rid } });
+};
+
 export default {
     getPopularProducts,
     saveCurrentProducts,
@@ -37,4 +49,6 @@ export default {
     updateCurrentProducts,
     getSearchedProducts,
     saveUsersCurrentProducts,
+    getFeedback,
+    getFeedbackStatus,
 };

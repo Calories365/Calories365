@@ -180,6 +180,24 @@ product name - (its calories per 100 grams, proteins, fats, carbohydrates);
 EOT,
 
     'data_not_extracted' => 'Failed to extract data.',
+
+    // FeedbackController language phrases
+    'default_user_info' => 'Male, 20 years old, 100 kg',
+    'male' => 'Male',
+    'female' => 'Female',
+    'years_old' => 'years old',
+    'kg' => 'kg',
+    'height_cm' => 'height',
+    'cm' => 'cm',
+    'goal' => 'goal',
+    'daily_calories_norm' => 'daily calories norm',
+    'meal_time' => 'Meal time',
+    'breakfast' => 'Breakfast',
+    'lunch' => 'Lunch',
+    'dinner' => 'Dinner',
+    'daily_diet' => 'Daily diet',
+    'no_products_consumed' => 'no products consumed',
+    'failed_to_get_feedback' => 'Failed to get feedback',
     'welcome_guide' => <<<'EOT'
 Vide instruction: https://t.me/calories_365/3
 
@@ -212,4 +230,42 @@ EOT,
     'whole_day' => 'Whole day',
     'send_feedback_email' => 'You can send your feedback to the administrator:  @calories365_admin',
     'generate_with_ai' => 'Generate with AI',
+    'get_feedback_for_part_of_day' => <<<'EOT'
+You are a nutritionist for :user_info
+:part_of_day_info
+
+Meal: :meals_list
+
+Response format:
+
+Short plain text, 2–4 sentences, ≤ 350 characters.
+
+No lists, headings, preambles, emojis, or the words "Summary/Pros/Cons/Advice".
+
+Write clearly for a layperson, in the same language as the input text.
+
+Balance rules and thresholds:
+
+Protein: target per meal ~25–40 g. If absent or low — suggest adding ~20–30 g protein
+(≈100–150 g lean chicken/fish, 150–200 g 2% cottage cheese, 2 eggs). If already ≥25 g — do not increase.
+
+Vegetables/fiber: if vegetables ≈0 g — you may add 100–150 g low-calorie vegetables;
+if 1–99 g — only 10–20 g greens; if ≥100 g — do not increase.
+
+Complex carbs: target ~20–40 g carbs (≈50–120 g cooked grains/potatoes or 30–50 g whole-grain bread).
+If absent — suggest adding a bit; if there is grains/potatoes/bread ≥100 g or enough fruit — do not add.
+
+Fats: if "dry" (lean protein + vegetables) — allow 5–10 g healthy fats (olive oil/a few nuts).
+If there are fatty foods (lard, sausages, cheese >20–30 g fat per meal) — recommend reducing their portion.
+
+Excess refined/fast carbs (white bread/sugar/pastries): suggest cutting the amount (e.g., bread to 30–50 g) or replacing part with complex carbs/vegetables without increasing calories.
+
+Recommendation logic:
+
+Give at most TWO specific edits: (a) what to REDUCE when there’s a clear excess and/or (b) what to ADD when there’s a clear deficit.
+
+If everything is balanced by thresholds — don’t suggest changes; simply note the balance.
+
+Output only the feedback text (2–4 sentences).
+EOT,
 ];

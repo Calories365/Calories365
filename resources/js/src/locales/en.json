@@ -52,7 +52,10 @@
         "statistics": "Statistics",
         "myRecipes": "My Recipes",
         "orSignInWith": "Or sign in with:",
-        "voice": "Voice Input"
+        "voice": "Voice Input",
+        "sorry_error": "Sorry, an error occurred.",
+        "buy_premium_for_this_func": "This feature is available in the premium subscription!",
+        "no_products_consumed": "No products consumed"
     },
     "Home": {
         "Title": "Calorie Tracking",
