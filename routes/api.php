@@ -34,6 +34,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/products/search', [\App\Http\Controllers\SearchProductController::class, 'search'])->name('meals.search');
 
+        Route::get('/getFeedback', [\App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
+
+        Route::get('/getFeedback/status', [\App\Http\Controllers\FeedbackController::class, 'status'])->name('feedback.status');
+
         Route::get('/user', [\App\Http\Controllers\UserController::class, 'show'])->name('show');
 
         Route::get('/telegram-link', [\App\Http\Controllers\TelegramLinkController::class, 'getLink'])
@@ -43,16 +47,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/cancel-premium', [\App\Http\Controllers\PaymentController::class, 'cancelPremium'])->name('cancelPremium');
 
-        // Маршрут для загрузки голосовых записей
         Route::post('/voice/upload', [VoiceController::class, 'upload'])->name('voice.upload');
 
-        // Маршрут для сохранения продуктов
         Route::post('/voice/save-products', [VoiceController::class, 'saveProducts'])->name('voice.saveProducts');
 
-        // Маршрут для генерации данных продукта
         Route::post('/voice/generate-product', [VoiceController::class, 'generateProductData'])->name('voice.generateProduct');
 
-        // Маршрут для поиска продукта по названию
         Route::post('/voice/search-product', [VoiceController::class, 'searchProduct'])->name('voice.searchProduct');
     });
 });

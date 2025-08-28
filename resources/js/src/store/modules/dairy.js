@@ -77,6 +77,10 @@ export const mutationTypes = {
     setDateFromCalendar: "[dairy] setDateFromCalendar",
 
     deleteDateFromCalendar: "[dairy] deleteDateFromCalendar",
+
+    getFeedbackStart: "[dairy] getFeedbackStart",
+    getFeedbackSuccess: "[dairy] getFeedbackSuccess",
+    getFeedbackFailure: "[dairy] getFeedbackFailure",
 };
 
 const mutations = {
@@ -201,6 +205,20 @@ const mutations = {
     [mutationTypes.deleteDateFromCalendar](state) {
         state.dateFromCalendar = null;
     },
+
+    [mutationTypes.getFeedbackStart](state) {
+        state.isSybmiting = true;
+        state.isLoading = true;
+    },
+    [mutationTypes.getFeedbackSuccess](state, payload) {
+        state.isSybmiting = false;
+        state.isLoading = false;
+    },
+    [mutationTypes.getFeedbackFailure](state, payload) {
+        state.errors = payload;
+        state.isSybmiting = false;
+        state.isLoading = false;
+    },
 };
 
 export const actionTypes = {
@@ -217,6 +235,7 @@ export const actionTypes = {
     calculateCaloriesPerDayPart: "[dairy] calculateCaloriesPerDayPart",
     setPartOfDay: "[dairy] setPartOfDay",
     setDateFromCalendar: "[dairy] setDateFromCalendar",
+    getFeedback: "[dairy] getFeedback",
 };
 
 const actions = {
@@ -563,7 +582,6 @@ const actions = {
             authApi
                 .getSearchedProducts(trimedQuery, payload.page)
                 .then((response) => {
-                    console.log(response.data);
                     const products = response.data.products;
                     const currentPage = response.data.current_page;
                     context.commit(mutationTypes.getSearchedProductsSuccess, {
@@ -635,6 +653,101 @@ const actions = {
 
             resolve(payload);
         });
+    },
+    [actionTypes.getFeedback]: async (context, payload) => {
+        const { commit, dispatch } = context;
+        commit(mutationTypes.getFeedbackStart);
+
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+        try {
+            const { date, part_of_day } = payload;
+            const resp = await authApi.getFeedback(date, part_of_day);
+
+            if (resp.status === 200 && resp.data?.success) {
+                const data = resp.data.data;
+                commit(mutationTypes.getFeedbackSuccess, data);
+                return data;
+            }
+
+            if (
+                resp.status === 200 &&
+                resp.data?.message === "no_products_consumed"
+            ) {
+                const msg = i18n.global.t("message.no_products_consumed");
+                dispatch("setError", msg, { root: true });
+                commit(
+                    mutationTypes.getFeedbackFailure,
+                    "no_products_consumed"
+                );
+                return null;
+            }
+
+            if (
+                resp.status === 202 &&
+                resp.data?.message === "accepted" &&
+                resp.data?.rid
+            ) {
+                const rid = resp.data.rid;
+                const base = Number(resp.data.poll_after_ms) || 1000;
+
+                const maxAttempts = 40;
+                const factor = 1.5;
+                const cap = 8000;
+
+                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                    const delay = Math.min(
+                        cap,
+                        Math.round(base * Math.pow(factor, attempt - 1))
+                    );
+                    await sleep(delay);
+
+                    const st = await authApi.getFeedbackStatus({
+                        rid,
+                        date,
+                        part_of_day,
+                    });
+                    if (st?.data?.ready) {
+                        const data = st.data.data;
+                        commit(mutationTypes.getFeedbackSuccess, data);
+                        return data;
+                    }
+
+                    if (st?.data?.status === "failed") {
+                        const errMsg = i18n.global.t("message.sorry_error");
+                        dispatch("setError", errMsg, { root: true });
+                        commit(mutationTypes.getFeedbackFailure, "failed");
+                        return null;
+                    }
+                }
+
+                const errMsg = i18n.global.t("message.sorry_error");
+                dispatch("setError", errMsg, { root: true });
+                commit(mutationTypes.getFeedbackFailure, "timeout");
+                return null;
+            }
+
+            const backendMsg = resp?.data?.message || "unknown_error";
+            throw new Error(backendMsg);
+        } catch (error) {
+            const status = error?.response?.status;
+            const backendMessage = error?.response?.data?.message;
+
+            const isNoPremium =
+                backendMessage === "buy_premium_for_this_func" ||
+                status === 402;
+            const key = isNoPremium
+                ? "message.buy_premium_for_this_func"
+                : "message.sorry_error";
+            const error_message = i18n.global.t(key);
+
+            dispatch("setError", error_message, { root: true });
+            commit(
+                mutationTypes.getFeedbackFailure,
+                backendMessage || error?.message || "unknown_error"
+            );
+            return null;
+        }
     },
 };
 export default {
