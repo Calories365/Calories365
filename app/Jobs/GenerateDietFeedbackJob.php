@@ -34,7 +34,7 @@ class GenerateDietFeedbackJob implements ShouldBeUnique, ShouldQueue
 
     public int $tries = 5;
 
-    public int $timeout = 60;
+    public int $timeout = 150;
 
     public $backoff = [5, 10, 20, 30];
 

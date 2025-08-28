@@ -52,7 +52,6 @@ class FeedbackController extends Controller
 
         DietFeedback::insertPendingIfMissing($user->id, $date, $partOfDay, $sig);
 
-        Log::info('start job');
         GenerateDietFeedbackJob::dispatch(
             userId: $user->id,
             date: $date,
