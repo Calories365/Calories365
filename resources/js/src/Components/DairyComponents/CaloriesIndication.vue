@@ -40,7 +40,6 @@ export default {
             getFeedback: "[dairy] getFeedback",
         }),
         showCaloriesInfo(usePartOfDay = false) {
-            // guard against re-clicks while loading
             if (this.isLoading) return;
 
             const payload = { date: this.currentDate };
@@ -132,6 +131,7 @@ export default {
     text-transform: uppercase;
     @media (max-width: 768px) {
         font-size: 12px;
+        letter-spacing: 0.0450rem;
     }
 
     &__list {
@@ -181,7 +181,6 @@ export default {
     }
 
     &.loading {
-        /* blocks pointer events while loading */
         pointer-events: none;
         cursor: not-allowed;
         opacity: 0.6;
@@ -191,7 +190,6 @@ export default {
         animation: spin 1s linear infinite;
     }
 
-    /* hover only when not loading */
     &:not(.loading):hover {
         background-color: #45a049;
     }
