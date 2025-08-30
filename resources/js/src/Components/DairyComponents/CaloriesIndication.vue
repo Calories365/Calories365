@@ -40,6 +40,9 @@ export default {
             getFeedback: "[dairy] getFeedback",
         }),
         showCaloriesInfo(usePartOfDay = false) {
+            // guard against re-clicks while loading
+            if (this.isLoading) return;
+
             const payload = { date: this.currentDate };
             if (usePartOfDay && this.part_of_day) {
                 payload.part_of_day = this.part_of_day;
@@ -48,9 +51,7 @@ export default {
             this.getFeedback(payload).then((data) => {
                 if (!data) return;
                 this.feedbackResponse =
-                    typeof data === "string"
-                        ? data
-                        : JSON.stringify(data, null, 2);
+                    typeof data === "string" ? data : JSON.stringify(data, null, 2);
                 this.isFeedbackModalOpen = true;
             });
         },
@@ -65,11 +66,12 @@ export default {
     <div class="indication-container">
         <ul class="indication-container__list">
             <li class="indication-container__element">
-                {{ localedPart_of_day }}: {{ caloriesPerDayPart }}
-                {{ $t("Diary.KCAL") }}
+                {{ localedPart_of_day }}: {{ caloriesPerDayPart }} {{ $t("Diary.KCAL") }}
                 <span
                     class="info-icon"
                     :class="{ loading: isLoading }"
+                    :aria-disabled="isLoading"
+                    :aria-busy="isLoading"
                     @click="showCaloriesInfo(true)"
                 >
                     <svg
@@ -87,13 +89,13 @@ export default {
                 </span>
             </li>
             <li class="indication-container__element">
-                {{ $t("Diary.summary") }}: {{ caloriesPerDay }}/{{
-                    currentUser.calories_limit
-                }}
+                {{ $t("Diary.summary") }}: {{ caloriesPerDay }}/{{ currentUser.calories_limit }}
                 {{ $t("Diary.KCAL") }}
                 <span
                     class="info-icon"
                     :class="{ loading: isLoading }"
+                    :aria-disabled="isLoading"
+                    :aria-busy="isLoading"
                     @click="showCaloriesInfo()"
                 >
                     <svg
@@ -138,9 +140,10 @@ export default {
     }
 
     &__element {
+        display: flex;
         padding: 20px 30px 20px;
         @media (max-width: 768px) {
-            padding: 10px 15px 10px;
+            padding: 10px 7px 10px;
         }
     }
 
@@ -177,11 +180,19 @@ export default {
         fill: white;
     }
 
+    &.loading {
+        /* blocks pointer events while loading */
+        pointer-events: none;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
     &.loading svg {
         animation: spin 1s linear infinite;
     }
 
-    &:hover {
+    /* hover only when not loading */
+    &:not(.loading):hover {
         background-color: #45a049;
     }
 
@@ -190,7 +201,6 @@ export default {
         height: 18px;
         line-height: 18px;
         margin-left: 6px;
-        margin-top: -3px;
 
         svg {
             width: 10px;
