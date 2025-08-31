@@ -1,27 +1,38 @@
 name: Deploy Calories365 (host-runner)
 
 on:
-    push:
-        branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-    deploy:
-        runs-on: self-hosted
+  deploy:
+    runs-on: self-hosted
 
-        steps:
-            - name: Git pull → /var/www/calories365/src
-              run: |
-                  cd /home/maxim/var/www/calories365/src
-                  git fetch origin main
-                  git reset --hard origin/main
+    steps:
+      - name: Git pull → /var/www/calories365/src
+        run: |
+          set -euo pipefail
+          cd /home/maxim/var/www/calories365/src
+          git fetch origin main
+          git reset --hard origin/main
 
-            - name: Docker compose up --build
-              working-directory: /home/maxim/var/www/calories365
-              run: |
-                  export DOCKER_BUILDKIT=1
-                  docker compose up -d --build
-                  docker builder prune --filter "until=168h" --force
+      - name: Docker compose up --build (+scale, recreate)
+        working-directory: /home/maxim/var/www/calories365
+        env:
+          DOCKER_BUILDKIT: "1"
+        run: |
+          set -euo pipefail
+          docker compose up -d --build --force-recreate --remove-orphans --scale calories_queue_worker=4
+          docker builder prune --filter "until=168h" --force
 
-            - name: Laravel migrate --force
-              working-directory: /home/maxim/var/www/calories365
-              run: docker compose exec -T calculator_php php artisan migrate --force
+      - name: Laravel migrate --force
+        working-directory: /home/maxim/var/www/calories365
+        run: |
+          set -euo pipefail
+          docker compose exec -T calculator_php php artisan migrate --force --no-interaction
+
+      - name: Graceful restart queue workers
+        working-directory: /home/maxim/var/www/calories365
+        run: |
+          set -euo pipefail
+          docker compose exec -T calculator_php php artisan queue:restart
