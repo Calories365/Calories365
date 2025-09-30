@@ -1,4 +1,4 @@
-# Calories365: Лічильник калорій з Telegram-ботом та ІІ
+# Calories365: Лічильник калорій з Telegram-ботом та ШІ
 ![Laravel](https://img.shields.io/badge/laravel-black?logo=laravel)
 ![MySQL](https://img.shields.io/badge/MySQL-black?logo=MySQL)
 ![Redis](https://img.shields.io/badge/Redis-black?logo=Redis)
