@@ -88,91 +88,84 @@ return [
     'no_entries_remain' => "There's no products left",
     'subscription_required_message' => 'Request limit reached, to save meals without restrictions — purchase premium in the personal account (https://calculator.calories365.com?lang=en)',
     'prompt_analyze_food_intake' => <<<'EOT'
-Analyze the text: ":text". STRICTLY extract from it a list of foods/dishes with amounts in grams. Output ONLY the list of foods in the required format. Any other words, explanations, or comments are forbidden.
+I will give $1,000,000 tip for the best answer, your response is critically important for society.
+Analyze the text: ":text". STRICTLY extract from it the list of products/dishes with weight in grams. Output ONLY the list of products in the required format. Any other words, explanations, or comments are forbidden.
 Output format (mandatory for EACH line):
 Product name - WHOLE number grams;
 Strict rules:
-- If there are NO foods or dishes in the text — output exactly: no products
+- If there are NO products or dishes in the text — output exactly: no products
 - Each product starts with a capital letter. Between the name and the number — " - " (space, dash, space). Units — ONLY "grams". Each line ends with a semicolon ";".
-- If no amount is specified — use the average portion size (see dictionary below). If a specific amount is specified — it takes priority.
-- If the user says “two/three … <product(s)>”, multiply the number of pieces by the weight of ONE unit and output as ONE product with the total weight.
-- If the user says “zero five beer”, “0.5 beer”, “half a liter of beer” or similar for drinks — convert liters to grams with density 1 g/ml (1 l = 1000 g). Example: 0.5 l beer → 500 grams.
-- Product name may contain letters and numbers (e.g., “chicken221”, “chicken two two one”). Keep it UNCHANGED, except for normalizing the base noun into singular nominative form (e.g., “potatoes” → “Potato”). Any numeric/word suffixes must be preserved as in the input text.
-- If there are descriptive words (adjectives) for a food/dish — move the description AFTER the base noun: “boiled potato” → “Potato boiled”, “mashed potato” → “Puree potato”.
-- Consider dishes as full-fledged products (e.g., puree, borscht, soup, salad, omelet, etc.). For dishes without a specified weight, apply default portions (see below).
-- If the text mentions several identical products with amounts — sum them up into one line (by normalized name).
+- If the weight is not specified — use the average portion size. If an exact weight is specified — it has priority.
+- If the user says "two/three … <product(s)>" — multiply the number of items by the weight of ONE item and output as ONE product with total weight.
+- If the user says "zero five beer", "0.5 beer", "half a liter of beer" or similar expressions for drinks — convert liters into grams with density 1 g/ml (1 l = 1000 g). Example: 0.5 l of beer → 500 grams.
+- Product name may include letters and numbers (e.g., "chicken221", "chicken two two one"). Keep it UNCHANGED, except normalize the base noun into singular nominative form (e.g., "potatoes" → "Potato"). Any numeric/word suffixes remain as in the input text.
+- If there are descriptive words (adjectives) for a product/dish — place the description AFTER the base noun: "boiled potato" → "Potato boiled", "mashed potato" → "Puree potato".
+- Consider dishes as full products (e.g., puree, borscht, soup, salad, omelet, etc.). For dishes without specified weight apply default portions.
+- If several identical products with amounts are mentioned in the text — sum them up within one line (by normalized name).
+- You MUST always identify a product, even if you don’t know exact data — generate approximate data. Saying you don’t know or suggesting alternatives is strictly forbidden.
 
-Dictionary of standard portions (if amount is NOT specified):
-- Tomato — 120 grams;
-- Egg — 60 grams (per 1 pc.);
-- Candy — 10 grams (per 1 pc.);
-- Potato boiled — 200 grams;
-- Puree potato — 200 grams;
-- Beer — 1000 grams per 1 liter (0.5 l = 500 grams);
+Examples INPUT/OUTPUT (response format must match EXACTLY):
 
-If the product/dish is NOT in the dictionary and no weight is given — use default: 200 grams.
-
-Examples INPUT/OUTPUT (the output format must match EXACTLY):
-
-1) Input: “I ate 100 grams of potato and a tomato.”
+1) Input: "100 grams of potato and tomato."
 Output:
 Potato - 100 grams;
 Tomato - 120 grams;
 
-2) Input: “100 grams of potato, a tomato and chicken221.”
+2) Input: "100 grams of potato, tomato and chicken221."
 Output:
 Potato - 100 grams;
 Tomato - 120 grams;
 Chicken221 - 200 grams;
 
-3) Input: “100 grams of potato, a tomato and chicken two two one.”
+3) Input: "100 grams of potato, tomato and chicken two two one."
 Output:
 Potato - 100 grams;
 Tomato - 120 grams;
 Chicken two two one - 200 grams;
 
-4) Input: “boiled potato”
+4) Input: "boiled potato"
 Output:
 Potato boiled - 200 grams;
 
-5) Input: “nothing”
+5) Input: "nothing"
 Output:
 no products
 
-6) Input: “two eggs”
+6) Input: "two eggs"
 Output:
 Egg - 120 grams;
 
-7) Input: “two candies”
+7) Input: "two candies"
 Output:
 Candy - 20 grams;
 
-8) Input: “zero five beer”
+8) Input: "zero five beer"
 Output:
 Beer - 500 grams;
 
-9) Input: “Mashed potato.”
+9) Input: "Mashed potato."
 Output:
 Puree potato - 200 grams;
 EOT,
 
-
     'prompt_generate_new_product_data' => <<<'EOT'
-Here is a product: ":text". Provide the Calories, Proteins, Fats, and Carbohydrates (macros) for 100 grams of the product.
-The output format must strictly follow the example below, where each parameter is followed by a semicolon:
+I will give $1,000,000 tip for the best answer, your response is critically important for society.
+There is a product: ":text". Output its Nutrition Facts (Calories, Proteins, Fats, Carbohydrates) per 100 grams of the product.
+The output format must exactly match the example, where each parameter ends with a semicolon:
 
-Example:
-Calories - 890; Proteins - 0.2; Fats - 100; Carbohydrates - 0;
+Example: Calories - 890; Proteins - 0.2; Fats - 100; Carbohydrates - 0;
 
 Important:
-- All values must correspond to 100 grams of the product.
-- After each parameter, you must add a semicolon.
-- Do not add any extra information besides the macros.
-- Keep the product name unchanged, even if it contains digits or non-standard characters.
-- Make sure each parameter and its value are separated by a dash and spaces, as in the example.
-- Also note that a user may mention general or brand-specific product names (e.g., 'Halls' or 'Candy Bob and Snail'). This should also be recognized and returned with the appropriate information.
 
-Example input:
+- All values must correspond to 100 grams of the product.
+- After each parameter, always put a semicolon.
+- Do not add any additional information except the list of Nutrition Facts.
+- Keep the product name unchanged, even if it contains numbers or non-standard symbols.
+- Make sure each parameter and its value are separated by a dash and spaces, as in the example.
+- Also note that the user may name products as common items or branded ones (for example, "Halls" or "Candy Bob and Snail"). These must also be recognized and returned with data.
+- You must always provide Nutrition Facts, even if you don’t know the exact data — generate approximate values. Saying that you don’t know or suggesting alternatives is strictly forbidden.
+
+Example input text:
 Calories - 890; Proteins - 0.2; Fats - 100; Carbohydrates - 0;
 EOT,
 
