@@ -22,7 +22,7 @@ jobs:
           DOCKER_BUILDKIT: "1"
         run: |
           set -euo pipefail
-          docker compose up -d --build --force-recreate --remove-orphans --scale calories_queue_worker=4
+          docker compose up -d --build --force-recreate --remove-orphans
           docker builder prune --filter "until=168h" --force
 
       - name: Laravel migrate --force
@@ -31,8 +31,8 @@ jobs:
           set -euo pipefail
           docker compose exec -T calculator_php php artisan migrate --force --no-interaction
 
-      - name: Graceful restart queue workers
+      - name: Graceful restart Horizon
         working-directory: /home/maxim/var/www/calories365
         run: |
-          set -euo pipefail
-          docker compose exec -T calculator_php php artisan queue:restart
+          docker compose exec -T calculator_horizon php artisan optimize:clear
+          docker compose exec -T calculator_horizon php artisan horizon:terminate
