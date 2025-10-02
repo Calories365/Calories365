@@ -17,6 +17,8 @@ import {
     saveVoiceProducts,
     generateProductData,
     searchProduct,
+    getVoiceStatus,
+    getGenerateProductStatus,
 } from "@/api/voice";
 import i18n from "@/i18n";
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
@@ -177,54 +179,52 @@ export default {
 
                     try {
                         const response = await this.voiceUploadRecording();
-                        const message = response.message;
+                        const { status, data } = response || {};
 
-                        if (message === "please_buy_premium") {
+                        // No premium case
+                        if (status === 200 && data?.message === "please_buy_premium") {
                             this.showError(this.$t("Voice.please_buy_premium"));
+                            this.$store.commit("voice/RECORDING_COMPLETE", audioBlob);
+                            return;
                         }
 
-                        if (response && response.transcription) {
-                            this.transcription = response.transcription;
-                        } else {
-                            this.transcription = "";
-                        }
-
-                        if (
-                            response &&
-                            response.products &&
-                            response.products.length > 0
-                        ) {
-                            this.products = response.products.map((item) => {
-                                return {
-                                    name:
-                                        item.product_translation?.name ||
-                                        "Неизвестный продукт",
+                        // Legacy immediate success response (fallback)
+                        if (status === 200 && data?.success) {
+                            this.transcription = data.transcription || "";
+                            if (Array.isArray(data.products) && data.products.length > 0) {
+                                this.products = data.products.map((item) => ({
+                                    name: item.product_translation?.name || "Неизвестный продукт",
                                     calories: item.product?.calories || 0,
                                     protein: item.product?.proteins || 0,
                                     fats: item.product?.fats || 0,
                                     carbs: item.product?.carbohydrates || 0,
-                                    weight: item.quantity || 0,
-                                    isGenerated: item.is_generated || false,
+                                    weight: item.quantity || item.product?.quantity || 0,
+                                    isGenerated: item.is_generated || item.product_translation?.is_generated || false,
                                     product_id: item.product?.id || null,
                                     isModified: false,
                                     nameModified: false,
                                     needsSearch: false,
-                                    originalName:
-                                        item.product_translation?.name ||
-                                        "Неизвестный продукт",
+                                    originalName: item.product_translation?.name || "Неизвестный продукт",
                                     searchedBefore: false,
-                                };
-                            });
-
-                            this.saveOriginalValues();
-                        } else {
-                            this.products = [];
+                                }));
+                                this.saveOriginalValues();
+                            } else {
+                                this.products = [];
+                            }
+                            this.$store.commit("voice/RECORDING_COMPLETE", audioBlob);
+                            return;
                         }
 
-                        this.$store.commit(
-                            "voice/RECORDING_COMPLETE",
-                            audioBlob
-                        );
+                        // Accepted → start polling status endpoint
+                        if (status === 202 && data?.message === "accepted" && data?.rid) {
+                            const baseDelay = Number(data.poll_after_ms) || 1000;
+                            await this.pollVoiceStatus(data.rid, baseDelay);
+                            return;
+                        }
+
+                        // Unexpected response
+                        this.showError(this.$t("Voice.errors.uploadError"));
+                        this.$store.commit("voice/RECORDING_COMPLETE", audioBlob);
                     } catch (error) {
                         console.error("Ошибка при отправке записи:", error);
                         this.showError("Не удалось отправить аудиозапись");
@@ -269,6 +269,58 @@ export default {
 
                 this.showError(errorMessage);
             }
+        },
+        async pollVoiceStatus(rid, baseDelay = 1000) {
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+            const maxAttempts = 40;
+            const factor = 1.5;
+            const cap = 8000;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                const delay = Math.min(cap, Math.round(baseDelay * Math.pow(factor, attempt - 1)));
+                await sleep(delay);
+                try {
+                    const resp = await getVoiceStatus(rid);
+                    const payload = resp?.data || {};
+
+                    if (payload?.ready) {
+                        this.transcription = payload.transcription || "";
+                        const products = Array.isArray(payload.products) ? payload.products : [];
+                        this.products = products.map((item) => ({
+                            name: item.product_translation?.name || "Неизвестный продукт",
+                            calories: item.product?.calories || 0,
+                            protein: item.product?.proteins || 0,
+                            fats: item.product?.fats || 0,
+                            carbs: item.product?.carbohydrates || 0,
+                            weight: item.quantity || item.product?.quantity || 0,
+                            isGenerated: item.is_generated || item.product_translation?.is_generated || false,
+                            product_id: item.product?.id || null,
+                            isModified: false,
+                            nameModified: false,
+                            needsSearch: false,
+                            originalName: item.product_translation?.name || "Неизвестный продукт",
+                            searchedBefore: false,
+                        }));
+                        this.saveOriginalValues();
+                        this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                        return;
+                    }
+
+                    if (payload?.status === "failed") {
+                        const msg = payload?.message || this.$t("Voice.errors.uploadError");
+                        this.showError(msg);
+                        this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Ошибка при получении статуса голосовой обработки:", e);
+                    // continue polling with backoff
+                }
+            }
+
+            // timeout
+            this.showError(this.$t("Voice.errors.uploadError"));
+            this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
         },
         async stopRecording() {
             if (this.mediaRecorder && this.isRecording) {
@@ -366,40 +418,84 @@ export default {
                 this.$store.commit("voice/RECORDING_PROCESS");
 
                 const response = await generateProductData(productName);
+                const { status, data } = response || {};
 
-                if (response.success && response.data) {
-                    this.products[index].calories = response.data.calories || 0;
-                    this.products[index].protein = response.data.proteins || 0;
-                    this.products[index].fats = response.data.fats || 0;
-                    this.products[index].carbs =
-                        response.data.carbohydrates || 0;
+                if (status === 200 && data?.success && data?.data) {
+                    const d = data.data;
+                    this.products[index].calories = d.calories || 0;
+                    this.products[index].protein = d.proteins || 0;
+                    this.products[index].fats = d.fats || 0;
+                    this.products[index].carbs = d.carbohydrates || 0;
                     this.products[index].isGenerated = true;
-
                     if (this.products[index].nameModified) {
                         this.products[index].product_id = null;
                     }
-
                     this.products[index].needsSearch = false;
-
-                    this.showSuccess(
-                        this.$t("Voice.success.dataGenerated", {
-                            product: productName,
-                        })
-                    );
-                } else {
-                    throw new Error(
-                        response.message ||
-                            this.$t("Voice.errors.generateError")
-                    );
+                    this.showSuccess(this.$t("Voice.success.dataGenerated", { product: productName }));
+                    this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                    return;
                 }
+
+                // Accepted → poll for product data
+                if (status === 202 && data?.message === "accepted" && data?.rid) {
+                    const base = Number(data.poll_after_ms) || 1000;
+                    await this.pollGenerateProductStatus(index, data.rid, base);
+                    return;
+                }
+
+                // Unexpected
+                throw new Error(this.$t("Voice.errors.generateError"));
             } catch (error) {
-                this.showError(
-                    error.message || this.$t("Voice.errors.generateError")
-                );
+                this.showError(error.message || this.$t("Voice.errors.generateError"));
                 console.error("Ошибка при генерации данных:", error);
-            } finally {
                 this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
             }
+        },
+        async pollGenerateProductStatus(index, rid, baseDelay = 1000) {
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+            const maxAttempts = 40;
+            const factor = 1.5;
+            const cap = 8000;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                const delay = Math.min(cap, Math.round(baseDelay * Math.pow(factor, attempt - 1)));
+                await sleep(delay);
+                try {
+                    const resp = await getGenerateProductStatus(rid);
+                    const payload = resp?.data || {};
+
+                    if (payload?.ready && payload?.product_data) {
+                        const d = payload.product_data;
+                        this.products[index].calories = d.calories || 0;
+                        this.products[index].protein = d.proteins || 0;
+                        this.products[index].fats = d.fats || 0;
+                        this.products[index].carbs = d.carbohydrates || 0;
+                        this.products[index].isGenerated = true;
+                        if (this.products[index].nameModified) {
+                            this.products[index].product_id = null;
+                        }
+                        this.products[index].needsSearch = false;
+
+                        this.showSuccess(this.$t("Voice.success.dataGenerated", { product: this.products[index].name }));
+                        this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                        return;
+                    }
+
+                    if (payload?.status === "failed") {
+                        const msg = payload?.message || this.$t("Voice.errors.generateError");
+                        this.showError(msg);
+                        this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Ошибка при получении статуса генерации продукта:", e);
+                    // continue polling
+                }
+            }
+
+            // timeout
+            this.showError(this.$t("Voice.errors.generateError"));
+            this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
         },
         saveToMeal(mealType, mealLabel) {
             const mealTypeMap = {
@@ -427,7 +523,6 @@ export default {
                     preparedProduct.weight = 100;
                 }
 
-                console.log("preparedProduct: ", preparedProduct);
                 return preparedProduct;
             });
 
@@ -495,10 +590,7 @@ export default {
                 }
             }
 
-            console.log(
-                "Browser supports recording:",
-                this.browserSupportsRecording
-            );
+
         },
         saveOriginalValues() {
             this.originalProducts = {};
@@ -516,10 +608,7 @@ export default {
                 }
             });
 
-            console.log(
-                "Сохранены оригинальные значения продуктов:",
-                this.originalProducts
-            );
+
         },
         checkModifiedProducts() {
             this.products.forEach((product, index) => {
@@ -534,23 +623,7 @@ export default {
                             product.carbs !== original.carbs)
                     ) {
                         this.products[index].isModified = true;
-                        console.log(
-                            `Продукт "${product.name}" был модифицирован:`,
-                            {
-                                original: {
-                                    calories: original.calories,
-                                    protein: original.protein,
-                                    fats: original.fats,
-                                    carbs: original.carbs,
-                                },
-                                modified: {
-                                    calories: product.calories,
-                                    protein: product.protein,
-                                    fats: product.fats,
-                                    carbs: product.carbs,
-                                },
-                            }
-                        );
+
                     }
                 }
             });
@@ -569,25 +642,7 @@ export default {
                         this.products[index].weight !== original.weight)
                 ) {
                     this.products[index].isModified = true;
-                    console.log(
-                        `Продукт "${this.products[index].name}" был модифицирован:`,
-                        {
-                            original: {
-                                calories: original.calories,
-                                protein: original.protein,
-                                fats: original.fats,
-                                carbs: original.carbs,
-                                weight: original.weight,
-                            },
-                            modified: {
-                                calories: this.products[index].calories,
-                                protein: this.products[index].protein,
-                                fats: this.products[index].fats,
-                                carbs: this.products[index].carbs,
-                                weight: this.products[index].weight,
-                            },
-                        }
-                    );
+
                 }
             } else if (this.products[index].nameModified) {
                 this.products[index].isModified = true;
@@ -609,9 +664,7 @@ export default {
             product.isModified = true;
 
             product.needsSearch = false;
-            console.log(
-                `Изменение имени продукта с "${product.originalName}" на "${product.name}". Создан новый пользовательский продукт.`
-            );
+
 
             product.originalName = product.name;
         },

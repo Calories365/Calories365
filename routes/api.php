@@ -52,8 +52,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/voice/save-products', [VoiceController::class, 'saveProducts'])->name('voice.saveProducts');
 
         Route::post('/voice/generate-product', [VoiceController::class, 'generateProductData'])->name('voice.generateProduct');
+        Route::get('/voice/generate-product/status', [VoiceController::class, 'generateProductStatus'])->name('voice.generateProduct.status');
 
         Route::post('/voice/search-product', [VoiceController::class, 'searchProduct'])->name('voice.searchProduct');
+
+        Route::get('/voice/status', [VoiceController::class, 'status'])->name('voice.status');
     });
 });
 Route::middleware('check.bot.key')->group(function () {

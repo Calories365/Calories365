@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateProductDataJob;
+use App\Jobs\ProcessVoiceRecordJob;
 use App\Models\Product;
 use App\Services\AudioConversionService;
 use App\Services\ProductService;
@@ -10,6 +12,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -36,7 +39,7 @@ class VoiceController extends Controller
     public function upload(Request $request)
     {
         try {
-
+            // Check subscription before accepting the job
             $res = $this->canTranscribeAudio(Auth::id());
 
             if (! $res['canTranscribeAudio']) {
@@ -49,61 +52,55 @@ class VoiceController extends Controller
             if (! $request->hasFile('audio')) {
                 return response()->json(['success' => false, 'message' => 'Аудиофайл не найден'], 400);
             }
+
             $audioFile = $request->file('audio');
 
-            $fileName = Str::uuid().'.'.$audioFile->getClientOriginalExtension();
+            // Generate a request id (rid) and persist the uploaded file to process in the background
+            $rid = (string) Str::uuid();
+            $extension = $audioFile->getClientOriginalExtension();
+            $fileName = $rid.'.'.$extension;
             $localPath = $audioFile->storeAs('voice_records', $fileName, 'public');
-            $fullPath = Storage::disk('public')->path($localPath);
 
-            [$mp3Local, $mp3Full] = $this->audioConversionService->convertToMp3($localPath, $fullPath);
+            // Prime cache with pending status, so the frontend can poll later
+            Cache::put(
+                'voice:job:'.$rid,
+                [
+                    'status' => 'pending',
+                    'user_id' => Auth::id(),
+                    'created_at' => now()->toISOString(),
+                ],
+                now()->addMinutes(30)
+            );
 
-            $fileForStt = $mp3Full ?: $fullPath;
+            // Dispatch queued job to process audio → transcription → product extraction
+            ProcessVoiceRecordJob::dispatch(
+                userId: Auth::id(),
+                rid: $rid,
+                localPath: $localPath,
+                locale: app()->getLocale(),
+            )->onQueue('AI');
 
-            $text = $this->speechToTextService->convertSpeechToText($fileForStt);
-            Log::info('$transcription: ');
-            Log::info(print_r($text, true));
-            Storage::disk('public')->delete($localPath);
-            if ($mp3Local) {
-                Storage::disk('public')->delete($mp3Local);
-            }
-
-            if (is_array($text) && isset($text['error'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ошибка при расшифровке: '.$text['error'],
-                ], 500);
-            }
-
-            $products = $this->searchProductsFromTranscription($text);
-
-            Log::info('Voice record processed', [
-                'user_id' => Auth::id(),
-                'transcription' => $text,
-                'products_found' => $products,
-            ]);
-
+            // Accept and return rid for polling
             return response()->json([
-                'success' => true,
-                'message' => 'Голосовая запись успешно обработана',
-                'transcription' => $text,
-                'products' => $products,
-            ]);
+                'success' => false,
+                'message' => 'accepted',
+                'rid' => $rid,
+                'poll_after_ms' => 1200,
+            ], 202);
 
         } catch (\Throwable $e) {
+            // Clean up stored file if something goes wrong before enqueuing
             if (isset($localPath)) {
                 Storage::disk('public')->delete($localPath);
             }
-            if (isset($mp3Local)) {
-                Storage::disk('public')->delete($mp3Local);
-            }
 
-            Log::error('Error processing voice record: '.$e->getMessage(), [
+            Log::error('Error enqueuing voice record: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Произошла ошибка при обработке записи: '.$e->getMessage(),
+                'message' => 'Произошла ошибка при постановке записи в очередь: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -126,7 +123,6 @@ class VoiceController extends Controller
 
             if (isset($mealTypeMap[$mealType])) {
                 $mealType = $mealTypeMap[$mealType];
-                Log::info('Meal type converted to English', ['original' => $data['meal_type'], 'converted' => $mealType]);
             }
 
             if (empty($products)) {
@@ -138,8 +134,6 @@ class VoiceController extends Controller
 
             $savedProducts = [];
             foreach ($products as $product) {
-                Log::info('Processing product', $product);
-
                 if (! isset($product['name'])) {
                     Log::warning('Missing name in product data', $product);
 
@@ -169,17 +163,9 @@ class VoiceController extends Controller
                 $productData['active'] = 1;
                 $productData['isGenerated'] = $product['isGenerated'];
 
-                Log::info('product data');
-                Log::info(print_r($productData, true));
-
                 $wasModified = isset($product['isModified']) && $product['isModified'] === true;
 
                 if (! empty($product['product_id']) && ! $wasModified && ! $product['isGenerated']) {
-                    Log::info('Using existing product ID', ['product_id' => $product['product_id']]);
-                    Log::info('Saving product with weight', [
-                        'name' => $product['name'],
-                        'weight' => $product['weight'] ?? 0,
-                    ]);
                     $result = $this->productService->createFoodConsumption([
                         'user_id' => Auth::id(),
                         'product_id' => $product['product_id'],
@@ -187,24 +173,6 @@ class VoiceController extends Controller
                         'quantity' => $product['weight'] ?? 0,
                     ]);
                 } else {
-                    Log::info('Creating new product or saving modified product', [
-                        'name' => $productData['name'],
-                        'wasModified' => $wasModified,
-                        'hasProductId' => ! empty($product['product_id']),
-                    ]);
-
-                    //                    if ($wasModified && ! empty($product['product_id'])) {
-                    Log::info('Creating custom version of existing product', [
-                        'original_id' => $product['product_id'],
-                        'new_values' => [
-                            'calories' => $product['calories'],
-                            'protein' => $product['protein'],
-                            'fats' => $product['fats'],
-                            'carbs' => $product['carbs'],
-                        ],
-                    ]);
-                    //                    }
-
                     $result = $this->productService->createProductWithTranslationsAndConsumption($productData);
                 }
 
@@ -235,7 +203,6 @@ class VoiceController extends Controller
         $productsInfo = [];
         $locale = app()->getLocale();
         $user_id = Auth::id();
-        Log::info(print_r($locale, true));
 
         $suffix = 'грамм';
         switch ($locale) {
@@ -260,8 +227,6 @@ class VoiceController extends Controller
         $products = array_filter($products, function ($item) {
             return trim($item) !== '';
         });
-
-        Log::info('Products from transcription:', ['products' => $products]);
 
         foreach ($products as $product) {
             $product = trim($product);
@@ -307,7 +272,6 @@ class VoiceController extends Controller
         $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
 
         if (is_array($productTranslation) && isset($productTranslation['_rankingScore']) && $productTranslation['_rankingScore'] < 0.6) {
-            Log::info("Продукт не найден (низкий рейтинг): {$productName}");
 
             return null;
         }
@@ -316,7 +280,6 @@ class VoiceController extends Controller
             $product = Product::find($productTranslation['product_id']);
 
             if ($product && $product->calories !== null) {
-                Log::info("Найден продукт '{$productTranslation['name']}', указанное количество: {$quantity} грамм");
 
                 return [
                     'product_translation' => [
@@ -359,60 +322,38 @@ class VoiceController extends Controller
                 ], 400);
             }
 
-            $productName = $request->input('product_name');
+            $productName = (string) $request->input('product_name');
 
-            Log::info('Генерация данных для продукта', ['name' => $productName]);
+            // Create request id and seed cache as pending
+            $rid = (string) Str::uuid();
+            Cache::put(
+                'voice:job:'.$rid,
+                [
+                    'status' => 'pending',
+                    'user_id' => Auth::id(),
+                    'type' => 'product_generate',
+                    'name' => $productName,
+                    'created_at' => now()->toISOString(),
+                ],
+                now()->addMinutes(30)
+            );
 
-            $generatedData = $this->speechToTextService->generateNewProductData($productName);
-
-            Log::info('$generatedData: ');
-            Log::info(print_r($generatedData, true));
-
-            if (is_array($generatedData) && isset($generatedData['error'])) {
-                Log::error('Ошибка при генерации данных продукта', ['error' => $generatedData['error']]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ошибка при генерации данных: '.$generatedData['error'],
-                ], 500);
-            }
-
-            if (! is_string($generatedData)) {
-                Log::error('Неожиданный формат данных от OpenAI', ['data' => $generatedData]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Неожиданный формат данных от API',
-                ], 500);
-            }
-
-            $parsedData = $this->parseGeneratedProductData($generatedData);
-
-            if (! $parsedData) {
-                Log::error('Не удалось распарсить данные продукта', ['raw_data' => $generatedData]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Не удалось распарсить данные продукта',
-                ], 500);
-            }
-
-            Log::info('Сгенерированы данные о продукте', ['product' => $productName, 'data' => $parsedData]);
+            // Dispatch job to generate product data via OpenAI
+            GenerateProductDataJob::dispatch(
+                userId: Auth::id(),
+                rid: $rid,
+                productName: $productName,
+                locale: app()->getLocale(),
+            )->onQueue('AI');
 
             return response()->json([
-                'success' => true,
-                'message' => 'Данные продукта успешно сгенерированы',
-                'data' => [
-                    'name' => $productName,
-                    'calories' => $parsedData['calories'] ?? 0,
-                    'proteins' => $parsedData['proteins'] ?? 0,
-                    'carbohydrates' => $parsedData['carbohydrates'] ?? 0,
-                    'fats' => $parsedData['fats'] ?? 0,
-                    'fibers' => $parsedData['fibers'] ?? 0,
-                ],
-            ]);
+                'success' => false,
+                'message' => 'accepted',
+                'rid' => $rid,
+                'poll_after_ms' => 1000,
+            ], 202);
         } catch (\Exception $e) {
-            Log::error('Ошибка при генерации данных продукта: '.$e->getMessage(), [
+            Log::error('Ошибка постановки генерации продукта в очередь: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -420,7 +361,7 @@ class VoiceController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Произошла ошибка при генерации данных продукта: '.$e->getMessage(),
+                'message' => 'Произошла ошибка при постановке задачи генерации продукта: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -437,56 +378,44 @@ class VoiceController extends Controller
 
             $data = [];
 
-            Log::info('Начало парсинга данных продукта:', ['raw' => $generatedData]);
-
             if (preg_match('/Калории[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['calories'] = floatval($matches[1]);
-                Log::info('Распознаны калории (русский формат):', ['value' => $data['calories']]);
             }
 
             if (preg_match('/Белки[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['proteins'] = floatval($matches[1]);
-                Log::info('Распознаны белки (русский формат):', ['value' => $data['proteins']]);
             }
 
             if (preg_match('/Углеводы[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['carbohydrates'] = floatval($matches[1]);
-                Log::info('Распознаны углеводы (русский формат):', ['value' => $data['carbohydrates']]);
             }
 
             if (preg_match('/Жиры[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['fats'] = floatval($matches[1]);
-                Log::info('Распознаны жиры (русский формат):', ['value' => $data['fats']]);
             }
 
             if (preg_match('/Клетчатка[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['fibers'] = floatval($matches[1]);
-                Log::info('Распознана клетчатка (русский формат):', ['value' => $data['fibers']]);
             }
 
             if (! isset($data['calories']) && preg_match('/Калорії[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['calories'] = floatval($matches[1]);
-                Log::info('Распознаны калории (украинский формат):', ['value' => $data['calories']]);
             }
 
             if (! isset($data['proteins']) && preg_match('/Білки[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['proteins'] = floatval($matches[1]);
-                Log::info('Распознаны белки (украинский формат):', ['value' => $data['proteins']]);
             }
 
             if (! isset($data['carbohydrates']) && preg_match('/Вуглеводи[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['carbohydrates'] = floatval($matches[1]);
-                Log::info('Распознаны углеводы (украинский формат):', ['value' => $data['carbohydrates']]);
             }
 
             if (! isset($data['fats']) && preg_match('/Жири[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['fats'] = floatval($matches[1]);
-                Log::info('Распознаны жиры (украинский формат):', ['value' => $data['fats']]);
             }
 
             if (! isset($data['fibers']) && preg_match('/Клітковина[\s\-]+(\d+\.?\d*)/i', $generatedData, $matches)) {
                 $data['fibers'] = floatval($matches[1]);
-                Log::info('Распознана клетчатка (украинский формат):', ['value' => $data['fibers']]);
             }
 
             if (! isset($data['calories']) && preg_match('/calories[\s\:]+(\d+\.?\d*)/i', $generatedData, $matches)) {
@@ -557,8 +486,6 @@ class VoiceController extends Controller
                 $data['fibers'] = 0;
             }
 
-            Log::info('Результат парсинга данных продукта:', $data);
-
             if (isset($data['calories']) || isset($data['proteins']) || isset($data['fats'])) {
                 return $data;
             }
@@ -576,12 +503,6 @@ class VoiceController extends Controller
     {
         try {
             $generatedData = $this->speechToTextService->generateNewProductData($productName);
-
-            Log::info('Генерация данных для продукта из расшифровки', [
-                'name' => $productName,
-                'quantity' => $quantity,
-                'response' => $generatedData,
-            ]);
 
             if (is_array($generatedData) && isset($generatedData['error'])) {
                 Log::error('Ошибка при генерации данных продукта: '.$generatedData['error']);
@@ -651,21 +572,10 @@ class VoiceController extends Controller
             $userId = Auth::id();
             $locale = app()->getLocale();
 
-            Log::info('Поиск продукта', [
-                'name' => $productName,
-                'user_id' => $userId,
-                'locale' => $locale,
-            ]);
-
             $searchResult = Product::getRawProduct($productName, $userId, $locale);
 
             if ($searchResult) {
                 $rankingScore = $searchResult['_rankingScore'] ?? 0;
-
-                Log::info('Найден продукт', [
-                    'product' => $searchResult,
-                    'ranking_score' => $rankingScore,
-                ]);
 
                 $productId = $searchResult['product_id'] ?? null;
 
@@ -760,8 +670,6 @@ class VoiceController extends Controller
             $response = $client->get($botPanelUrl.'/api/subscription-check/'.$user_id, [
                 'headers' => $headers,
             ]);
-            Log::info('response from sub');
-            Log::info(print_r($response, true));
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
@@ -769,5 +677,104 @@ class VoiceController extends Controller
 
             return ['error' => $e->getMessage()];
         }
+    }
+
+    /**
+     * Возвращает статус обработки голосовой записи и результат из кеша по rid
+     */
+    public function status(Request $request)
+    {
+        $rid = (string) $request->query('rid');
+
+        if (! $rid) {
+            return response()->json([
+                'ready' => false,
+                'status' => 'pending',
+                'message' => 'rid_is_required',
+            ], 400);
+        }
+
+        $key = 'voice:job:'.$rid;
+        $payload = Cache::get($key);
+
+        if (! $payload) {
+            return response()->json([
+                'ready' => false,
+                'status' => 'pending',
+            ], 200);
+        }
+
+        $status = $payload['status'] ?? 'pending';
+
+        if ($status === 'ready') {
+            return response()->json([
+                'ready' => true,
+                'status' => 'ready',
+                'transcription' => $payload['transcription'] ?? null,
+                'products' => $payload['products'] ?? [],
+            ], 200);
+        }
+
+        if ($status === 'failed') {
+            return response()->json([
+                'ready' => false,
+                'status' => 'failed',
+                'message' => $payload['message'] ?? null,
+            ], 200);
+        }
+
+        return response()->json([
+            'ready' => false,
+            'status' => 'pending',
+        ], 200);
+    }
+
+    /**
+     * Возвращает статус генерации КБЖУ для конкретного продукта и результат из кеша по rid
+     */
+    public function generateProductStatus(Request $request)
+    {
+        $rid = (string) $request->query('rid');
+
+        if (! $rid) {
+            return response()->json([
+                'ready' => false,
+                'status' => 'pending',
+                'message' => 'rid_is_required',
+            ], 400);
+        }
+
+        $key = 'voice:job:'.$rid;
+        $payload = Cache::get($key);
+
+        if (! $payload) {
+            return response()->json([
+                'ready' => false,
+                'status' => 'pending',
+            ], 200);
+        }
+
+        $status = $payload['status'] ?? 'pending';
+
+        if ($status === 'ready') {
+            return response()->json([
+                'ready' => true,
+                'status' => 'ready',
+                'product_data' => $payload['product_data'] ?? null,
+            ], 200);
+        }
+
+        if ($status === 'failed') {
+            return response()->json([
+                'ready' => false,
+                'status' => 'failed',
+                'message' => $payload['message'] ?? null,
+            ], 200);
+        }
+
+        return response()->json([
+            'ready' => false,
+            'status' => 'pending',
+        ], 200);
     }
 }
