@@ -828,8 +828,9 @@ export default {
                             </div>
                         </div>
 
+                        <div class="product-details-columns">
                         <div class="product-details">
-                            <!-- Row 1: per 100 grams (editable macros, fixed weight=100) -->
+                            <!-- Left column: per 100 grams (editable macros, fixed weight=100) -->
                             <div class="nutrition-item">
                                 <label>{{ $t("Voice.weight") }}</label>
                                 <input
@@ -881,7 +882,7 @@ export default {
                         </div>
 
                         <div class="product-details">
-                            <!-- Row 2: per user-specified weight (editable weight, computed macros) -->
+                            <!-- Right column: per user-specified weight (editable weight, computed macros) -->
                             <div class="nutrition-item">
                                 <label>{{ $t("Voice.weight") }}</label>
                                 <input
@@ -930,6 +931,7 @@ export default {
                                     disabled
                                 />
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -1407,16 +1409,20 @@ export default {
                 }
             }
 
-            .products-container {
-                h2 {
-                    font-size: 1.3rem;
-                }
+        .products-container {
+            h2 {
+                font-size: 1.3rem;
+            }
 
-                .products-list {
-                    .product-item {
-                        .product-header {
-                            flex-direction: column;
-                            align-items: flex-start;
+            .products-list {
+                .product-item {
+                    .product-details-columns {
+                        // default (desktop/tablet): keep existing stacked rows
+                        display: block;
+                    }
+                    .product-header {
+                        flex-direction: column;
+                        align-items: flex-start;
 
                             .product-name {
                                 width: 100%;
@@ -1454,6 +1460,19 @@ export default {
                 font-size: 1.2rem;
             }
         }
+    }
+}
+
+// Two-column mobile layout for nutrition groups
+@media (max-width: 768px) {
+    .voice-page .voice-container .products-container .products-list .product-item .product-details-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .voice-page .voice-container .products-container .products-list .product-item .product-details-columns .product-details {
+        display: block; // stack 5 fields within each column
     }
 }
 </style>
