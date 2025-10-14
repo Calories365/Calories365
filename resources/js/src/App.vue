@@ -18,14 +18,15 @@ export default {
         const langParam = urlParams.get("lang");
 
         const validLocales = ["en", "ru", "ua"];
-        let userLocale = localStorage.getItem("locale") || "ua";
+        let userLocale = localStorage.getItem("locale");
 
         if (langParam && validLocales.includes(langParam)) {
             userLocale = langParam;
-            localStorage.setItem("locale", langParam);
+            localStorage.setItem("locale", userLocale);
+        } else if (!userLocale || !validLocales.includes(userLocale)) {
+            userLocale = "ua";
+            localStorage.setItem("locale", userLocale);
         }
-
-        localStorage.setItem("locale", langParam);
         return {
             username: "Пена",
             locale: userLocale,
@@ -49,35 +50,41 @@ export default {
         },
     },
     methods: {
+        applyLocale(locale) {
+            this.locale = locale;
+            return this.$store.dispatch(actionTypes.setLocale, {
+                locale,
+                i18n: this.$i18n,
+            });
+        },
         initializeLanguage() {
+            const ensureLocale = () => {
+                const storedLocale =
+                    localStorage.getItem("locale") || this.locale;
+                return this.applyLocale(storedLocale);
+            };
+
             try {
                 this.$store
                     .dispatch("language/fetchLanguageStatus")
                     .then(() => {
-                        this.$store.dispatch(actionTypes.setLocale, {
-                            locale: this.locale,
-                            i18n: this.$i18n,
-                        });
+                        return ensureLocale();
                     })
                     .catch((error) => {
                         console.error(
                             "Error loading language settings:",
                             error
                         );
-                        this.$store.dispatch(actionTypes.setLocale, {
-                            locale: this.locale,
-                            i18n: this.$i18n,
-                        });
+                        return ensureLocale();
                     });
             } catch (error) {
                 console.error("Error in language initialization:", error);
-                this.$store.dispatch(actionTypes.setLocale, {
-                    locale: this.locale,
-                    i18n: this.$i18n,
-                });
-            } finally {
+                ensureLocale();
             }
         },
+    },
+    created() {
+        this.applyLocale(this.locale);
     },
     mounted() {
         this.initializeLanguage();
