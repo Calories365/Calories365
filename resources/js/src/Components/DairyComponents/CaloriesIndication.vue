@@ -50,7 +50,9 @@ export default {
             this.getFeedback(payload).then((data) => {
                 if (!data) return;
                 this.feedbackResponse =
-                    typeof data === "string" ? data : JSON.stringify(data, null, 2);
+                    typeof data === "string"
+                        ? data
+                        : JSON.stringify(data, null, 2);
                 this.isFeedbackModalOpen = true;
             });
         },
@@ -65,7 +67,8 @@ export default {
     <div class="indication-container">
         <ul class="indication-container__list">
             <li class="indication-container__element">
-                {{ localedPart_of_day }}: {{ caloriesPerDayPart }} {{ $t("Diary.KCAL") }}
+                {{ localedPart_of_day }}: {{ caloriesPerDayPart }}
+                {{ $t("Diary.KCAL") }}
                 <span
                     class="info-icon"
                     :class="{ loading: isLoading }"
@@ -88,7 +91,9 @@ export default {
                 </span>
             </li>
             <li class="indication-container__element">
-                {{ $t("Diary.summary") }}: {{ caloriesPerDay }}/{{ currentUser.calories_limit }}
+                {{ $t("Diary.summary") }}: {{ caloriesPerDay }}/{{
+                    currentUser.calories_limit
+                }}
                 {{ $t("Diary.KCAL") }}
                 <span
                     class="info-icon"

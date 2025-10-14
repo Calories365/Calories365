@@ -189,29 +189,49 @@ export default {
                         const { status, data } = response || {};
 
                         // No premium case
-                        if (status === 200 && data?.message === "please_buy_premium") {
+                        if (
+                            status === 200 &&
+                            data?.message === "please_buy_premium"
+                        ) {
                             this.showError(this.$t("Voice.please_buy_premium"));
-                            this.$store.commit("voice/RECORDING_COMPLETE", audioBlob);
+                            this.$store.commit(
+                                "voice/RECORDING_COMPLETE",
+                                audioBlob
+                            );
                             return;
                         }
 
                         // Legacy immediate success response (fallback)
                         if (status === 200 && data?.success) {
                             this.transcription = data.transcription || "";
-                            if (Array.isArray(data.products) && data.products.length > 0) {
+                            if (
+                                Array.isArray(data.products) &&
+                                data.products.length > 0
+                            ) {
                                 this.products = data.products.map((item) => ({
-                                    name: item.product_translation?.name || "Неизвестный продукт",
+                                    name:
+                                        item.product_translation?.name ||
+                                        "Неизвестный продукт",
                                     calories: item.product?.calories || 0,
                                     protein: item.product?.proteins || 0,
                                     fats: item.product?.fats || 0,
                                     carbs: item.product?.carbohydrates || 0,
-                                    weight: item.quantity || item.product?.quantity || 0,
-                                    isGenerated: item.is_generated || item.product_translation?.is_generated || false,
+                                    weight:
+                                        item.quantity ||
+                                        item.product?.quantity ||
+                                        0,
+                                    isGenerated:
+                                        item.is_generated ||
+                                        item.product_translation
+                                            ?.is_generated ||
+                                        false,
                                     product_id: item.product?.id || null,
                                     isModified: false,
                                     nameModified: false,
                                     needsSearch: false,
-                                    originalName: item.product_translation?.name || "Неизвестный продукт",
+                                    originalName:
+                                        item.product_translation?.name ||
+                                        "Неизвестный продукт",
                                     searchedBefore: false,
                                     isGenerating: false,
                                 }));
@@ -219,20 +239,31 @@ export default {
                             } else {
                                 this.products = [];
                             }
-                            this.$store.commit("voice/RECORDING_COMPLETE", audioBlob);
+                            this.$store.commit(
+                                "voice/RECORDING_COMPLETE",
+                                audioBlob
+                            );
                             return;
                         }
 
                         // Accepted → start polling status endpoint
-                        if (status === 202 && data?.message === "accepted" && data?.rid) {
-                            const baseDelay = Number(data.poll_after_ms) || 1000;
+                        if (
+                            status === 202 &&
+                            data?.message === "accepted" &&
+                            data?.rid
+                        ) {
+                            const baseDelay =
+                                Number(data.poll_after_ms) || 1000;
                             await this.pollVoiceStatus(data.rid, baseDelay);
                             return;
                         }
 
                         // Unexpected response
                         this.showError(this.$t("Voice.errors.uploadError"));
-                        this.$store.commit("voice/RECORDING_COMPLETE", audioBlob);
+                        this.$store.commit(
+                            "voice/RECORDING_COMPLETE",
+                            audioBlob
+                        );
                     } catch (error) {
                         console.error("Ошибка при отправке записи:", error);
                         this.showError("Не удалось отправить аудиозапись");
@@ -285,7 +316,10 @@ export default {
             const cap = 8000;
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                const delay = Math.min(cap, Math.round(baseDelay * Math.pow(factor, attempt - 1)));
+                const delay = Math.min(
+                    cap,
+                    Math.round(baseDelay * Math.pow(factor, attempt - 1))
+                );
                 await sleep(delay);
                 try {
                     const resp = await getVoiceStatus(rid);
@@ -293,36 +327,57 @@ export default {
 
                     if (payload?.ready) {
                         this.transcription = payload.transcription || "";
-                        const products = Array.isArray(payload.products) ? payload.products : [];
+                        const products = Array.isArray(payload.products)
+                            ? payload.products
+                            : [];
                         this.products = products.map((item) => ({
-                            name: item.product_translation?.name || "Неизвестный продукт",
+                            name:
+                                item.product_translation?.name ||
+                                "Неизвестный продукт",
                             calories: item.product?.calories || 0,
                             protein: item.product?.proteins || 0,
                             fats: item.product?.fats || 0,
                             carbs: item.product?.carbohydrates || 0,
-                            weight: item.quantity || item.product?.quantity || 0,
-                            isGenerated: item.is_generated || item.product_translation?.is_generated || false,
+                            weight:
+                                item.quantity || item.product?.quantity || 0,
+                            isGenerated:
+                                item.is_generated ||
+                                item.product_translation?.is_generated ||
+                                false,
                             product_id: item.product?.id || null,
                             isModified: false,
                             nameModified: false,
                             needsSearch: false,
-                            originalName: item.product_translation?.name || "Неизвестный продукт",
+                            originalName:
+                                item.product_translation?.name ||
+                                "Неизвестный продукт",
                             searchedBefore: false,
                             isGenerating: false,
                         }));
                         this.saveOriginalValues();
-                        this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                        this.$store.commit(
+                            "voice/RECORDING_COMPLETE",
+                            this.audioBlob
+                        );
                         return;
                     }
 
                     if (payload?.status === "failed") {
-                        const msg = payload?.message || this.$t("Voice.errors.uploadError");
+                        const msg =
+                            payload?.message ||
+                            this.$t("Voice.errors.uploadError");
                         this.showError(msg);
-                        this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                        this.$store.commit(
+                            "voice/RECORDING_COMPLETE",
+                            this.audioBlob
+                        );
                         return;
                     }
                 } catch (e) {
-                    console.error("Ошибка при получении статуса голосовой обработки:", e);
+                    console.error(
+                        "Ошибка при получении статуса голосовой обработки:",
+                        e
+                    );
                     // continue polling with backoff
                 }
             }
@@ -440,14 +495,25 @@ export default {
                         this.products[index].product_id = null;
                     }
                     this.products[index].needsSearch = false;
-                    this.showSuccess(this.$t("Voice.success.dataGenerated", { product: productName }));
+                    this.showSuccess(
+                        this.$t("Voice.success.dataGenerated", {
+                            product: productName,
+                        })
+                    );
                     this.products[index].isGenerating = false;
-                    this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                    this.$store.commit(
+                        "voice/RECORDING_COMPLETE",
+                        this.audioBlob
+                    );
                     return;
                 }
 
                 // Accepted → poll for product data
-                if (status === 202 && data?.message === "accepted" && data?.rid) {
+                if (
+                    status === 202 &&
+                    data?.message === "accepted" &&
+                    data?.rid
+                ) {
                     const base = Number(data.poll_after_ms) || 1000;
                     await this.pollGenerateProductStatus(index, data.rid, base);
                     return;
@@ -456,7 +522,9 @@ export default {
                 // Unexpected
                 throw new Error(this.$t("Voice.errors.generateError"));
             } catch (error) {
-                this.showError(error.message || this.$t("Voice.errors.generateError"));
+                this.showError(
+                    error.message || this.$t("Voice.errors.generateError")
+                );
                 console.error("Ошибка при генерации данных:", error);
                 this.products[index].isGenerating = false;
                 this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
@@ -469,7 +537,10 @@ export default {
             const cap = 8000;
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                const delay = Math.min(cap, Math.round(baseDelay * Math.pow(factor, attempt - 1)));
+                const delay = Math.min(
+                    cap,
+                    Math.round(baseDelay * Math.pow(factor, attempt - 1))
+                );
                 await sleep(delay);
                 try {
                     const resp = await getGenerateProductStatus(rid);
@@ -487,21 +558,36 @@ export default {
                         }
                         this.products[index].needsSearch = false;
 
-                        this.showSuccess(this.$t("Voice.success.dataGenerated", { product: this.products[index].name }));
+                        this.showSuccess(
+                            this.$t("Voice.success.dataGenerated", {
+                                product: this.products[index].name,
+                            })
+                        );
                         this.products[index].isGenerating = false;
-                        this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                        this.$store.commit(
+                            "voice/RECORDING_COMPLETE",
+                            this.audioBlob
+                        );
                         return;
                     }
 
                     if (payload?.status === "failed") {
-                        const msg = payload?.message || this.$t("Voice.errors.generateError");
+                        const msg =
+                            payload?.message ||
+                            this.$t("Voice.errors.generateError");
                         this.showError(msg);
                         this.products[index].isGenerating = false;
-                        this.$store.commit("voice/RECORDING_COMPLETE", this.audioBlob);
+                        this.$store.commit(
+                            "voice/RECORDING_COMPLETE",
+                            this.audioBlob
+                        );
                         return;
                     }
                 } catch (e) {
-                    console.error("Ошибка при получении статуса генерации продукта:", e);
+                    console.error(
+                        "Ошибка при получении статуса генерации продукта:",
+                        e
+                    );
                     // continue polling
                 }
             }
@@ -526,7 +612,9 @@ export default {
             }
 
             // Max weight validation: do not allow saving items > 5000g
-            const hasTooHeavy = this.products.some((p) => Number(p.weight) > 5000);
+            const hasTooHeavy = this.products.some(
+                (p) => Number(p.weight) > 5000
+            );
             if (hasTooHeavy) {
                 this.showError(this.$t("Voice.errors.saveError"));
                 return;
@@ -620,8 +708,6 @@ export default {
                     this.browserSupportsRecording = true;
                 }
             }
-
-
         },
         saveOriginalValues() {
             this.originalProducts = {};
@@ -638,8 +724,6 @@ export default {
                     };
                 }
             });
-
-
         },
         checkModifiedProducts() {
             this.products.forEach((product, index) => {
@@ -654,7 +738,6 @@ export default {
                             product.carbs !== original.carbs)
                     ) {
                         this.products[index].isModified = true;
-
                     }
                 }
             });
@@ -673,7 +756,6 @@ export default {
                         this.products[index].weight !== original.weight)
                 ) {
                     this.products[index].isModified = true;
-
                 }
             } else if (this.products[index].nameModified) {
                 this.products[index].isModified = true;
@@ -695,7 +777,6 @@ export default {
             product.isModified = true;
 
             product.needsSearch = false;
-
 
             product.originalName = product.name;
         },
@@ -814,9 +895,18 @@ export default {
                                     :title="$t('Voice.generateButton')"
                                     :disabled="product.isGenerating"
                                 >
-                                    <FontAwesomeIcon v-if="!product.isGenerating" :icon="faMagic()" />
-                                    <FontAwesomeIcon v-else :icon="faSpinner()" class="fa-spin" />
-                                    <span>{{ $t("Voice.generateButton") }}</span>
+                                    <FontAwesomeIcon
+                                        v-if="!product.isGenerating"
+                                        :icon="faMagic()"
+                                    />
+                                    <FontAwesomeIcon
+                                        v-else
+                                        :icon="faSpinner()"
+                                        class="fa-spin"
+                                    />
+                                    <span>{{
+                                        $t("Voice.generateButton")
+                                    }}</span>
                                 </button>
                                 <button
                                     class="remove-btn"
@@ -829,109 +919,133 @@ export default {
                         </div>
 
                         <div class="product-details-columns">
-                        <div class="product-details">
-                            <!-- Left column: per 100 grams (editable macros, fixed weight=100) -->
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.weight") }}</label>
-                                <input
-                                    type="number"
-                                    :value="100"
-                                    min="0"
-                                    disabled
-                                />
+                            <div class="product-details">
+                                <!-- Left column: per 100 grams (editable macros, fixed weight=100) -->
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.weight") }}</label>
+                                    <input
+                                        type="number"
+                                        :value="100"
+                                        min="0"
+                                        disabled
+                                    />
+                                </div>
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.calories") }}</label>
+                                    <input
+                                        type="number"
+                                        v-model="product.calories"
+                                        min="0"
+                                        @change="onProductChanged(index)"
+                                    />
+                                </div>
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.protein") }}</label>
+                                    <input
+                                        type="number"
+                                        v-model="product.protein"
+                                        min="0"
+                                        step="0.1"
+                                        @change="onProductChanged(index)"
+                                    />
+                                </div>
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.fats") }}</label>
+                                    <input
+                                        type="number"
+                                        v-model="product.fats"
+                                        min="0"
+                                        step="0.1"
+                                        @change="onProductChanged(index)"
+                                    />
+                                </div>
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.carbs") }}</label>
+                                    <input
+                                        type="number"
+                                        v-model="product.carbs"
+                                        min="0"
+                                        step="0.1"
+                                        @change="onProductChanged(index)"
+                                    />
+                                </div>
                             </div>
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.calories") }}</label>
-                                <input
-                                    type="number"
-                                    v-model="product.calories"
-                                    min="0"
-                                    @change="onProductChanged(index)"
-                                />
-                            </div>
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.protein") }}</label>
-                                <input
-                                    type="number"
-                                    v-model="product.protein"
-                                    min="0"
-                                    step="0.1"
-                                    @change="onProductChanged(index)"
-                                />
-                            </div>
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.fats") }}</label>
-                                <input
-                                    type="number"
-                                    v-model="product.fats"
-                                    min="0"
-                                    step="0.1"
-                                    @change="onProductChanged(index)"
-                                />
-                            </div>
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.carbs") }}</label>
-                                <input
-                                    type="number"
-                                    v-model="product.carbs"
-                                    min="0"
-                                    step="0.1"
-                                    @change="onProductChanged(index)"
-                                />
-                            </div>
-                        </div>
 
-                        <div class="product-details">
-                            <!-- Right column: per user-specified weight (editable weight, computed macros) -->
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.weight") }}</label>
-                                <input
-                                    type="number"
-                                    v-model.number="product.weight"
-                                    min="0"
-                                    @change="onProductChanged(index)"
-                                />
+                            <div class="product-details">
+                                <!-- Right column: per user-specified weight (editable weight, computed macros) -->
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.weight") }}</label>
+                                    <input
+                                        type="number"
+                                        v-model.number="product.weight"
+                                        min="0"
+                                        @change="onProductChanged(index)"
+                                    />
+                                </div>
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.calories") }}</label>
+                                    <input
+                                        type="number"
+                                        :value="
+                                            calcPerWeight(
+                                                product.calories,
+                                                product.weight,
+                                                0
+                                            )
+                                        "
+                                        min="0"
+                                        disabled
+                                    />
+                                </div>
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.protein") }}</label>
+                                    <input
+                                        type="number"
+                                        :value="
+                                            calcPerWeight(
+                                                product.protein,
+                                                product.weight,
+                                                1
+                                            )
+                                        "
+                                        min="0"
+                                        step="0.1"
+                                        disabled
+                                    />
+                                </div>
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.fats") }}</label>
+                                    <input
+                                        type="number"
+                                        :value="
+                                            calcPerWeight(
+                                                product.fats,
+                                                product.weight,
+                                                1
+                                            )
+                                        "
+                                        min="0"
+                                        step="0.1"
+                                        disabled
+                                    />
+                                </div>
+                                <div class="nutrition-item">
+                                    <label>{{ $t("Voice.carbs") }}</label>
+                                    <input
+                                        type="number"
+                                        :value="
+                                            calcPerWeight(
+                                                product.carbs,
+                                                product.weight,
+                                                1
+                                            )
+                                        "
+                                        min="0"
+                                        step="0.1"
+                                        disabled
+                                    />
+                                </div>
                             </div>
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.calories") }}</label>
-                                <input
-                                    type="number"
-                                    :value="calcPerWeight(product.calories, product.weight, 0)"
-                                    min="0"
-                                    disabled
-                                />
-                            </div>
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.protein") }}</label>
-                                <input
-                                    type="number"
-                                    :value="calcPerWeight(product.protein, product.weight, 1)"
-                                    min="0"
-                                    step="0.1"
-                                    disabled
-                                />
-                            </div>
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.fats") }}</label>
-                                <input
-                                    type="number"
-                                    :value="calcPerWeight(product.fats, product.weight, 1)"
-                                    min="0"
-                                    step="0.1"
-                                    disabled
-                                />
-                            </div>
-                            <div class="nutrition-item">
-                                <label>{{ $t("Voice.carbs") }}</label>
-                                <input
-                                    type="number"
-                                    :value="calcPerWeight(product.carbs, product.weight, 1)"
-                                    min="0"
-                                    step="0.1"
-                                    disabled
-                                />
-                            </div>
-                        </div>
                         </div>
                     </div>
                 </div>

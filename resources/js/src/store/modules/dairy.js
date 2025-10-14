@@ -122,9 +122,7 @@ const mutations = {
         state.isSybmiting = true;
     },
     [mutationTypes.getCurrentProductsSuccess](state, payload) {
-        payload.forEach((product) => {
-            state.currentProducts.push(product);
-        });
+        state.currentProducts = payload;
         state.isSybmiting = false;
     },
     [mutationTypes.getCurrentProductsFailure](state, payload) {

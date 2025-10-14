@@ -32,7 +32,6 @@ export const saveVoiceProducts = async (products, mealType) => {
             );
             product.weight = 100;
         } else {
-
         }
     });
 
@@ -41,7 +40,6 @@ export const saveVoiceProducts = async (products, mealType) => {
             products,
             meal_type: mealType,
         });
-
 
         return response.data;
     } catch (error) {
@@ -55,11 +53,9 @@ export const saveVoiceProducts = async (products, mealType) => {
 
 export const generateProductData = async (productName) => {
     try {
-
         const response = await axios.post("/api/voice/generate-product", {
             product_name: productName,
         });
-
 
         return response;
     } catch (error) {
@@ -85,7 +81,9 @@ export const getGenerateProductStatus = async (rid) => {
 
 export const getVoiceStatus = async (rid) => {
     try {
-        const response = await axios.get("/api/voice/status", { params: { rid } });
+        const response = await axios.get("/api/voice/status", {
+            params: { rid },
+        });
         return response;
     } catch (error) {
         console.error("Error get voice status:", error);
@@ -95,11 +93,9 @@ export const getVoiceStatus = async (rid) => {
 
 export const searchProduct = async (productName) => {
     try {
-
         const response = await axios.post("/api/voice/search-product", {
             product_name: productName,
         });
-
 
         return response.data;
     } catch (error) {
