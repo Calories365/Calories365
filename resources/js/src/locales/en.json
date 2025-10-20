@@ -88,7 +88,8 @@
         "AgreeToTermsPart2": "",
         "CancelPremium": "Cancel Premium",
         "TermsOfService2": "Terms of Service",
-        "CaloriesDesc": "Demonstration of Calories365"
+        "CaloriesDesc": "Demonstration of Calories365",
+        "PaymentUnavailable" : "Payment is temporarily unavailable."
     },
 
     "calculationResult": {

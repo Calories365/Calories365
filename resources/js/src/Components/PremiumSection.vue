@@ -87,40 +87,42 @@ export default {
 </script>
 
 <template>
-    <div class="container premium-content">
-        <div v-if="isHomePage" class="premium_home-page-content">
-            <h2 class="premium_text">{{ $t("Home.PremiumTitle") }}</h2>
-            <p v-if="!isPremium">{{ $t("Home.PremiumDesc") }}</p>
-            <p v-else>{{ $t("Home.PremiumAlreadyHaveDesc") }}</p>
-        </div>
-        <div
-            class="top-info_premium"
-            :class="{ 'top-info_premium-cabinet': !isHomePage }"
-        >
-            <div v-if="!isPremium">
-                <span class="top-info_premium_text" @click="buyPremium">
-                    {{ $t("Home.BuyPremium") }}
-                </span>
-                <label>
-                    <input type="checkbox" v-model="termsAgreed" />
-                    {{ $t("Home.AgreeToTermsPart1") }}
-                    <router-link :to="{ name: 'termsOfService' }">
-                        {{ $t("Home.TermsOfService2") }}
-                    </router-link>
-                    {{ $t("Home.AgreeToTermsPart2") }}
-                </label>
-            </div>
-            <div v-else>
-                <span class="top-info_premium_text_bought">
-                    {{ $t("Home.Premium") }}
-                </span>
-                <span class="cancel-premium" @click="cancelPremium">
-                    {{ $t("Home.CancelPremium") }}
-                </span>
-            </div>
-        </div>
-    </div>
+<!--    <div class="container premium-content">-->
+<!--        <div v-if="isHomePage" class="premium_home-page-content">-->
+<!--            <h2 class="premium_text">{{ $t("Home.PremiumTitle") }}</h2>-->
+<!--            <p v-if="!isPremium">{{ $t("Home.PremiumDesc") }}</p>-->
+<!--            <p v-else>{{ $t("Home.PremiumAlreadyHaveDesc") }}</p>-->
+<!--        </div>-->
+<!--        <div-->
+<!--            class="top-info_premium"-->
+<!--            :class="{ 'top-info_premium-cabinet': !isHomePage }"-->
+<!--        >-->
+<!--            <div v-if="!isPremium">-->
+<!--                <span class="top-info_premium_text" @click="buyPremium">-->
+<!--                    {{ $t("Home.BuyPremium") }}-->
+<!--                </span>-->
+<!--                <label>-->
+<!--                    <input type="checkbox" v-model="termsAgreed" />-->
+<!--                    {{ $t("Home.AgreeToTermsPart1") }}-->
+<!--                    <router-link :to="{ name: 'termsOfService' }">-->
+<!--                        {{ $t("Home.TermsOfService2") }}-->
+<!--                    </router-link>-->
+<!--                    {{ $t("Home.AgreeToTermsPart2") }}-->
+<!--                </label>-->
+<!--            </div>-->
+<!--            <div v-else>-->
+<!--                <span class="top-info_premium_text_bought">-->
+<!--                    {{ $t("Home.Premium") }}-->
+<!--                </span>-->
+<!--                <span class="cancel-premium" @click="cancelPremium">-->
+<!--                    {{ $t("Home.CancelPremium") }}-->
+<!--                </span>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+    {{ $t("Home.PaymentUnavailable") }}
 </template>
+
 
 <style scoped lang="scss">
 .premium-content {

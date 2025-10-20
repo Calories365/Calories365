@@ -88,7 +88,8 @@
         "AgreeToTermsPart2": "",
         "CancelPremium": "Скасувати Преміум",
         "TermsOfService2": "Умовами використання",
-        "CaloriesDesc": "Демонстрація Calories365"
+        "CaloriesDesc": "Демонстрація Calories365",
+        "PaymentUnavailable" : "Оплата тимчасово не доступна."
     },
     "calculationResult": {
         "calculatorSectionHeadOne": "Результати",
