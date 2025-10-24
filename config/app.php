@@ -86,7 +86,7 @@ return [
     |
     */
 
-    'locale' => 'ua',
+    'locale' => 'en',
 
     /*
     |--------------------------------------------------------------------------
@@ -99,7 +99,7 @@ return [
     |
     */
 
-    'fallback_locale' => 'ua',
+    'fallback_locale' => 'en',
 
     /*
     |--------------------------------------------------------------------------
@@ -172,6 +172,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
+        App\Providers\Filament\Admin365PanelProvider::class,
         App\Providers\RouteServiceProvider::class,
     ])->toArray(),
 
