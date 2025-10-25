@@ -1,12 +1,14 @@
 # Bot Panel
 
-Сервісний шар для обробки Telegram-ботів, реалізований на основі патерна «Стратегія» та лінивої ініціалізації обробників через фабрики (замикання). Це забезпечує високу гнучкість і модульність архітектури.
+Сервісний шар для Telegram-ботів реалізований на патерні «Стратегія», з ледачим створенням обробників через фабрики (замикання) та виконанням усіх запитів у чергах Horizon. Така схема забезпечує передбачувану структуру, розширюваність і стабільну продуктивність.
 
 ## Основна ідея
 
 ### 1. Контролер і центральний обробник
 
-Вхідні запити від Telegram через Webhook спочатку потрапляють у контролер, після чого передаються до центрального обробника — [`TelegramHandler`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php). Тут запит проходить первинну обробку за допомогою middleware, реалізованих через Laravel Pipeline. Middleware виконують задачі логування, фільтрації та авторизації до того, як запит буде спрямований до конкретної стратегії.
+Webhook обробляє [`BotController`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Http/Controllers/BotController.php), який формує payload і ставить job [`ProcessTelegramUpdate`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Jobs/ProcessTelegramUpdate.php) у чергу `telegram`, що обслуговується Horizon. Усередині job управління передається центральному обробнику — [`TelegramHandler`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php).
+
+На цьому етапі запит проходить первинну обробку через middleware, реалізовані за допомогою Laravel Pipeline. Вони виконують логування, фільтрацію та авторизацію перед передачею запиту конкретній стратегії.
 
 ### 2. Стратегії
 
@@ -81,6 +83,10 @@ protected function getMessageHandlers(): array
 ```
 
 Також стратегії можуть використовувати додаткові методи та утиліти, такі як `Utilities::applySynonyms()`, для налаштування команд і підвищення зручності взаємодії з користувачем.
+
+### 5. Стійкість обробки
+
+Laravel-job [`ProcessTelegramUpdate`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Jobs/ProcessTelegramUpdate.php) гарантує, що кожен апдейт Telegram обробляється лише один раз і не запускається повторно у паралельних воркерах. Завдання виконуються у виділеній черзі з rate-limit, коректно відкладаються у разі `retry_after`, а помилки логуються та передаються далі для моніторингу.
 
 ## Переваги архітектури
 

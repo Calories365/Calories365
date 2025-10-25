@@ -1,12 +1,14 @@
 # Bot Panel
 
-A service layer for handling Telegram bots, implemented using the **Strategy** pattern with lazy handler initialization via factories (closures). This ensures high flexibility and modularity of the architecture.
+The service layer for Telegram bots is implemented using the Strategy pattern, with lazy handler creation via factories (closures) and processing of all requests through Horizon queues. This approach ensures a predictable structure, extensibility, and stable performance.
 
 ## Core Idea
 
 ### 1. Controller and Central Handler
 
-Incoming Telegram Webhook requests first reach the controller, after which they are forwarded to the central handler — [`TelegramHandler`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php). Here, the request undergoes initial processing via middleware implemented through the Laravel Pipeline. The middleware handles logging, filtering, and authorization before the request is routed to a specific strategy.
+The webhook is handled by [`BotController`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Http/Controllers/BotController.php), which builds the payload and dispatches the [`ProcessTelegramUpdate`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Jobs/ProcessTelegramUpdate.php) job to the `telegram` queue managed by Horizon. Inside the job, control is passed to the central handler — [`TelegramHandler`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php).
+
+At this stage, the request goes through initial processing via middleware implemented using Laravel Pipeline. These middleware handle logging, filtering, and authorization before the request is routed to the specific strategy.
 
 ### 2. Strategies
 
@@ -82,6 +84,10 @@ protected function getMessageHandlers(): array
 
 Strategies can also use additional methods and utilities, such as `Utilities::applySynonyms()`, to configure commands and enhance user interaction.
 
+### 5. Processing Reliability
+
+The Laravel job [`ProcessTelegramUpdate`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Jobs/ProcessTelegramUpdate.php) ensures that each Telegram update is processed exactly once and is not executed again in parallel workers. Jobs run in a dedicated queue with rate limiting, are properly deferred on `retry_after`, and all errors are logged and propagated for monitoring.
+
 ## Architecture Advantages
 
 * **Flexibility**: easily add or modify handlers for each bot.
@@ -89,4 +95,3 @@ Strategies can also use additional methods and utilities, such as `Utilities::ap
 * **Scalability**: rapidly scale and introduce new commands and message types.
 
 Thanks to this approach, the project can be developed and maintained efficiently without touching the core structure, enabling the creation of Telegram bots with diverse functionality within a single application.
-

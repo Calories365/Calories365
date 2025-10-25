@@ -44,7 +44,7 @@ A calendar grid shows daily kcal intake and whether you exceeded or under-shot y
 
 ### 2.1 Backend Architecture for Telegram Bots
 
-The Telegram bot lives in a separate app (“Bot Panel”), acting as an admin panel and providing:
+The Telegram bot runs in a separate application (“Bot Panel”), acts as an admin panel, and all Telegram requests are processed through Horizon queues. The application provides:
 
 * management and configuration of Telegram bots;
 * monitoring of user and bot activity;
