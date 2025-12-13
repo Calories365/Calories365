@@ -96,5 +96,5 @@ Details: see [README on Docker configs](https://github.com/Calories365/Configs/b
 ## 5. Additional Tools
 
 * Payments via **WayForPay**.
-* Authentication through **OAuth** (Google).
+* Authentication through **OAuth** (Google). The project is temporarily running on the .online domain instead of .com. As a result, OAuth authentication is temporarily unavailable.
 * Code quality enforced by **Larastan**, **Laravel Pint** and the JS formatter **Prettier**.
