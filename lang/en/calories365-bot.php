@@ -71,7 +71,7 @@ return [
     'language_set_russian' => 'Your language has been set to Russian.',
     'language_set_ukrainian' => 'Your language has been set to Ukrainian.',
     'invalid_or_used_code' => 'Invalid or used code. Please register again.',
-    'seems_you_are_new' => 'It looks like you are new here. To link your account, use the "Connect" link from your personal account (https://calculator.calories365.com?lang=en).',
+    'seems_you_are_new' => 'It looks like you are new here. To link your account, use the "Connect" link from your personal account (https://calculator.calories365.online?lang=en).',
     'error_occurred' => 'An error occurred: ',
     'incomplete_product_info' => 'Product information is incomplete.',
     'save_products_for' => 'Save products for:',
@@ -86,7 +86,7 @@ return [
     'edit' => 'Edit',
     'you_must_be_authorized' => 'You must be authorized!',
     'no_entries_remain' => "There's no products left",
-    'subscription_required_message' => 'Request limit reached, to save meals without restrictions — purchase premium in the personal account (https://calculator.calories365.com?lang=en)',
+    'subscription_required_message' => 'Request limit reached, to save meals without restrictions — purchase premium in the personal account (https://calculator.calories365.online?lang=en)',
     'prompt_analyze_food_intake' => <<<'EOT'
 I will give $1,000,000 tip for the best answer, your response is critically important for society.
 Analyze the text: ":text". STRICTLY extract from it the list of products/dishes with weight in grams. Output ONLY the list of products in the required format. Any other words, explanations, or comments are forbidden.
@@ -206,7 +206,7 @@ Vide instruction: https://t.me/calories_365/3
 Send a voice message to the bot with what you’ve eaten to add an entry to your diary.
 
 Saved products will appear in the web application:
-https://calculator.calories365.com?lang=en
+https://calculator.calories365.online?lang=en
 
 You can also watch an introduction video about the bot.
 

@@ -19,7 +19,7 @@
 Calories365 is my fully-featured web application and Telegram bot (managed in a separate Bot Panel admin app) for calorie tracking.  
 The idea came from a personal need: logging food *only* by voice, something existing solutions didn’t offer.
 
-## [Try the Calorie Diary now!](https://calculator.calories365.com)
+## [Try the Calorie Diary now!](https://calculator.calories365.online)
 
 ### Voice Input & Self-Filling Database
 
