@@ -19,7 +19,7 @@
 Calories365 is my fully-featured web application and Telegram bot (managed in a separate Bot Panel admin app) for calorie tracking.  
 The idea came from a personal need: logging food *only* by voice, something existing solutions didn’t offer.
 
-## [Try the Calorie Diary now!](https://calculator.calories365.online)
+## [Try the Calorie Diary now!](https://calculator.calories365.com)
 
 ### Voice Input & Self-Filling Database
 
@@ -96,5 +96,5 @@ Details: see [README on Docker configs](https://github.com/Calories365/Configs/b
 ## 5. Additional Tools
 
 * Payments via **WayForPay**.
-* Authentication through **OAuth** (Google). The project is temporarily running on the .online domain instead of .com. As a result, OAuth authentication is temporarily unavailable.
+* Authentication through **OAuth** (Google).
 * Code quality enforced by **Larastan**, **Laravel Pint** and the JS formatter **Prettier**.
