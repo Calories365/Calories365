@@ -123,20 +123,36 @@ class Product extends Model
             $res = $client->index('products')->search($query, [
                 'showRankingScore' => true,
                 'filter' => $filter,
-                'limit' => 1,
+                'limit' => 5,
             ]);
 
             $hits = $res->getHits();
             if (empty($hits)) {
-
                 return false;
             }
 
-            usort($hits, function ($a, $b) use ($user_id) {
-                $scoreA = $a['_rankingScore'] ?? 0;
-                $scoreB = $b['_rankingScore'] ?? 0;
+            $queryNorm = mb_strtolower(trim($query));
+            $queryWordCount = count(preg_split('/\s+/', $queryNorm));
 
-                if ($scoreA !== $scoreB) {
+            foreach ($hits as &$hit) {
+                $nameNorm = mb_strtolower(trim($hit['name']));
+                $meiliScore = $hit['_rankingScore'] ?? 0;
+
+                if ($nameNorm === $queryNorm) {
+                    $hit['_adjustedScore'] = $meiliScore + 0.1;
+                } else {
+                    $nameWordCount = count(preg_split('/\s+/', $nameNorm));
+                    $wordRatio = min(1.0, $queryWordCount / max($nameWordCount, 1));
+                    $hit['_adjustedScore'] = $meiliScore * $wordRatio;
+                }
+            }
+            unset($hit);
+
+            usort($hits, function ($a, $b) use ($user_id) {
+                $scoreA = $a['_adjustedScore'] ?? 0;
+                $scoreB = $b['_adjustedScore'] ?? 0;
+
+                if ($scoreA <> $scoreB) {
                     return $scoreB <=> $scoreA;
                 }
 
@@ -147,9 +163,9 @@ class Product extends Model
             });
 
             $best = $hits[0];
-            $ranking = $best['_rankingScore'] ?? 0;
+            $best['_rankingScore'] = $best['_adjustedScore'];
 
-            return $ranking ? $best : false;
+            return ($best['_rankingScore'] ?? 0) > 0 ? $best : false;
 
         } catch (\Throwable $e) {
             Log::error('getRawProduct error: '.$e->getMessage(), [
