@@ -132,7 +132,7 @@ class Product extends Model
             }
 
             $queryNorm = mb_strtolower(trim($query));
-            $queryWordCount = count(preg_split('/\s+/', $queryNorm));
+            $queryWordCount = count(preg_split('/\s+/', $queryNorm, -1, PREG_SPLIT_NO_EMPTY));
 
             foreach ($hits as &$hit) {
                 $nameNorm = mb_strtolower(trim($hit['name']));
@@ -141,9 +141,14 @@ class Product extends Model
                 if ($nameNorm === $queryNorm) {
                     $hit['_adjustedScore'] = $meiliScore + 0.1;
                 } else {
-                    $nameWordCount = count(preg_split('/\s+/', $nameNorm));
-                    $wordRatio = min(1.0, $queryWordCount / max($nameWordCount, 1));
-                    $hit['_adjustedScore'] = $meiliScore * $wordRatio;
+                    $nameWordCount = count(preg_split('/\s+/', $nameNorm, -1, PREG_SPLIT_NO_EMPTY));
+
+                    if ($queryWordCount === 1 && $nameWordCount > 1) {
+                        $wordRatio = 1.0 / max($nameWordCount, 1);
+                        $hit['_adjustedScore'] = $meiliScore * $wordRatio;
+                    } else {
+                        $hit['_adjustedScore'] = $meiliScore;
+                    }
                 }
             }
             unset($hit);
