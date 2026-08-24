@@ -59,6 +59,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/voice/status', [VoiceController::class, 'status'])->name('voice.status');
     });
 });
+Route::post('/telegram/web-app-auth', [\App\Http\Controllers\TelegramWebAppController::class, 'auth'])
+    ->middleware('throttle:30,1')
+    ->name('telegram.webApp.auth');
+
 Route::middleware('check.bot.key')->group(function () {
     Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::post('/caloriesEndPoint', [\App\Http\Controllers\CaloriesAPIBotController::class, 'storeFiltered'])

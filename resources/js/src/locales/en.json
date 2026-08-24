@@ -498,5 +498,9 @@
     "CookieBanner": {
         "Cookies": "We use cookies to improve your experience.",
         "Approve": "Accept"
+    },
+    "MiniApp": {
+        "authError": "Could not sign you in through Telegram. Please try again.",
+        "retry": "Try again"
     }
 }

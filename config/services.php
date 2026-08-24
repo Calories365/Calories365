@@ -38,4 +38,17 @@ return [
     'telegram_bot_url' => env('TELEGRAM_BOT_URL', 'https://t.me/Calories365Test_bot'),
     'academic_telegram_bot_url' => env('ACADEMIC_TELEGRAM_BOT_URL', 'https://t.me/Calories365KNU_bot'),
     'bot_api_key' => env('BOT_API_KEY', ''),
+
+    'bot_panel' => [
+        'url' => env('BOT_PANEL_URL'),
+        'key' => env('BOT_API_KEY'),
+        'host' => env('BOT_HOST'),
+    ],
+
+    'telegram_mini_app' => [
+        // Which bot signed the initData; null lets the panel try every active bot.
+        'bot' => env('TELEGRAM_MINI_APP_BOT'),
+        // Telegram gives us no email, so accounts opened from the Mini App get one here.
+        'email_domain' => env('TELEGRAM_MINI_APP_EMAIL_DOMAIN', 'telegram.calories365.local'),
+    ],
 ];

@@ -9,6 +9,10 @@ import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vu
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
 import PremiumNotice from "@/Components/PremiumNotice.vue";
 import CookieBanner from "./Components/CookieBanner.vue";
+import MiniAppTabBar from "@/Components/MiniApp/MiniAppTabBar.vue";
+import MiniAppAuthError from "@/Components/MiniApp/MiniAppAuthError.vue";
+import { isMiniApp } from "@/telegram/miniApp.js";
+import { getterTypes } from "@/store/modules/auth.js";
 
 library.add(faAngleDown);
 
@@ -30,9 +34,12 @@ export default {
         return {
             username: "Пена",
             locale: userLocale,
+            isMiniApp: isMiniApp(),
         };
     },
     components: {
+        MiniAppAuthError,
+        MiniAppTabBar,
         CookieBanner,
         CaloriesSuccessNotification,
         CaloriesErrorNotification,
@@ -42,6 +49,13 @@ export default {
         PremiumNotice,
     },
     computed: {
+        // Telegram signs the visitor in before the app mounts, so a logged-out
+        // Mini App means that handshake failed.
+        miniAppAuthFailed() {
+            return (
+                this.isMiniApp && !this.$store.getters[getterTypes.isLoggedIn]
+            );
+        },
         successMessage() {
             return this.$store.getters.isSuccess;
         },
@@ -92,7 +106,7 @@ export default {
 };
 </script>
 <template>
-    <div class="page-wrapper">
+    <div class="page-wrapper" :class="{ 'page-wrapper--mini-app': isMiniApp }">
         <calories-success-notification v-if="successMessage">
             {{ successMessage }}
         </calories-success-notification>
@@ -101,17 +115,22 @@ export default {
             {{ errorMessage }}
         </calories-error-notification>
 
-        <calories-header-v2 />
+        <calories-header-v2 v-if="!isMiniApp" />
 
-        <premium-notice />
+        <!-- Its links point at the landing page, which the Mini App does not show. -->
+        <premium-notice v-if="!isMiniApp" />
 
-        <cookie-banner />
+        <cookie-banner v-if="!isMiniApp" />
 
-        <main id="primary" class="main-wrapper">
+        <mini-app-auth-error v-if="miniAppAuthFailed" />
+
+        <main v-else id="primary" class="main-wrapper">
             <article class="main-article">
                 <router-view />
             </article>
         </main>
+
+        <mini-app-tab-bar v-if="isMiniApp && !miniAppAuthFailed" />
     </div>
 </template>
 
@@ -120,6 +139,17 @@ export default {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+}
+
+/* Telegram draws its own header, and the tab bar sits on top of the content. */
+.page-wrapper--mini-app {
+    min-height: var(--tg-viewport-height, 100vh);
+    background: var(--tg-theme-bg-color, transparent);
+
+    .main-wrapper {
+        margin-top: 0;
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    }
 }
 
 .main-wrapper {

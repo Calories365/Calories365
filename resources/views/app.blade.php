@@ -7,6 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="secure-cookie" content="{{ config('session.secure_cookie') ? 'true' : 'false' }}">
     <title>Calories 365</title>
+    {{-- Must run before the SPA boots: it is what makes window.Telegram.WebApp available. --}}
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     @vite('resources/js/app.js')
     @vite('resources/css/app.css')
 

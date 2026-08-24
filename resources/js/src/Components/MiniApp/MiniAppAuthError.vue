@@ -1,0 +1,47 @@
+<script>
+export default {
+    name: "MiniAppAuthError",
+    methods: {
+        retry() {
+            window.location.reload();
+        },
+    },
+};
+</script>
+
+<template>
+    <div class="mini-app-auth-error">
+        <p class="mini-app-auth-error_text">{{ $t("MiniApp.authError") }}</p>
+        <button class="mini-app-auth-error_button" @click="retry">
+            {{ $t("MiniApp.retry") }}
+        </button>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.mini-app-auth-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    min-height: 60vh;
+    padding: 24px;
+    text-align: center;
+
+    &_text {
+        color: var(--tg-theme-text-color, #666666);
+        font-size: 16px;
+    }
+
+    &_button {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        background: var(--tg-theme-button-color, #{$main-color});
+        color: var(--tg-theme-button-text-color, #ffffff);
+        font-size: 15px;
+        cursor: pointer;
+    }
+}
+</style>

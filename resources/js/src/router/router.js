@@ -3,6 +3,7 @@ import routes from "./routes.js";
 import store from "@/store/store.js";
 import { getterTypes } from "@/store/modules/auth.js";
 import i18n from "@/i18n.js";
+import { isMiniApp } from "@/telegram/miniApp.js";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -16,7 +17,16 @@ const router = createRouter({
     routes,
 });
 
+const miniApp = isMiniApp();
+
 router.beforeEach((to, from, next) => {
+    // Inside Telegram the marketing pages and the login form have no place:
+    // the visitor is already signed in by the time the app mounts.
+    if (miniApp && (to.name === "home" || to.meta.needNotAuth)) {
+        next({ name: "diary" });
+        return;
+    }
+
     if (store.state.auth.isLoading) {
         const unwatch = store.watch(
             (state) => state.auth.isLoading,
@@ -34,7 +44,7 @@ router.beforeEach((to, from, next) => {
             } else {
                 const message = i18n.global.t("Notification.Error.NeedAuth");
                 store.dispatch("setError", message, { root: true });
-                next({ name: "login" });
+                next(miniApp ? false : { name: "login" });
             }
         } else if (to.meta.needNotAuth) {
             if (!store.getters[getterTypes.isLoggedIn]) {
