@@ -188,19 +188,6 @@ export default {
                         const response = await this.voiceUploadRecording();
                         const { status, data } = response || {};
 
-                        // No premium case
-                        if (
-                            status === 200 &&
-                            data?.message === "please_buy_premium"
-                        ) {
-                            this.showError(this.$t("Voice.please_buy_premium"));
-                            this.$store.commit(
-                                "voice/RECORDING_COMPLETE",
-                                audioBlob
-                            );
-                            return;
-                        }
-
                         // Legacy immediate success response (fallback)
                         if (status === 200 && data?.success) {
                             this.transcription = data.transcription || "";
@@ -266,7 +253,12 @@ export default {
                         );
                     } catch (error) {
                         console.error("Ошибка при отправке записи:", error);
-                        this.showError("Не удалось отправить аудиозапись");
+                        // 429: too many recordings in a row (spam guard, no paid limit).
+                        this.showError(
+                            error.response?.status === 429
+                                ? this.$t("Voice.rate_limited")
+                                : "Не удалось отправить аудиозапись"
+                        );
                         this.$store.commit(
                             "voice/RECORDING_COMPLETE",
                             audioBlob

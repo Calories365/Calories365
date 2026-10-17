@@ -44,15 +44,16 @@ class VoiceUploadTest extends TestCase
             && $request->hasHeader('X-Api-Key', 'testing-bot-key'));
     }
 
-    public function test_a_user_over_the_limit_is_asked_to_buy_premium(): void
+    public function test_recording_too_often_is_refused_as_rate_limited(): void
     {
         Http::fake([self::PANEL.'/api/subscription-check/*' => Http::response(['canTranscribeAudio' => false])]);
 
         $this->upload()
-            ->assertOk()
-            ->assertJsonPath('message', 'please_buy_premium');
+            ->assertStatus(429)
+            ->assertJsonPath('message', 'voice_rate_limited');
 
         Queue::assertNothingPushed();
+        $this->assertSame([], Storage::disk('public')->allFiles());
     }
 
     public function test_an_unreachable_panel_is_reported_as_unavailable_not_as_a_spent_limit(): void

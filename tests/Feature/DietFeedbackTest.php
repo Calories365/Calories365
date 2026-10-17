@@ -29,7 +29,7 @@ class DietFeedbackTest extends TestCase
 
         Http::preventStrayRequests();
 
-        $this->user = User::factory()->create(['premium_until' => now()->addMonth()]);
+        $this->user = User::factory()->create();
 
         $product = Product::create([
             'calories' => 330, 'proteins' => 12, 'carbohydrates' => 62, 'fats' => 3, 'fibers' => 10,
@@ -107,6 +107,18 @@ class DietFeedbackTest extends TestCase
 
         Queue::assertPushed(GenerateDietFeedbackJob::class);
         $this->assertSame('pending', DietFeedback::findBySignature($this->user->id, self::DATE, null, $signature)->status);
+    }
+
+    public function test_feedback_does_not_require_premium(): void
+    {
+        Queue::fake();
+        $this->user->forceFill(['premium_until' => null])->save();
+
+        $this->actingAs($this->user)
+            ->getJson('/api/getFeedback?date='.self::DATE)
+            ->assertStatus(202);
+
+        Queue::assertPushed(GenerateDietFeedbackJob::class);
     }
 
     private function pendingSignature(): string

@@ -14,9 +14,6 @@ class FeedbackController extends Controller
     public function index(DateValidationRequest $request): JsonResponse
     {
         $user = $request->user();
-        if (! $user->isPremium()) {
-            return response()->json(['success' => false, 'message' => 'buy_premium_for_this_func'], 402);
-        }
 
         $date = $request->validated()['date'];
         $partOfDay = $request->input('part_of_day');

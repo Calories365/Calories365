@@ -456,7 +456,7 @@
         "saveLunch": "Save to Lunch",
         "saveDinner": "Save to Dinner",
         "cancel": "Cancel",
-        "please_buy_premium": "Your free trial has ended, please purchase premium!",
+        "rate_limited": "Too many recordings in a row. Please try again a little later.",
         "premiumNoticeStart": "in the free version, you can use the",
         "premiumNoticeAssistant": "voice assistant",
         "premiumNoticeMiddle": "only 10 times; for continuous use, purchase",

@@ -51,11 +51,12 @@ class VoiceController extends Controller
                 ], 503);
             }
 
+            // No paid limit: the panel refuses only when the account records too often.
             if (! $allowed) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'please_buy_premium',
-                ], 200);
+                    'message' => 'voice_rate_limited',
+                ], 429);
             }
 
             if (! $request->hasFile('audio')) {
