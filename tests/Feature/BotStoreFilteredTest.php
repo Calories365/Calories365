@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\User;
-use App\Services\ProductMatcher;
+use App\Services\ProductCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,10 +29,10 @@ class BotStoreFilteredTest extends TestCase
         $this->baked = Product::create(['calories' => 191, 'proteins' => 23, 'carbohydrates' => 0, 'fats' => 11, 'fibers' => 0]);
     }
 
-    public function test_items_are_matched_together_and_keep_the_answer_shape(): void
+    public function test_items_are_found_together_and_keep_the_answer_shape(): void
     {
-        $this->mock(ProductMatcher::class, function ($mock) {
-            $mock->shouldReceive('match')->once()
+        $this->mock(ProductCatalog::class, function ($mock) {
+            $mock->shouldReceive('find')->once()
                 ->with(['Нога запечённая куриная', 'Гречка варёная'], $this->user->id, 'ru')
                 ->andReturn([
                     ['id' => 12, 'product_id' => $this->baked->id, 'locale' => 'ru', 'name' => 'куриная ножка в духовке'],
@@ -56,10 +56,10 @@ class BotStoreFilteredTest extends TestCase
             ->assertJsonPath('products.1.quantity_grams', 150);
     }
 
-    public function test_an_item_without_a_quantity_is_not_sent_to_the_matcher(): void
+    public function test_an_item_without_a_quantity_is_not_looked_up(): void
     {
-        $this->mock(ProductMatcher::class, function ($mock) {
-            $mock->shouldReceive('match')->once()->with(['Гречка варёная'], $this->user->id, 'ru')->andReturn([null]);
+        $this->mock(ProductCatalog::class, function ($mock) {
+            $mock->shouldReceive('find')->once()->with(['Гречка варёная'], $this->user->id, 'ru')->andReturn([null]);
         });
 
         $this->send('Хлеб; Гречка варёная - 150 граммов;')

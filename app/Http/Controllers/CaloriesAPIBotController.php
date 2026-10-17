@@ -8,7 +8,7 @@ use App\Http\Requests\StoreUsersFoodConsumptionsRequest;
 use App\Http\Resources\MealCollection;
 use App\Models\FoodConsumption;
 use App\Models\Product;
-use App\Services\ProductMatcher;
+use App\Services\ProductCatalog;
 use App\Services\ProductService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -23,11 +23,11 @@ class CaloriesAPIBotController extends BaseController
     /**
      * Find the products of an analysed voice message, "Name - N grams;" per item.
      *
-     * The items go to ProductMatcher together. An item it finds no product for, or
-     * one without a quantity, comes back with found = false, and the panel
-     * generates its nutrition facts.
+     * The items go to ProductCatalog together: a food the database lacks is added
+     * to it. An item still without a product, or one without a quantity, comes
+     * back with found = false, and the panel generates its nutrition facts.
      */
-    public function storeFiltered(Request $request, ProductMatcher $matcher): JsonResponse
+    public function storeFiltered(Request $request, ProductCatalog $catalog): JsonResponse
     {
         $text = $request->input('text', '');
 
@@ -62,7 +62,7 @@ class CaloriesAPIBotController extends BaseController
         $toMatch = array_keys(array_filter($items, static fn (array $item) => $item['quantity'] > 0));
         $hits = $toMatch === []
             ? []
-            : array_combine($toMatch, $matcher->match(
+            : array_combine($toMatch, $catalog->find(
                 array_map(static fn (int $key) => $items[$key]['said_name'], $toMatch),
                 auth()->id(),
                 $locale
@@ -102,9 +102,10 @@ class CaloriesAPIBotController extends BaseController
     /**
      * The product for one "Name - N grams" item, for the bot's "search" button.
      *
-     * Answers false when the text has no quantity or no product is the same food.
+     * A food the database lacks is added to it. Answers false when the text has no
+     * quantity or there is no product of the same food all the same.
      */
-    public function getTheMostRelevantProduct(Request $request, ProductMatcher $matcher): bool|JsonResponse
+    public function getTheMostRelevantProduct(Request $request, ProductCatalog $catalog): bool|JsonResponse
     {
         $parts = array_map('trim', explode(' - ', (string) $request->input('text')));
 
@@ -115,7 +116,7 @@ class CaloriesAPIBotController extends BaseController
         $productName = $parts[0];
         $quantity = (float) $matches[1];
 
-        $hit = $matcher->match([$productName], auth()->id(), app()->getLocale())[0] ?? null;
+        $hit = $catalog->find([$productName], auth()->id(), app()->getLocale())[0] ?? null;
         $product = $hit ? Product::find($hit['product_id']) : null;
 
         if (! $product) {

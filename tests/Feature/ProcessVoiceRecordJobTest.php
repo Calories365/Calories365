@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Jobs\ProcessVoiceRecordJob;
 use App\Models\Product;
 use App\Services\AudioConversionService;
-use App\Services\ProductMatcher;
+use App\Services\ProductCatalog;
 use App\Services\SpeechToTextService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -65,12 +65,12 @@ class ProcessVoiceRecordJobTest extends TestCase
         Storage::disk('public')->assertMissing(self::SOURCE);
     }
 
-    public function test_the_items_are_matched_together_and_the_unmatched_one_is_generated(): void
+    public function test_the_items_are_found_together_and_the_one_still_missing_is_generated(): void
     {
         $baked = Product::create(['calories' => 191, 'proteins' => 23, 'carbohydrates' => 0, 'fats' => 11, 'fibers' => 0]);
 
-        $matcher = Mockery::mock(ProductMatcher::class);
-        $matcher->shouldReceive('match')->once()
+        $catalog = Mockery::mock(ProductCatalog::class);
+        $catalog->shouldReceive('find')->once()
             ->with(['Нога запечённая куриная', 'Гречка варёная'], 1, 'ru')
             ->andReturn([['id' => 12, 'product_id' => $baked->id, 'locale' => 'ru', 'name' => 'куриная ножка в духовке'], null]);
 
@@ -78,7 +78,7 @@ class ProcessVoiceRecordJobTest extends TestCase
             $stt->shouldReceive('convertSpeechToText')->andReturn("Нога запечённая куриная - 200 граммов;\nГречка варёная - 150 граммов;");
             $stt->shouldReceive('generateNewProductData')->once()->with('Гречка варёная')
                 ->andReturn('Калории - 105; Белки - 4; Жиры - 1; Углеводы - 21;');
-        }, $matcher);
+        }, $catalog);
 
         $record = Cache::get('voice:job:'.self::RID);
         $this->assertSame('ready', $record['status']);
@@ -94,7 +94,7 @@ class ProcessVoiceRecordJobTest extends TestCase
         return new ProcessVoiceRecordJob(userId: 1, rid: self::RID, localPath: self::SOURCE, locale: 'ru');
     }
 
-    private function runJob(callable $speechToText, ?ProductMatcher $matcher = null): void
+    private function runJob(callable $speechToText, ?ProductCatalog $catalog = null): void
     {
         $audio = Mockery::mock(AudioConversionService::class);
         $audio->shouldReceive('convertToMp3')->andReturn([null, null]);
@@ -102,6 +102,6 @@ class ProcessVoiceRecordJobTest extends TestCase
         $stt = Mockery::mock(SpeechToTextService::class);
         $speechToText($stt);
 
-        $this->makeJob()->handle($audio, $stt, $matcher ?? Mockery::mock(ProductMatcher::class));
+        $this->makeJob()->handle($audio, $stt, $catalog ?? Mockery::mock(ProductCatalog::class));
     }
 }

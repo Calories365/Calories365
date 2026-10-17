@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Product;
 use App\Services\AudioConversionService;
-use App\Services\ProductMatcher;
+use App\Services\ProductCatalog;
 use App\Services\SpeechToTextService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -50,7 +50,7 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
         $this->onQueue('AI');
     }
 
-    public function handle(AudioConversionService $audioConversionService, SpeechToTextService $speechToTextService, ProductMatcher $productMatcher): void
+    public function handle(AudioConversionService $audioConversionService, SpeechToTextService $speechToTextService, ProductCatalog $productCatalog): void
     {
         // Ensure the job uses the same locale as the request
         App::setLocale($this->locale);
@@ -89,7 +89,7 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
                 return;
             }
 
-            $products = $this->searchProductsFromTranscription($text, $this->userId, $this->locale, $speechToTextService, $productMatcher);
+            $products = $this->searchProductsFromTranscription($text, $this->userId, $this->locale, $speechToTextService, $productCatalog);
 
             $this->finish($cacheKey, [
                 'status' => 'ready',
@@ -137,7 +137,7 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
         }
     }
 
-    private function searchProductsFromTranscription(string $text, int $userId, string $locale, SpeechToTextService $stt, ProductMatcher $matcher): array
+    private function searchProductsFromTranscription(string $text, int $userId, string $locale, SpeechToTextService $stt, ProductCatalog $catalog): array
     {
         $suffix = 'грамм';
         switch ($locale) {
@@ -197,9 +197,9 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
             return [];
         }
 
-        // All items of the meal are matched together; the ones without a product of
-        // the same food get their nutrition facts generated for the full name.
-        $hits = $matcher->match(array_column($parsed, 'name'), $userId, $locale);
+        // All items of the meal are found together, and a food the database lacks is
+        // added to it; an item still without a product gets its facts generated here.
+        $hits = $catalog->find(array_column($parsed, 'name'), $userId, $locale);
 
         $result = [];
         foreach ($parsed as $index => $item) {
@@ -221,7 +221,7 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
     }
 
     /**
-     * @param  array<string, mixed>|null  $productTranslation  the hit ProductMatcher chose
+     * @param  array<string, mixed>|null  $productTranslation  the hit ProductCatalog found
      */
     private function foundProduct(?array $productTranslation, string $productName, float $quantity): ?array
     {
