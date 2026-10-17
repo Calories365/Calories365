@@ -220,8 +220,15 @@ class CaloriesAPIBotController extends BaseController
         return new MealCollection($meals);
     }
 
+    /**
+     * Delete a meal of the account the panel acts for.
+     *
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function destroy(FoodConsumption $meal): \Illuminate\Http\JsonResponse
     {
+        $this->authorize('delete', $meal);
+
         $meal->delete();
 
         return response()->json(['message' => 'Success']);
