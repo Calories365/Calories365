@@ -3,31 +3,53 @@
 namespace App\Services;
 
 use App\Models\Product;
-use Illuminate\Support\Facades\Http;
+use App\Models\ProductTranslation;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Meilisearch\Client;
+use Meilisearch\Contracts\SearchQuery;
 
 /**
- * Finds the database product for each food a user named.
+ * Finds the database product for each food a user named, without a model.
  *
- * The search engine matches words, not meaning: "Нога куриная запечённая" finds
- * nothing because the database says "Куриная ножка", and "Гречка варёная" lands
- * on "гречка вареная с луком и морковью". A cooking method changes the nutrition
- * facts several times over, so a near match is worse than none: an item without
- * an exact match gets its facts generated for the full name instead.
+ * A cooking method changes the nutrition facts several times over, so a near
+ * match is worse than none: "Гречка" is boiled buckwheat, not the dry groats
+ * the database lists first, and "Гречка варёная" is not "гречка вареная с луком
+ * и морковью". FoodName reads the said name and every product name alike: the
+ * stems of the food, its cooking method, what was added. The index keeps the
+ * stems and the method of each product, so one multi-search request finds, for
+ * all items of a meal at once, the products with the same food words and a
+ * cooking method that fits.
  *
- * One request to the model writes the names a food database would use for each
- * item; the candidates found for all of them go to a second request, which picks
- * the same food with the same cooking method and nothing added, or nothing. Both
- * requests cover all items of a meal at once. When the model is unavailable, the
- * old rule applies: the best hit scoring at least 0.6.
+ * Of those, a product that is another food or adds something the user did not
+ * name is left out, and so is one whose nutrition facts cannot be true. The rest
+ * are ranked the way calorie diaries rank their search: the same cooking method
+ * first, then what the user has eaten before, then the fewest words the user did
+ * not say, then names in the user's language, verified products, products people
+ * entered over estimated ones, and the most eaten.
+ *
+ * An item with no fitting product gets null; ProductCatalog then adds it.
  */
 class ProductMatcher
 {
-    private const CANDIDATES_PER_QUERY = 5;
+    private const CANDIDATES_PER_ITEM = 50;
 
-    private const CANDIDATES_PER_ITEM = 12;
+    /**
+     * FoodName::penaltyFor beyond which a product is taken for another food: a
+     * word the user did not say, or the fat content. A product not found is added
+     * by ProductCatalog, which costs less than the wrong one.
+     */
+    private const MAX_PENALTY = 2;
 
-    private const FALLBACK_MIN_SCORE = 0.6;
+    /**
+     * A grain boiled in water holds under 200 kcal in 100 g; a "boiled" product
+     * above that carries the facts of the dry grain.
+     */
+    private const MAX_BOILED_GRAIN_CALORIES = 200;
+
+    private const MIN_BOILED_GRAIN_CALORIES = 60;
+
+    public function __construct(private Client $client) {}
 
     /**
      * @param  array<int, string>  $names  the foods as the user named them
@@ -35,241 +57,248 @@ class ProductMatcher
      */
     public function match(array $names, ?int $userId, string $locale): array
     {
-        $names = array_values($names);
+        try {
+            return $this->find($names, $userId, $locale);
+        } catch (\Throwable $e) {
+            Log::warning('Product search failed', ['error' => $e->getMessage()]);
 
-        if ($names === []) {
+            return array_fill(0, count($names), null);
+        }
+    }
+
+    /**
+     * Like match(), but a failed search is thrown: a caller that adds the missing
+     * products must not take every item for missing.
+     *
+     * @param  array<int, string>  $names
+     * @return array<int, array<string, mixed>|null>
+     *
+     * @throws \Throwable
+     */
+    public function find(array $names, ?int $userId, string $locale): array
+    {
+        $said = array_map(static fn (string $name) => FoodName::parse($name), array_values($names));
+
+        if ($said === []) {
             return [];
         }
 
-        try {
-            $queries = $this->searchQueries($names, $locale);
-            $candidates = [];
-
-            foreach ($names as $index => $name) {
-                $candidates[$index] = $this->collectCandidates([$name, ...($queries[$index] ?? [])], $userId, $locale);
+        $hits = $this->search($said, $userId, $locale);
+        $productIds = [];
+        foreach ($hits as $itemHits) {
+            foreach ($itemHits as $hit) {
+                $productIds[(int) $hit['product_id']] = (int) $hit['product_id'];
             }
-
-            $choices = $this->choose($names, $candidates, $locale);
-
-            return array_map(
-                static fn (int $index) => $choices[$index] !== null ? ($candidates[$index][$choices[$index]] ?? null) : null,
-                array_keys($names)
-            );
-        } catch (\Throwable $e) {
-            Log::warning('Product matching by the model failed, using the search score', ['error' => $e->getMessage()]);
-
-            return array_map(fn (string $name) => $this->bestByScore($name, $userId, $locale), $names);
         }
+
+        $facts = Product::matchingFacts(array_values($productIds), $userId);
+        $foods = $this->foodWords();
+
+        return array_map(
+            fn (int $index) => $this->best($said[$index], $hits[$index] ?? [], $facts, $foods, $userId, $locale),
+            array_keys($said)
+        );
     }
 
     /**
-     * Search hits for one query; the seam tests replace.
+     * Index hits per item: products with the same food words and a fitting
+     * cooking method, visible to the user. The seam tests replace.
      *
-     * @return array<int, array<string, mixed>>
+     * @param  array<int, FoodName>  $said
+     * @return array<int, array<int, array<string, mixed>>>
      */
-    public function candidates(string $query, ?int $userId, string $locale): array
+    public function search(array $said, ?int $userId, string $locale): array
     {
-        return Product::searchCandidates($query, $userId, $locale, self::CANDIDATES_PER_QUERY);
-    }
-
-    /**
-     * @param  array<int, string>  $queries
-     * @return array<int, array<string, mixed>> hits keyed by translation id
-     */
-    private function collectCandidates(array $queries, ?int $userId, string $locale): array
-    {
-        $found = [];
-
-        foreach (array_unique($queries) as $query) {
-            foreach ($this->candidates($query, $userId, $locale) as $hit) {
-                $found[(int) $hit['id']] ??= $hit;
-            }
-
-            if (count($found) >= self::CANDIDATES_PER_ITEM) {
-                break;
-            }
-        }
-
-        return array_slice($found, 0, self::CANDIDATES_PER_ITEM, true);
-    }
-
-    /**
-     * Names a food database would use for each item, in the user's language.
-     *
-     * @param  array<int, string>  $names
-     * @return array<int, array<int, string>>
-     */
-    private function searchQueries(array $names, string $locale): array
-    {
-        $lines = [];
-        foreach ($names as $index => $name) {
-            $lines[] = $index.'. '.$name;
-        }
-
-        $prompt = "A user of a calorie diary named these foods (language: {$this->languageName($locale)}):\n"
-            .implode("\n", $lines)."\n\n"
-            .'For each item write up to 3 short search queries, in the same language, the way the food is '
-            .'usually named in a nutrition database: common word order, singular, usual synonyms '
-            .'(for example "куриная ножка" and "окорочок" for "куриная нога"). Keep the cooking method and the '
-            .'variety exactly as the user said them. When no cooking method was said and the food is eaten only '
-            .'after cooking (grains, pasta, legumes, meat, fish), the weight is of the cooked food: name it in its '
-            .'usual cooked form ("гречка варёная", "макароны отварные"). Otherwise add no cooking method.';
-
-        $result = $this->ask($prompt, 'search_queries', [
-            'type' => 'object',
-            'additionalProperties' => false,
-            'required' => ['items'],
-            'properties' => [
-                'items' => [
-                    'type' => 'array',
-                    'items' => [
-                        'type' => 'object',
-                        'additionalProperties' => false,
-                        'required' => ['index', 'queries'],
-                        'properties' => [
-                            'index' => ['type' => 'integer'],
-                            'queries' => ['type' => 'array', 'items' => ['type' => 'string']],
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-
         $queries = [];
-        foreach ($result['items'] ?? [] as $item) {
-            $queries[(int) $item['index']] = array_slice(array_filter(array_map('trim', $item['queries'] ?? [])), 0, 3);
-        }
+        $items = [];
 
-        return $queries;
-    }
-
-    /**
-     * The chosen translation id per item, or null when no candidate is the same food.
-     *
-     * @param  array<int, string>  $names
-     * @param  array<int, array<int, array<string, mixed>>>  $candidates
-     * @return array<int, int|null>
-     */
-    private function choose(array $names, array $candidates, string $locale): array
-    {
-        $choices = array_fill_keys(array_keys($names), null);
-
-        $lines = [];
-        foreach ($names as $index => $name) {
-            if ($candidates[$index] === []) {
+        foreach ($said as $index => $name) {
+            if ($name->stems() === []) {
                 continue;
             }
 
-            $lines[] = "Item {$index}: {$name}";
-            foreach ($candidates[$index] as $id => $hit) {
-                $lines[] = "  {$id}: {$hit['name']}";
-            }
+            $cooking = implode(', ', array_map(
+                static fn (string $method) => '"'.$method.'"',
+                array_keys($name->acceptedCooking())
+            ));
+
+            $queries[] = (new SearchQuery)
+                ->setIndexUid((new ProductTranslation)->searchableAs())
+                ->setQuery($name->queryText())
+                ->setAttributesToSearchOn(['stems'])
+                ->setMatchingStrategy('all')
+                ->setFilter([
+                    'locale = "'.addslashes($locale).'"',
+                    $this->visibleTo($userId),
+                    "cooking IN [{$cooking}]",
+                ])
+                ->setLimit(self::CANDIDATES_PER_ITEM);
+            $items[] = $index;
         }
 
-        if ($lines === []) {
-            return $choices;
+        if ($queries === []) {
+            return [];
         }
 
-        $prompt = "A user of a calorie diary named foods they ate (language: {$this->languageName($locale)}). "
-            ."For each item pick the database product that is the same food, or null.\n\n"
-            ."Rules:\n"
-            .'- The cooking method must be the same: raw, boiled, fried, baked, grilled, stewed, steamed, '
-            ."smoked and so on. Synonyms count as the same (\"отварной\" = \"варёный\", \"печёный\" = \"запечённый\").\n"
-            .'- When the user named no cooking method: a food that is eaten only after cooking (grains, pasta, '
-            .'legumes, meat, fish) was eaten cooked — boiled for grains and pasta. Never pick the dry or raw '
-            ."product for it; pick the usual cooked one, or null. Anything else is as sold.\n"
-            .'- No added ingredients, sauces or garnish the user did not name ("с луком", "с маслом", '
-            ."\"со сметаной\"); a product that is only a brand or packaging variant of the same food is fine.\n"
-            ."- The variety or fat content must match when the user named it.\n"
-            .'- When no candidate fits, answer null: the nutrition facts are then estimated for the exact '
-            ."name, which is better than a different food.\n\n"
-            .implode("\n", $lines);
+        $results = $this->client->multiSearch($queries)['results'] ?? [];
 
-        $result = $this->ask($prompt, 'product_choice', [
-            'type' => 'object',
-            'additionalProperties' => false,
-            'required' => ['items'],
-            'properties' => [
-                'items' => [
-                    'type' => 'array',
-                    'items' => [
-                        'type' => 'object',
-                        'additionalProperties' => false,
-                        'required' => ['index', 'candidate_id'],
-                        'properties' => [
-                            'index' => ['type' => 'integer'],
-                            'candidate_id' => ['type' => ['integer', 'null']],
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-
-        foreach ($result['items'] ?? [] as $item) {
-            $index = (int) $item['index'];
-            $id = $item['candidate_id'];
-
-            // Only an id that was offered for this item counts.
-            if (array_key_exists($index, $choices) && $id !== null && isset($candidates[$index][(int) $id])) {
-                $choices[$index] = (int) $id;
-            }
+        $hits = [];
+        foreach ($items as $position => $index) {
+            $hits[$index] = $results[$position]['hits'] ?? [];
         }
 
-        return $choices;
+        return $hits;
     }
 
     /**
+     * The user's own products, the shared ones and the verified products of others.
+     */
+    private function visibleTo(?int $userId): string
+    {
+        return $userId === null
+            ? '(user_id IS NULL OR verified = 1)'
+            : "((user_id = {$userId} AND active = 1) OR user_id IS NULL OR verified = 1)";
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $hits
+     * @param  array<int, array{calories: float, proteins: float, fats: float, carbohydrates: float, uses: int, mine: int, source: string|null}>  $facts
+     * @param  array<string, true>  $foods
      * @return array<string, mixed>|null
      */
-    private function bestByScore(string $name, ?int $userId, string $locale): ?array
+    private function best(FoodName $said, array $hits, array $facts, array $foods, ?int $userId, string $locale): ?array
     {
-        $best = $this->candidates($name, $userId, $locale)[0] ?? null;
+        $accepted = $said->acceptedCooking();
+        $fitting = [];
 
-        return $best && ($best['_rankingScore'] ?? 0) >= self::FALLBACK_MIN_SCORE ? $best : null;
+        foreach ($hits as $position => $hit) {
+            $name = (string) $hit['name'];
+            $product = FoodName::parse($name);
+            $fact = $facts[(int) $hit['product_id']] ?? null;
+            $penalty = $said->penaltyFor($product, $locale !== 'en', $foods);
+            $foreign = $this->inAnotherLanguage($name, $locale);
+
+            // The index may hold a name read by older rules; the method is checked again.
+            if (! isset($accepted[$product->cooking]) || $fact === null || ! $this->plausible($product, $fact)
+                || $penalty === null || $penalty > self::MAX_PENALTY || ($foreign && $locale === 'en')) {
+                continue;
+            }
+
+            $fitting[] = [
+                'hit' => $hit,
+                'calories' => $fact['calories'],
+                'rank' => [
+                    $accepted[$product->cooking],
+                    -$fact['mine'],
+                    $penalty,
+                    (int) $foreign,
+                    isset($hit['user_id']) && $userId !== null && (int) $hit['user_id'] === $userId ? 0 : 1,
+                    ! empty($hit['verified']) ? 0 : 1,
+                    $fact['source'] === Product::SOURCE_AI ? 1 : 0,
+                ],
+                'tail' => [-$fact['uses'], mb_strlen($name), $position],
+            ];
+        }
+
+        if ($fitting === []) {
+            return null;
+        }
+
+        $median = $this->medianCalories($fitting);
+        foreach ($fitting as &$candidate) {
+            $candidate['rank'] = [...$candidate['rank'], $this->deviation($candidate['calories'], $median), ...$candidate['tail']];
+        }
+        unset($candidate);
+
+        usort($fitting, static fn (array $a, array $b) => $a['rank'] <=> $b['rank']);
+
+        return $fitting[0]['hit'];
     }
 
     /**
-     * One structured answer of the matching model.
+     * The median calories of the candidates as close to the named food as the
+     * closest one: the same cooking tier and as few words the user did not say.
      *
-     * @param  array<string, mixed>  $schema
-     * @return array<string, mixed>
+     * Several products of the same food are entered by different people, and one
+     * of them now and then holds wrong facts ("Курица на пару", 56 kcal). The
+     * agreeing majority shows which.
      *
-     * @throws \Illuminate\Http\Client\RequestException
-     * @throws \RuntimeException
+     * @param  array<int, array{calories: float, rank: array<int, int>}>  $fitting
      */
-    private function ask(string $prompt, string $name, array $schema): array
+    private function medianCalories(array $fitting): float
     {
-        $keys = config('services.openai.keys');
+        $closest = min(array_map(static fn (array $candidate) => [$candidate['rank'][0], $candidate['rank'][2]], $fitting));
 
-        $result = Http::timeout(30)
-            ->withToken((string) ($keys[app()->getLocale()] ?? $keys['ru'] ?? ''))
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => config('services.openai.models.matching'),
-                'reasoning_effort' => config('services.openai.reasoning_effort'),
-                'response_format' => [
-                    'type' => 'json_schema',
-                    'json_schema' => ['name' => $name, 'strict' => true, 'schema' => $schema],
-                ],
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-            ])
-            ->throw()
-            ->json();
-
-        $decoded = json_decode((string) ($result['choices'][0]['message']['content'] ?? ''), true);
-
-        if (! is_array($decoded)) {
-            throw new \RuntimeException('The matching model gave no JSON');
+        $calories = [];
+        foreach ($fitting as $candidate) {
+            if ([$candidate['rank'][0], $candidate['rank'][2]] === $closest) {
+                $calories[] = $candidate['calories'];
+            }
         }
 
-        return $decoded;
+        sort($calories);
+        $middle = intdiv(count($calories), 2);
+
+        return count($calories) % 2 === 1 ? $calories[$middle] : ($calories[$middle - 1] + $calories[$middle]) / 2;
     }
 
-    private function languageName(string $locale): string
+    /**
+     * How far the calories are from the median: 0 within a fifth of it, 1 within
+     * a half, 2 beyond.
+     */
+    private function deviation(float $calories, float $median): int
     {
-        return match ($locale) {
-            'ua' => 'Ukrainian',
-            'en' => 'English',
-            default => 'Russian',
+        $share = abs($calories - $median) / max($median, 1.0);
+
+        return $share <= 0.2 ? 0 : ($share <= 0.5 ? 1 : 2);
+    }
+
+    /**
+     * Whether the nutrition facts can be those of the named food.
+     *
+     * Macros worth more energy than the calories are a typo or a test entry ("мед",
+     * 11 kcal and 11 g of everything); fewer are common, the macros often go
+     * unfilled. A boiled grain with the calories of a dry one, or of a soup, has
+     * the wrong facts.
+     *
+     * @param  array{calories: float, proteins: float, fats: float, carbohydrates: float}  $fact
+     */
+    public function plausible(FoodName $product, array $fact): bool
+    {
+        $fromMacros = 4 * $fact['proteins'] + 4 * $fact['carbohydrates'] + 9 * $fact['fats'];
+
+        if ($fromMacros > $fact['calories'] * 1.35 + 40) {
+            return false;
+        }
+
+        if (! $product->isGrain() || ! in_array($product->cooking, [FoodName::BOILED, FoodName::STEAMED, FoodName::COOKED], true)) {
+            return true;
+        }
+
+        return $fact['calories'] >= self::MIN_BOILED_GRAIN_CALORIES && $fact['calories'] <= self::MAX_BOILED_GRAIN_CALORIES;
+    }
+
+    /**
+     * Stems of the foods the database names in one word, see FoodName::foodWords.
+     *
+     * @return array<string, true>
+     */
+    private function foodWords(): array
+    {
+        return Cache::remember('product-matcher:food-words', now()->addDay(),
+            static fn () => FoodName::foodWords(ProductTranslation::oneWordNames()));
+    }
+
+    /**
+     * A name written in another language than the locale: shared products got
+     * every translation with the name their author typed.
+     */
+    private function inAnotherLanguage(string $name, string $locale): bool
+    {
+        return (bool) match ($locale) {
+            'ru' => preg_match('/[іїєґ]/u', mb_strtolower($name)),
+            'ua' => preg_match('/[ыэъё]/u', mb_strtolower($name)),
+            default => preg_match('/\p{Cyrillic}/u', $name),
         };
     }
 }

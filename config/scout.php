@@ -137,6 +137,7 @@ return [
         // these attributes; a products index without them rejects every query.
         'index-settings' => [
             \App\Models\ProductTranslation::class => [
+                'searchableAttributes' => \App\Models\ProductTranslation::SEARCHABLE,
                 'filterableAttributes' => \App\Models\ProductTranslation::FILTERABLE,
                 'sortableAttributes' => \App\Models\ProductTranslation::SORTABLE,
             ],

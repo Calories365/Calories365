@@ -22,7 +22,13 @@ class Product extends Model
         'fibers',
         'is_popular',
         'user_id',
+        'source',
     ];
+
+    /**
+     * Products the model estimated the nutrition facts of, see ProductCatalog.
+     */
+    public const SOURCE_AI = 'ai';
 
     public function translations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
@@ -113,6 +119,44 @@ class Product extends Model
         $best = self::searchCandidates($query, $user_id, $locale)[0] ?? null;
 
         return $best && $best['_rankingScore'] > 0 ? $best : false;
+    }
+
+    /**
+     * What ProductMatcher checks and ranks found products by: the nutrition facts,
+     * how often each was eaten, by anyone and by the user, and where the facts
+     * came from. Products without calories are left out.
+     *
+     * @param  array<int, int>  $ids
+     * @return array<int, array{calories: float, proteins: float, fats: float, carbohydrates: float, uses: int, mine: int, source: string|null}> keyed by product id
+     */
+    public static function matchingFacts(array $ids, ?int $userId): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return self::query()
+            ->whereIn('products.id', $ids)
+            ->whereNotNull('products.calories')
+            ->leftJoin('food_consumptions', 'food_consumptions.food_id', '=', 'products.id')
+            ->groupBy('products.id', 'products.source', 'products.calories', 'products.proteins', 'products.fats', 'products.carbohydrates')
+            ->selectRaw(
+                'products.id, products.source, products.calories, products.proteins, products.fats, products.carbohydrates, '
+                .'COUNT(food_consumptions.id) AS uses, COALESCE(SUM(food_consumptions.user_id = ?), 0) AS mine',
+                [$userId ?? 0]
+            )
+            ->toBase()
+            ->get()
+            ->mapWithKeys(static fn (object $row) => [(int) $row->id => [
+                'calories' => (float) $row->calories,
+                'proteins' => (float) $row->proteins,
+                'fats' => (float) $row->fats,
+                'carbohydrates' => (float) $row->carbohydrates,
+                'uses' => (int) $row->uses,
+                'mine' => (int) $row->mine,
+                'source' => $row->source,
+            ]])
+            ->all();
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\FoodName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
@@ -13,7 +14,12 @@ class ProductTranslation extends Model
 
     public const SORTABLE = ['id'];
 
-    public const FILTERABLE = ['locale', 'user_id', 'active', 'verified'];
+    public const FILTERABLE = ['locale', 'user_id', 'active', 'verified', 'cooking'];
+
+    /**
+     * The site searches the name as written; ProductMatcher searches the stems.
+     */
+    public const SEARCHABLE = ['name', 'stems'];
 
     protected $fillable = [
         'product_id', 'locale', 'name', 'double_metaphoned_name', 'transliterated_name', 'user_id', 'active', 'verified',
@@ -22,6 +28,21 @@ class ProductTranslation extends Model
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Names of shared products written in one word: "Грибы", "Фасоль".
+     *
+     * @return array<int, string>
+     */
+    public static function oneWordNames(): array
+    {
+        return self::query()
+            ->whereNull('user_id')
+            ->where('name', 'not like', '% %')
+            ->distinct()
+            ->pluck('name')
+            ->all();
     }
 
     public static function createProductTranslations($product, $validatedData): bool
@@ -44,18 +65,27 @@ class ProductTranslation extends Model
         return true;
     }
 
+    /**
+     * The document of the products index.
+     *
+     * Stems and cooking come from FoodName, the rules ProductMatcher reads a
+     * spoken name by: a product is found by the stems of its food and filtered by
+     * how it was cooked.
+     */
     public function toSearchableArray()
     {
-        $data = [
+        $name = FoodName::parse((string) $this->name);
+
+        return [
             'locale' => $this->locale,
             'product_id' => $this->product_id,
             'name' => $this->name,
+            'stems' => $name->searchText(),
+            'cooking' => $name->cooking,
             'user_id' => $this->user_id,
             'active' => $this->active,
             'verified' => $this->verified,
         ];
-
-        return $data;
     }
 
     public function searchableAs()

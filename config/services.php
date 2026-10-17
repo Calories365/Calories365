@@ -57,10 +57,9 @@ return [
             // accuracy matters more than price.
             'meal_analysis' => env('OPENAI_MEAL_ANALYSIS_MODEL', 'gpt-6.1-sol'),
             'feedback' => env('OPENAI_FEEDBACK_MODEL', 'gpt-6.1-sol'),
-            // Nutrition facts of a single product: short and frequent.
+            // Nutrition facts of a product, and of the foods of a meal the database
+            // lacks (ProductCatalog): short and frequent.
             'product' => env('OPENAI_PRODUCT_MODEL', 'gpt-6-luna'),
-            // Picking the database product for each item a user named (ProductMatcher).
-            'matching' => env('OPENAI_MATCHING_MODEL', 'gpt-6-luna'),
             'transcription' => env('OPENAI_TRANSCRIPTION_MODEL', 'gpt-transcribe'),
         ],
         // The GPT-6 models reason before answering; low keeps the answer fast. They
