@@ -15,6 +15,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 
 class GenerateDietFeedbackJob implements ShouldBeUnique, ShouldQueue
 {
@@ -60,6 +61,9 @@ class GenerateDietFeedbackJob implements ShouldBeUnique, ShouldQueue
 
     public function handle(ChatGPTFeedback $ai): void
     {
+        // The worker has no request locale; the API key is chosen by it.
+        App::setLocale($this->locale);
+
         $rec = DietFeedback::findBySignature($this->userId, $this->date, $this->partOfDay, $this->signature);
 
         if ($rec && $rec->status === 'ready' && $rec->feedback_text) {

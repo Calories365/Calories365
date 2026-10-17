@@ -41,15 +41,20 @@ class FeedbackController extends Controller
                 ], 200);
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'accepted',
-                'rid' => $sig,
-                'poll_after_ms' => 1200,
-            ], 202);
-        }
+            if ($existing->status !== 'failed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'accepted',
+                    'rid' => $sig,
+                    'poll_after_ms' => 1200,
+                ], 202);
+            }
 
-        DietFeedback::insertPendingIfMissing($user->id, $date, $partOfDay, $sig);
+            // Every attempt of the previous job failed; a new request tries again.
+            DietFeedback::updateStatusBySignature($user->id, $date, $partOfDay, $sig, 'pending');
+        } else {
+            DietFeedback::insertPendingIfMissing($user->id, $date, $partOfDay, $sig);
+        }
 
         GenerateDietFeedbackJob::dispatch(
             userId: $user->id,
