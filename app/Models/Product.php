@@ -157,7 +157,7 @@ class Product extends Model
                 $scoreA = $a['_adjustedScore'] ?? 0;
                 $scoreB = $b['_adjustedScore'] ?? 0;
 
-                if ($scoreA <> $scoreB) {
+                if ($scoreA != $scoreB) {
                     return $scoreB <=> $scoreA;
                 }
 
