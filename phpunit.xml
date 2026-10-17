@@ -18,14 +18,30 @@
         </include>
     </source>
     <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="CACHE_DRIVER" value="array"/>
-        <env name="DB_CONNECTION" value="database"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
+        <!-- The container already exports the working values from .env, and
+             Laravel's env() reads $_SERVER first. These are therefore server
+             variables, forced: an env element, or one without force="true",
+             leaves the container's value in place and the tests run against the
+             development database, Redis and SMTP. The database is a separate
+             *_testing one, built from database/schema/mysql-schema.sql;
+             tests/CreatesApplication.php refuses to run against any other. -->
+        <server name="APP_ENV" value="testing" force="true"/>
+        <server name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <server name="CACHE_DRIVER" value="array" force="true"/>
+        <server name="DB_CONNECTION" value="mysql" force="true"/>
+        <server name="DB_DATABASE" value="calories_testing" force="true"/>
+        <server name="DB_SSL_VERIFY_SERVER_CERT" value="false" force="true"/>
+        <server name="MAIL_MAILER" value="array" force="true"/>
+        <server name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <server name="SESSION_DRIVER" value="array" force="true"/>
+        <server name="BROADCAST_DRIVER" value="log" force="true"/>
+        <server name="SCOUT_DRIVER" value="null" force="true"/>
+        <server name="TELESCOPE_ENABLED" value="false" force="true"/>
+        <server name="BOT_API_KEY" value="testing-bot-key" force="true"/>
+        <server name="BOT_PANEL_URL" value="" force="true"/>
+        <server name="BOT_HOST" value="" force="true"/>
+        <server name="OPENAI_API_KEY_RU" value="testing" force="true"/>
+        <server name="OPENAI_API_KEY_UK" value="testing" force="true"/>
+        <server name="OPENAI_API_KEY_EN" value="testing" force="true"/>
     </php>
 </phpunit>

@@ -60,7 +60,12 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            ]) + (env('DB_SSL_VERIFY_SERVER_CERT') === false ? [
+                // The MariaDB client in the php image insists on a trusted certificate,
+                // so loading a schema dump (tests) fails. With this option Laravel
+                // passes --ssl=off to it. Only phpunit.xml sets the variable.
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+            ] : []) : [],
         ],
 
         'pgsql' => [
