@@ -7,6 +7,7 @@ use App\Jobs\ProcessVoiceRecordJob;
 use App\Models\Product;
 use App\Services\AudioConversionService;
 use App\Services\BotPanelService;
+use App\Services\ProductMatcher;
 use App\Services\ProductService;
 use App\Services\SpeechToTextService;
 use Illuminate\Http\Request;
@@ -568,7 +569,7 @@ class VoiceController extends Controller
     /**
      * @return \Illuminate\Http\JsonResponse
      */
-    public function searchProduct(Request $request)
+    public function searchProduct(Request $request, ProductMatcher $matcher)
     {
         try {
             if (! $request->has('product_name')) {
@@ -582,7 +583,8 @@ class VoiceController extends Controller
             $userId = Auth::id();
             $locale = app()->getLocale();
 
-            $searchResult = Product::getRawProduct($productName, $userId, $locale);
+            // The matcher returns only a product of the same food and cooking method.
+            $searchResult = $matcher->match([(string) $productName], $userId, $locale)[0] ?? null;
 
             if ($searchResult) {
                 $rankingScore = $searchResult['_rankingScore'] ?? 0;
@@ -635,7 +637,7 @@ class VoiceController extends Controller
                     'success' => true,
                     'message' => 'Продукт найден',
                     'product' => $formattedProduct,
-                    'should_generate' => $rankingScore < 0.9,
+                    'should_generate' => false,
                 ]);
             } else {
                 return response()->json([

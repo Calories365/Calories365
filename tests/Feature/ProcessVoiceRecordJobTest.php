@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Jobs\ProcessVoiceRecordJob;
+use App\Models\Product;
 use App\Services\AudioConversionService;
+use App\Services\ProductMatcher;
 use App\Services\SpeechToTextService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -12,6 +15,8 @@ use Tests\TestCase;
 
 class ProcessVoiceRecordJobTest extends TestCase
 {
+    use RefreshDatabase;
+
     private const RID = 'rid-1';
 
     private const SOURCE = 'voice_records/rid-1.webm';
@@ -60,12 +65,36 @@ class ProcessVoiceRecordJobTest extends TestCase
         Storage::disk('public')->assertMissing(self::SOURCE);
     }
 
+    public function test_the_items_are_matched_together_and_the_unmatched_one_is_generated(): void
+    {
+        $baked = Product::create(['calories' => 191, 'proteins' => 23, 'carbohydrates' => 0, 'fats' => 11, 'fibers' => 0]);
+
+        $matcher = Mockery::mock(ProductMatcher::class);
+        $matcher->shouldReceive('match')->once()
+            ->with(['Нога запечённая куриная', 'Гречка варёная'], 1, 'ru')
+            ->andReturn([['id' => 12, 'product_id' => $baked->id, 'locale' => 'ru', 'name' => 'куриная ножка в духовке'], null]);
+
+        $this->runJob(function ($stt) {
+            $stt->shouldReceive('convertSpeechToText')->andReturn("Нога запечённая куриная - 200 граммов;\nГречка варёная - 150 граммов;");
+            $stt->shouldReceive('generateNewProductData')->once()->with('Гречка варёная')
+                ->andReturn('Калории - 105; Белки - 4; Жиры - 1; Углеводы - 21;');
+        }, $matcher);
+
+        $record = Cache::get('voice:job:'.self::RID);
+        $this->assertSame('ready', $record['status']);
+        $this->assertSame('куриная ножка в духовке', $record['products'][0]['product_translation']['name']);
+        $this->assertSame($baked->id, $record['products'][0]['product']['id']);
+        $this->assertSame(200.0, $record['products'][0]['quantity']);
+        $this->assertTrue($record['products'][1]['is_generated']);
+        $this->assertSame(105.0, $record['products'][1]['product']['calories']);
+    }
+
     private function makeJob(): ProcessVoiceRecordJob
     {
         return new ProcessVoiceRecordJob(userId: 1, rid: self::RID, localPath: self::SOURCE, locale: 'ru');
     }
 
-    private function runJob(callable $speechToText): void
+    private function runJob(callable $speechToText, ?ProductMatcher $matcher = null): void
     {
         $audio = Mockery::mock(AudioConversionService::class);
         $audio->shouldReceive('convertToMp3')->andReturn([null, null]);
@@ -73,6 +102,6 @@ class ProcessVoiceRecordJobTest extends TestCase
         $stt = Mockery::mock(SpeechToTextService::class);
         $speechToText($stt);
 
-        $this->makeJob()->handle($audio, $stt);
+        $this->makeJob()->handle($audio, $stt, $matcher ?? Mockery::mock(ProductMatcher::class));
     }
 }

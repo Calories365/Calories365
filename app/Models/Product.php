@@ -105,7 +105,26 @@ class Product extends Model
         }
     }
 
+    /**
+     * The best product visible to the user for the query, or false.
+     */
     public static function getRawProduct(string $query, ?int $user_id, string $locale): array|bool
+    {
+        $best = self::searchCandidates($query, $user_id, $locale)[0] ?? null;
+
+        return $best && $best['_rankingScore'] > 0 ? $best : false;
+    }
+
+    /**
+     * Products visible to the user whose name matches the query, best first.
+     *
+     * Each hit is a product translation from the Meilisearch index; _rankingScore
+     * is the engine's score adjusted below. An empty list when nothing matches or
+     * the search fails.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function searchCandidates(string $query, ?int $user_id, string $locale, int $limit = 5): array
     {
         $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
 
@@ -123,12 +142,12 @@ class Product extends Model
             $res = $client->index('products')->search($query, [
                 'showRankingScore' => true,
                 'filter' => $filter,
-                'limit' => 5,
+                'limit' => $limit,
             ]);
 
             $hits = $res->getHits();
             if (empty($hits)) {
-                return false;
+                return [];
             }
 
             $queryNorm = mb_strtolower(trim($query));
@@ -167,19 +186,19 @@ class Product extends Model
                 return $isOwnB <=> $isOwnA;
             });
 
-            $best = $hits[0];
-            $best['_rankingScore'] = $best['_adjustedScore'];
+            return array_map(static function (array $hit): array {
+                $hit['_rankingScore'] = $hit['_adjustedScore'];
 
-            return ($best['_rankingScore'] ?? 0) > 0 ? $best : false;
-
+                return $hit;
+            }, $hits);
         } catch (\Throwable $e) {
-            Log::error('getRawProduct error: '.$e->getMessage(), [
+            Log::error('searchCandidates error: '.$e->getMessage(), [
                 'query' => $query,
                 'user' => $user_id,
                 'loc' => $locale,
             ]);
 
-            return false;
+            return [];
         }
     }
 

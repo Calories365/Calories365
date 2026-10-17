@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Product;
 use App\Services\AudioConversionService;
+use App\Services\ProductMatcher;
 use App\Services\SpeechToTextService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -49,7 +50,7 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
         $this->onQueue('AI');
     }
 
-    public function handle(AudioConversionService $audioConversionService, SpeechToTextService $speechToTextService): void
+    public function handle(AudioConversionService $audioConversionService, SpeechToTextService $speechToTextService, ProductMatcher $productMatcher): void
     {
         // Ensure the job uses the same locale as the request
         App::setLocale($this->locale);
@@ -88,7 +89,7 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
                 return;
             }
 
-            $products = $this->searchProductsFromTranscription($text, $this->userId, $this->locale, $speechToTextService);
+            $products = $this->searchProductsFromTranscription($text, $this->userId, $this->locale, $speechToTextService, $productMatcher);
 
             $this->finish($cacheKey, [
                 'status' => 'ready',
@@ -136,7 +137,7 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
         }
     }
 
-    private function searchProductsFromTranscription(string $text, int $userId, string $locale, SpeechToTextService $stt): array
+    private function searchProductsFromTranscription(string $text, int $userId, string $locale, SpeechToTextService $stt, ProductMatcher $matcher): array
     {
         $suffix = 'грамм';
         switch ($locale) {
@@ -160,7 +161,7 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
 
         $items = array_filter($items, fn ($i) => trim($i) !== '');
 
-        $result = [];
+        $parsed = [];
         foreach ($items as $product) {
             $product = trim($product);
             if ($product === '') {
@@ -176,39 +177,54 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
 
             $productName = trim($parts[0]);
             $quantityStr = trim($parts[1]);
-            if (preg_match('/(\d+(\.\d+)?)/', $quantityStr, $matches)) {
-                $quantity = (float) $matches[1];
-                if ($quantity <= 0) {
-                    Log::warning("Некорректное количество продукта: {$productName}", ['rid' => $this->rid]);
-
-                    continue;
-                }
-
-                $productData = $this->findProduct($productName, $quantity, $userId, $locale);
-                if ($productData) {
-                    $result[] = $productData;
-                } else {
-                    $generated = $this->generateProductsData($productName, $quantity, $stt);
-                    if ($generated) {
-                        $result[] = $generated;
-                    }
-                }
-            } else {
+            if (! preg_match('/(\d+(\.\d+)?)/', $quantityStr, $matches)) {
                 Log::warning("Ошибка при извлечении количества: {$quantityStr}", ['rid' => $this->rid]);
+
+                continue;
+            }
+
+            $quantity = (float) $matches[1];
+            if ($quantity <= 0) {
+                Log::warning("Некорректное количество продукта: {$productName}", ['rid' => $this->rid]);
+
+                continue;
+            }
+
+            $parsed[] = ['name' => $productName, 'quantity' => $quantity];
+        }
+
+        if ($parsed === []) {
+            return [];
+        }
+
+        // All items of the meal are matched together; the ones without a product of
+        // the same food get their nutrition facts generated for the full name.
+        $hits = $matcher->match(array_column($parsed, 'name'), $userId, $locale);
+
+        $result = [];
+        foreach ($parsed as $index => $item) {
+            $productData = $this->foundProduct($hits[$index] ?? null, $item['name'], $item['quantity']);
+
+            if ($productData) {
+                $result[] = $productData;
+
+                continue;
+            }
+
+            $generated = $this->generateProductsData($item['name'], $item['quantity'], $stt);
+            if ($generated) {
+                $result[] = $generated;
             }
         }
 
         return $result;
     }
 
-    private function findProduct(string $productName, float $quantity, int $userId, string $locale): ?array
+    /**
+     * @param  array<string, mixed>|null  $productTranslation  the hit ProductMatcher chose
+     */
+    private function foundProduct(?array $productTranslation, string $productName, float $quantity): ?array
     {
-        $productTranslation = Product::getRawProduct($productName, $userId, $locale);
-
-        if (is_array($productTranslation) && isset($productTranslation['_rankingScore']) && $productTranslation['_rankingScore'] < 0.6) {
-            return null;
-        }
-
         if (is_array($productTranslation)) {
             $product = Product::find($productTranslation['product_id']);
             if ($product && $product->calories !== null) {

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreUsersFoodConsumptionsRequest;
 use App\Http\Resources\MealCollection;
 use App\Models\FoodConsumption;
 use App\Models\Product;
+use App\Services\ProductMatcher;
 use App\Services\ProductService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -20,10 +21,13 @@ class CaloriesAPIBotController extends BaseController
     use AuthorizesRequests, ValidatesRequests;
 
     /**
-     * Returns only the products with _rankingScore ≥ 0.9.
-     * If none pass the filter — products = [] and message = "Products not found".
+     * Find the products of an analysed voice message, "Name - N grams;" per item.
+     *
+     * The items go to ProductMatcher together. An item it finds no product for, or
+     * one without a quantity, comes back with found = false, and the panel
+     * generates its nutrition facts.
      */
-    public function storeFiltered(Request $request): JsonResponse
+    public function storeFiltered(Request $request, ProductMatcher $matcher): JsonResponse
     {
         $text = $request->input('text', '');
 
@@ -37,93 +41,52 @@ class CaloriesAPIBotController extends BaseController
         }
 
         $locale = app()->getLocale();
-        $suffixMap = ['en' => 'grams', 'uk' => 'грам', 'ru' => 'грамм'];
+        $suffixMap = ['en' => 'grams', 'ua' => 'грам', 'ru' => 'грамм'];
         $suffix = $suffixMap[$locale] ?? 'грамм';
         $delimiter = str_contains($text, ';') ? ';' : $suffix;
         $rawItems = array_filter(array_map('trim', explode($delimiter, $text)));
 
-        $productsInfo = [];
-        $userId = auth()->id() ?? null;
-
+        $items = [];
         foreach ($rawItems as $raw) {
             $parts = array_map('trim', explode(' - ', $raw));
 
             if (count($parts) !== 2 || ! preg_match('/(\d+(\.\d+)?)/', $parts[1], $m)) {
-                $productsInfo[] = [
-                    'product_translation' => null,
-                    'product' => null,
-                    'said_name' => $raw,
-                    'quantity_grams' => null,
-                    'found' => false,
-                ];
+                $items[] = ['said_name' => $raw, 'quantity' => null];
 
                 continue;
             }
 
-            [$productName, $quantityStr] = $parts;
-            $quantity = (float) $m[1];
+            $items[] = ['said_name' => $parts[0], 'quantity' => (float) $m[1]];
+        }
 
-            if ($quantity <= 0) {
-                $productsInfo[] = [
-                    'product_translation' => null,
-                    'product' => null,
-                    'said_name' => $productName,
-                    'quantity_grams' => $quantity,
-                    'found' => false,
-                ];
+        $toMatch = array_keys(array_filter($items, static fn (array $item) => $item['quantity'] > 0));
+        $hits = $toMatch === []
+            ? []
+            : array_combine($toMatch, $matcher->match(
+                array_map(static fn (int $key) => $items[$key]['said_name'], $toMatch),
+                auth()->id(),
+                $locale
+            ));
 
-                continue;
-            }
+        $productsInfo = [];
+        foreach ($items as $key => $item) {
+            $hit = $hits[$key] ?? null;
+            $productModel = $hit ? Product::find($hit['product_id']) : null;
 
-            $candidate = Product::getRawProduct($productName, $userId, $locale);
-
-            if (! $candidate || (($candidate['_rankingScore'] ?? 0) < 0.6)) {
-                $productsInfo[] = [
-                    'product_translation' => null,
-                    'product' => null,
-                    'said_name' => $productName,
-                    'quantity_grams' => $quantity,
-                    'found' => false,
-                ];
-
-                continue;
-            }
-
-            $productModel = Product::find($candidate['product_id']);
             if (! $productModel || $productModel->calories === null) {
                 $productsInfo[] = [
                     'product_translation' => null,
                     'product' => null,
-                    'said_name' => $productName,
-                    'quantity_grams' => $quantity,
+                    'said_name' => $item['said_name'],
+                    'quantity_grams' => $item['quantity'],
                     'found' => false,
                 ];
 
                 continue;
             }
 
-            $productsInfo[] = [
-                'product_translation' => [
-                    'id' => $candidate['id'],
-                    'product_id' => $candidate['product_id'],
-                    'locale' => $candidate['locale'],
-                    'name' => $candidate['name'],
-                    'said_name' => $productName,
-                    'original_name' => $productName,
-                ],
-                'product' => [
-                    'id' => $productModel->id,
-                    'user_id' => $productModel->user_id,
-                    'calories' => $productModel->calories,
-                    'proteins' => $productModel->proteins,
-                    'carbohydrates' => $productModel->carbohydrates,
-                    'fats' => $productModel->fats,
-                    'fibers' => $productModel->fibers ?? 0,
-                    'quantity_grams' => $quantity,
-                ],
-                'quantity_grams' => $quantity,
-                'found' => true,
-            ];
+            $productsInfo[] = $this->foundProduct($hit, $productModel, $item['said_name'], $item['quantity'])
+                + ['found' => true];
         }
 
         if ($productsInfo) {
@@ -136,59 +99,64 @@ class CaloriesAPIBotController extends BaseController
         return response()->json($response);
     }
 
-    public function getTheMostRelevantProduct(Request $request): bool|JsonResponse
+    /**
+     * The product for one "Name - N grams" item, for the bot's "search" button.
+     *
+     * Answers false when the text has no quantity or no product is the same food.
+     */
+    public function getTheMostRelevantProduct(Request $request, ProductMatcher $matcher): bool|JsonResponse
     {
-        $text = $request->input('text');
-        $parts = explode(' - ', $text);
+        $parts = array_map('trim', explode(' - ', (string) $request->input('text')));
 
-        if (count($parts) > 1) {
-            $productName = trim($parts[0]);
-            $quantityStr = trim($parts[1]);
-        }
-        if (preg_match('/(\d+(\.\d+)?)/', $quantityStr, $matches)) {
-            $quantity = floatval($matches[1]);
-        }
-
-        $user_id = auth()->id();
-        $locale = app()->getLocale();
-
-        $productTranslation = Product::getRawProduct($productName, $user_id, $locale);
-        $product = Product::where('id', $productTranslation['product_id'])->first();
-
-        if ($productTranslation['_rankingScore'] < 0.9) {
+        if (count($parts) < 2 || ! preg_match('/(\d+(\.\d+)?)/', $parts[1], $matches)) {
             return false;
         }
 
-        if ($productTranslation) {
-            $productInfo = [
-                'product_translation' => [
-                    'id' => $productTranslation['id'],
-                    'product_id' => $productTranslation['product_id'],
-                    'locale' => $productTranslation['locale'],
-                    'name' => $productTranslation['name'],
-                    'said_name' => $productName,
-                    'original_name' => $productName,
-                ],
-                'product' => [
-                    'id' => $product->id,
-                    'user_id' => $product->user_id,
-                    'calories' => $product->calories,
-                    'proteins' => $product->proteins,
-                    'carbohydrates' => $product->carbohydrates,
-                    'fats' => $product->fats,
-                    'fibers' => $product->fibers,
-                    'quantity_grams' => $quantity,
-                ],
+        $productName = $parts[0];
+        $quantity = (float) $matches[1];
+
+        $hit = $matcher->match([$productName], auth()->id(), app()->getLocale())[0] ?? null;
+        $product = $hit ? Product::find($hit['product_id']) : null;
+
+        if (! $product) {
+            return false;
+        }
+
+        return response()->json([
+            'message' => 'Product found',
+            'product' => $this->foundProduct($hit, $product, $productName, $quantity),
+        ]);
+    }
+
+    /**
+     * One found item in the shape the bot panel reads.
+     *
+     * @param  array<string, mixed>  $hit  the product translation from the search index
+     * @return array<string, mixed>
+     */
+    private function foundProduct(array $hit, Product $product, string $saidName, float $quantity): array
+    {
+        return [
+            'product_translation' => [
+                'id' => $hit['id'],
+                'product_id' => $hit['product_id'],
+                'locale' => $hit['locale'],
+                'name' => $hit['name'],
+                'said_name' => $saidName,
+                'original_name' => $saidName,
+            ],
+            'product' => [
+                'id' => $product->id,
+                'user_id' => $product->user_id,
+                'calories' => $product->calories,
+                'proteins' => $product->proteins,
+                'carbohydrates' => $product->carbohydrates,
+                'fats' => $product->fats,
+                'fibers' => $product->fibers ?? 0,
                 'quantity_grams' => $quantity,
-            ];
-
-            return response()->json([
-                'message' => 'Product found',
-                'product' => $productInfo,
-            ]);
-        } else {
-            return false;
-        }
+            ],
+            'quantity_grams' => $quantity,
+        ];
     }
 
     public function saveProduct(StoreUsersFoodConsumptionsRequest $request, ProductService $productService): JsonResponse
