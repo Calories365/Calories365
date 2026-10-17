@@ -4,6 +4,7 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
+        "test": "vitest run",
         "build-and-push": "npm run build && git add -A && git commit -m \"$COMMIT_MSG\" && git push",
         "format": "prettier --write \"resources/js/src/**/*.{js,vue}\""
     },
@@ -16,7 +17,8 @@
         "sass": "^1.69.5",
         "scss": "^0.2.4",
         "tailwindcss": "^3.3.6",
-        "vite": "^4.0.0"
+        "vite": "^4.0.0",
+        "vitest": "^0.34.6"
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^6.5.1",

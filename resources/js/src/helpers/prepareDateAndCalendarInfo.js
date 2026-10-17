@@ -1,11 +1,13 @@
+import { parseLocalDate, toLocalDateString } from "@/helpers/localDate.js";
+
 function prepareDateAndCalendarInfo(currentTime) {
     if (typeof currentTime === "string") {
-        currentTime = new Date(currentTime);
+        currentTime = parseLocalDate(currentTime);
     } else if (!currentTime) {
         currentTime = new Date();
     }
 
-    const currentDate = currentTime.toISOString().split("T")[0];
+    const currentDate = toLocalDateString(currentTime);
     const month = currentTime.getMonth();
     const daysInMonth = new Date(
         currentTime.getFullYear(),

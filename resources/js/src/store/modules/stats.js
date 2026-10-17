@@ -1,5 +1,6 @@
 import statsApi from "@/api/stats.js";
 import prepareDateAndCalendarInfo from "@/helpers/prepareDateAndCalendarInfo.js";
+import { parseLocalDate } from "@/helpers/localDate.js";
 import { toRaw } from "vue";
 
 const state = {
@@ -90,7 +91,10 @@ const actions = {
     [actionTypes.dateToggle](context, direction) {
         return new Promise((resolve) => {
             const currentDateStr = context.state.currentDate;
-            const currentDate = new Date(currentDateStr);
+            const currentDate = parseLocalDate(currentDateStr);
+            // From the 31st, setMonth(+1) lands two months ahead; the month is all
+            // the stats need, so the day is moved to the 1st first.
+            currentDate.setDate(1);
 
             if (direction === "next") {
                 currentDate.setMonth(currentDate.getMonth() + 1);

@@ -1,5 +1,6 @@
 import authApi from "@/api/dairy.js";
 import i18n from "@/i18n.js";
+import { parseLocalDate, toLocalDateString } from "@/helpers/localDate.js";
 
 const state = {
     isSybmiting: false,
@@ -398,13 +399,13 @@ const actions = {
         return new Promise((resolve) => {
             let currentTime;
             if (context.state.dateFromCalendar) {
-                currentTime = new Date(context.state.dateFromCalendar);
+                currentTime = parseLocalDate(context.state.dateFromCalendar);
             } else {
                 currentTime = new Date();
             }
             const hours = currentTime.getHours();
 
-            const currentDate = currentTime.toISOString().split("T")[0]; // Формат YYYY-MM-DD
+            const currentDate = toLocalDateString(currentTime);
 
             let partOfTheDay;
 
@@ -438,7 +439,7 @@ const actions = {
     [actionTypes.dateToggle](context, direction) {
         return new Promise((resolve) => {
             const currentDateStr = context.state.currentDate;
-            const currentDate = new Date(currentDateStr);
+            const currentDate = parseLocalDate(currentDateStr);
 
             if (direction === "next") {
                 currentDate.setDate(currentDate.getDate() + 1);
@@ -448,7 +449,7 @@ const actions = {
                 throw new Error("Invalid direction for dateToggle action");
             }
 
-            const updatedDateStr = currentDate.toISOString().split("T")[0]; // Формат YYYY-MM-DD
+            const updatedDateStr = toLocalDateString(currentDate);
 
             context.commit(mutationTypes.setDate, updatedDateStr);
 

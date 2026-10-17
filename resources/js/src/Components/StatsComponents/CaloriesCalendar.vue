@@ -6,6 +6,7 @@ import { getterTypes as authGetterTypes } from "@/store/modules/auth.js";
 import store from "@/store/store.js";
 import router from "@/router/router.js";
 import { actionTypes } from "@/store/modules/dairy.js";
+import { parseLocalDate, toLocalDateString } from "@/helpers/localDate.js";
 
 const props = defineProps({
     currentDate: {
@@ -23,10 +24,10 @@ const calendarDate = computed(
 );
 
 function moveToDairy(day) {
-    let date = new Date(calendarDate.value);
+    const date = parseLocalDate(calendarDate.value);
     date.setDate(day);
 
-    const updatedDate = date.toISOString().split("T")[0];
+    const updatedDate = toLocalDateString(date);
     store.dispatch(actionTypes.setDateFromCalendar, updatedDate).then(() => {
         router.push({ name: "diary" });
     });
