@@ -64,58 +64,76 @@ class ProcessVoiceRecordJob implements ShouldBeUnique, ShouldQueue
 
             $text = $speechToTextService->convertSpeechToText($fileForStt);
 
-            // Clean up files regardless of STT result
-            try {
-                Storage::disk('public')->delete($this->localPath);
-            } catch (\Throwable $cleanupE) {
-                Log::warning('Failed to delete source voice file', ['rid' => $this->rid, 'path' => $this->localPath]);
-            }
-
+            // The mp3 is rebuilt from the source on a retry; the source itself is kept
+            // until the record has a final outcome.
             if ($mp3Local) {
-                try {
-                    Storage::disk('public')->delete($mp3Local);
-                } catch (\Throwable $cleanupE) {
-                    Log::warning('Failed to delete converted mp3', ['rid' => $this->rid, 'path' => $mp3Local]);
-                }
+                $this->deleteFile($mp3Local);
             }
 
             if (is_array($text) && isset($text['error'])) {
-                Cache::put($cacheKey, [
+                $this->finish($cacheKey, [
                     'status' => 'failed',
                     'message' => 'Ошибка при расшифровке: '.$text['error'],
-                ], now()->addMinutes(30));
+                ]);
+
+                return;
+            }
+
+            if (! is_string($text) || trim($text) === '') {
+                $this->finish($cacheKey, [
+                    'status' => 'failed',
+                    'message' => 'Не удалось распознать речь в записи',
+                ]);
 
                 return;
             }
 
             $products = $this->searchProductsFromTranscription($text, $this->userId, $this->locale, $speechToTextService);
 
-            Cache::put($cacheKey, [
+            $this->finish($cacheKey, [
                 'status' => 'ready',
                 'transcription' => $text,
                 'products' => $products,
-            ], now()->addMinutes(30));
+            ]);
         } catch (\Throwable $e) {
             Log::error('ProcessVoiceRecordJob failed: '.$e->getMessage(), [
                 'rid' => $this->rid,
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            Cache::put($cacheKey, [
-                'status' => 'failed',
-                'message' => 'Произошла ошибка при обработке записи: '.$e->getMessage(),
-            ], now()->addMinutes(30));
-
-            throw $e; // allow retry/backoff
+            // The status stays pending: the page keeps polling while the queue
+            // retries, and failed() reports the outcome after the last attempt.
+            throw $e;
         }
     }
 
     public function failed(\Throwable $e): void
     {
-        Cache::put('voice:job:'.$this->rid, [
+        $this->finish('voice:job:'.$this->rid, [
             'status' => 'failed',
             'message' => 'Произошла ошибка при обработке записи: '.$e->getMessage(),
-        ], now()->addMinutes(30));
+        ]);
+    }
+
+    /**
+     * Store the final outcome of the record and remove its source file.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function finish(string $cacheKey, array $payload): void
+    {
+        Cache::put($cacheKey, $payload, now()->addMinutes(30));
+
+        $this->deleteFile($this->localPath);
+    }
+
+    private function deleteFile(string $path): void
+    {
+        try {
+            Storage::disk('public')->delete($path);
+        } catch (\Throwable) {
+            Log::warning('Failed to delete voice file', ['rid' => $this->rid, 'path' => $path]);
+        }
     }
 
     private function searchProductsFromTranscription(string $text, int $userId, string $locale, SpeechToTextService $stt): array

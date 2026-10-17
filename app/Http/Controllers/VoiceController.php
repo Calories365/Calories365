@@ -6,10 +6,9 @@ use App\Jobs\GenerateProductDataJob;
 use App\Jobs\ProcessVoiceRecordJob;
 use App\Models\Product;
 use App\Services\AudioConversionService;
+use App\Services\BotPanelService;
 use App\Services\ProductService;
 use App\Services\SpeechToTextService;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -25,12 +24,14 @@ class VoiceController extends Controller
 
     protected AudioConversionService $audioConversionService;
 
-    public function __construct(SpeechToTextService $speechToTextService, ProductService $productService, AudioConversionService $audioConversionService)
+    protected BotPanelService $botPanelService;
+
+    public function __construct(SpeechToTextService $speechToTextService, ProductService $productService, AudioConversionService $audioConversionService, BotPanelService $botPanelService)
     {
         $this->speechToTextService = $speechToTextService;
         $this->productService = $productService;
         $this->audioConversionService = $audioConversionService;
-
+        $this->botPanelService = $botPanelService;
     }
 
     /**
@@ -40,9 +41,17 @@ class VoiceController extends Controller
     {
         try {
             // Check subscription before accepting the job
-            $res = $this->canTranscribeAudio(Auth::id());
+            $allowed = $this->botPanelService->canTranscribeAudio(Auth::id());
 
-            if (! $res['canTranscribeAudio']) {
+            // The panel did not answer: say so instead of treating it as a spent limit.
+            if ($allowed === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'voice_service_unavailable',
+                ], 503);
+            }
+
+            if (! $allowed) {
                 return response()->json([
                     'success' => false,
                     'message' => 'please_buy_premium',
@@ -644,38 +653,6 @@ class VoiceController extends Controller
                 'message' => 'Произошла ошибка при поиске продукта: '.$e->getMessage(),
                 'should_generate' => true,
             ], 500);
-        }
-    }
-
-    private function canTranscribeAudio($user_id)
-    {
-        $botPanelUrl = env('BOT_PANEL_URL');
-        $botApiKey = env('BOT_API_KEY');
-        $host = env('BOT_HOST');
-
-        if (! $botPanelUrl || ! $botApiKey) {
-            Log::warning('Bot panel URL или API key не настроены');
-
-            return;
-        }
-
-        $client = new Client;
-        $headers = [
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-            'Host' => $host,
-            'X-Api-Key' => $botApiKey,
-        ];
-        try {
-            $response = $client->get($botPanelUrl.'/api/subscription-check/'.$user_id, [
-                'headers' => $headers,
-            ]);
-
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            Log::error('Error sending text to diary service: '.$e->getMessage());
-
-            return ['error' => $e->getMessage()];
         }
     }
 

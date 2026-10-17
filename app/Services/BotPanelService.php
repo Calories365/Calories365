@@ -90,6 +90,42 @@ class BotPanelService
         }
     }
 
+    /**
+     * Ask the panel whether the user may record one more voice message.
+     *
+     * The panel owns the free limit shared with the bot, and counts the use.
+     *
+     * @return bool|null null when the panel is not configured or did not answer
+     */
+    public function canTranscribeAudio(int $caloriesId): ?bool
+    {
+        if (! $this->isConfigured()) {
+            Log::warning('Bot panel URL or API key is not set');
+
+            return null;
+        }
+
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders($this->headers())
+                ->get($this->url.'/api/subscription-check/'.$caloriesId);
+        } catch (\Throwable $e) {
+            Log::error('Error checking the voice limit in bot panel: '.$e->getMessage());
+
+            return null;
+        }
+
+        $allowed = $response->successful() ? $response->json('canTranscribeAudio') : null;
+
+        if (! is_bool($allowed)) {
+            Log::error('Bot panel gave no voice limit answer', ['status' => $response->status()]);
+
+            return null;
+        }
+
+        return $allowed;
+    }
+
     private function isConfigured(): bool
     {
         return ! empty($this->url) && ! empty($this->key);
