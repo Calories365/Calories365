@@ -45,6 +45,27 @@ return [
         'host' => env('BOT_HOST'),
     ],
 
+    'openai' => [
+        // One key per interface language; "ua" uses the _UK one, other locales the _RU one.
+        'keys' => [
+            'ua' => env('OPENAI_API_KEY_UK'),
+            'ru' => env('OPENAI_API_KEY_RU'),
+            'en' => env('OPENAI_API_KEY_EN'),
+        ],
+        'models' => [
+            // What the user ate, from speech (photos later), and the diet feedback:
+            // accuracy matters more than price.
+            'meal_analysis' => env('OPENAI_MEAL_ANALYSIS_MODEL', 'gpt-6.1-sol'),
+            'feedback' => env('OPENAI_FEEDBACK_MODEL', 'gpt-6.1-sol'),
+            // Nutrition facts of a single product: short and frequent.
+            'product' => env('OPENAI_PRODUCT_MODEL', 'gpt-6-luna'),
+            'transcription' => env('OPENAI_TRANSCRIPTION_MODEL', 'gpt-transcribe'),
+        ],
+        // The GPT-6 models reason before answering; low keeps the answer fast. They
+        // reject temperature other than 1 and max_tokens.
+        'reasoning_effort' => env('OPENAI_REASONING_EFFORT', 'low'),
+    ],
+
     'telegram_mini_app' => [
         // Which bot signed the initData; null lets the panel try every active bot.
         'bot' => env('TELEGRAM_MINI_APP_BOT'),

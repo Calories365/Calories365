@@ -6,13 +6,14 @@ use Illuminate\Support\Facades\Http;
 
 class ChatGPTFeedback
 {
+    /**
+     * Key of the OpenAI project for the current locale.
+     */
     private function getApiKey(): string
     {
-        return match (app()->getLocale()) {
-            'ua' => env('OPENAI_API_KEY_UK'),
-            'en' => env('OPENAI_API_KEY_EN'),
-            default => env('OPENAI_API_KEY_RU'),
-        };
+        $keys = config('services.openai.keys');
+
+        return (string) ($keys[app()->getLocale()] ?? $keys['ru'] ?? '');
     }
 
     /**
@@ -20,6 +21,8 @@ class ChatGPTFeedback
      *
      * Failures are thrown, not returned as text: the caller stores the result as
      * finished feedback, and an error message stored that way is never replaced.
+     * The length of the reply is set by the prompt; the GPT-6 models reject
+     * max_tokens and any temperature but the default.
      *
      * @throws \Illuminate\Http\Client\RequestException
      * @throws \RuntimeException
@@ -30,9 +33,8 @@ class ChatGPTFeedback
             ->retry(3, 500, fn ($e) => in_array(optional($e->response)->status(), [429, 500, 502, 503, 504], true))
             ->withHeaders(['Authorization' => 'Bearer '.$this->getApiKey()])
             ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4o',
-                'temperature' => 0.2,
-                'max_tokens' => 300,
+                'model' => config('services.openai.models.feedback'),
+                'reasoning_effort' => config('services.openai.reasoning_effort'),
                 'messages' => [['role' => 'user', 'content' => $prompt]],
             ])
             ->throw()

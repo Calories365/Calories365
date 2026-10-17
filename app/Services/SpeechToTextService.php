@@ -8,49 +8,45 @@ use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Speech to a list of products, and nutrition facts of a product, through OpenAI.
+ *
+ * Models come from config('services.openai.models'): transcription for speech,
+ * meal_analysis for the list of products, product for nutrition facts.
+ */
 class SpeechToTextService
 {
     private Client $client;
 
-    public function __construct()
+    public function __construct(?Client $client = null)
     {
-        $this->client = new Client;
+        $this->client = $client ?? new Client;
     }
 
     /**
-     * Определяем нужный ключ в зависимости от текущей локали
+     * Key of the OpenAI project for the current locale.
      */
     private function getApiKey(): string
     {
-        $locale = app()->getLocale();
+        $keys = config('services.openai.keys');
 
-        Log::info('$locale: '.$locale);
-
-        switch ($locale) {
-            case 'ua':
-                return env('OPENAI_API_KEY_UK');
-
-            case 'en':
-                return env('OPENAI_API_KEY_EN');
-
-            default:
-                return env('OPENAI_API_KEY_RU');
-        }
+        return (string) ($keys[app()->getLocale()] ?? $keys['ru'] ?? '');
     }
 
+    /**
+     * Transcribe the recording and turn the text into "Name - N grams;" lines.
+     *
+     * @return string|array{error: string}|false false when the transcript has no text
+     */
     public function convertSpeechToText(string $filePath)
     {
-        $locale = app()->getLocale();
-
-        $languageCode = match ($locale) {
+        $languageCode = match (app()->getLocale()) {
             'ua' => 'uk',
             'ru' => 'ru',
             'en' => 'en',
             default => 'uk',
         };
 
-        Log::info('Lang code: ');
-        Log::info(print_r($languageCode, true));
         $multipartBody = new MultipartStream([
             [
                 'name' => 'file',
@@ -59,10 +55,11 @@ class SpeechToTextService
             ],
             [
                 'name' => 'model',
-                'contents' => 'whisper-1',
+                'contents' => config('services.openai.models.transcription'),
             ],
             [
-                'name' => 'language',
+                // gpt-transcribe takes a list of expected languages instead of "language".
+                'name' => 'languages[]',
                 'contents' => $languageCode,
             ],
         ]);
@@ -93,45 +90,20 @@ class SpeechToTextService
         }
     }
 
+    /**
+     * @return string|array{error: string}
+     */
     public function analyzeFoodIntake(string $text)
     {
-        Log::info('prompt: '.$text);
-
         $prompt = __('calories365-bot.prompt_analyze_food_intake', [
             'text' => $text,
         ]);
 
-        Log::info('calories365-bot.prompt_analyze_food_intake');
-        Log::info(print_r($prompt, true));
-
-        try {
-            $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
-                'headers' => [
-                    'Authorization' => 'Bearer '.$this->getApiKey(),
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => 'gpt-4o',
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $prompt,
-                        ],
-                    ],
-                ],
-            ]);
-
-            $result = json_decode($response->getBody()->getContents(), true);
-
-            return $result['choices'][0]['message']['content']
-                ?? __('calories365-bot.data_not_extracted');
-        } catch (GuzzleException $e) {
-            return ['error' => $e->getMessage()];
-        }
+        return $this->complete(config('services.openai.models.meal_analysis'), $prompt);
     }
 
     /**
-     * @throws GuzzleException
+     * @return string|array{error: string}
      */
     public function generateNewProductData(string $text)
     {
@@ -139,6 +111,16 @@ class SpeechToTextService
             'text' => $text,
         ]);
 
+        return $this->complete(config('services.openai.models.product'), $prompt);
+    }
+
+    /**
+     * One chat completion; the reply text, or ['error' => ...] when the call failed.
+     *
+     * @return string|array{error: string}
+     */
+    private function complete(string $model, string $prompt)
+    {
         try {
             $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
                 'headers' => [
@@ -146,7 +128,8 @@ class SpeechToTextService
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model' => 'gpt-4o',
+                    'model' => $model,
+                    'reasoning_effort' => config('services.openai.reasoning_effort'),
                     'messages' => [
                         [
                             'role' => 'user',
@@ -161,70 +144,8 @@ class SpeechToTextService
             return $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
         } catch (GuzzleException $e) {
-            return ['error' => $e->getMessage()];
-        }
-    }
+            Log::error('OpenAI request failed', ['model' => $model, 'error' => $e->getMessage()]);
 
-    public function chooseTheMostRelevantProduct(array $products)
-    {
-        try {
-            $chosenProductName = '';
-
-            for ($i = 0; $i < count($products); $i += 5) {
-                $prompt = '';
-
-                for ($j = $i; $j < $i + 5 && $j < count($products); $j++) {
-                    $name = $products[$j]['name'];
-                    $details = $products[$j]['details'];
-
-                    $productNames = array_map(function ($detail) {
-                        return $detail['id'].' - '.$detail['name'];
-                    }, $details);
-
-                    $prompt .= __('calories365-bot.prompt_choose_relevant_products_part', [
-                        'name' => $name,
-                        'productNames' => implode(', ', $productNames),
-                    ]).' ';
-                }
-
-                $prompt .= __('calories365-bot.prompt_choose_relevant_products_footer');
-
-                $chosenProductName .= $this->askGPTForRelevance($prompt);
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Error in choosing product: '.$e->getMessage());
-
-            return ['error' => $e->getMessage()];
-        }
-
-        return true;
-    }
-
-    private function askGPTForRelevance($prompt)
-    {
-        try {
-            $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
-                'headers' => [
-                    'Authorization' => 'Bearer '.$this->getApiKey(),
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => 'gpt-4o',
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $prompt,
-                        ],
-                    ],
-                ],
-            ]);
-
-            $result = json_decode($response->getBody()->getContents(), true);
-
-            return $result['choices'][0]['message']['content']
-                ?? __('calories365-bot.data_not_extracted');
-        } catch (GuzzleException $e) {
             return ['error' => $e->getMessage()];
         }
     }
