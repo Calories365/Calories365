@@ -31,6 +31,14 @@ jobs:
           set -euo pipefail
           docker compose exec -T calculator_php php artisan migrate --force --no-interaction
 
+      # Filterable attributes of the products index live in config/scout.php; product
+      # search fails without them. Idempotent, so it runs on every deploy.
+      - name: Sync Meilisearch index settings
+        working-directory: /home/maxim/var/www/calories365
+        run: |
+          set -euo pipefail
+          docker compose exec -T calculator_php php artisan scout:sync-index-settings --no-interaction
+
       - name: Graceful restart Horizon
         working-directory: /home/maxim/var/www/calories365
         run: |

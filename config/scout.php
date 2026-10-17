@@ -133,10 +133,13 @@ return [
     'meilisearch' => [
         'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
         'key' => env('MEILISEARCH_KEY'),
+        // Applied by `php artisan scout:sync-index-settings`. Product search filters by
+        // these attributes; a products index without them rejects every query.
         'index-settings' => [
-            // 'users' => [
-            //     'filterableAttributes'=> ['id', 'name', 'email'],
-            // ],
+            \App\Models\ProductTranslation::class => [
+                'filterableAttributes' => \App\Models\ProductTranslation::FILTERABLE,
+                'sortableAttributes' => \App\Models\ProductTranslation::SORTABLE,
+            ],
         ],
     ],
 
