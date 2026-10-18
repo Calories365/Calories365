@@ -111,12 +111,15 @@ class MealInputReader
             .'the food first, then what describes it, singular, nominative. Keep the cooking method, the sort, the '
             .'fat content, the brand and what was added as the user said or the photo shows them. When the method is '
             .'not said and the food is eaten only cooked (grains, pasta, legumes, potatoes, meat, fish), name its '
-            ."usual method, \"Гречка варёная\". A soup with sour cream or a salad with its dressing is one item.\n\n"
+            .'usual method, "Гречка варёная". No parentheses in names. A soup with sour cream or a salad with its '
+            ."dressing is one item.\n\n"
             .'Grams: the amount eaten. Take it from the text; for pieces multiply by the weight of one piece; for '
             .'drinks 1 ml is 1 g. Without an amount in the text, estimate it from the photo by the plate, the cutlery '
             ."and the usual portion, or take a usual portion. Never leave grams null for add.\n\n"
-            .'A photo of a dish: add every food on it with its estimated grams. A photo of a nutrition label or a '
-            .'package: read each product into "labels": its name in Russian (name_ru), Ukrainian (name_ua) and '
+            .'A photo of a dish: add every food on it with its estimated grams. A photo of a nutrition label: read '
+            .'each product whose table of nutrition facts is printed and legible on the photo into "labels" '
+            .'("facts_visible" true); a package without a legible table is a food like any other, added by its name, '
+            .'and never gets facts made up. A label holds the name in Russian (name_ru), Ukrainian (name_ua) and '
             .'English (name_en), product type first, then brand and fat content; "named" is false when neither the '
             .'package nor the text tells what the product is, and the names then say only its kind; calories, '
             .'proteins, fats, carbohydrates and fibers per 100 g (per 100 ml counts as per 100 g; values only per '
@@ -166,8 +169,9 @@ class MealInputReader
                     'items' => [
                         'type' => 'object',
                         'additionalProperties' => false,
-                        'required' => ['name_ru', 'name_ua', 'name_en', 'named', 'calories', 'proteins', 'fats', 'carbohydrates', 'fibers', 'package_grams'],
+                        'required' => ['facts_visible', 'name_ru', 'name_ua', 'name_en', 'named', 'calories', 'proteins', 'fats', 'carbohydrates', 'fibers', 'package_grams'],
                         'properties' => [
+                            'facts_visible' => ['type' => 'boolean'],
                             'name_ru' => ['type' => 'string'],
                             'name_ua' => ['type' => 'string'],
                             'name_en' => ['type' => 'string'],
@@ -228,13 +232,19 @@ class MealInputReader
     }
 
     /**
-     * The label as stored facts, or null when its facts cannot be true.
+     * The label as stored facts, or null when the photo does not show its facts
+     * or they cannot be true.
      *
      * @param  array<string, mixed>  $label
      * @return array{names: array<string, string>, named: bool, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float}|null
      */
     private function validLabel(array $label): ?array
     {
+        // Facts the photo does not show are made up, whatever the package says.
+        if (($label['facts_visible'] ?? false) !== true) {
+            return null;
+        }
+
         $names = [];
         foreach (['ru' => 'name_ru', 'ua' => 'name_ua', 'en' => 'name_en'] as $locale => $field) {
             $name = trim((string) ($label[$field] ?? ''));

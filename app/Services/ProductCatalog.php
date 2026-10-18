@@ -151,7 +151,7 @@ class ProductCatalog
             ."For each item:\n"
             ."- is_food: false for anything that is not a food or a drink; the other fields are then ignored.\n"
             .'- name_ru, name_ua, name_en: the food in Russian, Ukrainian and English, the way a nutrition database '
-            .'names it: the food first, then what describes it. Keep the cooking method, the sort, the fat content, '
+            .'names it: the food first, then what describes it, no parentheses. Keep the cooking method, the sort, the fat content, '
             .'the brand and what was added as the user said them, and add nothing else. When no cooking method was '
             .'said and the food is eaten only cooked (grains, pasta, legumes, potatoes, meat, fish), name the usual '
             ."method: \"Гречка варёная\", \"Стейк говяжий жареный\".\n"
@@ -280,19 +280,42 @@ class ProductCatalog
             return $this->store($label, $locale, Product::SOURCE_LABEL, $userId);
         }
 
-        $known = ProductTranslation::query()
-            ->where('locale', $locale)
-            ->where('name', $label['names'][$locale] ?? $label['names']['ru'])
-            ->whereNull('user_id')
-            ->whereHas('product', static fn ($product) => $product
-                ->where('source', Product::SOURCE_LABEL)
-                ->whereBetween('calories', [$label['calories'] - 0.5, $label['calories'] + 0.5]))
-            ->first();
+        $known = $this->knownLabel($label, $locale);
 
         $hit = $known ? self::hit($known) : $this->store($label, $locale, Product::SOURCE_LABEL);
         ProductAlias::remember($hit['name'], $locale, (int) $hit['product_id']);
 
         return $hit;
+    }
+
+    /**
+     * The shared product an earlier photo of the same label made: the same
+     * nutrition facts and a name of the same food. The model spells a brand
+     * differently from photo to photo, "Olympus" and "OLYMPOS", so the name is
+     * compared by its food words only.
+     *
+     * @param  array{names: array<string, string>, calories: float, proteins: float, fats: float, carbohydrates: float}  $label
+     */
+    private function knownLabel(array $label, string $locale): ?ProductTranslation
+    {
+        $food = FoodName::parse($label['names'][$locale] ?? $label['names']['ru'])->food;
+
+        $translations = ProductTranslation::query()
+            ->where('locale', $locale)
+            ->whereNull('user_id')
+            ->whereHas('product', static function ($product) use ($label) {
+                $product->where('source', Product::SOURCE_LABEL);
+                foreach (['calories', 'proteins', 'fats', 'carbohydrates'] as $fact) {
+                    $product->whereBetween($fact, [$label[$fact] - 0.5, $label[$fact] + 0.5]);
+                }
+            })
+            ->limit(20)
+            ->get();
+
+        return $translations->first(static fn (ProductTranslation $translation) => array_intersect(
+            FoodName::parse((string) $translation->name)->food,
+            $food
+        ) !== []);
     }
 
     /**

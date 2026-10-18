@@ -135,6 +135,19 @@ class MealDraftTest extends TestCase
         Http::assertSent(fn (Request $request) => str_starts_with($request['messages'][0]['content'][1]['image_url']['url'], 'data:image/jpeg;base64,'));
     }
 
+    public function test_the_same_label_photographed_again_finds_the_product_it_made(): void
+    {
+        $this->fakeModel([$this->add('Кефир Олимп 1%', 250, label: 0)], [$this->label(named: true)]);
+        $this->input(['photo' => $this->photo()])->assertOk();
+
+        $again = $this->label(named: true);
+        $again['name_ru'] = 'Кефир OLYMPOS 1%';
+        $this->fakeModel([$this->add('Кефир OLYMPOS 1%', 200, label: 0)], [$again]);
+        $this->input(['photo' => $this->photo()])->assertOk();
+
+        $this->assertSame(1, Product::where('source', Product::SOURCE_LABEL)->count());
+    }
+
     public function test_a_label_without_the_products_name_makes_the_users_own_product(): void
     {
         $this->fakeModel([$this->add('Продукт с этикетки', 100, label: 0)], [$this->label(named: false)]);
@@ -144,6 +157,18 @@ class MealDraftTest extends TestCase
         $product = Product::where('source', Product::SOURCE_LABEL)->sole();
         $this->assertSame($this->user->id, $product->user_id);
         $this->assertSame([$this->user->id], ProductTranslation::where('product_id', $product->id)->pluck('user_id')->unique()->values()->all());
+    }
+
+    public function test_a_package_without_legible_facts_is_found_by_its_name(): void
+    {
+        $this->fakeModel([$this->add('Хлеб', 100, label: 0)], [$this->label(named: true, factsVisible: false)]);
+
+        $this->input(['text' => 'съел хлеб', 'photo' => $this->photo()])->assertOk()
+            ->assertJsonPath('draft.items.0.name', 'Хлеб')
+            ->assertJsonPath('draft.items.0.source', MealDraftItem::SOURCE_DATABASE)
+            ->assertJsonPath('draft.items.0.per_100g.calories', 234);
+
+        $this->assertSame(0, Product::where('source', Product::SOURCE_LABEL)->count());
     }
 
     public function test_an_input_about_nothing_leaves_the_draft_as_it_was(): void
@@ -278,9 +303,10 @@ class MealDraftTest extends TestCase
     /**
      * @return array<string, mixed>
      */
-    private function label(bool $named): array
+    private function label(bool $named, bool $factsVisible = true): array
     {
         return [
+            'facts_visible' => $factsVisible,
             'name_ru' => $named ? 'Кефир Олимп 1%' : 'Продукт с этикетки',
             'name_ua' => $named ? 'Кефір Олімп 1%' : 'Продукт з етикетки',
             'name_en' => $named ? 'Kefir Olimp 1%' : 'Product from a label',
