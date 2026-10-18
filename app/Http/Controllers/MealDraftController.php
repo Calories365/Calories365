@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DraftInputRequest;
 use App\Http\Requests\SaveDraftRequest;
+use App\Http\Requests\UpdateDraftItemRequest;
 use App\Models\MealDraft;
+use App\Services\AudioConversionService;
 use App\Services\MealDraftService;
+use App\Services\SpeechToTextService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
- * The meal draft of the account the bot panel acts for, see MealDraftService.
+ * The user's meal draft, see MealDraftService: for the bot panel (bot API key)
+ * and for the site and the Mini App (the "Приём пищи" page).
  *
  * Every answer carries the draft in the shape of MealDraft::toPayload, or null
  * when there is none.
@@ -30,18 +34,28 @@ class MealDraftController extends Controller
     }
 
     /**
-     * Apply a text or a photo to the draft. understood is false when the input
-     * says nothing about food; not_found lists the foods without a product.
+     * Apply a text, a photo or a voice recording to the draft. understood is
+     * false when the input says nothing about food; not_found lists the foods
+     * without a product.
      */
     public function input(DraftInputRequest $request): JsonResponse
     {
         $photo = $request->file('photo');
+        $text = $request->validated('text');
 
         try {
+            if ($request->hasFile('audio')) {
+                $text = $this->drafts->transcribe($request->file('audio'), app(AudioConversionService::class), app(SpeechToTextService::class));
+
+                if ($text === null) {
+                    return response()->json(['message' => 'voice_not_recognized'], 422);
+                }
+            }
+
             $result = $this->drafts->input(
                 auth()->id(),
                 app()->getLocale(),
-                $request->validated('text'),
+                $text,
                 $photo ? ['mime' => (string) $photo->getMimeType(), 'contents' => $photo->get()] : null,
             );
         } catch (\Throwable $e) {
@@ -54,7 +68,36 @@ class MealDraftController extends Controller
             'draft' => $result['draft']?->toPayload(),
             'understood' => $result['understood'],
             'not_found' => $result['not_found'],
+            'text' => $text,
         ]);
+    }
+
+    /**
+     * Change an item from the draft editor.
+     */
+    public function updateItem(UpdateDraftItemRequest $request, int $item): JsonResponse
+    {
+        $draft = $this->drafts->updateItem(auth()->id(), $item, $request->validated());
+
+        if ($draft === null) {
+            return response()->json(['message' => 'item_not_found'], 404);
+        }
+
+        return response()->json(['draft' => $draft->toPayload()]);
+    }
+
+    /**
+     * Remove an item from the draft editor.
+     */
+    public function destroyItem(int $item): JsonResponse
+    {
+        $draft = $this->drafts->removeItem(auth()->id(), $item);
+
+        if ($draft === false) {
+            return response()->json(['message' => 'item_not_found'], 404);
+        }
+
+        return response()->json(['draft' => $draft?->toPayload()]);
     }
 
     /**

@@ -57,6 +57,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/voice/search-product', [VoiceController::class, 'searchProduct'])->name('voice.searchProduct');
 
         Route::get('/voice/status', [VoiceController::class, 'status'])->name('voice.status');
+
+        // The meal draft of the "Приём пищи" page, shared with the bot.
+        Route::get('/draft', [\App\Http\Controllers\MealDraftController::class, 'show'])->name('meal-draft.show');
+        Route::post('/draft/input', [\App\Http\Controllers\MealDraftController::class, 'input'])
+            ->middleware(\App\Http\Middleware\GuardDraftInput::class)
+            ->name('meal-draft.input');
+        Route::patch('/draft/items/{item}', [\App\Http\Controllers\MealDraftController::class, 'updateItem'])
+            ->whereNumber('item')
+            ->name('meal-draft.items.update');
+        Route::delete('/draft/items/{item}', [\App\Http\Controllers\MealDraftController::class, 'destroyItem'])
+            ->whereNumber('item')
+            ->name('meal-draft.items.destroy');
+        Route::post('/draft/save', [\App\Http\Controllers\MealDraftController::class, 'save'])->name('meal-draft.save');
+        Route::delete('/draft', [\App\Http\Controllers\MealDraftController::class, 'destroy'])->name('meal-draft.destroy');
     });
 });
 Route::post('/telegram/web-app-auth', [\App\Http\Controllers\TelegramWebAppController::class, 'auth'])

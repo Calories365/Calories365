@@ -52,7 +52,7 @@
         "statistics": "Statistics",
         "myRecipes": "My Recipes",
         "orSignInWith": "Or sign in with:",
-        "voice": "Voice Input",
+        "voice": "Meal",
         "sorry_error": "Sorry, an error occurred.",
         "buy_premium_for_this_func": "This feature is available in the premium subscription!",
         "no_products_consumed": "No products consumed"
@@ -502,5 +502,58 @@
     "MiniApp": {
         "authError": "Could not sign you in through Telegram. Please try again.",
         "retry": "Try again"
+    },
+    "Meal": {
+        "title": "Meal",
+        "lead": "Say, type or take a photo of what you ate. Several messages are fine: they all make one meal, and the Telegram bot shows the same.",
+        "record": "Speak",
+        "stop": "Done",
+        "photo": "Photo of food or a label",
+        "textLabel": "What you ate",
+        "textHint": "For example: buckwheat 200 g and a cutlet",
+        "send": "Send",
+        "listening": "Listening… Press \"Done\" when you finish.",
+        "reading": "Reading…",
+        "heard": "You said: \"{text}\"",
+        "grams": "g",
+        "kcal": "kcal",
+        "macros": "P {proteins} · F {fats} · C {carbohydrates}",
+        "per100": "Nutrition per 100 g",
+        "factsHint": "Changed values save the product as your own.",
+        "calories": "Calories",
+        "proteins": "Protein, g",
+        "fats": "Fat, g",
+        "carbohydrates": "Carbs, g",
+        "edited": "changed",
+        "label": "from the label",
+        "remove": "Remove",
+        "notFound": "Not found: {names}",
+        "total": "Total: {calories} kcal",
+        "saveTo": {
+            "morning": "To breakfast",
+            "dinner": "To lunch",
+            "supper": "To dinner"
+        },
+        "cancel": "Cancel the meal",
+        "saved": "Saved to the diary: {calories} kcal",
+        "cancelled": "The meal is cancelled",
+        "notUnderstood": "No food found in the message. Say or type what you ate.",
+        "howTo": {
+            "title": "How to use",
+            "say": "Press \"Speak\" and list what you ate: \"buckwheat 200 grams, a cutlet and tea with two spoons of sugar\". Or type the same in the field below.",
+            "photo": "Or take a photo of the plate. A photo of a label with its nutrition table gives the exact values from the package.",
+            "correct": "Correct it if needed: grams and nutrition right in the list, or in words: \"buckwheat was 250\", \"remove the tea\".",
+            "save": "Press \"To breakfast\", \"To lunch\" or \"To dinner\" to save the meal to the diary.",
+            "bot": "The Telegram bot works the same: send it a voice message, a photo or text, the draft is shared."
+        },
+        "errors": {
+            "rateLimited": "Too many messages in a row. Please try a bit later.",
+            "unavailable": "The service is unavailable right now, please try later.",
+            "notRead": "Could not read it, please try again.",
+            "notHeard": "Could not hear the recording, please try again.",
+            "gone": "This meal is already saved or cancelled.",
+            "mic": "No access to the microphone. Allow it in the settings or type instead.",
+            "generic": "Something went wrong, please try again."
+        }
     }
 }

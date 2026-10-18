@@ -137,7 +137,7 @@ const routes = [
     },
     {
         path: "/voice",
-        component: () => import("@/pages/Voice.vue"),
+        component: () => import("@/pages/Meal.vue"),
         name: "voice",
         meta: {
             needAuth: true,

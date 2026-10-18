@@ -6,8 +6,11 @@ use App\Models\FoodConsumption;
 use App\Models\MealDraft;
 use App\Models\MealDraftItem;
 use App\Models\Product;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * The meal draft: a meal put together from several messages, voice, text, a
@@ -22,6 +25,16 @@ use Illuminate\Support\Facades\DB;
  */
 class MealDraftService
 {
+    /**
+     * "2 250": grams of item 2.
+     */
+    private const SET_GRAMS = '/^(\d{1,2})\s*[-—:.]?\s*(\d{1,4})\s*(?:г|гр|грам\p{L}*|g)?\.?$/u';
+
+    /**
+     * "убрать 3": remove item 3.
+     */
+    private const REMOVE = '/^(?:-|убра\p{L}*|убери|удал\p{L}*|прибра\p{L}*|прибери|видал\p{L}*|remove|delete)\s*(\d{1,2})$/u';
+
     public function __construct(
         private MealInputReader $reader,
         private ProductCatalog $catalog,
@@ -169,6 +182,100 @@ class MealDraftService
     }
 
     /**
+     * Change an item from the draft editor: grams are the portion; a name or
+     * nutrition facts the user types make the item the user's own (edited).
+     *
+     * @param  array{grams?: int|float, name?: string, calories?: float, proteins?: float, fats?: float, carbohydrates?: float}  $changes
+     * @return MealDraft|null the draft, or null when the user has no such item
+     */
+    public function updateItem(int $userId, int $itemId, array $changes): ?MealDraft
+    {
+        $draft = MealDraft::openFor($userId);
+        $item = $draft?->items->firstWhere('id', $itemId);
+
+        if ($item === null) {
+            return null;
+        }
+
+        if (isset($changes['grams'])) {
+            $item->quantity = (int) round($changes['grams']);
+        }
+
+        $own = array_intersect_key($changes, array_flip(['name', 'calories', 'proteins', 'fats', 'carbohydrates']));
+        if ($own !== []) {
+            $item->fill($own + ['edited' => true]);
+        }
+
+        $item->save();
+        $draft->touch();
+
+        return $draft->fresh();
+    }
+
+    /**
+     * Remove an item from the draft editor; the draft goes with its last item.
+     *
+     * @return MealDraft|false|null the draft, null when it is gone, false when the user has no such item
+     */
+    public function removeItem(int $userId, int $itemId): MealDraft|false|null
+    {
+        $draft = MealDraft::openFor($userId);
+        $item = $draft?->items->firstWhere('id', $itemId);
+
+        if ($item === null) {
+            return false;
+        }
+
+        $item->delete();
+
+        if ($draft->items()->doesntExist()) {
+            $draft->delete();
+
+            return null;
+        }
+
+        $this->renumber($draft);
+
+        return $draft->fresh();
+    }
+
+    /**
+     * The words of a voice recording from the site or the Mini App; null when
+     * it has none. The file is removed once read.
+     *
+     * @throws \RuntimeException when the transcription fails
+     */
+    public function transcribe(UploadedFile $audio, AudioConversionService $converter, SpeechToTextService $speech): ?string
+    {
+        $extension = strtolower($audio->getClientOriginalExtension() ?: 'webm');
+        $localPath = $audio->storeAs('voice_records', Str::uuid().'.'.$extension, 'public');
+        $fullPath = Storage::disk('public')->path($localPath);
+
+        // gpt-transcribe takes the webm, mp4 and mp3 browsers record; only ogg needs converting.
+        [$mp3Local, $mp3Full] = in_array($extension, ['ogg', 'oga'], true)
+            ? $converter->convertToMp3($localPath, $fullPath)
+            : [null, null];
+
+        try {
+            $text = $speech->transcribe($mp3Full ?: $fullPath);
+        } finally {
+            Storage::disk('public')->delete(array_filter([$localPath, $mp3Local]));
+        }
+
+        return $text === false ? null : $text;
+    }
+
+    /**
+     * Whether the text is a short edit the draft applies without the model.
+     */
+    public static function isShortEdit(string $text): bool
+    {
+        $text = mb_strtolower(trim($text));
+
+        return (bool) preg_match(self::SET_GRAMS, $text) || (bool) preg_match(self::REMOVE, $text);
+    }
+
+    /**
      * "2 250" sets the grams of item 2, "убрать 3" removes item 3; anything else
      * goes to the model.
      *
@@ -179,12 +286,12 @@ class MealDraftService
     {
         $text = mb_strtolower(trim($text));
 
-        if (preg_match('/^(\d{1,2})\s*[-—:.]?\s*(\d{1,4})\s*(?:г|гр|грам\p{L}*|g)?\.?$/u', $text, $match)
+        if (preg_match(self::SET_GRAMS, $text, $match)
             && isset($items[$match[1] - 1]) && $match[2] > 0) {
             return ['operations' => [['action' => 'update', 'item' => (int) $match[1], 'name' => '', 'grams' => (float) $match[2], 'label' => null, 'facts' => []]], 'labels' => []];
         }
 
-        if (preg_match('/^(?:-|убра\p{L}*|убери|удал\p{L}*|прибра\p{L}*|прибери|видал\p{L}*|remove|delete)\s*(\d{1,2})$/u', $text, $match)
+        if (preg_match(self::REMOVE, $text, $match)
             && isset($items[$match[1] - 1])) {
             return ['operations' => [['action' => 'remove', 'item' => (int) $match[1], 'name' => '', 'grams' => null, 'label' => null, 'facts' => []]], 'labels' => []];
         }

@@ -40,6 +40,23 @@ class SpeechToTextService
      */
     public function convertSpeechToText(string $filePath)
     {
+        try {
+            $text = $this->transcribe($filePath);
+        } catch (\RuntimeException $e) {
+            return ['error' => $e->getMessage()];
+        }
+
+        return $text !== false ? $this->analyzeFoodIntake($text) : false;
+    }
+
+    /**
+     * The words of the recording; false when it has none. The meal draft reads
+     * what they say about food.
+     *
+     * @throws \RuntimeException when the transcription fails
+     */
+    public function transcribe(string $filePath): string|false
+    {
         $languageCode = match (app()->getLocale()) {
             'ua' => 'uk',
             'ru' => 'ru',
@@ -78,16 +95,14 @@ class SpeechToTextService
 
         try {
             $response = $this->client->send($request);
-            $data = json_decode($response->getBody()->getContents(), true);
-
-            if (isset($data['text'])) {
-                return $this->analyzeFoodIntake($data['text']);
-            }
-
-            return false;
         } catch (GuzzleException $e) {
-            return ['error' => $e->getMessage()];
+            throw new \RuntimeException('Transcription failed: '.$e->getMessage(), 0, $e);
         }
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        $text = trim((string) ($data['text'] ?? ''));
+
+        return $text !== '' ? $text : false;
     }
 
     /**
