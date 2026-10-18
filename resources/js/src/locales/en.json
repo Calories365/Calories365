@@ -585,6 +585,38 @@
             "medium": "medium",
             "high": "high"
         },
-        "loadHint": "The glycemic load shows how much the meal raises blood sugar: it counts both how many carbohydrates there are and how fast they are."
+        "loadHint": "The glycemic load shows how much the meal raises blood sugar: it counts both how many carbohydrates there are and how fast they are.",
+        "recordedWeight": "Saved the weight {weight} kg.",
+        "recordedActivity": "Saved: {title}, {minutes} min, ≈{calories} kcal."
+    },
+    "Body": {
+        "weight": "Weight",
+        "kg": "kg",
+        "save": "Save",
+        "update": "Change",
+        "saved": "Weight saved",
+        "notSaved": "Could not save it, please try again",
+        "invalid": "Type the weight in kilograms, like 82.4",
+        "activity": "Activity, ≈{calories} kcal",
+        "activityItem": "{title}, {minutes} min, ≈{calories} kcal",
+        "remove": "Remove",
+        "hint": "Say or type to the bot or on the \"Meal\" page: \"I weigh 82.4\", \"ran 5 km in 30 minutes\", \"an hour at the gym\"."
+    },
+    "Energy": {
+        "title": "Your expenditure by the diary",
+        "expenditure": "≈{calories} kcal a day",
+        "explained": "Over {days} days of the diary you ate {intake} kcal on average, and your weight changed by {change} kg a week. The calculator below guesses the expenditure from age and weight; this one is measured.",
+        "norm": {
+            "lose": "To lose weight, eat about {norm} kcal a day.",
+            "stay": "To keep your weight, eat about {norm} kcal a day.",
+            "gain": "To gain, eat about {norm} kcal a day."
+        },
+        "apply": "Make {norm} kcal the norm",
+        "isNorm": "This is your norm in the diary already.",
+        "applied": "The norm {norm} kcal is saved",
+        "notApplied": "Could not save the norm, please try again",
+        "collecting": "I will measure your real expenditure once the diary has {days} days of meals and {weights} weigh-ins over {span} days or more. Weigh yourself in the morning and tell the bot \"I weigh 82.4\".",
+        "progress": "Over the last 4 weeks: days of meals — {days}, weigh-ins — {weights}.",
+        "unclear": "Cannot measure it: by the diary you eat {intake} kcal on average while your weight changes by {change} kg a week, which no body does. Usually some meals are missing from the diary or the weigh-ins were made in different conditions."
     }
 }

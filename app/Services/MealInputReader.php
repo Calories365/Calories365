@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BodyWeight;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -32,7 +33,7 @@ class MealInputReader
      *
      * @param  array<int, array{name: string, grams: int}>  $draft  the items of the draft, numbered from 1 by position
      * @param  array<int, array{kind: string, text: string|null, photo: array{mime: string, contents: string}|null}>  $inputs  in the order the user sent them
-     * @return array{operations: array<int, array{action: string, item: int|null, name: string, brand: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>}
+     * @return array{operations: array<int, array{action: string, item: int|null, name: string, brand: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>, weight: float|null, activities: array<int, array{title: string, minutes: int, met: float}>}
      *
      * @throws \Illuminate\Http\Client\RequestException
      * @throws \RuntimeException
@@ -83,7 +84,21 @@ class MealInputReader
             }
         }
 
-        return ['operations' => $operations, 'labels' => $labels];
+        $weight = $decoded['weight_kg'] ?? null;
+        $weight = is_numeric($weight) && $weight >= BodyWeight::MIN && $weight <= BodyWeight::MAX ? round((float) $weight, 2) : null;
+
+        $activities = [];
+        foreach ($decoded['activities'] ?? [] as $activity) {
+            $title = is_array($activity) ? trim((string) ($activity['title'] ?? '')) : '';
+            $minutes = (int) round((float) ($activity['minutes'] ?? 0));
+            $met = round((float) ($activity['met'] ?? 0), 1);
+
+            if ($title !== '' && $minutes >= 1 && $minutes <= 600 && $met >= 1 && $met <= 20) {
+                $activities[] = ['title' => mb_substr($title, 0, 150), 'minutes' => $minutes, 'met' => $met];
+            }
+        }
+
+        return ['operations' => $operations, 'labels' => $labels, 'weight' => $weight, 'activities' => $activities];
     }
 
     /**
@@ -162,6 +177,12 @@ class MealInputReader
             .'Brand: for add and for a changed name, the brand or the maker of the product when the user names one '
             .'or a package or a label on a photo shows it, spelled the same as in the name, which keeps it; "" for a food '
             ."without a brand: a dish, a fruit, a home-made food, a product of no visible make.\n\n"
+            .'Body weight and physical activity are not foods. weight_kg: the body weight the user tells for today '
+            .'("вешу 82,4", "вес утром 82.4"), otherwise null. activities: each physical activity the user tells '
+            ."they did today (\"пробежал 5 км за 30 минут\", \"час в зале\", \"10 тысяч шагов\"): title in {$language}, short, "
+            .'as said ("Бег 5 км"); minutes, estimated from the distance or the steps when not said; met, the MET of '
+            .'the activity from the Compendium of Physical Activities. An activity planned or done on another day '
+            ."is not given.\n\n"
             .'When the input says nothing about food, return no operations and no labels.';
     }
 
@@ -175,8 +196,22 @@ class MealInputReader
         return [
             'type' => 'object',
             'additionalProperties' => false,
-            'required' => ['operations', 'labels'],
+            'required' => ['operations', 'labels', 'weight_kg', 'activities'],
             'properties' => [
+                'weight_kg' => ['type' => ['number', 'null']],
+                'activities' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'additionalProperties' => false,
+                        'required' => ['title', 'minutes', 'met'],
+                        'properties' => [
+                            'title' => ['type' => 'string'],
+                            'minutes' => ['type' => 'number'],
+                            'met' => ['type' => 'number'],
+                        ],
+                    ],
+                ],
                 'operations' => [
                     'type' => 'array',
                     'items' => [

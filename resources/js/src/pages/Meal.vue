@@ -203,6 +203,7 @@ export default {
                 const { data } = await request();
                 this.show(data);
                 this.notFound = data.not_found ?? [];
+                this.tellRecorded(data.recorded);
             } catch (error) {
                 this.fail(error);
             } finally {
@@ -289,6 +290,36 @@ export default {
             this.stream?.getTracks().forEach((track) => track.stop());
             this.stream = null;
         },
+        /**
+         * Say what weight and activities went to the diary of the day.
+         */
+        tellRecorded(recorded) {
+            if (!recorded) {
+                return;
+            }
+
+            const told = [];
+
+            if (recorded.weight) {
+                told.push(
+                    this.$t("Meal.recordedWeight", { weight: recorded.weight })
+                );
+            }
+
+            (recorded.activities ?? []).forEach((activity) => {
+                told.push(
+                    this.$t("Meal.recordedActivity", {
+                        title: activity.title,
+                        minutes: activity.minutes,
+                        calories: activity.calories,
+                    })
+                );
+            });
+
+            if (told.length) {
+                this.notify("successMessage", told.join(" "));
+            }
+        },
         async dropInput(input) {
             try {
                 const { data } = await removeInput(input.id);
@@ -343,6 +374,7 @@ export default {
 
             this.calculating = false;
             this.show(data);
+            this.tellRecorded(state?.recorded);
 
             if (state?.status === "failed") {
                 this.notify("errorMessage", this.$t("Meal.errors.notRead"));

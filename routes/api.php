@@ -58,6 +58,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/voice/status', [VoiceController::class, 'status'])->name('voice.status');
 
+        // The body weight and the activities of a day.
+        Route::get('/body/{date}', [\App\Http\Controllers\BodyLogController::class, 'day'])
+            ->where('date', '\d{4}-\d{2}-\d{2}')
+            ->name('body.day');
+        Route::post('/body/weight', [\App\Http\Controllers\BodyLogController::class, 'storeWeight'])->name('body.weight.store');
+        Route::delete('/body/activities/{activity}', [\App\Http\Controllers\BodyLogController::class, 'destroyActivity'])
+            ->whereNumber('activity')
+            ->name('body.activities.destroy');
+
+        // The real daily expenditure the diary measured.
+        Route::get('/energy', [\App\Http\Controllers\EnergyBalanceController::class, 'show'])->name('energy.show');
+        Route::post('/energy/apply', [\App\Http\Controllers\EnergyBalanceController::class, 'apply'])->name('energy.apply');
+
         // The meal draft of the "Приём пищи" page, shared with the bot.
         Route::get('/draft', [\App\Http\Controllers\MealDraftController::class, 'show'])->name('meal-draft.show');
         Route::post('/draft/input', [\App\Http\Controllers\MealDraftController::class, 'input'])

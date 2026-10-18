@@ -1,6 +1,7 @@
 <script>
 import CaloriesFoodList from "@/Components/DairyComponents/CaloriesFoodList.vue";
 import CaloriesIndication from "@/Components/DairyComponents/CaloriesIndication.vue";
+import CaloriesBodyDay from "@/Components/DairyComponents/CaloriesBodyDay.vue";
 import CaloriesNavbar from "@/Components/DairyComponents/CaloriesNavbar.vue";
 import CaloriesAddBtn from "@/UI/CaloriesAddBtn.vue";
 import CaloriesSlideMenu from "@/Components/DairyComponents/CaloriesSlideMenu.vue";
@@ -22,6 +23,7 @@ export default {
         CaloriesNavbar,
         CaloriesIndication,
         CaloriesFoodList,
+        CaloriesBodyDay,
     },
     data() {
         return {
@@ -85,6 +87,8 @@ export default {
                     <calories-add-btn @click="toggleMenu" />
                 </div>
             </div>
+
+            <calories-body-day />
         </div>
     </section>
 </template>

@@ -59,6 +59,7 @@ class MealDraftService
         private ProductCatalog $catalog,
         private ProductService $products,
         private ProductEnricher $enricher,
+        private BodyLog $body,
     ) {}
 
     /**
@@ -66,7 +67,7 @@ class MealDraftService
      * says nothing about food, not_found lists the foods no product was found for.
      *
      * @param  array{mime: string, contents: string}|null  $photo
-     * @return array{draft: MealDraft|null, understood: bool, not_found: array<int, string>}
+     * @return array{draft: MealDraft|null, understood: bool, not_found: array<int, string>, recorded: array<string, mixed>|null}
      *
      * @throws \Illuminate\Http\Client\RequestException
      * @throws \RuntimeException
@@ -85,7 +86,7 @@ class MealDraftService
      * or a photo with its caption. A short edit of the draft applies at once
      * instead, and then is the result of input().
      *
-     * @return array{draft: MealDraft|null, understood: bool, not_found: array<int, string>}|null
+     * @return array{draft: MealDraft|null, understood: bool, not_found: array<int, string>, recorded?: array<string, mixed>|null}|null
      *
      * @throws \LengthException when the user has as many inputs waiting as a calculation takes
      */
@@ -93,6 +94,14 @@ class MealDraftService
     {
         if ($photo === null && self::isShortEdit((string) $text) && MealDraft::openFor($userId) !== null) {
             return $this->input($userId, $locale, $text, null);
+        }
+
+        // "вешу 82,4" needs no model and waits for nothing.
+        $weight = $photo === null ? BodyLog::weightIn((string) $text) : null;
+        if ($weight !== null) {
+            $this->body->recordWeight($userId, today()->toDateString(), $weight);
+
+            return ['draft' => MealDraft::openFor($userId), 'understood' => true, 'not_found' => [], 'recorded' => ['weight' => $weight, 'activities' => []]];
         }
 
         $pending = MealDraftInput::pendingFor($userId);
@@ -185,6 +194,7 @@ class MealDraftService
             'status' => 'done',
             'understood' => $result['understood'],
             'not_found' => $result['not_found'],
+            'recorded' => $result['recorded'] ?? null,
         ], now()->addMinutes(10));
     }
 
@@ -230,7 +240,7 @@ class MealDraftService
      * needs none.
      *
      * @param  array<int, array{kind: string, text: string|null, photo: array{mime: string, contents: string}|null}>  $inputs
-     * @return array{draft: MealDraft|null, understood: bool, not_found: array<int, string>}
+     * @return array{draft: MealDraft|null, understood: bool, not_found: array<int, string>, recorded: array<string, mixed>|null}
      *
      * @throws \Illuminate\Http\Client\RequestException
      * @throws \RuntimeException
@@ -243,8 +253,10 @@ class MealDraftService
         $read = (count($inputs) === 1 && $inputs[0]['photo'] === null ? $this->shortEdit((string) $inputs[0]['text'], $items) : null)
             ?? $this->reader->read($items->map(static fn (MealDraftItem $item) => ['name' => $item->name, 'grams' => $item->quantity])->all(), $inputs, $locale);
 
+        $recorded = $this->recordBody($userId, $read);
+
         if ($read['operations'] === []) {
-            return ['draft' => $draft, 'understood' => false, 'not_found' => []];
+            return ['draft' => $draft, 'understood' => $recorded !== null, 'not_found' => [], 'recorded' => $recorded];
         }
 
         $products = $this->products($read, $userId, $locale);
@@ -305,7 +317,35 @@ class MealDraftService
             $draft = null;
         }
 
-        return ['draft' => $draft, 'understood' => true, 'not_found' => $notFound];
+        return ['draft' => $draft, 'understood' => true, 'not_found' => $notFound, 'recorded' => $recorded];
+    }
+
+    /**
+     * Keep the body weight and the activities the input told, the weight first
+     * for the activities to burn by it; null when it told neither.
+     *
+     * @param  array<string, mixed>  $read
+     * @return array{weight: float|null, activities: array<int, array<string, mixed>>}|null
+     */
+    private function recordBody(int $userId, array $read): ?array
+    {
+        $weight = $read['weight'] ?? null;
+        $activities = $read['activities'] ?? [];
+
+        if ($weight === null && $activities === []) {
+            return null;
+        }
+
+        $date = today()->toDateString();
+
+        if ($weight !== null) {
+            $this->body->recordWeight($userId, $date, $weight);
+        }
+
+        return [
+            'weight' => $weight,
+            'activities' => array_map(fn (array $activity) => $this->body->recordActivity($userId, $date, $activity['title'], $activity['minutes'], $activity['met'])->toPayload(), $activities),
+        ];
     }
 
     /**

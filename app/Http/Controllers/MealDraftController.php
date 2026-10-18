@@ -75,6 +75,7 @@ class MealDraftController extends Controller
             'text' => $text,
             'understood' => $applied['understood'] ?? true,
             'not_found' => $applied['not_found'] ?? [],
+            'recorded' => $applied['recorded'] ?? null,
         ]);
     }
 
@@ -165,6 +166,7 @@ class MealDraftController extends Controller
             'draft' => $result['draft']?->toPayload(),
             'understood' => $result['understood'],
             'not_found' => $result['not_found'],
+            'recorded' => $result['recorded'] ?? null,
             'text' => $text,
         ]);
     }
