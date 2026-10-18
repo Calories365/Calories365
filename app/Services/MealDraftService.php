@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\DB;
  * correct an item, remove one. A short edit, "2 250" or "убрать 3", needs no
  * model. The foods named get their products from ProductCatalog, all of one
  * input in one call; a label makes its own product. The draft keeps the facts
- * each item shows, so a change the user makes later is told from the product.
+ * each item shows; nutrition facts the user tells mark the item edited, and it
+ * is saved as the user's own product.
  */
 class MealDraftService
 {
@@ -72,7 +73,7 @@ class MealDraftService
                 }
 
                 if ($operation['name'] !== '' || $operation['label'] !== null) {
-                    if ($product === null) {
+                    if ($product === null && ! $this->toldAllFacts($operation)) {
                         $notFound[] = $operation['name'];
 
                         continue;
@@ -80,7 +81,13 @@ class MealDraftService
 
                     // A new item goes after the others until renumber() gives it its place.
                     $item ??= new MealDraftItem(['meal_draft_id' => $draft->id, 'position' => 1000 + $index]);
-                    $item->fill($product + ['edited' => false]);
+                    $item->fill($product !== null
+                        ? $product + ['edited' => false]
+                        : ['name' => $operation['name'], 'product_id' => null, 'fibers' => 0, 'source' => MealDraftItem::SOURCE_USER]);
+                }
+
+                if ($operation['facts'] !== []) {
+                    $item->fill($operation['facts'] + ['edited' => true]);
                 }
 
                 if ($operation['grams'] !== null) {
@@ -174,12 +181,12 @@ class MealDraftService
 
         if (preg_match('/^(\d{1,2})\s*[-—:.]?\s*(\d{1,4})\s*(?:г|гр|грам\p{L}*|g)?\.?$/u', $text, $match)
             && isset($items[$match[1] - 1]) && $match[2] > 0) {
-            return ['operations' => [['action' => 'update', 'item' => (int) $match[1], 'name' => '', 'grams' => (float) $match[2], 'label' => null]], 'labels' => []];
+            return ['operations' => [['action' => 'update', 'item' => (int) $match[1], 'name' => '', 'grams' => (float) $match[2], 'label' => null, 'facts' => []]], 'labels' => []];
         }
 
         if (preg_match('/^(?:-|убра\p{L}*|убери|удал\p{L}*|прибра\p{L}*|прибери|видал\p{L}*|remove|delete)\s*(\d{1,2})$/u', $text, $match)
             && isset($items[$match[1] - 1])) {
-            return ['operations' => [['action' => 'remove', 'item' => (int) $match[1], 'name' => '', 'grams' => null, 'label' => null]], 'labels' => []];
+            return ['operations' => [['action' => 'remove', 'item' => (int) $match[1], 'name' => '', 'grams' => null, 'label' => null, 'facts' => []]], 'labels' => []];
         }
 
         return null;
@@ -204,7 +211,7 @@ class MealDraftService
 
             if ($operation['label'] !== null) {
                 $hits[$index] = ['hit' => $this->catalog->addFromLabel($read['labels'][$operation['label']], $locale, $userId), 'source' => MealDraftItem::SOURCE_LABEL];
-            } elseif ($operation['name'] !== '') {
+            } elseif ($operation['name'] !== '' && ! $this->toldAllFacts($operation)) {
                 $names[$index] = $operation['name'];
             }
         }
@@ -238,6 +245,16 @@ class MealDraftService
         }
 
         return $products;
+    }
+
+    /**
+     * Whether the user told all the facts of a food: it needs no product then.
+     *
+     * @param  array<string, mixed>  $operation
+     */
+    private function toldAllFacts(array $operation): bool
+    {
+        return count($operation['facts']) === 4;
     }
 
     private function renumber(MealDraft $draft): void

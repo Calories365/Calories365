@@ -85,6 +85,28 @@ class MealDraftTest extends TestCase
         Http::assertSent(fn (Request $request) => str_contains($request['messages'][0]['content'][0]['text'], "1. Гречка варёная — 200 g\n2. Хлеб — 40 g"));
     }
 
+    public function test_nutrition_facts_the_user_tells_make_the_items_the_users_own(): void
+    {
+        $this->draftOf(['Хлеб' => 40]);
+        $this->fakeModel([
+            ['action' => 'update', 'item' => 1, 'name' => '', 'grams' => null, 'label' => null, 'calories' => 260, 'proteins' => null, 'fats' => null, 'carbohydrates' => null],
+            ['action' => 'add', 'item' => null, 'name' => 'Батончик домашний', 'grams' => 50, 'label' => null, 'calories' => 400, 'proteins' => 10, 'fats' => 20, 'carbohydrates' => 45],
+        ]);
+
+        $this->input(['text' => 'в хлебе 260 калорий, и батончик 50 грамм: 400 ккал, белки 10, жиры 20, углеводы 45'])->assertOk()
+            ->assertJsonPath('draft.items.0.per_100g.calories', 260)
+            ->assertJsonPath('draft.items.0.per_100g.proteins', 8)
+            ->assertJsonPath('draft.items.0.edited', true)
+            ->assertJsonPath('draft.items.1.name', 'Батончик домашний')
+            ->assertJsonPath('draft.items.1.product_id', null)
+            ->assertJsonPath('draft.items.1.source', MealDraftItem::SOURCE_USER)
+            ->assertJsonPath('draft.items.1.portion.calories', 200);
+
+        $this->bot()->postJson('/api/caloriesEndPoint/draft/save', ['part_of_day' => 'supper', 'consumed_at' => '2026-10-18'])->assertOk();
+
+        $this->assertSame([$this->user->id, $this->user->id], FoodConsumption::with('product')->get()->pluck('product.user_id')->all());
+    }
+
     public function test_a_short_edit_needs_no_model(): void
     {
         $this->draftOf(['Гречка варёная' => 200, 'Хлеб' => 40]);

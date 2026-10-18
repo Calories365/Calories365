@@ -33,6 +33,11 @@ class MealDraftItem extends Model
      */
     public const SOURCE_LABEL = 'label';
 
+    /**
+     * A food the user gave the nutrition facts of; it has no product until saved.
+     */
+    public const SOURCE_USER = 'user';
+
     public const FACTS = ['calories', 'proteins', 'fats', 'carbohydrates', 'fibers'];
 
     protected $fillable = [

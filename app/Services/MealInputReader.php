@@ -29,7 +29,7 @@ class MealInputReader
      *
      * @param  array<int, array{name: string, grams: int}>  $draft  the items of the draft, numbered from 1 by position
      * @param  array{mime: string, contents: string}|null  $photo
-     * @return array{operations: array<int, array{action: string, item: int|null, name: string, grams: float|null, label: int|null}>, labels: array<int, array<string, mixed>|null>}
+     * @return array{operations: array<int, array{action: string, item: int|null, name: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>}
      *
      * @throws \Illuminate\Http\Client\RequestException
      * @throws \RuntimeException
@@ -124,6 +124,9 @@ class MealInputReader
             .'weight, or null. Then add each product the user ate, or update the draft item it belongs to, with '
             .'"label" set to its index in "labels"; otherwise "label" is null. A product on a label that the text '
             ."says the user did not eat is not added.\n\n"
+            .'Nutrition facts the user tells for a food ("во втором 250 калорий на 100 грамм", "белка 20"): '
+            .'calories, proteins, fats, carbohydrates per 100 g of an add or update; facts per portion are '
+            ."converted to 100 g by its grams. A fact the user did not tell is null.\n\n"
             .'When the input says nothing about food, return no operations and no labels.';
     }
 
@@ -144,13 +147,17 @@ class MealInputReader
                     'items' => [
                         'type' => 'object',
                         'additionalProperties' => false,
-                        'required' => ['action', 'item', 'name', 'grams', 'label'],
+                        'required' => ['action', 'item', 'name', 'grams', 'label', 'calories', 'proteins', 'fats', 'carbohydrates'],
                         'properties' => [
                             'action' => ['type' => 'string', 'enum' => ['add', 'update', 'remove']],
                             'item' => ['type' => ['integer', 'null']],
                             'name' => ['type' => 'string'],
                             'grams' => ['type' => ['number', 'null']],
                             'label' => ['type' => ['integer', 'null']],
+                            'calories' => ['type' => ['number', 'null']],
+                            'proteins' => ['type' => ['number', 'null']],
+                            'fats' => ['type' => ['number', 'null']],
+                            'carbohydrates' => ['type' => ['number', 'null']],
                         ],
                     ],
                 ],
@@ -179,11 +186,12 @@ class MealInputReader
     }
 
     /**
-     * The operation, or null when it points at no item or adds nothing.
+     * The operation, or null when it points at no item or adds nothing; facts
+     * are the nutrition facts per 100 g the user told.
      *
      * @param  mixed  $operation
      * @param  array<int, array<string, mixed>|null>  $labels
-     * @return array{action: string, item: int|null, name: string, grams: float|null, label: int|null}|null
+     * @return array{action: string, item: int|null, name: string, grams: float|null, label: int|null, facts: array<string, float>}|null
      */
     private function validOperation($operation, int $items, array $labels): ?array
     {
@@ -201,14 +209,22 @@ class MealInputReader
             $grams = null;
         }
 
+        $facts = [];
+        foreach (['calories', 'proteins', 'fats', 'carbohydrates'] as $field) {
+            $value = $operation[$field] ?? null;
+            if (is_numeric($value) && $value >= 0 && $value <= ($field === 'calories' ? 950 : 100)) {
+                $facts[$field] = round((float) $value, 2);
+            }
+        }
+
         $fits = match ($action) {
             'add' => ($name !== '' || $label !== null) && $grams !== null,
-            'update' => $item !== null && $item >= 1 && $item <= $items && ($name !== '' || $grams !== null || $label !== null),
+            'update' => $item !== null && $item >= 1 && $item <= $items && ($name !== '' || $grams !== null || $label !== null || $facts !== []),
             'remove' => $item !== null && $item >= 1 && $item <= $items,
             default => false,
         };
 
-        return $fits ? ['action' => $action, 'item' => $item, 'name' => mb_substr($name, 0, 150), 'grams' => $grams, 'label' => $label] : null;
+        return $fits ? ['action' => $action, 'item' => $item, 'name' => mb_substr($name, 0, 150), 'grams' => $grams, 'label' => $label, 'facts' => $facts] : null;
     }
 
     /**
