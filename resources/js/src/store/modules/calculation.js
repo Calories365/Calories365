@@ -112,6 +112,8 @@ const actions = {
                                 parsedData
                             );
                             resolve(parsedData);
+                        } else {
+                            resolve(null);
                         }
                     } else {
                         context.commit(
@@ -148,6 +150,8 @@ const actions = {
                     parsedData
                 );
                 resolve(parsedData);
+            } else {
+                resolve(null);
             }
         });
     },

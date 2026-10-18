@@ -18,11 +18,12 @@ export default {
     data() {
         return {
             isActive: false,
+            // Starting values a new account sees results for.
             gender: "female",
-            birthYear: 1900,
-            weight: 30,
-            height: 100,
-            goalWeight: 60,
+            birthYear: new Date().getFullYear() - 30,
+            weight: 70,
+            height: 170,
+            goalWeight: 70,
             fat: 0,
             activity: 0,
             goal: 0,
@@ -96,25 +97,30 @@ export default {
         },
     },
     mounted() {
-        if (this.currentUser) {
-            this.$store
-                .dispatch(actionTypes.getCalculationData)
-                .then((data) => {
-                    for (const key in data) {
-                        this[key] = data[key];
-                    }
-                    this.$store.dispatch(actionTypes.countResults, data);
-                });
-        } else {
-            this.$store
-                .dispatch(actionTypes.getCalculationDataNotAuth)
-                .then((data) => {
-                    for (const key in data) {
-                        this[key] = data[key];
-                    }
-                    this.$store.dispatch(actionTypes.countResults, data);
-                });
-        }
+        // The server has nothing for an account that never saved a result:
+        // what the person entered as a guest comes next, the starting values last.
+        const accountData = this.currentUser
+            ? this.$store
+                  .dispatch(actionTypes.getCalculationData)
+                  .catch(() => null)
+            : Promise.resolve(null);
+
+        accountData
+            .then(
+                (data) =>
+                    data ||
+                    this.$store.dispatch(actionTypes.getCalculationDataNotAuth)
+            )
+            .then((data) => {
+                for (const key in data) {
+                    this[key] = data[key];
+                }
+                this.$store.dispatch(
+                    actionTypes.countResults,
+                    this.transformData()
+                );
+            });
+
         this.properties.forEach((property) => {
             this.$watch(property, this.calculateResults);
         });
