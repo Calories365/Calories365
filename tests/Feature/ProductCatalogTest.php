@@ -132,6 +132,81 @@ class ProductCatalogTest extends TestCase
         $this->assertSame(0, Product::count());
     }
 
+    public function test_a_branded_food_gets_a_product_of_its_own_and_finds_it_again(): void
+    {
+        $this->sharedProduct('Творог 5%', 121);
+        $this->fakeModel([$this->item(0, 'Творог Простоквашино 5%', 'Сир кисломолочний Простоквашино 5%', 'Prostokvashino cottage cheese 5%', 125)]);
+
+        $first = $this->findBranded('Творог Простоквашино 5%', 'Простоквашино');
+
+        $this->assertSame('Творог Простоквашино 5%', $first['name']);
+        $this->assertNull($first['user_id']);
+        $this->assertSame(125.0, (float) Product::find($first['product_id'])->calories);
+
+        $again = $this->findBranded('Творог Простоквашино', 'Простоквашино');
+
+        $this->assertSame($first['product_id'], $again['product_id']);
+        Http::assertSentCount(1);
+    }
+
+    public function test_a_brand_never_takes_another_food_of_the_brand(): void
+    {
+        $milk = $this->sharedProduct('Молоко Простоквашино 2,5%', 53);
+        $this->fakeModel([$this->item(0, 'Кефир Простоквашино 1%', 'Кефір Простоквашино 1%', 'Prostokvashino kefir 1%', 40)]);
+
+        $hit = $this->findBranded('Кефир Простоквашино 1%', 'Простоквашино');
+
+        $this->assertNotSame($milk->id, $hit['product_id']);
+        $this->assertSame('Кефир Простоквашино 1%', $hit['name']);
+    }
+
+    public function test_a_brand_keeps_the_fat_content_that_was_said(): void
+    {
+        $this->sharedProduct('Творог 2% Простоквашино', 100);
+        $fivePercent = $this->sharedProduct('Творог 5% Простоквашино Danone', 119);
+
+        $hit = $this->findBranded('Творог 5% Простоквашино', 'Простоквашино');
+
+        $this->assertSame($fivePercent->id, $hit['product_id']);
+        Http::assertNothingSent();
+    }
+
+    public function test_a_brand_is_found_in_another_form_of_its_name(): void
+    {
+        $known = $this->sharedProduct('Ряженка 4% Яготинська', 62);
+
+        $hit = $this->findBranded('Ряженка Яготинская 4%', 'Яготинская');
+
+        $this->assertSame($known->id, $hit['product_id']);
+        Http::assertNothingSent();
+    }
+
+    public function test_a_brand_keeps_what_was_added_to_the_food(): void
+    {
+        $this->sharedProduct('Сырок с абрикосом Яготинський', 220);
+        $raisins = $this->sharedProduct('Сырок с изюмом 9% Яготинский', 202);
+
+        $hit = $this->findBranded('Сырок Яготинский с изюмом', 'Яготинский');
+
+        $this->assertSame($raisins->id, $hit['product_id']);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function findBranded(string $name, string $brand): ?array
+    {
+        return app(ProductCatalog::class)->findBranded([['name' => $name, 'brand' => $brand]], null, 'ru')[0];
+    }
+
+    private function sharedProduct(string $name, float $calories): Product
+    {
+        $product = Product::create(['calories' => $calories, 'proteins' => 3, 'fats' => 3, 'carbohydrates' => 5, 'fibers' => 0]);
+        ProductTranslation::create(['product_id' => $product->id, 'locale' => 'ru', 'name' => $name, 'user_id' => null, 'active' => 1, 'verified' => 0]);
+
+        return $product;
+    }
+
     /**
      * @param  array<int, string>  $names
      * @return array<int, array<string, mixed>|null>

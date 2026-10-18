@@ -95,6 +95,137 @@ class ProductCatalog
     }
 
     /**
+     * Products of a brand the user named or a package shows. The generic food
+     * has other facts, so a branded food never takes it: it takes an earlier
+     * product of the same brand and the same food, or the model estimates the
+     * facts of the branded food and it becomes one shared product under its
+     * branded name, which the next mention of the brand finds.
+     *
+     * @param  array<int, array{name: string, brand: string}>  $foods
+     * @return array<int, array<string, mixed>|null> per food: the product translation hit, or null
+     */
+    public function findBranded(array $foods, ?int $userId, string $locale): array
+    {
+        $hits = [];
+        $missing = [];
+
+        foreach ($foods as $index => $food) {
+            $known = $this->knownBranded($food['name'], $food['brand'], $userId, $locale);
+            $hits[$index] = $known ? self::hit($known) : null;
+
+            if ($known === null) {
+                $missing[$index] = $food['name'];
+            }
+        }
+
+        if ($missing === []) {
+            return $hits;
+        }
+
+        $indexes = array_keys($missing);
+
+        try {
+            $generated = $this->generate(array_values($missing), $locale);
+        } catch (\Throwable $e) {
+            Log::warning('Branded product generation failed', ['error' => $e->getMessage()]);
+
+            return $hits;
+        }
+
+        foreach ($indexes as $position => $index) {
+            $facts = $generated[$position] ?? null;
+            if ($facts === null) {
+                continue;
+            }
+
+            $hits[$index] = $this->store($facts, $locale);
+            ProductAlias::remember($missing[$index], $locale, (int) $hits[$index]['product_id']);
+        }
+
+        return $hits;
+    }
+
+    /**
+     * The product of the brand and of the same food: "Творог Простоквашино 5%"
+     * finds "Творог 5% Простоквашино Danone", or "Творог Простоквашино" without
+     * a fat content, never "Творог 2% Простоквашино", "Молоко Простоквашино" or
+     * plain "Творог"; "Сырок с изюмом" never finds "Сырок с абрикосом". Shared
+     * products and the user's own.
+     */
+    private function knownBranded(string $name, string $brand, ?int $userId, string $locale): ?ProductTranslation
+    {
+        $key = self::brandKey($brand);
+        $isBrand = static fn (string $word) => $key !== '' && str_starts_with($word, $key);
+
+        // Additions come in parts of several words, and the brand may stick to one.
+        $added = static fn (FoodName $parsed) => array_values(array_filter(
+            array_merge([], ...$parsed->additions),
+            static fn (string $word) => ! $isBrand($word)
+        ));
+
+        $said = FoodName::parse($name);
+        $food = array_values(array_filter($said->food, static fn (string $word) => ! $isBrand($word)));
+        $additions = $added($said);
+        $numbers = $said->numbers;
+        sort($numbers);
+
+        if ($food === [] || $key === '') {
+            return null;
+        }
+
+        $alias = ProductAlias::translationsFor([$name], $locale)[0] ?? null;
+        if ($alias !== null) {
+            return $alias;
+        }
+
+        return ProductTranslation::query()
+            ->where('locale', $locale)
+            ->where('name', 'like', '%'.addcslashes($key, '%_\\').'%')
+            ->where(static fn ($query) => $query->whereNull('user_id')->orWhere('user_id', $userId))
+            ->limit(50)
+            ->get()
+            ->map(static function (ProductTranslation $translation) use ($food, $numbers, $additions, $added, $isBrand) {
+                $known = FoodName::parse((string) $translation->name);
+                $words = array_values(array_filter($known->food, static fn (string $word) => ! $isBrand($word)));
+                $knownAdditions = $added($known);
+                $knownNumbers = $known->numbers;
+                sort($knownNumbers);
+
+                // The kind of food, the first word, must match; a fat content or a
+                // weight both names give must be the same, and so must what both
+                // say was added. The rest only ranks.
+                if (! in_array($food[0], $words, true)
+                    || ($numbers !== [] && $knownNumbers !== [] && $numbers !== $knownNumbers)
+                    || ($additions !== [] && $knownAdditions !== [] && array_intersect($additions, $knownAdditions) === [])) {
+                    return null;
+                }
+
+                $rank = ($numbers !== [] && $numbers === $knownNumbers ? 100 : 0)
+                    + 10 * count(array_intersect($additions, $knownAdditions))
+                    - 10 * count(array_diff($additions, $knownAdditions))
+                    - 5 * count(array_diff($knownAdditions, $additions))
+                    + count(array_intersect($food, $words)) - count(array_diff($words, $food));
+
+                return ['translation' => $translation, 'rank' => $rank];
+            })
+            ->filter()
+            ->sortByDesc('rank')
+            ->first()['translation'] ?? null;
+    }
+
+    /**
+     * The start of a brand that its other forms share: "Яготинская",
+     * "Яготинська" and "Яготинский" all begin with "яготинс".
+     */
+    private static function brandKey(string $brand): string
+    {
+        $brand = mb_strtolower(trim($brand));
+        $length = mb_strlen($brand);
+
+        return mb_substr($brand, 0, min($length, max(4, $length - 3)));
+    }
+
+    /**
      * Positions of the items without a product.
      *
      * @param  array<int, array<string, mixed>|null>  $hits
