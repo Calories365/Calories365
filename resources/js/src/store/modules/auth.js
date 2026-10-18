@@ -315,6 +315,9 @@ const actions = {
                 })
                 .catch(() => {
                     context.commit(mutationTypes.getCurrentUserFailure);
+                    // app.js mounts the app only once this settles: a guest
+                    // must get an answer too, or the page stays blank.
+                    resolve(null);
                 });
         });
     },
