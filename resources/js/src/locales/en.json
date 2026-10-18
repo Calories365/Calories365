@@ -511,7 +511,7 @@
     },
     "Meal": {
         "title": "Meal",
-        "lead": "Say, type or take a photo of what you ate. Several messages are fine: they all make one meal, and the Telegram bot shows the same.",
+        "lead": "Send a voice message, photos of the food and its labels, or type what you ate, in as many messages as you like. Then tap \"Calculate\": all of it is read together into one meal. The Telegram bot shows the same draft.",
         "record": "Speak",
         "stop": "Done",
         "photo": "Photo of food or a label",
@@ -519,8 +519,6 @@
         "textHint": "For example: buckwheat 200 g and a cutlet",
         "send": "Send",
         "listening": "Listening… Press \"Done\" when you finish.",
-        "reading": "Reading…",
-        "heard": "You said: \"{text}\"",
         "grams": "g",
         "kcal": "kcal",
         "macros": "P {proteins} · F {fats} · C {carbohydrates}",
@@ -543,23 +541,40 @@
         "cancel": "Cancel the meal",
         "saved": "Saved to the diary: {calories} kcal",
         "cancelled": "The meal is cancelled",
-        "notUnderstood": "No food found in the message. Say or type what you ate.",
+        "notUnderstood": "Found no food in what you added. Say, type or photograph what you ate.",
         "howTo": {
             "title": "How to use",
-            "say": "Press \"Speak\" and list what you ate: \"buckwheat 200 grams, a cutlet and tea with two spoons of sugar\". Or type the same in the field below.",
-            "photo": "Or take a photo of the plate. A photo of a label with its nutrition table gives the exact values from the package.",
-            "correct": "Correct it if needed: grams and nutrition right in the list, or in words: \"buckwheat was 250\", \"remove the tea\".",
+            "say": "Tap \"Say\" and list what you ate: \"buckwheat 200 grams, a cutlet and tea with two spoons of sugar\". Or type the same in the field below.",
+            "photo": "Add a photo of the plate and photos of the labels, several at once if you like. A label with a nutrition table gives the exact values from the package, and a brand from the package or the one you name stays in the product name.",
+            "correct": "Correct it if needed: grams and nutrition right in the list, or add in words \"the buckwheat was 250\", \"remove the tea\" and tap \"Recalculate with what is added\".",
             "save": "Press \"To breakfast\", \"To lunch\" or \"To dinner\" to save the meal to the diary.",
-            "bot": "The Telegram bot works the same: send it a voice message, a photo or text, the draft is shared."
+            "bot": "The Telegram bot works the same: send it voice messages, photos and text and tap \"Calculate\". The draft is shared.",
+            "calculate": "Tap \"Calculate\": the voice messages, photos and text are read together into one meal."
         },
         "errors": {
             "rateLimited": "Too many messages in a row. Please try a bit later.",
             "unavailable": "The service is unavailable right now, please try later.",
-            "notRead": "Could not read it, please try again.",
+            "notRead": "Could not calculate. What you added is kept, tap \"Calculate\" again.",
             "notHeard": "Could not hear the recording, please try again.",
             "gone": "This meal is already saved or cancelled.",
             "mic": "No access to the microphone. Allow it in the settings or type instead.",
-            "generic": "Something went wrong, please try again."
-        }
+            "generic": "Something went wrong, please try again.",
+            "notKept": "Could not add it, please try again.",
+            "tooMany": "One calculation takes up to 8 photos and 12 messages. Tap \"Calculate\", then add the rest.",
+            "tooLarge": "The photo is too large, try another one."
+        },
+        "keeping": "Adding…",
+        "uploading": "Uploading photo {current} of {total}…",
+        "inputsTitle": "Added",
+        "inputKinds": {
+            "photo": "Photo",
+            "voice": "Voice message",
+            "text": "Text"
+        },
+        "calculate": "Calculate",
+        "recalculate": "Recalculate with what is added",
+        "calculating": "Calculating…",
+        "calculatingHint": "It usually takes up to a minute.",
+        "inputsHint": "Add another voice message, photo or text, or tap \"Calculate\": all of it is read together."
     }
 }

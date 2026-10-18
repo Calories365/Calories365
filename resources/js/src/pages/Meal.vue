@@ -1,25 +1,32 @@
 <script>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
+    faCalculator,
     faCamera,
     faChevronDown,
     faChevronUp,
+    faCommentDots,
     faMicrophone,
     faPaperPlane,
     faSpinner,
     faStop,
     faTrash,
+    faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import {
+    calculateDraft,
     cancelDraft,
+    collectPhoto,
+    collectText,
+    collectVoice,
     getDraft,
+    getInputPhoto,
     removeDraftItem,
+    removeInput,
     saveDraft,
-    sendDraftPhoto,
-    sendDraftText,
-    sendDraftVoice,
     updateDraftItem,
 } from "@/api/draft.js";
+import { resizeImage } from "@/helpers/resizeImage.js";
 import { suggestedMeals } from "@/helpers/mealTime.js";
 import { toLocalDateString } from "@/helpers/localDate.js";
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
@@ -29,17 +36,27 @@ import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vu
 const ERRORS = {
     voice_rate_limited: "Meal.errors.rateLimited",
     voice_service_unavailable: "Meal.errors.unavailable",
-    draft_input_failed: "Meal.errors.notRead",
+    draft_input_failed: "Meal.errors.notKept",
     voice_not_recognized: "Meal.errors.notHeard",
     draft_not_found: "Meal.errors.gone",
+    too_many_inputs: "Meal.errors.tooMany",
 };
 
 const FACTS = ["calories", "proteins", "fats", "carbohydrates"];
 
+// How often the page asks whether the calculation is done, and for how long.
+const POLL_MS = 2000;
+const POLL_LIMIT_MS = 240000;
+
+// Telegram keeps a voice message short; this bitrate keeps a minute of speech
+// near 250 KB.
+const AUDIO_BITS_PER_SECOND = 32000;
+
 /**
- * The meal being put together: the same draft the Telegram bot shows. Voice,
- * a photo of the dish or of a label, and text all add to it; the list below
- * corrects it and saves it to the diary.
+ * The meal being put together: the same draft the Telegram bot shows. Voice
+ * messages, photos of the dish and of labels, and texts wait in a list until
+ * "Посчитать" sends all of them to the model at once; the draft below corrects
+ * the result and saves it to the diary.
  */
 export default {
     name: "Meal",
@@ -51,28 +68,35 @@ export default {
     data() {
         return {
             draft: null,
+            inputs: [],
+            photoUrls: {},
             notFound: [],
-            heard: "",
             text: "",
             loading: true,
             busy: false,
+            uploading: null,
+            calculating: false,
             recording: false,
             canRecord: false,
             mediaRecorder: null,
             stream: null,
             chunks: [],
+            pollTimer: null,
             expanded: {},
             successMessage: "",
             errorMessage: "",
             icons: {
+                faCalculator,
                 faCamera,
                 faChevronDown,
                 faChevronUp,
+                faCommentDots,
                 faMicrophone,
                 faPaperPlane,
                 faSpinner,
                 faStop,
                 faTrash,
+                faXmark,
             },
             facts: FACTS,
         };
@@ -84,6 +108,9 @@ export default {
         meals() {
             return suggestedMeals(new Date().getHours());
         },
+        locked() {
+            return this.busy || this.calculating || this.uploading !== null;
+        },
     },
     async created() {
         this.canRecord =
@@ -93,7 +120,12 @@ export default {
 
         try {
             const { data } = await getDraft();
-            this.draft = data.draft;
+            this.show(data);
+
+            // The bot or another tab may have started it.
+            if (data.calculation?.status === "running") {
+                this.waitForCalculation();
+            }
         } catch (error) {
             this.fail(error);
         } finally {
@@ -102,6 +134,10 @@ export default {
     },
     beforeUnmount() {
         this.releaseMicrophone();
+        clearTimeout(this.pollTimer);
+        Object.values(this.photoUrls).forEach((url) =>
+            URL.revokeObjectURL(url)
+        );
     },
     methods: {
         round(value, digits = 0) {
@@ -117,24 +153,56 @@ export default {
         },
         fail(error) {
             const code = error?.response?.data?.message;
-            this.notify(
-                "errorMessage",
-                this.$t(ERRORS[code] ?? "Meal.errors.generic")
-            );
+            const key =
+                error?.response?.status === 413
+                    ? "Meal.errors.tooLarge"
+                    : ERRORS[code] ?? "Meal.errors.generic";
+            this.notify("errorMessage", this.$t(key));
         },
-        async apply(request) {
+        /**
+         * Show what an answer of the draft API carries.
+         */
+        show(data) {
+            this.draft = data.draft;
+            this.inputs = data.inputs ?? [];
+            this.loadPhotos();
+        },
+        async loadPhotos() {
+            const waiting = new Set(this.inputs.map((input) => input.id));
+
+            Object.keys(this.photoUrls).forEach((id) => {
+                if (!waiting.has(Number(id))) {
+                    URL.revokeObjectURL(this.photoUrls[id]);
+                    delete this.photoUrls[id];
+                }
+            });
+
+            for (const input of this.inputs) {
+                if (input.kind !== "photo" || this.photoUrls[input.id]) {
+                    continue;
+                }
+
+                try {
+                    const { data } = await getInputPhoto(input.id);
+                    this.photoUrls = {
+                        ...this.photoUrls,
+                        [input.id]: URL.createObjectURL(data),
+                    };
+                } catch (error) {
+                    // The list shows the photo icon instead.
+                }
+            }
+        },
+        /**
+         * Send an input to the list; a short edit ("2 250") changes the draft at once.
+         */
+        async collect(request) {
             this.busy = true;
-            this.notFound = [];
 
             try {
                 const { data } = await request();
-                this.draft = data.draft;
+                this.show(data);
                 this.notFound = data.not_found ?? [];
-                this.heard = data.text ?? "";
-
-                if (!data.understood) {
-                    this.notify("errorMessage", this.$t("Meal.notUnderstood"));
-                }
             } catch (error) {
                 this.fail(error);
             } finally {
@@ -144,25 +212,36 @@ export default {
         sendText() {
             const text = this.text.trim();
 
-            if (!text || this.busy) {
+            if (!text || this.locked) {
                 return;
             }
 
             this.text = "";
-            this.apply(() => sendDraftText(text));
+            this.collect(() => collectText(text));
         },
-        sendPhoto(event) {
-            const file = event.target.files?.[0];
+        async sendPhotos(event) {
+            const files = Array.from(event.target.files ?? []);
             event.target.value = "";
 
-            if (!file || this.busy) {
+            if (!files.length || this.locked) {
                 return;
             }
 
-            // What is typed in the field goes as the caption: "съел половину".
-            const caption = this.text.trim();
-            this.text = "";
-            this.apply(() => sendDraftPhoto(file, caption));
+            for (const [index, file] of files.entries()) {
+                this.uploading = { current: index + 1, total: files.length };
+
+                try {
+                    const { data } = await collectPhoto(
+                        await resizeImage(file)
+                    );
+                    this.show(data);
+                } catch (error) {
+                    this.fail(error);
+                    break;
+                }
+            }
+
+            this.uploading = null;
         },
         async toggleRecording() {
             if (this.recording) {
@@ -185,10 +264,10 @@ export default {
                 "audio/webm",
             ].find((type) => MediaRecorder.isTypeSupported(type));
             this.chunks = [];
-            this.mediaRecorder = new MediaRecorder(
-                this.stream,
-                mimeType ? { mimeType } : undefined
-            );
+            this.mediaRecorder = new MediaRecorder(this.stream, {
+                ...(mimeType ? { mimeType } : {}),
+                audioBitsPerSecond: AUDIO_BITS_PER_SECOND,
+            });
             this.mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) {
                     this.chunks.push(event.data);
@@ -201,7 +280,7 @@ export default {
                         this.mediaRecorder.mimeType || mimeType || "audio/webm",
                 });
                 this.releaseMicrophone();
-                this.apply(() => sendDraftVoice(blob));
+                this.collect(() => collectVoice(blob));
             };
             this.mediaRecorder.start();
             this.recording = true;
@@ -209,6 +288,71 @@ export default {
         releaseMicrophone() {
             this.stream?.getTracks().forEach((track) => track.stop());
             this.stream = null;
+        },
+        async dropInput(input) {
+            try {
+                const { data } = await removeInput(input.id);
+                this.show(data);
+            } catch (error) {
+                this.fail(error);
+            }
+        },
+        async calculate() {
+            if (!this.inputs.length || this.locked) {
+                return;
+            }
+
+            this.calculating = true;
+            this.notFound = [];
+
+            try {
+                const { data } = await calculateDraft();
+                this.finishOrWait(data);
+            } catch (error) {
+                this.calculating = false;
+                this.fail(error);
+            }
+        },
+        waitForCalculation(startedAt = Date.now()) {
+            this.calculating = true;
+            clearTimeout(this.pollTimer);
+
+            this.pollTimer = setTimeout(async () => {
+                try {
+                    const { data } = await getDraft();
+                    this.finishOrWait(data, startedAt);
+                } catch (error) {
+                    this.calculating = false;
+                    this.fail(error);
+                }
+            }, POLL_MS);
+        },
+        finishOrWait(data, startedAt = Date.now()) {
+            const state = data.calculation;
+
+            if (state?.status === "running") {
+                if (Date.now() - startedAt < POLL_LIMIT_MS) {
+                    this.waitForCalculation(startedAt);
+                    return;
+                }
+
+                this.calculating = false;
+                this.notify("errorMessage", this.$t("Meal.errors.notRead"));
+                return;
+            }
+
+            this.calculating = false;
+            this.show(data);
+
+            if (state?.status === "failed") {
+                this.notify("errorMessage", this.$t("Meal.errors.notRead"));
+            } else if (state?.status === "done") {
+                this.notFound = state.not_found ?? [];
+
+                if (!state.understood) {
+                    this.notify("errorMessage", this.$t("Meal.notUnderstood"));
+                }
+            }
         },
         async change(item, changes) {
             try {
@@ -271,7 +415,7 @@ export default {
                     toLocalDateString(new Date())
                 );
                 this.draft = null;
-                this.heard = "";
+                this.notFound = [];
                 this.notify(
                     "successMessage",
                     this.$t("Meal.saved", {
@@ -286,9 +430,8 @@ export default {
         },
         async cancel() {
             try {
-                await cancelDraft();
-                this.draft = null;
-                this.heard = "";
+                const { data } = await cancelDraft();
+                this.show(data);
                 this.notFound = [];
                 this.notify("successMessage", this.$t("Meal.cancelled"));
             } catch (error) {
@@ -319,7 +462,7 @@ export default {
                         type="button"
                         class="meal_button"
                         :class="{ 'meal_button--recording': recording }"
-                        :disabled="busy"
+                        :disabled="locked"
                         @click="toggleRecording"
                     >
                         <FontAwesomeIcon
@@ -333,14 +476,17 @@ export default {
                     </button>
                     <label
                         class="meal_button meal_button--photo"
-                        :class="{ 'meal_button--disabled': busy || recording }"
+                        :class="{
+                            'meal_button--disabled': locked || recording,
+                        }"
                     >
                         <input
                             type="file"
                             accept="image/*"
+                            multiple
                             class="meal_file"
-                            :disabled="busy || recording"
-                            @change="sendPhoto"
+                            :disabled="locked || recording"
+                            @change="sendPhotos"
                         />
                         <FontAwesomeIcon :icon="icons.faCamera" />
                         <span>{{ $t("Meal.photo") }}</span>
@@ -354,11 +500,11 @@ export default {
                         maxlength="2000"
                         :aria-label="$t('Meal.textLabel')"
                         :placeholder="$t('Meal.textHint')"
-                        :disabled="busy"
+                        :disabled="locked"
                     />
                     <button
                         type="submit"
-                        :disabled="busy || !text.trim()"
+                        :disabled="locked || !text.trim()"
                         :title="$t('Meal.send')"
                     >
                         <FontAwesomeIcon :icon="icons.faPaperPlane" />
@@ -368,12 +514,81 @@ export default {
                 <p v-if="recording" class="meal_status">
                     {{ $t("Meal.listening") }}
                 </p>
+                <p v-else-if="uploading" class="meal_status">
+                    <FontAwesomeIcon :icon="icons.faSpinner" spin />
+                    {{ $t("Meal.uploading", uploading) }}
+                </p>
                 <p v-else-if="busy" class="meal_status">
                     <FontAwesomeIcon :icon="icons.faSpinner" spin />
-                    {{ $t("Meal.reading") }}
+                    {{ $t("Meal.keeping") }}
                 </p>
-                <p v-else-if="heard" class="meal_heard">
-                    {{ $t("Meal.heard", { text: heard }) }}
+            </div>
+
+            <div v-if="inputs.length" class="meal_inputs">
+                <h2 class="meal_inputs-title">{{ $t("Meal.inputsTitle") }}</h2>
+                <ul class="meal_inputs-list">
+                    <li
+                        v-for="input in inputs"
+                        :key="input.id"
+                        class="meal-input"
+                    >
+                        <img
+                            v-if="input.kind === 'photo' && photoUrls[input.id]"
+                            :src="photoUrls[input.id]"
+                            class="meal-input_photo"
+                            alt=""
+                        />
+                        <span v-else class="meal-input_icon">
+                            <FontAwesomeIcon
+                                :icon="
+                                    input.kind === 'photo'
+                                        ? icons.faCamera
+                                        : input.kind === 'voice'
+                                        ? icons.faMicrophone
+                                        : icons.faCommentDots
+                                "
+                            />
+                        </span>
+                        <span class="meal-input_text">{{
+                            input.text || $t(`Meal.inputKinds.${input.kind}`)
+                        }}</span>
+                        <button
+                            type="button"
+                            class="meal-input_remove"
+                            :title="$t('Meal.remove')"
+                            :disabled="calculating"
+                            @click="dropInput(input)"
+                        >
+                            <FontAwesomeIcon :icon="icons.faXmark" />
+                        </button>
+                    </li>
+                </ul>
+                <button
+                    type="button"
+                    class="meal_calculate"
+                    :disabled="locked || recording"
+                    @click="calculate"
+                >
+                    <FontAwesomeIcon
+                        :icon="
+                            calculating ? icons.faSpinner : icons.faCalculator
+                        "
+                        :spin="calculating"
+                    />
+                    {{
+                        calculating
+                            ? $t("Meal.calculating")
+                            : draft
+                            ? $t("Meal.recalculate")
+                            : $t("Meal.calculate")
+                    }}
+                </button>
+                <p class="meal_inputs-hint">
+                    {{
+                        calculating
+                            ? $t("Meal.calculatingHint")
+                            : $t("Meal.inputsHint")
+                    }}
                 </p>
             </div>
 
@@ -493,7 +708,7 @@ export default {
                         type="button"
                         class="meal_save-button"
                         :class="{ 'meal_save-button--main': index === 0 }"
-                        :disabled="busy"
+                        :disabled="locked"
                         @click="save(meal)"
                     >
                         {{ $t(`Meal.saveTo.${meal}`) }}
@@ -501,7 +716,7 @@ export default {
                     <button
                         type="button"
                         class="meal_cancel"
-                        :disabled="busy"
+                        :disabled="locked"
                         @click="cancel"
                     >
                         {{ $t("Meal.cancel") }}
@@ -509,11 +724,15 @@ export default {
                 </div>
             </div>
 
-            <div v-else-if="!loading && !busy" class="meal_how-to">
+            <div
+                v-else-if="!loading && !locked && !inputs.length"
+                class="meal_how-to"
+            >
                 <h2>{{ $t("Meal.howTo.title") }}</h2>
                 <ol>
                     <li>{{ $t("Meal.howTo.say") }}</li>
                     <li>{{ $t("Meal.howTo.photo") }}</li>
+                    <li>{{ $t("Meal.howTo.calculate") }}</li>
                     <li>{{ $t("Meal.howTo.correct") }}</li>
                     <li>{{ $t("Meal.howTo.save") }}</li>
                 </ol>
@@ -629,10 +848,56 @@ export default {
         }
     }
 
-    &_status,
-    &_heard {
+    &_status {
         margin: 0;
         font-size: 0.95rem;
+        color: #666;
+        text-align: center;
+    }
+
+    &_inputs {
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #f7f9f7;
+        border-radius: 12px;
+    }
+
+    &_inputs-title {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+    }
+
+    &_inputs-list {
+        margin: 0 0 12px;
+        padding: 0;
+        list-style: none;
+    }
+
+    &_calculate {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 52px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+        background: $main-color;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    &_inputs-hint {
+        margin: 8px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
         color: #666;
         text-align: center;
     }
@@ -712,6 +977,50 @@ export default {
             margin: 0;
             color: #666;
         }
+    }
+}
+
+.meal-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+
+    &_photo,
+    &_icon {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+    }
+
+    &_photo {
+        object-fit: cover;
+    }
+
+    &_icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $main-color;
+        background: #eef7ee;
+    }
+
+    &_text {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        line-height: 1.4;
+    }
+
+    &_remove {
+        flex-shrink: 0;
+        padding: 8px;
+        color: #999;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
 }
 

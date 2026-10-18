@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\Http;
  * the meal draft, in one request to the meal model.
  *
  * The model sees the draft, so "гречки было 250" or "убери хлеб" change the item
- * the user means. A photo of a dish gives its foods with an estimate of the
- * portions; a photo of a label gives the product's nutrition facts exactly as
- * printed. The model names foods; their nutrition facts come from the database
- * through ProductCatalog, or from the label.
+ * the user means. It gets everything the user sent for the calculation at once,
+ * voice messages, texts and photos in the order they came, and puts them
+ * together: a label and a photo of the dish of the same food make one item. A
+ * photo of a dish gives its foods with an estimate of the portions; a photo of a
+ * label gives the product's nutrition facts exactly as printed. The model names
+ * foods and their brands; their nutrition facts come from the database through
+ * ProductCatalog, or from the label.
  */
 class MealInputReader
 {
@@ -28,26 +31,29 @@ class MealInputReader
      * be true is null, and an operation pointing at no item is dropped.
      *
      * @param  array<int, array{name: string, grams: int}>  $draft  the items of the draft, numbered from 1 by position
-     * @param  array{mime: string, contents: string}|null  $photo
-     * @return array{operations: array<int, array{action: string, item: int|null, name: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>}
+     * @param  array<int, array{kind: string, text: string|null, photo: array{mime: string, contents: string}|null}>  $inputs  in the order the user sent them
+     * @return array{operations: array<int, array{action: string, item: int|null, name: string, brand: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>}
      *
      * @throws \Illuminate\Http\Client\RequestException
      * @throws \RuntimeException
      */
-    public function read(array $draft, ?string $text, ?array $photo, string $locale): array
+    public function read(array $draft, array $inputs, string $locale): array
     {
-        $content = [['type' => 'text', 'text' => $this->prompt($draft, $text, $locale)]];
+        $content = [['type' => 'text', 'text' => $this->prompt($draft, $inputs, $locale)]];
 
-        if ($photo !== null) {
-            $content[] = [
-                'type' => 'image_url',
-                'image_url' => ['url' => 'data:'.$photo['mime'].';base64,'.base64_encode($photo['contents'])],
-            ];
+        foreach ($inputs as $input) {
+            if ($input['photo'] !== null) {
+                $content[] = [
+                    'type' => 'image_url',
+                    'image_url' => ['url' => 'data:'.$input['photo']['mime'].';base64,'.base64_encode($input['photo']['contents'])],
+                ];
+            }
         }
 
         $keys = config('services.openai.keys');
 
-        $result = Http::timeout(90)
+        // Several photos take the model half a minute and more.
+        $result = Http::timeout(150)
             ->withToken((string) ($keys[$locale] ?? $keys['ru'] ?? ''))
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => config('services.openai.models.meal_analysis'),
@@ -82,8 +88,9 @@ class MealInputReader
 
     /**
      * @param  array<int, array{name: string, grams: int}>  $draft
+     * @param  array<int, array{kind: string, text: string|null, photo: array{mime: string, contents: string}|null}>  $inputs
      */
-    private function prompt(array $draft, ?string $text, string $locale): string
+    private function prompt(array $draft, array $inputs, string $locale): string
     {
         $language = match ($locale) {
             'ua' => 'Ukrainian',
@@ -96,12 +103,32 @@ class MealInputReader
             $lines[] = ($index + 1).'. '.$item['name'].' — '.$item['grams'].' g';
         }
 
-        $text = trim((string) $text);
+        $sent = [];
+        $photos = 0;
+        foreach ($inputs as $input) {
+            $text = trim((string) $input['text']);
+
+            if ($input['photo'] !== null) {
+                $photos++;
+                $sent[] = "Photo {$photos} (attached image {$photos})".($text === '' ? '' : ', caption: '.$text);
+            } elseif ($text !== '') {
+                $sent[] = ($input['kind'] === 'voice' ? 'Voice message: ' : 'Text: ').$text;
+            }
+        }
+
+        foreach ($sent as $index => $line) {
+            $sent[$index] = ($index + 1).'. '.$line;
+        }
 
         return "You keep the draft of a meal in a calorie diary. The user speaks {$language}.\n\n"
             ."The draft now:\n".($lines === [] ? '(empty)' : implode("\n", $lines))."\n\n"
-            ."New input from the user: the text below and the attached photo, if any.\n"
-            .'Text: '.($text === '' ? '(none)' : $text)."\n\n"
+            ."New input from the user, in the order it was sent; the photos are attached in the same order:\n"
+            .($sent === [] ? '(none)' : implode("\n", $sent))."\n\n"
+            .'All of the input is about this one meal: put it together. Words, a photo of the dish and a photo of '
+            .'a label may show the same food: it is one item, with the facts of the label, the amount the words '
+            .'give, otherwise the amount the dish shows. What the user says, an amount, a fat content, a brand, '
+            .'is kept as said; a photo adds what the words do not tell, and only printed text on it overrides '
+            ."the words. A later message may correct an earlier one; the later one wins.\n\n"
             ."Return the operations that turn the draft into what the user ate:\n"
             ."- add: a food the user ate that the draft does not have yet.\n"
             .'- update: the user corrects a draft item: "item" is its number; give the new grams, the new name, '
@@ -130,6 +157,9 @@ class MealInputReader
             .'Nutrition facts the user tells for a food ("во втором 250 калорий на 100 грамм", "белка 20"): '
             .'calories, proteins, fats, carbohydrates per 100 g of an add or update; facts per portion are '
             ."converted to 100 g by its grams. A fact the user did not tell is null.\n\n"
+            .'Brand: for add and for a changed name, the brand or the maker of the product when the user names one '
+            .'or a package or a label on a photo shows it, spelled the same as in the name, which keeps it; "" for a food '
+            ."without a brand: a dish, a fruit, a home-made food, a product of no visible make.\n\n"
             .'When the input says nothing about food, return no operations and no labels.';
     }
 
@@ -150,11 +180,12 @@ class MealInputReader
                     'items' => [
                         'type' => 'object',
                         'additionalProperties' => false,
-                        'required' => ['action', 'item', 'name', 'grams', 'label', 'calories', 'proteins', 'fats', 'carbohydrates'],
+                        'required' => ['action', 'item', 'name', 'brand', 'grams', 'label', 'calories', 'proteins', 'fats', 'carbohydrates'],
                         'properties' => [
                             'action' => ['type' => 'string', 'enum' => ['add', 'update', 'remove']],
                             'item' => ['type' => ['integer', 'null']],
                             'name' => ['type' => 'string'],
+                            'brand' => ['type' => 'string'],
                             'grams' => ['type' => ['number', 'null']],
                             'label' => ['type' => ['integer', 'null']],
                             'calories' => ['type' => ['number', 'null']],
@@ -195,7 +226,7 @@ class MealInputReader
      *
      * @param  mixed  $operation
      * @param  array<int, array<string, mixed>|null>  $labels
-     * @return array{action: string, item: int|null, name: string, grams: float|null, label: int|null, facts: array<string, float>}|null
+     * @return array{action: string, item: int|null, name: string, brand: string, grams: float|null, label: int|null, facts: array<string, float>}|null
      */
     private function validOperation($operation, int $items, array $labels): ?array
     {
@@ -206,6 +237,12 @@ class MealInputReader
         $action = $operation['action'] ?? null;
         $item = is_int($operation['item'] ?? null) ? $operation['item'] : null;
         $name = trim((string) ($operation['name'] ?? ''));
+        $brand = $name === '' ? '' : mb_substr(trim((string) ($operation['brand'] ?? '')), 0, 60);
+
+        // The product is found and stored by its name, so the brand must be in it.
+        if ($brand !== '' && mb_stripos($name, $brand) === false) {
+            $name .= ' '.$brand;
+        }
         $grams = is_numeric($operation['grams'] ?? null) ? (float) $operation['grams'] : null;
         $label = is_int($operation['label'] ?? null) && ($labels[$operation['label']] ?? null) !== null ? $operation['label'] : null;
 
@@ -228,7 +265,7 @@ class MealInputReader
             default => false,
         };
 
-        return $fits ? ['action' => $action, 'item' => $item, 'name' => mb_substr($name, 0, 150), 'grams' => $grams, 'label' => $label, 'facts' => $facts] : null;
+        return $fits ? ['action' => $action, 'item' => $item, 'name' => mb_substr($name, 0, 150), 'brand' => $brand, 'grams' => $grams, 'label' => $label, 'facts' => $facts] : null;
     }
 
     /**

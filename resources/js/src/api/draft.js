@@ -1,33 +1,39 @@
 import axios from "@/api/axios";
 
 // The meal draft of the "Приём пищи" page, shared with the Telegram bot. Every
-// answer carries the whole draft ({ draft }), or null when there is none.
+// answer carries the whole draft ({ draft }), or null when there is none; the
+// inputs waiting for the calculation ({ inputs }) and its state ({ calculation }).
 
-// Reading a photo or a recording with the model takes several seconds.
+// Transcribing a recording or sending a photo over a slow network takes a while.
 const INPUT_TIMEOUT_MS = 90000;
 
 export const getDraft = () => axios.get("/api/draft");
 
-export const sendDraftText = (text) =>
-    axios.post("/api/draft/input", { text }, { timeout: INPUT_TIMEOUT_MS });
+export const collectText = (text) =>
+    axios.post("/api/draft/inputs", { text }, { timeout: INPUT_TIMEOUT_MS });
 
-export const sendDraftPhoto = (file, text = "") => {
+export const collectPhoto = (file) => {
     const form = new FormData();
     form.append("photo", file);
-    if (text) {
-        form.append("text", text);
-    }
 
-    return axios.post("/api/draft/input", form, { timeout: INPUT_TIMEOUT_MS });
+    return axios.post("/api/draft/inputs", form, { timeout: INPUT_TIMEOUT_MS });
 };
 
-export const sendDraftVoice = (blob) => {
+export const collectVoice = (blob) => {
     const form = new FormData();
     const extension = (blob.type || "").includes("mp4") ? "m4a" : "webm";
     form.append("audio", blob, `record.${extension}`);
 
-    return axios.post("/api/draft/input", form, { timeout: INPUT_TIMEOUT_MS });
+    return axios.post("/api/draft/inputs", form, { timeout: INPUT_TIMEOUT_MS });
 };
+
+export const getInputPhoto = (id) =>
+    axios.get(`/api/draft/inputs/${id}/photo`, { responseType: "blob" });
+
+export const removeInput = (id) => axios.delete(`/api/draft/inputs/${id}`);
+
+// Answers at once: the calculation runs in the queue, getDraft tells when it is done.
+export const calculateDraft = () => axios.post("/api/draft/calculate");
 
 export const updateDraftItem = (id, changes) =>
     axios.patch(`/api/draft/items/${id}`, changes);

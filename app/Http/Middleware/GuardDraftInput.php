@@ -11,9 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * The spam guard for inputs to the meal draft from the site and the Mini App.
  *
- * Every input costs a model call; the panel counts them per account, shared
- * with the bot, which counts its own inputs before it calls the diary. A short
- * edit ("2 250") needs no model and is not counted.
+ * A model call is counted; the panel counts them per account, shared with the
+ * bot, which counts its own before it calls the diary. What is counted depends
+ * on the route: "model" (an input read at once) counts all but a short edit
+ * ("2 250"), which needs no model; "audio" (an input kept for the calculation)
+ * counts only a recording, which is transcribed; "always" counts the calculation.
  */
 class GuardDraftInput
 {
@@ -24,11 +26,9 @@ class GuardDraftInput
         $this->botPanelService = $botPanelService;
     }
 
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $counts = 'model'): Response
     {
-        $text = (string) $request->input('text', '');
-
-        if (! $request->hasFile('photo') && ! $request->hasFile('audio') && MealDraftService::isShortEdit($text)) {
+        if (! $this->counts($request, $counts)) {
             return $next($request);
         }
 
@@ -43,5 +43,15 @@ class GuardDraftInput
         }
 
         return $next($request);
+    }
+
+    private function counts(Request $request, string $counts): bool
+    {
+        return match ($counts) {
+            'always' => true,
+            'audio' => $request->hasFile('audio'),
+            default => $request->hasFile('photo') || $request->hasFile('audio')
+                || ! MealDraftService::isShortEdit((string) $request->input('text', '')),
+        };
     }
 }

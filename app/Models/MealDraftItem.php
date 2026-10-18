@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * A food of a meal draft with the nutrition facts per 100 g it shows.
@@ -74,7 +75,8 @@ class MealDraftItem extends Model
         return [
             'number' => $number,
             'id' => $this->id,
-            'name' => $this->name,
+            // Some products of the database are named in lower case: "мед різнотрав'я".
+            'name' => Str::ucfirst((string) $this->name),
             'grams' => $this->quantity,
             'product_id' => $this->product_id,
             'source' => $this->source,

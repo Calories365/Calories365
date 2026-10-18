@@ -2,26 +2,34 @@
 
 namespace App\Services;
 
+use App\Jobs\CalculateMealDraftJob;
 use App\Models\FoodConsumption;
 use App\Models\MealDraft;
+use App\Models\MealDraftInput;
 use App\Models\MealDraftItem;
 use App\Models\Product;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * The meal draft: a meal put together from several messages, voice, text, a
- * photo of the dish or of a label, in any order, and saved to the diary at once.
+ * The meal draft: a meal put together from several messages, voice, text,
+ * photos of the dish and of labels, in any order, and saved to the diary at once.
  *
- * Every input becomes operations on the draft (MealInputReader): add a food,
- * correct an item, remove one. A short edit, "2 250" or "убрать 3", needs no
- * model. The foods named get their products from ProductCatalog, all of one
- * input in one call; a label makes its own product. The draft keeps the facts
- * each item shows; nutrition facts the user tells mark the item edited, and it
- * is saved as the user's own product.
+ * What the user sends waits as inputs (collect) until the user asks to
+ * calculate: a queued job (CalculateMealDraftJob) gives all of them to the model
+ * in one request with the draft, so a label, a photo of the dish and the words
+ * about the same food make one item. The model's answer is operations on the
+ * draft (MealInputReader): add a food, correct an item, remove one. A short
+ * edit, "2 250" or "убрать 3", needs no model and applies at once. The foods
+ * named get their products from ProductCatalog, all of one calculation in one
+ * call; a brand gets a product of its own and a label makes its own product. The
+ * draft keeps the facts each item shows; nutrition facts the user tells mark the
+ * item edited, and it is saved as the user's own product.
  */
 class MealDraftService
 {
@@ -34,6 +42,17 @@ class MealDraftService
      * "убрать 3": remove item 3.
      */
     private const REMOVE = '/^(?:-|убра\p{L}*|убери|удал\p{L}*|прибра\p{L}*|прибери|видал\p{L}*|remove|delete)\s*(\d{1,2})$/u';
+
+    /**
+     * The state of the user's calculation, see calculation().
+     */
+    private const CALCULATION_KEY = 'meal_draft_calculation_';
+
+    /**
+     * Seconds after which a calculation that never finished counts as failed:
+     * longer than the job may run.
+     */
+    private const CALCULATION_LIMIT = 200;
 
     public function __construct(
         private MealInputReader $reader,
@@ -53,11 +72,169 @@ class MealDraftService
      */
     public function input(int $userId, string $locale, ?string $text, ?array $photo): array
     {
+        return $this->apply($userId, $locale, [[
+            'kind' => $photo === null ? MealDraftInput::KIND_TEXT : MealDraftInput::KIND_PHOTO,
+            'text' => $text,
+            'photo' => $photo,
+        ]]);
+    }
+
+    /**
+     * Keep an input until the calculation: a voice message (its words), a text
+     * or a photo with its caption. A short edit of the draft applies at once
+     * instead, and then is the result of input().
+     *
+     * @return array{draft: MealDraft|null, understood: bool, not_found: array<int, string>}|null
+     *
+     * @throws \LengthException when the user has as many inputs waiting as a calculation takes
+     */
+    public function collect(int $userId, string $locale, string $kind, ?string $text, ?UploadedFile $photo = null): ?array
+    {
+        if ($photo === null && self::isShortEdit((string) $text) && MealDraft::openFor($userId) !== null) {
+            return $this->input($userId, $locale, $text, null);
+        }
+
+        $pending = MealDraftInput::pendingFor($userId);
+
+        if ($pending->count() >= MealDraftInput::MAX_PENDING
+            || ($photo !== null && $pending->whereNotNull('photo_path')->count() >= MealDraftInput::MAX_PHOTOS)) {
+            throw new \LengthException('Too many inputs wait for the calculation');
+        }
+
+        MealDraftInput::create([
+            'user_id' => $userId,
+            'kind' => $kind,
+            'text' => $text !== null && trim($text) !== '' ? trim($text) : null,
+            'photo_path' => $photo?->store('meal-inputs/'.$userId, MealDraftInput::DISK),
+            'photo_mime' => $photo ? (string) $photo->getMimeType() : null,
+        ]);
+
+        // What a finished calculation reported is about the inputs it took.
+        if (($this->calculation($userId)['status'] ?? null) !== 'running') {
+            Cache::forget(self::CALCULATION_KEY.$userId);
+        }
+
+        return null;
+    }
+
+    /**
+     * Start the calculation of the inputs waiting: a queued job, since the model
+     * reads several photos for half a minute and more. Inputs sent meanwhile wait
+     * for the next calculation.
+     *
+     * @return array<string, mixed>|null the state of the calculation, null when nothing waits
+     */
+    public function calculate(int $userId, string $locale): ?array
+    {
+        $state = $this->calculation($userId);
+        if (($state['status'] ?? null) === 'running') {
+            return $state;
+        }
+
+        $inputs = MealDraftInput::pendingFor($userId);
+        if ($inputs->isEmpty()) {
+            return null;
+        }
+
+        $state = ['status' => 'running', 'started_at' => now()->timestamp];
+        Cache::put(self::CALCULATION_KEY.$userId, $state, now()->addMinutes(10));
+
+        CalculateMealDraftJob::dispatch($userId, $locale, $inputs->pluck('id')->all());
+
+        // A synchronous queue has finished it by now.
+        return $this->calculation($userId);
+    }
+
+    /**
+     * Apply the inputs to the draft in one model call and drop them; the
+     * outcome becomes the state of the calculation.
+     *
+     * @param  array<int, int>  $inputIds
+     */
+    public function runCalculation(int $userId, string $locale, array $inputIds): void
+    {
+        $inputs = MealDraftInput::query()->where('user_id', $userId)->whereIn('id', $inputIds)->orderBy('id')->get();
+
+        try {
+            $result = $inputs->isEmpty()
+                ? ['understood' => false, 'not_found' => []]
+                : $this->apply($userId, $locale, $inputs->map(static fn (MealDraftInput $input) => [
+                    'kind' => $input->kind,
+                    'text' => $input->text,
+                    'photo' => $input->photo(),
+                ])->all());
+        } catch (\Throwable $e) {
+            Log::warning('Meal draft calculation failed', ['error' => $e->getMessage()]);
+            Cache::put(self::CALCULATION_KEY.$userId, ['status' => 'failed'], now()->addMinutes(10));
+
+            return;
+        }
+
+        // The inputs are taken whatever the model made of them: sending the same
+        // again would give the same answer.
+        $inputs->each->delete();
+
+        Cache::put(self::CALCULATION_KEY.$userId, [
+            'status' => 'done',
+            'understood' => $result['understood'],
+            'not_found' => $result['not_found'],
+        ], now()->addMinutes(10));
+    }
+
+    /**
+     * The state of the user's last calculation: running, done with what it
+     * understood and the foods it found no product for, or failed; null without one.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function calculation(int $userId): ?array
+    {
+        $state = Cache::get(self::CALCULATION_KEY.$userId);
+
+        // The job died without a word: it was killed or the queue lost it.
+        if (($state['status'] ?? null) === 'running' && now()->timestamp - ($state['started_at'] ?? 0) > self::CALCULATION_LIMIT) {
+            return ['status' => 'failed'];
+        }
+
+        return $state;
+    }
+
+    /**
+     * Drop one input waiting for the calculation.
+     */
+    public function removeInput(int $userId, int $inputId): bool
+    {
+        $input = MealDraftInput::query()->where('user_id', $userId)->find($inputId);
+
+        return (bool) $input?->delete();
+    }
+
+    /**
+     * Drop all the inputs waiting for the calculation.
+     */
+    public function clearInputs(int $userId): void
+    {
+        MealDraftInput::query()->where('user_id', $userId)->get()->each->delete();
+        Cache::forget(self::CALCULATION_KEY.$userId);
+    }
+
+    /**
+     * Apply inputs to the user's draft in one model call; a single short edit
+     * needs none.
+     *
+     * @param  array<int, array{kind: string, text: string|null, photo: array{mime: string, contents: string}|null}>  $inputs
+     * @return array{draft: MealDraft|null, understood: bool, not_found: array<int, string>}
+     *
+     * @throws \Illuminate\Http\Client\RequestException
+     * @throws \RuntimeException
+     */
+    private function apply(int $userId, string $locale, array $inputs): array
+    {
         $draft = MealDraft::openFor($userId);
         $items = $draft ? $draft->items->values() : collect();
 
-        $read = ($photo === null ? $this->shortEdit((string) $text, $items) : null)
-            ?? $this->reader->read($items->map(static fn (MealDraftItem $item) => ['name' => $item->name, 'grams' => $item->quantity])->all(), $text, $photo, $locale);
+        $read = (count($inputs) === 1 && $inputs[0]['photo'] === null ? $this->shortEdit((string) $inputs[0]['text'], $items) : null)
+            ?? $this->reader->read($items->map(static fn (MealDraftItem $item) => ['name' => $item->name, 'grams' => $item->quantity])->all(), $inputs, $locale);
 
         if ($read['operations'] === []) {
             return ['draft' => $draft, 'understood' => false, 'not_found' => []];
@@ -179,6 +356,7 @@ class MealDraftService
     public function cancel(int $userId): void
     {
         MealDraft::query()->where('user_id', $userId)->delete();
+        $this->clearInputs($userId);
     }
 
     /**
@@ -310,6 +488,7 @@ class MealDraftService
     {
         $hits = [];
         $names = [];
+        $branded = [];
 
         foreach ($read['operations'] as $index => $operation) {
             if ($operation['action'] === 'remove') {
@@ -319,7 +498,17 @@ class MealDraftService
             if ($operation['label'] !== null) {
                 $hits[$index] = ['hit' => $this->catalog->addFromLabel($read['labels'][$operation['label']], $locale, $userId), 'source' => MealDraftItem::SOURCE_LABEL];
             } elseif ($operation['name'] !== '' && ! $this->toldAllFacts($operation)) {
-                $names[$index] = $operation['name'];
+                if (($operation['brand'] ?? '') !== '') {
+                    $branded[$index] = ['name' => $operation['name'], 'brand' => $operation['brand']];
+                } else {
+                    $names[$index] = $operation['name'];
+                }
+            }
+        }
+
+        if ($branded !== []) {
+            foreach ($this->catalog->findBranded($branded, $userId, $locale) as $index => $hit) {
+                $hits[$index] = $hit ? ['hit' => $hit, 'source' => MealDraftItem::SOURCE_DATABASE] : null;
             }
         }
 

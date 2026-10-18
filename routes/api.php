@@ -63,6 +63,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/draft/input', [\App\Http\Controllers\MealDraftController::class, 'input'])
             ->middleware(\App\Http\Middleware\GuardDraftInput::class)
             ->name('meal-draft.input');
+        Route::post('/draft/inputs', [\App\Http\Controllers\MealDraftController::class, 'collect'])
+            ->middleware(\App\Http\Middleware\GuardDraftInput::class.':audio')
+            ->name('meal-draft.inputs.store');
+        Route::get('/draft/inputs/{input}/photo', [\App\Http\Controllers\MealDraftController::class, 'photo'])
+            ->whereNumber('input')
+            ->name('meal-draft.inputs.photo');
+        Route::delete('/draft/inputs/{input}', [\App\Http\Controllers\MealDraftController::class, 'destroyInput'])
+            ->whereNumber('input')
+            ->name('meal-draft.inputs.destroy');
+        Route::delete('/draft/inputs', [\App\Http\Controllers\MealDraftController::class, 'destroyInputs'])
+            ->name('meal-draft.inputs.clear');
+        Route::post('/draft/calculate', [\App\Http\Controllers\MealDraftController::class, 'calculate'])
+            ->middleware(\App\Http\Middleware\GuardDraftInput::class.':always')
+            ->name('meal-draft.calculate');
         Route::patch('/draft/items/{item}', [\App\Http\Controllers\MealDraftController::class, 'updateItem'])
             ->whereNumber('item')
             ->name('meal-draft.items.update');
@@ -92,6 +106,12 @@ Route::middleware('check.bot.key')->group(function () {
             ->name('draft.show');
         Route::post('/caloriesEndPoint/draft/input', [\App\Http\Controllers\MealDraftController::class, 'input'])
             ->name('draft.input');
+        Route::post('/caloriesEndPoint/draft/inputs', [\App\Http\Controllers\MealDraftController::class, 'collect'])
+            ->name('draft.inputs.store');
+        Route::delete('/caloriesEndPoint/draft/inputs', [\App\Http\Controllers\MealDraftController::class, 'destroyInputs'])
+            ->name('draft.inputs.clear');
+        Route::post('/caloriesEndPoint/draft/calculate', [\App\Http\Controllers\MealDraftController::class, 'calculate'])
+            ->name('draft.calculate');
         Route::post('/caloriesEndPoint/draft/save', [\App\Http\Controllers\MealDraftController::class, 'save'])
             ->name('draft.save');
         Route::delete('/caloriesEndPoint/draft', [\App\Http\Controllers\MealDraftController::class, 'destroy'])
