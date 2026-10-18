@@ -160,10 +160,18 @@ class CaloriesAPIBotController extends BaseController
         ];
     }
 
+    /**
+     * Save a product the bot generated or the user changed, with the meal.
+     *
+     * The panel sends verified = 1 for nutrition facts its model estimated and the
+     * user kept: such a product joins the shared database. Anything the user
+     * changed stays the user's own.
+     */
     public function saveProduct(StoreUsersFoodConsumptionsRequest $request, ProductService $productService): JsonResponse
     {
         $validatedData = $request->validated();
         $validatedData['user_id'] = auth()->id();
+        $validatedData['ai_generated'] = (bool) ($validatedData['verified'] ?? false);
         $userResult = $productService->createProductWithTranslationsAndConsumption($validatedData);
 
         return response()->json($userResult, 201);

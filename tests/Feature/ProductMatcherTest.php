@@ -89,6 +89,17 @@ class ProductMatcherTest extends TestCase
         $this->assertSame('Творог 5% Простоквашино', app(ProductMatcher::class)->match(['Творог 5%'], $user->id, 'ru')[0]['name']);
     }
 
+    public function test_the_users_own_product_named_the_way_the_user_says_it_is_that_food(): void
+    {
+        $user = User::factory()->create();
+        $this->indexed('гречк', [['Вареная гречка на воде', 105, 3, 1, 20], ['Гречка', 110, 4, 1, 21]]);
+        $this->index['гречк'][1]['user_id'] = $user->id;
+
+        $this->assertSame('Гречка', app(ProductMatcher::class)->match(['Гречка'], $user->id, 'ru')[0]['name']);
+        $this->assertSame('Вареная гречка на воде', $this->match('Гречка')['name']);
+        $this->assertSame('Вареная гречка на воде', app(ProductMatcher::class)->match(['Гречка варёная'], $user->id, 'ru')[0]['name']);
+    }
+
     public function test_a_name_in_another_language_comes_after_one_in_the_users_language(): void
     {
         $this->indexed('яйц', [['Яйце підсмажене', 196, 14, 15, 1], ['Яйцо жареное', 196, 14, 15, 1]]);
@@ -119,7 +130,7 @@ class ProductMatcherTest extends TestCase
             $this->assertSame(['stems'], $leg['attributesToSearchOn']);
             $this->assertSame('all', $leg['matchingStrategy']);
             $this->assertContains('locale = "ru"', $leg['filter']);
-            $this->assertContains('cooking IN ["baked", "grilled", "cooked"]', $leg['filter']);
+            $this->assertContains('(cooking IN ["baked", "grilled", "cooked"] OR user_id = 7)', $leg['filter']);
             $this->assertContains('((user_id = 7 AND active = 1) OR user_id IS NULL OR verified = 1)', $leg['filter']);
             $this->assertContainsOnlyInstancesOf(SearchQuery::class, $queries);
 

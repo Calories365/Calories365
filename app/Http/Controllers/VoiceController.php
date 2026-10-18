@@ -172,11 +172,13 @@ class VoiceController extends Controller
 
                 $productData['verified'] = 0;
                 $productData['active'] = 1;
-                $productData['isGenerated'] = $product['isGenerated'];
 
                 $wasModified = isset($product['isModified']) && $product['isModified'] === true;
 
-                if (! empty($product['product_id']) && ! $wasModified && ! $product['isGenerated']) {
+                // Facts the model estimated and the user kept join the shared database.
+                $productData['ai_generated'] = ! empty($product['isGenerated']) && ! $wasModified;
+
+                if (! empty($product['product_id']) && ! $wasModified && empty($product['isGenerated'])) {
                     $result = $this->productService->createFoodConsumption([
                         'user_id' => Auth::id(),
                         'product_id' => $product['product_id'],

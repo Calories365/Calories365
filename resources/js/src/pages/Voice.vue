@@ -21,6 +21,7 @@ import {
     getGenerateProductStatus,
 } from "@/api/voice";
 import i18n from "@/i18n";
+import { factsChanged, factsOf } from "@/helpers/productFacts.js";
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
 import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vue";
 
@@ -435,6 +436,12 @@ export default {
 
                     this.products[index].needsSearch = false;
                     this.products[index].nameModified = false;
+                    // The product found is saved as eaten unless the user changes its facts.
+                    this.products[index].isGenerated = false;
+                    this.products[index].isModified = false;
+                    this.originalProducts[productData.product.id] = factsOf(
+                        this.products[index]
+                    );
 
                     this.products[index].searchedBefore = true;
 
@@ -482,11 +489,7 @@ export default {
                     this.products[index].protein = d.proteins || 0;
                     this.products[index].fats = d.fats || 0;
                     this.products[index].carbs = d.carbohydrates || 0;
-                    this.products[index].isGenerated = true;
-                    if (this.products[index].nameModified) {
-                        this.products[index].product_id = null;
-                    }
-                    this.products[index].needsSearch = false;
+                    this.markGenerated(index);
                     this.showSuccess(
                         this.$t("Voice.success.dataGenerated", {
                             product: productName,
@@ -544,11 +547,7 @@ export default {
                         this.products[index].protein = d.proteins || 0;
                         this.products[index].fats = d.fats || 0;
                         this.products[index].carbs = d.carbohydrates || 0;
-                        this.products[index].isGenerated = true;
-                        if (this.products[index].nameModified) {
-                            this.products[index].product_id = null;
-                        }
-                        this.products[index].needsSearch = false;
+                        this.markGenerated(index);
 
                         this.showSuccess(
                             this.$t("Voice.success.dataGenerated", {
@@ -625,9 +624,10 @@ export default {
             const productsToSave = this.products.map((product) => {
                 const preparedProduct = { ...product };
 
+                // A renamed product is not the one found; generated anew for the new
+                // name, it still counts as generated.
                 if (preparedProduct.nameModified) {
                     preparedProduct.product_id = null;
-                    preparedProduct.isGenerated = false;
                 }
 
                 if (!preparedProduct.weight || preparedProduct.weight <= 0) {
@@ -706,51 +706,42 @@ export default {
 
             this.products.forEach((item) => {
                 if (item.product_id) {
-                    this.originalProducts[item.product_id] = {
-                        name: item.name,
-                        calories: item.calories,
-                        protein: item.protein,
-                        fats: item.fats,
-                        carbs: item.carbs,
-                        weight: item.weight,
-                    };
+                    this.originalProducts[item.product_id] = factsOf(item);
+                } else if (item.isGenerated) {
+                    item.generatedFacts = factsOf(item);
                 }
             });
         },
-        checkModifiedProducts() {
-            this.products.forEach((product, index) => {
-                if (product.product_id) {
-                    const original = this.originalProducts[product.product_id];
+        // The facts the product came with: from the database or from the model.
+        originalFacts(product) {
+            return product.product_id
+                ? this.originalProducts[product.product_id]
+                : product.generatedFacts;
+        },
+        // Facts the model estimated for the current name; the user has changed nothing yet.
+        markGenerated(index) {
+            const product = this.products[index];
 
-                    if (
-                        original &&
-                        (product.calories !== original.calories ||
-                            product.protein !== original.protein ||
-                            product.fats !== original.fats ||
-                            product.carbs !== original.carbs)
-                    ) {
-                        this.products[index].isModified = true;
-                    }
+            if (product.nameModified) {
+                product.product_id = null;
+            }
+            product.isGenerated = true;
+            product.isModified = false;
+            product.needsSearch = false;
+            product.generatedFacts = factsOf(product);
+        },
+        checkModifiedProducts() {
+            this.products.forEach((product) => {
+                if (factsChanged(product, this.originalFacts(product))) {
+                    product.isModified = true;
                 }
             });
         },
         onProductChanged(index) {
-            if (this.products[index].product_id) {
-                const original =
-                    this.originalProducts[this.products[index].product_id];
+            const product = this.products[index];
 
-                if (
-                    original &&
-                    (this.products[index].calories !== original.calories ||
-                        this.products[index].protein !== original.protein ||
-                        this.products[index].fats !== original.fats ||
-                        this.products[index].carbs !== original.carbs ||
-                        this.products[index].weight !== original.weight)
-                ) {
-                    this.products[index].isModified = true;
-                }
-            } else if (this.products[index].nameModified) {
-                this.products[index].isModified = true;
+            if (factsChanged(product, this.originalFacts(product))) {
+                product.isModified = true;
             }
         },
 

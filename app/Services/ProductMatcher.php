@@ -130,7 +130,8 @@ class ProductMatcher
                 ->setFilter([
                     'locale = "'.addslashes($locale).'"',
                     $this->visibleTo($userId),
-                    "cooking IN [{$cooking}]",
+                    // The user's own products come whatever the method: see best().
+                    $userId === null ? "cooking IN [{$cooking}]" : "(cooking IN [{$cooking}] OR user_id = {$userId})",
                 ])
                 ->setLimit(self::CANDIDATES_PER_ITEM);
             $items[] = $index;
@@ -177,9 +178,15 @@ class ProductMatcher
             $fact = $facts[(int) $hit['product_id']] ?? null;
             $penalty = $said->penaltyFor($product, $locale !== 'en', $foods);
             $foreign = $this->inAnotherLanguage($name, $locale);
+            $own = isset($hit['user_id']) && $userId !== null && (int) $hit['user_id'] === $userId;
 
             // The index may hold a name read by older rules; the method is checked again.
-            if (! isset($accepted[$product->cooking]) || $fact === null || ! $this->plausible($product, $fact)
+            // A product the user made under the very name the user says is that food,
+            // however the rules read the name: the user's "Гречка" with 110 kcal is boiled.
+            $tier = $accepted[$product->cooking]
+                ?? ($own && $penalty === 0 && $product->cooking === $said->cooking ? 0 : null);
+
+            if ($tier === null || $fact === null || ! $this->plausible($product, $fact)
                 || $penalty === null || $penalty > self::MAX_PENALTY || ($foreign && $locale === 'en')) {
                 continue;
             }
@@ -188,11 +195,11 @@ class ProductMatcher
                 'hit' => $hit,
                 'calories' => $fact['calories'],
                 'rank' => [
-                    $accepted[$product->cooking],
+                    $tier,
                     -$fact['mine'],
                     $penalty,
                     (int) $foreign,
-                    isset($hit['user_id']) && $userId !== null && (int) $hit['user_id'] === $userId ? 0 : 1,
+                    $own ? 0 : 1,
                     ! empty($hit['verified']) ? 0 : 1,
                     $fact['source'] === Product::SOURCE_AI ? 1 : 0,
                 ],
