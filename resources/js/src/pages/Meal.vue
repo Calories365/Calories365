@@ -532,8 +532,8 @@ export default {
     max-width: 720px;
     margin: 0 auto;
     padding: 20px;
-    color: var(--tg-theme-text-color, #333);
-    background: var(--tg-theme-bg-color, #fff);
+    color: #333;
+    background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 
@@ -546,7 +546,7 @@ export default {
     &_lead {
         margin: 0 0 20px;
         text-align: center;
-        color: var(--tg-theme-hint-color, #666);
+        color: #666;
         line-height: 1.5;
     }
 
@@ -572,15 +572,15 @@ export default {
         padding: 12px 16px;
         font-size: 1.1rem;
         font-weight: 600;
-        color: var(--tg-theme-button-text-color, #fff);
-        background: var(--tg-theme-button-color, #4caf50);
+        color: #fff;
+        background: $main-color;
         border: none;
         border-radius: 14px;
         cursor: pointer;
 
         &--photo {
-            color: var(--tg-theme-button-color, #4caf50);
-            background: var(--tg-theme-secondary-bg-color, #eef7ee);
+            color: $main-color;
+            background: #eef7ee;
         }
 
         &--recording {
@@ -609,15 +609,15 @@ export default {
             padding: 12px 14px;
             font-size: 1rem;
             color: inherit;
-            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            background: #f5f5f5;
             border: 1px solid transparent;
             border-radius: 12px;
         }
 
         button {
             width: 48px;
-            color: var(--tg-theme-button-text-color, #fff);
-            background: var(--tg-theme-button-color, #4caf50);
+            color: #fff;
+            background: $main-color;
             border: none;
             border-radius: 12px;
             cursor: pointer;
@@ -633,7 +633,7 @@ export default {
     &_heard {
         margin: 0;
         font-size: 0.95rem;
-        color: var(--tg-theme-hint-color, #666);
+        color: #666;
         text-align: center;
     }
 
@@ -653,7 +653,7 @@ export default {
 
         span {
             font-weight: 400;
-            color: var(--tg-theme-hint-color, #666);
+            color: #666;
         }
     }
 
@@ -667,22 +667,22 @@ export default {
         padding: 14px 8px;
         font-size: 1rem;
         font-weight: 600;
-        color: var(--tg-theme-button-color, #4caf50);
-        background: var(--tg-theme-secondary-bg-color, #eef7ee);
+        color: $main-color;
+        background: #eef7ee;
         border: none;
         border-radius: 12px;
         cursor: pointer;
 
         &--main {
-            color: var(--tg-theme-button-text-color, #fff);
-            background: var(--tg-theme-button-color, #4caf50);
+            color: #fff;
+            background: $main-color;
         }
     }
 
     &_cancel {
         grid-column: 1 / -1;
         padding: 10px;
-        color: var(--tg-theme-hint-color, #888);
+        color: #888;
         background: none;
         border: none;
         cursor: pointer;
@@ -690,7 +690,7 @@ export default {
 
     &_how-to {
         padding: 16px;
-        background: var(--tg-theme-secondary-bg-color, #f7f9f7);
+        background: #f7f9f7;
         border-radius: 12px;
         line-height: 1.5;
 
@@ -710,14 +710,14 @@ export default {
 
         p {
             margin: 0;
-            color: var(--tg-theme-hint-color, #666);
+            color: #666;
         }
     }
 }
 
 .meal-item {
     padding: 12px 0;
-    border-bottom: 1px solid var(--tg-theme-section-separator-color, #eee);
+    border-bottom: 1px solid #eee;
 
     &_head {
         display: flex;
@@ -732,8 +732,8 @@ export default {
         line-height: 24px;
         font-size: 0.85rem;
         text-align: center;
-        color: var(--tg-theme-button-text-color, #fff);
-        background: var(--tg-theme-button-color, #4caf50);
+        color: #fff;
+        background: $main-color;
         border-radius: 50%;
     }
 
@@ -745,14 +745,14 @@ export default {
     &_tag {
         padding: 2px 8px;
         font-size: 0.8rem;
-        color: var(--tg-theme-hint-color, #666);
-        background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        color: #666;
+        background: #f0f0f0;
         border-radius: 8px;
     }
 
     &_remove {
         padding: 6px 8px;
-        color: var(--tg-theme-hint-color, #999);
+        color: #999;
         background: none;
         border: none;
         cursor: pointer;
@@ -771,7 +771,7 @@ export default {
         padding: 6px 8px;
         font-size: 1rem;
         color: inherit;
-        background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+        background: #f5f5f5;
         border: 1px solid transparent;
         border-radius: 8px;
     }
@@ -781,7 +781,7 @@ export default {
     }
 
     &_macros {
-        color: var(--tg-theme-hint-color, #666);
+        color: #666;
         font-size: 0.9rem;
     }
 
@@ -789,7 +789,7 @@ export default {
         margin: 6px 0 0 32px;
         padding: 0;
         font-size: 0.9rem;
-        color: var(--tg-theme-link-color, #2e7d32);
+        color: darken($main-color, 15%);
         background: none;
         border: none;
         cursor: pointer;
@@ -807,13 +807,13 @@ export default {
         flex-direction: column;
         gap: 4px;
         font-size: 0.85rem;
-        color: var(--tg-theme-hint-color, #666);
+        color: #666;
 
         input {
             padding: 6px 8px;
             font-size: 1rem;
-            color: var(--tg-theme-text-color, #333);
-            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            color: #333;
+            background: #f5f5f5;
             border: 1px solid transparent;
             border-radius: 8px;
         }
@@ -823,7 +823,7 @@ export default {
         grid-column: 1 / -1;
         margin: 0;
         font-size: 0.8rem;
-        color: var(--tg-theme-hint-color, #888);
+        color: #888;
     }
 }
 

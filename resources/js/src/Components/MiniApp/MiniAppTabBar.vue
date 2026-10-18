@@ -53,8 +53,8 @@ export default {
     justify-content: space-around;
     align-items: stretch;
     padding-bottom: env(safe-area-inset-bottom, 0);
-    background: var(--tg-theme-secondary-bg-color, #ffffff);
-    border-top: 1px solid var(--tg-theme-section-separator-color, #{$border-color});
+    background: #ffffff;
+    border-top: 1px solid $border-color;
 
     &_item {
         flex: 1;
@@ -65,11 +65,11 @@ export default {
         gap: 4px;
         padding: 8px 2px;
         text-decoration: none;
-        color: var(--tg-theme-hint-color, #{$darkgray});
+        color: #8a8a8a;
         transition: color 0.15s ease;
 
         &--active {
-            color: var(--tg-theme-link-color, #{$main-color});
+            color: $main-color;
         }
     }
 

@@ -91,9 +91,10 @@ export default {
                 </span>
             </li>
             <li class="indication-container__element">
-                {{ $t("Diary.summary") }}: {{ caloriesPerDay }}/{{
-                    currentUser.calories_limit
-                }}
+                {{ $t("Diary.summary") }}: {{ caloriesPerDay
+                }}<template v-if="currentUser.calories_limit"
+                    >/{{ currentUser.calories_limit }}</template
+                >
                 {{ $t("Diary.KCAL") }}
                 <span
                     class="info-icon"
@@ -118,6 +119,14 @@ export default {
             </li>
         </ul>
 
+        <!-- New accounts, the ones from Telegram first of all, have no norm yet. -->
+        <router-link
+            v-if="!currentUser.calories_limit"
+            :to="{ name: 'calculation' }"
+            class="indication-container__set-limit"
+        >
+            {{ $t("Diary.setLimit") }}
+        </router-link>
         <CaloriesModal
             :isOpen="isFeedbackModalOpen"
             :content="feedbackResponse"
@@ -154,6 +163,18 @@ export default {
 
     &__btn {
         margin-top: 10px;
+    }
+
+    &__set-limit {
+        display: block;
+        padding: 0 30px 10px;
+        color: $main-color;
+        text-transform: none;
+        letter-spacing: normal;
+        text-decoration: underline;
+        @media (max-width: 768px) {
+            padding: 0 7px 10px;
+        }
     }
 }
 

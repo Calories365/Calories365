@@ -22,6 +22,8 @@ class UserController extends Controller
             ]),
             [
                 'telegram_auth' => ! empty($user->telegram_id),
+                // Accounts opened from the Mini App get a made-up address, the cabinet hides it.
+                'synthetic_email' => str_ends_with((string) $user->email, '@'.config('services.telegram_mini_app.email_domain')),
             ]
         );
     }

@@ -7,11 +7,11 @@ import CaloriesCalculationLocaleChanger from "@/Components/CaloriesCalculationLo
 import { actionTypes } from "@/store/modules/changeLocale.js";
 import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vue";
 import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
-import PremiumNotice from "@/Components/PremiumNotice.vue";
 import CookieBanner from "./Components/CookieBanner.vue";
 import MiniAppTabBar from "@/Components/MiniApp/MiniAppTabBar.vue";
 import MiniAppAuthError from "@/Components/MiniApp/MiniAppAuthError.vue";
-import { isMiniApp } from "@/telegram/miniApp.js";
+import MiniAppOpenHint from "@/Components/MiniApp/MiniAppOpenHint.vue";
+import { isMiniApp, isTelegramWithoutData } from "@/telegram/miniApp.js";
 import { getterTypes } from "@/store/modules/auth.js";
 
 library.add(faAngleDown);
@@ -35,10 +35,13 @@ export default {
             username: "Пена",
             locale: userLocale,
             isMiniApp: isMiniApp(),
+            telegramWithoutData: isTelegramWithoutData(),
+            openHintDismissed: false,
         };
     },
     components: {
         MiniAppAuthError,
+        MiniAppOpenHint,
         MiniAppTabBar,
         CookieBanner,
         CaloriesSuccessNotification,
@@ -46,14 +49,24 @@ export default {
         CaloriesCalculationLocaleChanger,
         CaloriesHeaderV2,
         CaloriesTestLocale,
-        PremiumNotice,
     },
     computed: {
         // Telegram signs the visitor in before the app mounts, so a logged-out
         // Mini App means that handshake failed.
         miniAppAuthFailed() {
             return (
-                this.isMiniApp && !this.$store.getters[getterTypes.isLoggedIn]
+                this.isMiniApp &&
+                !this.telegramWithoutData &&
+                !this.$store.getters[getterTypes.isLoggedIn]
+            );
+        },
+        // Opened inside Telegram without the data to sign in: the site would ask
+        // for a password the person never set, so first say how to open the app.
+        showOpenHint() {
+            return (
+                this.telegramWithoutData &&
+                !this.openHintDismissed &&
+                !this.$store.getters[getterTypes.isLoggedIn]
             );
         },
         successMessage() {
@@ -115,14 +128,20 @@ export default {
             {{ errorMessage }}
         </calories-error-notification>
 
-        <calories-header-v2 v-if="!isMiniApp" />
+        <calories-header-v2 v-if="!isMiniApp && !showOpenHint" />
 
-        <!-- Its links point at the landing page, which the Mini App does not show. -->
-        <premium-notice v-if="!isMiniApp" />
+        <!-- PremiumNotice is off while payment is: it promised a limit of 10
+             voice inputs that no longer exists. -->
 
-        <cookie-banner v-if="!isMiniApp" />
+        <cookie-banner v-if="!isMiniApp && !showOpenHint" />
 
         <mini-app-auth-error v-if="miniAppAuthFailed" />
+
+        <mini-app-open-hint
+            v-else-if="showOpenHint"
+            :can-sign-in-with-email="!isMiniApp"
+            @dismiss="openHintDismissed = true"
+        />
 
         <main v-else id="primary" class="main-wrapper">
             <article class="main-article">
@@ -130,7 +149,9 @@ export default {
             </article>
         </main>
 
-        <mini-app-tab-bar v-if="isMiniApp && !miniAppAuthFailed" />
+        <mini-app-tab-bar
+            v-if="isMiniApp && !miniAppAuthFailed && !showOpenHint"
+        />
     </div>
 </template>
 
@@ -144,7 +165,7 @@ export default {
 /* Telegram draws its own header, and the tab bar sits on top of the content. */
 .page-wrapper--mini-app {
     min-height: var(--tg-viewport-height, 100vh);
-    background: var(--tg-theme-bg-color, transparent);
+    background: #ffffff;
 
     .main-wrapper {
         margin-top: 0;

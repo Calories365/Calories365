@@ -112,7 +112,11 @@ export default {
                     <div class="top-info_avatar" @click="play">
                         <img src="@/assets/valera.png" />
                     </div>
-                    <div class="top-info_premium" v-if="!$isAcademic">
+                    <!-- Payment is off for now, and Telegram allows no payment pages. -->
+                    <div
+                        class="top-info_premium"
+                        v-if="!$isAcademic && !$isMiniApp"
+                    >
                         <PremiumSection
                             :isPremium="isPremium"
                             :currentUser="currentUser"
@@ -120,7 +124,10 @@ export default {
                     </div>
                 </div>
                 <div class="page-cabinet_mid mid-info">
-                    <div class="mid-info_email">
+                    <div
+                        class="mid-info_email"
+                        v-if="!currentUser.synthetic_email"
+                    >
                         <div class="mid-info_text">
                             {{ $t("Cabinet.Mail") }}:
                         </div>
@@ -162,7 +169,11 @@ export default {
                             class="mid-info_credentials"
                         />
                     </div>
-                    <div class="mid-info_link">
+                    <!-- An account opened from Telegram has a random password nobody knows. -->
+                    <div
+                        class="mid-info_link"
+                        v-if="!currentUser.synthetic_email"
+                    >
                         <div class="mid-info_text">
                             {{ $t("Cabinet.Password") }}:
                         </div>
@@ -179,7 +190,9 @@ export default {
                         >
                             {{ $t("Cabinet.Save") }}
                         </calories-button>
+                        <!-- Telegram signs the person in again on the next open. -->
                         <calories-button
+                            v-if="!$isMiniApp"
                             @click="logout"
                             passed-class="danger"
                             class="mid-info_button"

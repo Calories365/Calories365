@@ -7,7 +7,15 @@ import store from '@/store/store.js';
 import axios from 'axios';
 import {actionTypes} from '@/store/modules/auth';
 import i18n from "@/i18n.js";
-import {authenticateMiniApp, initMiniApp, isMiniApp, resetMiniAppSession} from '@/telegram/miniApp.js';
+import {
+    authenticateMiniApp,
+    hasInitData,
+    initMiniApp,
+    isMiniApp,
+    isTelegramWithoutData,
+    prepareTelegramView,
+    resetMiniAppSession,
+} from '@/telegram/miniApp.js';
 
 // Determine if we're in academic environment based on hostname
 const isAcademic = window.location.hostname.includes('calculator.calories365.xyz');
@@ -20,6 +28,8 @@ const miniApp = isMiniApp();
 const bootstrapSession = async () => {
     if (miniApp) {
         initMiniApp();
+    } else if (isTelegramWithoutData()) {
+        prepareTelegramView();
     }
 
     // Needed in the Mini App too: Sanctum treats same-origin requests as
@@ -30,7 +40,8 @@ const bootstrapSession = async () => {
         console.error('Error during CSRF token initialization', error);
     }
 
-    if (miniApp) {
+    // Without initData the token of an earlier launch is all there is.
+    if (miniApp && hasInitData()) {
         try {
             await authenticateMiniApp();
         } catch (error) {

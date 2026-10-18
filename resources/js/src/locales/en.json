@@ -134,6 +134,7 @@
     },
     "Diary": {
         "summary": "Total",
+        "setLimit": "Work out your daily calorie norm in the calculator",
         "KCAL": "KCAL",
         "PopularProducts": "Popular Products",
         "AddProduct": "Add Product",
@@ -501,7 +502,11 @@
     },
     "MiniApp": {
         "authError": "Could not sign you in through Telegram. Please try again.",
-        "retry": "Try again"
+        "retry": "Try again",
+        "openHintTitle": "Open the app with the button left of the message field",
+        "openHint": "Telegram did not pass the data to sign you in: this happens when the app is opened with a button under the message field. Close this window and, in the chat with the bot, tap the app button left of the message field. The old button under the message field goes away after the /start command.",
+        "close": "Close",
+        "signInWithEmail": "Sign in with email and password"
     },
     "Meal": {
         "title": "Meal",

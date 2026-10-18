@@ -30,7 +30,7 @@ export default {
     text-align: center;
 
     &_text {
-        color: var(--tg-theme-text-color, #666666);
+        color: #666666;
         font-size: 16px;
     }
 
@@ -38,8 +38,8 @@ export default {
         padding: 10px 24px;
         border: none;
         border-radius: 8px;
-        background: var(--tg-theme-button-color, #{$main-color});
-        color: var(--tg-theme-button-text-color, #ffffff);
+        background: $main-color;
+        color: #ffffff;
         font-size: 15px;
         cursor: pointer;
     }
