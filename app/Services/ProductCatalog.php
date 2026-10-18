@@ -287,7 +287,8 @@ class ProductCatalog
             .'said and the food is eaten only cooked (grains, pasta, legumes, potatoes, meat, fish), name the usual '
             ."method: \"Гречка варёная\", \"Стейк говяжий жареный\".\n"
             .'- calories (kcal), proteins, fats, carbohydrates, fibers (g): per 100 g of the food as eaten, in the '
-            .'state the names say.';
+            ."state the names say.\n"
+            .ProductQuality::instructions();
 
         $number = ['type' => 'number'];
         $keys = config('services.openai.keys');
@@ -312,7 +313,7 @@ class ProductCatalog
                                     'items' => [
                                         'type' => 'object',
                                         'additionalProperties' => false,
-                                        'required' => ['index', 'is_food', 'name_ru', 'name_ua', 'name_en', 'calories', 'proteins', 'fats', 'carbohydrates', 'fibers'],
+                                        'required' => ['index', 'is_food', 'name_ru', 'name_ua', 'name_en', 'calories', 'proteins', 'fats', 'carbohydrates', 'fibers', ...ProductQuality::FIELDS],
                                         'properties' => [
                                             'index' => ['type' => 'integer'],
                                             'is_food' => ['type' => 'boolean'],
@@ -324,7 +325,7 @@ class ProductCatalog
                                             'fats' => $number,
                                             'carbohydrates' => $number,
                                             'fibers' => $number,
-                                        ],
+                                        ] + ProductQuality::schema(),
                                     ],
                                 ],
                             ],
@@ -391,7 +392,7 @@ class ProductCatalog
             return null;
         }
 
-        return ['names' => $names] + $values;
+        return ['names' => $names] + $values + ProductQuality::valid($item, $values['carbohydrates']);
     }
 
     /**
@@ -402,7 +403,7 @@ class ProductCatalog
      * A label without the product's name makes the user's own product: a shared
      * "Продукт с этикетки" would match nothing anyone says.
      *
-     * @param  array{names: array<string, string>, named: bool, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float}  $label
+     * @param  array{names: array<string, string>, named: bool, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float, sugars?: float|null, glycemic_index?: int|null, nova?: int|null}  $label
      * @return array<string, mixed> the hit of the translation in the locale
      */
     public function addFromLabel(array $label, string $locale, int $userId): array
@@ -412,6 +413,12 @@ class ProductCatalog
         }
 
         $known = $this->knownLabel($label, $locale);
+
+        // A product an earlier photo made before labels gave sugars and the GI.
+        $knownProduct = $known?->product;
+        if ($knownProduct instanceof Product && $knownProduct->quality_source === null) {
+            $knownProduct->update(array_filter(array_intersect_key($label, array_flip(ProductQuality::FIELDS)), static fn ($value) => $value !== null) + ['quality_source' => Product::SOURCE_LABEL]);
+        }
 
         $hit = $known ? self::hit($known) : $this->store($label, $locale, Product::SOURCE_LABEL);
         ProductAlias::remember($hit['name'], $locale, (int) $hit['product_id']);
@@ -453,12 +460,14 @@ class ProductCatalog
      * Store the food as a product with a translation per language: shared, or
      * the owner's own.
      *
-     * @param  array{names: array<string, string>, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float}  $facts
+     * @param  array{names: array<string, string>, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float, sugars?: float|null, glycemic_index?: int|null, nova?: int|null}  $facts
      * @return array<string, mixed> the hit of the translation in the locale
      */
     private function store(array $facts, string $locale, string $source = Product::SOURCE_AI, ?int $ownerId = null): array
     {
         $translation = DB::transaction(function () use ($facts, $locale, $source, $ownerId) {
+            $quality = array_intersect_key($facts, array_flip(ProductQuality::FIELDS));
+
             $product = Product::create([
                 'user_id' => $ownerId,
                 'source' => $source,
@@ -467,7 +476,8 @@ class ProductCatalog
                 'fats' => $facts['fats'],
                 'carbohydrates' => $facts['carbohydrates'],
                 'fibers' => $facts['fibers'],
-            ]);
+                'quality_source' => $quality !== [] ? $source : null,
+            ] + $quality);
 
             $translations = [];
             foreach ($facts['names'] as $code => $name) {

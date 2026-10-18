@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ProductQuality;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -50,17 +51,27 @@ class MealDraft extends Model
     /**
      * The draft as the bot panel and the site show it: items numbered from 1,
      * nutrition facts per 100 g and per portion, and the total of the meal.
+     * The total's sugars and glycemic load count the items whose products have
+     * them, and are null when none has.
      *
-     * @return array{items: array<int, array<string, mixed>>, total: array<string, float>}
+     * @return array{items: array<int, array<string, mixed>>, total: array<string, mixed>}
      */
     public function toPayload(): array
     {
+        $this->items->loadMissing('product');
         $items = $this->items->values()->map(static fn (MealDraftItem $item, int $index) => $item->toPayload($index + 1))->all();
 
         $total = [];
         foreach (MealDraftItem::FACTS as $fact) {
             $total[$fact] = round(array_sum(array_map(static fn (array $item) => $item['portion'][$fact], $items)), 1);
         }
+
+        foreach (['sugars', 'glycemic_load'] as $measure) {
+            $known = array_filter(array_map(static fn (array $item) => $item['quality'][$measure], $items), static fn ($value) => $value !== null);
+            $total[$measure] = $known === [] ? null : round(array_sum($known), 1);
+        }
+
+        $total['glycemic_load_level'] = $total['glycemic_load'] === null ? null : ProductQuality::mealLoadLevel($total['glycemic_load']);
 
         return ['items' => $items, 'total' => $total];
     }

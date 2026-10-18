@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ProductQuality;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -55,6 +56,9 @@ class MealDraftItem extends Model
         'fibers' => 'float',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Product, $this>
+     */
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -83,6 +87,29 @@ class MealDraftItem extends Model
             'edited' => $this->edited,
             'per_100g' => $per100,
             'portion' => $portion,
+            'quality' => $this->quality($portion['carbohydrates']),
+        ];
+    }
+
+    /**
+     * Sugars of the portion, the GI and the glycemic load of the portion, the
+     * NOVA group and the marks the draft shows, from the item's product: nulls
+     * without a product, or before the product has got them.
+     *
+     * @return array{sugars: float|null, glycemic_index: int|null, glycemic_load: float|null, nova: int|null, fast_carbohydrates: bool, ultra_processed: bool}
+     */
+    private function quality(float $carbohydrates): array
+    {
+        $product = $this->product_id !== null ? $this->product : null;
+        $index = $product?->glycemic_index;
+
+        return [
+            'sugars' => $product?->sugars === null ? null : round($product->sugars * $this->quantity / 100, 1),
+            'glycemic_index' => $index,
+            'glycemic_load' => ProductQuality::glycemicLoad($index, $carbohydrates),
+            'nova' => $product?->nova,
+            'fast_carbohydrates' => ProductQuality::fastCarbohydrates($index, $carbohydrates),
+            'ultra_processed' => $product?->nova === ProductQuality::ULTRA_PROCESSED,
         ];
     }
 }

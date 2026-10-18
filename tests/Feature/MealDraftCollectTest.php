@@ -80,8 +80,12 @@ class MealDraftCollectTest extends TestCase
             ->assertJsonPath('draft.items.1.name', 'Сыр Président')
             ->assertJsonPath('draft.items.1.product_id', $this->cheese->id);
 
-        Http::assertSentCount(1);
+        $this->assertCount(1, $this->mealRequests());
         Http::assertSent(function (Request $request) {
+            if ($request['model'] !== 'gpt-6.1-sol') {
+                return false;
+            }
+
             $content = $request['messages'][0]['content'];
             $prompt = $content[0]['text'];
 
@@ -101,7 +105,45 @@ class MealDraftCollectTest extends TestCase
         $this->bot()->postJson('/api/caloriesEndPoint/draft/calculate')->assertStatus(202)
             ->assertJsonPath('draft.items.0.grams', 250);
 
-        Http::assertSent(fn (Request $request) => str_contains($request['messages'][0]['content'][0]['text'], '1. Гречка варёная — 200 g'));
+        Http::assertSent(fn (Request $request) => $request['model'] === 'gpt-6.1-sol'
+            && str_contains($request['messages'][0]['content'][0]['text'], '1. Гречка варёная — 200 g'));
+    }
+
+    public function test_the_calculation_gives_old_products_their_sugars_and_glycemic_index(): void
+    {
+        $this->collect(['text' => 'гречка 200 и сыр Président 30'])->assertOk();
+        $this->fakeModel([
+            ['action' => 'add', 'item' => null, 'name' => 'Гречка варёная', 'brand' => '', 'grams' => 200, 'label' => null],
+            ['action' => 'add', 'item' => null, 'name' => 'Сыр Président', 'brand' => 'Président', 'grams' => 30, 'label' => null],
+        ], [
+            ['index' => 0, 'sugars' => 0.6, 'glycemic_index' => 50, 'nova' => 1],
+            ['index' => 1, 'sugars' => 0, 'glycemic_index' => 0, 'nova' => 3],
+        ]);
+
+        $response = $this->bot()->postJson('/api/caloriesEndPoint/draft/calculate')->assertStatus(202)
+            ->assertJsonPath('draft.items.0.quality.glycemic_index', 50)
+            ->assertJsonPath('draft.items.0.quality.nova', 1)
+            ->assertJsonPath('draft.items.0.quality.fast_carbohydrates', false)
+            ->assertJsonPath('draft.items.1.quality.ultra_processed', false)
+            ->assertJsonPath('draft.total.glycemic_load_level', 'low');
+
+        // 50 × 40 g of carbohydrates / 100; the cheese has none.
+        $this->assertEquals(20, $response->json('draft.items.0.quality.glycemic_load'));
+        $this->assertEquals(20, $response->json('draft.total.glycemic_load'));
+        $this->assertEquals(1.2, $response->json('draft.total.sugars'));
+        $this->assertSame('ai', $this->buckwheat->fresh()->quality_source);
+    }
+
+    public function test_a_product_that_has_its_quality_is_not_asked_about_again(): void
+    {
+        $this->buckwheat->update(['sugars' => 0.6, 'glycemic_index' => 50, 'nova' => 1, 'quality_source' => 'ai']);
+        $this->collect(['text' => 'гречка 200'])->assertOk();
+        $this->fakeModel([['action' => 'add', 'item' => null, 'name' => 'Гречка варёная', 'brand' => '', 'grams' => 200, 'label' => null]]);
+
+        $this->bot()->postJson('/api/caloriesEndPoint/draft/calculate')->assertStatus(202)
+            ->assertJsonPath('draft.items.0.quality.glycemic_index', 50);
+
+        Http::assertSentCount(1);
     }
 
     public function test_a_short_edit_applies_at_once(): void
@@ -230,12 +272,26 @@ class MealDraftCollectTest extends TestCase
     }
 
     /**
+     * The meal model answers with the operations, the product model with the
+     * sugars, glycemic index and NOVA group of the products it is asked about.
+     *
      * @param  array<int, array<string, mixed>>  $operations
+     * @param  array<int, array<string, mixed>>  $quality
      */
-    private function fakeModel(array $operations): void
+    private function fakeModel(array $operations, array $quality = []): void
     {
-        Http::fake(['api.openai.com/*' => Http::response([
-            'choices' => [['message' => ['content' => json_encode(['operations' => $operations, 'labels' => []])]]],
+        Http::fake(['api.openai.com/*' => fn (Request $request) => Http::response([
+            'choices' => [['message' => ['content' => json_encode($request['model'] === 'gpt-6.1-sol'
+                ? ['operations' => $operations, 'labels' => []]
+                : ['items' => $quality])]]],
         ])]);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, array{0: Request, 1: mixed}>
+     */
+    private function mealRequests()
+    {
+        return Http::recorded(fn (Request $request) => $request['model'] === 'gpt-6.1-sol');
     }
 }

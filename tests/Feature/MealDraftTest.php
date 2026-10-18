@@ -130,6 +130,8 @@ class MealDraftTest extends TestCase
 
         $product = Product::where('source', Product::SOURCE_LABEL)->sole();
         $this->assertNull($product->user_id);
+        $this->assertSame(4.1, $product->sugars);
+        $this->assertSame(Product::SOURCE_LABEL, $product->quality_source);
         $this->assertSame(['en' => 'Kefir Olimp 1%', 'ru' => 'Кефир Олимп 1%', 'ua' => 'Кефір Олімп 1%'], $product->translations()->orderBy('locale')->pluck('name', 'locale')->all());
         $this->assertDatabaseHas('product_aliases', ['product_id' => $product->id]);
         Http::assertSent(fn (Request $request) => str_starts_with($request['messages'][0]['content'][1]['image_url']['url'], 'data:image/jpeg;base64,'));
@@ -316,6 +318,9 @@ class MealDraftTest extends TestCase
             'fats' => 1,
             'carbohydrates' => 4.1,
             'fibers' => 0,
+            'sugars' => 4.1,
+            'glycemic_index' => 15,
+            'nova' => 1,
             'package_grams' => 500,
         ];
     }

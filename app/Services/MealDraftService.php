@@ -58,6 +58,7 @@ class MealDraftService
         private MealInputReader $reader,
         private ProductCatalog $catalog,
         private ProductService $products,
+        private ProductEnricher $enricher,
     ) {}
 
     /**
@@ -173,6 +174,12 @@ class MealDraftService
         // The inputs are taken whatever the model made of them: sending the same
         // again would give the same answer.
         $inputs->each->delete();
+
+        // Products of the database older than their sugars and glycemic index
+        // learn them now, for this draft to show how fast its carbohydrates are.
+        if ($result['draft'] ?? null) {
+            $this->enricher->enrich($result['draft']->items->pluck('product_id')->filter()->all(), $locale);
+        }
 
         Cache::put(self::CALCULATION_KEY.$userId, [
             'status' => 'done',

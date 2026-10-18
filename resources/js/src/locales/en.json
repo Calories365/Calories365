@@ -575,6 +575,16 @@
         "recalculate": "Recalculate with what is added",
         "calculating": "Calculating…",
         "calculatingHint": "It usually takes up to a minute.",
-        "inputsHint": "Add another voice message, photo or text, or tap \"Calculate\": all of it is read together."
+        "inputsHint": "Add another voice message, photo or text, or tap \"Calculate\": all of it is read together.",
+        "fastCarbs": "fast carbohydrates",
+        "ultraProcessed": "ultra-processed",
+        "quality": "Sugars {sugars} g · glycemic index {index} · NOVA {nova}",
+        "load": "Sugar {sugars} g · glycemic load {load}, {level}",
+        "loadLevels": {
+            "low": "low",
+            "medium": "medium",
+            "high": "high"
+        },
+        "loadHint": "The glycemic load shows how much the meal raises blood sugar: it counts both how many carbohydrates there are and how fast they are."
     }
 }

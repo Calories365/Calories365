@@ -150,8 +150,10 @@ class MealInputReader
             .'English (name_en), product type first, then brand and fat content; "named" is false when neither the '
             .'package nor the text tells what the product is, and the names then say only its kind; calories, '
             .'proteins, fats, carbohydrates and fibers per 100 g (per 100 ml counts as per 100 g; values only per '
-            .'serving are converted to 100 g by the serving weight; fibers 0 when not shown); package_grams, the net '
-            .'weight, or null. Then add each product the user ate, or update the draft item it belongs to, with '
+            .'serving are converted to 100 g by the serving weight; fibers 0 when not shown); sugars as printed '
+            .'("в т.ч. сахара", "of which sugars"), null when not printed; glycemic_index and nova estimated from the '
+            .'kind of product and its ingredients; package_grams, the net weight, or null.'
+            ."\nFor sugars, glycemic_index and nova of a label:\n".ProductQuality::instructions()."\n".'Then add each product the user ate, or update the draft item it belongs to, with '
             .'"label" set to its index in "labels"; otherwise "label" is null. A product on a label that the text '
             ."says the user did not eat is not added.\n\n"
             .'Nutrition facts the user tells for a food ("во втором 250 калорий на 100 грамм", "белка 20"): '
@@ -200,7 +202,7 @@ class MealInputReader
                     'items' => [
                         'type' => 'object',
                         'additionalProperties' => false,
-                        'required' => ['facts_visible', 'name_ru', 'name_ua', 'name_en', 'named', 'calories', 'proteins', 'fats', 'carbohydrates', 'fibers', 'package_grams'],
+                        'required' => ['facts_visible', 'name_ru', 'name_ua', 'name_en', 'named', 'calories', 'proteins', 'fats', 'carbohydrates', 'fibers', ...ProductQuality::FIELDS, 'package_grams'],
                         'properties' => [
                             'facts_visible' => ['type' => 'boolean'],
                             'name_ru' => ['type' => 'string'],
@@ -213,7 +215,7 @@ class MealInputReader
                             'carbohydrates' => $number,
                             'fibers' => $number,
                             'package_grams' => ['type' => ['number', 'null']],
-                        ],
+                        ] + ProductQuality::schema(),
                     ],
                 ],
             ],
@@ -305,6 +307,6 @@ class MealInputReader
             return null;
         }
 
-        return ['names' => $names, 'named' => ($label['named'] ?? false) === true] + $values;
+        return ['names' => $names, 'named' => ($label['named'] ?? false) === true] + $values + ProductQuality::valid($label, $values['carbohydrates']);
     }
 }

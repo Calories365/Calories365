@@ -10,6 +10,20 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Meilisearch\Client;
 
+/**
+ * @property int $id
+ * @property int|null $user_id
+ * @property string|null $source
+ * @property float $calories
+ * @property float $proteins
+ * @property float $carbohydrates
+ * @property float $fats
+ * @property float|null $fibers
+ * @property float|null $sugars
+ * @property int|null $glycemic_index
+ * @property int|null $nova
+ * @property string|null $quality_source
+ */
 class Product extends Model
 {
     use HasFactory;
@@ -20,9 +34,19 @@ class Product extends Model
         'carbohydrates',
         'fats',
         'fibers',
+        'sugars',
+        'glycemic_index',
+        'nova',
+        'quality_source',
         'is_popular',
         'user_id',
         'source',
+    ];
+
+    protected $casts = [
+        'sugars' => 'float',
+        'glycemic_index' => 'integer',
+        'nova' => 'integer',
     ];
 
     /**

@@ -60,6 +60,19 @@ class ProductCatalogTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_a_generated_product_gets_its_sugars_glycemic_index_and_nova_group(): void
+    {
+        $this->fakeModel([$this->item(0, 'Булка сдобная', 'Булка здобна', 'Sweet bun', 340, 8, 9, 56) + ['sugars' => 14, 'glycemic_index' => 80, 'nova' => 4]]);
+
+        $product = Product::find($this->find(['Булка сдобная'])[0]['product_id']);
+
+        $this->assertSame(14.0, $product->sugars);
+        $this->assertSame(80, $product->glycemic_index);
+        $this->assertSame(4, $product->nova);
+        $this->assertSame(Product::SOURCE_AI, $product->quality_source);
+        Http::assertSent(fn (Request $request) => str_contains($request['messages'][0]['content'], 'glycemic_index'));
+    }
+
     public function test_the_missing_foods_of_a_meal_go_to_the_model_in_one_request(): void
     {
         $this->fakeModel([

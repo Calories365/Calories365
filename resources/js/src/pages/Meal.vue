@@ -615,6 +615,25 @@ export default {
                         </button>
                     </div>
 
+                    <div
+                        v-if="
+                            item.quality?.fast_carbohydrates ||
+                            item.quality?.ultra_processed
+                        "
+                        class="meal-item_marks"
+                    >
+                        <span
+                            v-if="item.quality.fast_carbohydrates"
+                            class="meal-item_mark"
+                            >{{ $t("Meal.fastCarbs") }}</span
+                        >
+                        <span
+                            v-if="item.quality.ultra_processed"
+                            class="meal-item_mark"
+                            >{{ $t("Meal.ultraProcessed") }}</span
+                        >
+                    </div>
+
                     <div class="meal-item_portion">
                         <label class="meal-item_grams">
                             <input
@@ -676,6 +695,21 @@ export default {
                                 @change="changeFact(item, fact, $event)"
                             />
                         </label>
+                        <p
+                            v-if="
+                                item.quality &&
+                                item.quality.glycemic_index !== null
+                            "
+                            class="meal-item_quality"
+                        >
+                            {{
+                                $t("Meal.quality", {
+                                    sugars: round(item.quality.sugars, 1),
+                                    index: item.quality.glycemic_index,
+                                    nova: item.quality.nova,
+                                })
+                            }}
+                        </p>
                         <p class="meal-item_hint">{{ $t("Meal.factsHint") }}</p>
                     </div>
                 </div>
@@ -700,6 +734,25 @@ export default {
                         }}
                     </span>
                 </p>
+
+                <div
+                    v-if="draft.total.glycemic_load !== null"
+                    class="meal_load"
+                    :class="`meal_load--${draft.total.glycemic_load_level}`"
+                >
+                    <p>
+                        {{
+                            $t("Meal.load", {
+                                sugars: round(draft.total.sugars),
+                                load: round(draft.total.glycemic_load),
+                                level: $t(
+                                    `Meal.loadLevels.${draft.total.glycemic_load_level}`
+                                ),
+                            })
+                        }}
+                    </p>
+                    <p class="meal_load-hint">{{ $t("Meal.loadHint") }}</p>
+                </div>
 
                 <div class="meal_save">
                     <button
@@ -853,6 +906,33 @@ export default {
         font-size: 0.95rem;
         color: #666;
         text-align: center;
+    }
+
+    &_load {
+        margin: -8px 0 16px;
+        padding: 10px 12px;
+        line-height: 1.4;
+        background: #f7f9f7;
+        border-left: 4px solid $main-color;
+        border-radius: 8px;
+
+        p {
+            margin: 0;
+        }
+
+        &--medium {
+            border-left-color: #f0a500;
+        }
+
+        &--high {
+            border-left-color: #e53935;
+        }
+    }
+
+    &_load-hint {
+        margin-top: 4px !important;
+        font-size: 0.85rem;
+        color: #666;
     }
 
     &_inputs {
@@ -1133,6 +1213,28 @@ export default {
         margin: 0;
         font-size: 0.8rem;
         color: #888;
+    }
+
+    &_quality {
+        grid-column: 1 / -1;
+        margin: 0;
+        font-size: 0.85rem;
+        color: #555;
+    }
+
+    &_marks {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 6px 0 0 32px;
+    }
+
+    &_mark {
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        color: #9a5b00;
+        background: #fff3e0;
+        border-radius: 8px;
     }
 }
 
