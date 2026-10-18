@@ -44,3 +44,13 @@ jobs:
         run: |
           docker compose exec -T calculator_horizon php artisan optimize:clear
           docker compose exec -T calculator_horizon php artisan horizon:terminate
+
+      # storage is a volume shared with Horizon and the scheduler, which run as root
+      # like the artisan commands above: a log file they create cannot be written by
+      # php-fpm (www-data), and every log call of a web request then fails with 500.
+      - name: Give storage back to php-fpm
+        working-directory: /home/maxim/var/www/calories365
+        run: |
+          set -euo pipefail
+          docker compose exec -T calculator_php sh -c 'ls -ln storage/logs || true'
+          docker compose exec -T calculator_php chown -R www-data:www-data storage bootstrap/cache
