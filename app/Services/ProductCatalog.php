@@ -264,17 +264,50 @@ class ProductCatalog
     }
 
     /**
-     * Store the food as a shared product with a translation per language.
+     * The product of a label read from a photo (MealInputReader).
+     *
+     * A label tells what is in the package, so a named product joins the shared
+     * database, and the same label photographed again finds the product it made.
+     * A label without the product's name makes the user's own product: a shared
+     * "Продукт с этикетки" would match nothing anyone says.
+     *
+     * @param  array{names: array<string, string>, named: bool, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float}  $label
+     * @return array<string, mixed> the hit of the translation in the locale
+     */
+    public function addFromLabel(array $label, string $locale, int $userId): array
+    {
+        if (! $label['named']) {
+            return $this->store($label, $locale, Product::SOURCE_LABEL, $userId);
+        }
+
+        $known = ProductTranslation::query()
+            ->where('locale', $locale)
+            ->where('name', $label['names'][$locale] ?? $label['names']['ru'])
+            ->whereNull('user_id')
+            ->whereHas('product', static fn ($product) => $product
+                ->where('source', Product::SOURCE_LABEL)
+                ->whereBetween('calories', [$label['calories'] - 0.5, $label['calories'] + 0.5]))
+            ->first();
+
+        $hit = $known ? self::hit($known) : $this->store($label, $locale, Product::SOURCE_LABEL);
+        ProductAlias::remember($hit['name'], $locale, (int) $hit['product_id']);
+
+        return $hit;
+    }
+
+    /**
+     * Store the food as a product with a translation per language: shared, or
+     * the owner's own.
      *
      * @param  array{names: array<string, string>, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float}  $facts
      * @return array<string, mixed> the hit of the translation in the locale
      */
-    private function store(array $facts, string $locale): array
+    private function store(array $facts, string $locale, string $source = Product::SOURCE_AI, ?int $ownerId = null): array
     {
-        $translation = DB::transaction(function () use ($facts, $locale) {
+        $translation = DB::transaction(function () use ($facts, $locale, $source, $ownerId) {
             $product = Product::create([
-                'user_id' => null,
-                'source' => Product::SOURCE_AI,
+                'user_id' => $ownerId,
+                'source' => $source,
                 'calories' => $facts['calories'],
                 'proteins' => $facts['proteins'],
                 'fats' => $facts['fats'],
@@ -288,7 +321,7 @@ class ProductCatalog
                     'product_id' => $product->id,
                     'locale' => $code,
                     'name' => $name,
-                    'user_id' => null,
+                    'user_id' => $ownerId,
                     'active' => 1,
                     'verified' => 0,
                 ]);

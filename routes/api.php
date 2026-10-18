@@ -74,6 +74,15 @@ Route::middleware('check.bot.key')->group(function () {
         Route::post('/caloriesEndPoint/saveFoodConsumption', [\App\Http\Controllers\CaloriesAPIBotController::class, 'saveFoodConsumption'])
             ->name('calculations.saveFoodConsumption');
 
+        Route::get('/caloriesEndPoint/draft', [\App\Http\Controllers\MealDraftController::class, 'show'])
+            ->name('draft.show');
+        Route::post('/caloriesEndPoint/draft/input', [\App\Http\Controllers\MealDraftController::class, 'input'])
+            ->name('draft.input');
+        Route::post('/caloriesEndPoint/draft/save', [\App\Http\Controllers\MealDraftController::class, 'save'])
+            ->name('draft.save');
+        Route::delete('/caloriesEndPoint/draft', [\App\Http\Controllers\MealDraftController::class, 'destroy'])
+            ->name('draft.destroy');
+
         Route::get('/caloriesEndPoint/showUserStats/{date}/{partOfDay?}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'showUserStats'])
             ->name('calculations.showUserStats');
 

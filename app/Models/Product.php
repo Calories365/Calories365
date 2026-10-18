@@ -30,6 +30,11 @@ class Product extends Model
      */
     public const SOURCE_AI = 'ai';
 
+    /**
+     * Products with the nutrition facts printed on their label, read from a photo.
+     */
+    public const SOURCE_LABEL = 'label';
+
     public function translations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ProductTranslation::class);
