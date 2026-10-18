@@ -1,6 +1,13 @@
 <script>
+import { miniAppAuthFailure } from "@/telegram/miniApp.js";
+
 export default {
     name: "MiniAppAuthError",
+    data() {
+        return {
+            failure: miniAppAuthFailure(),
+        };
+    },
     methods: {
         retry() {
             window.location.reload();
@@ -15,6 +22,9 @@ export default {
         <button class="mini-app-auth-error_button" @click="retry">
             {{ $t("MiniApp.retry") }}
         </button>
+        <p v-if="failure" class="mini-app-auth-error_code">
+            {{ $t("MiniApp.errorCode", { code: failure }) }}
+        </p>
     </div>
 </template>
 
@@ -42,6 +52,11 @@ export default {
         color: #ffffff;
         font-size: 15px;
         cursor: pointer;
+    }
+
+    &_code {
+        color: #a7a7a7;
+        font-size: 13px;
     }
 }
 </style>

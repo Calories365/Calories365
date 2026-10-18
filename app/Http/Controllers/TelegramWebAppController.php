@@ -38,7 +38,12 @@ class TelegramWebAppController extends Controller
         $panelResponse = $this->botPanelService->validateInitData($input['init_data'], $bot);
 
         if (! $panelResponse) {
-            return response()->json(['message' => 'Invalid Telegram init data'], 401);
+            // The reason reaches the screen of the failed sign-in, to tell a
+            // panel that is down or misconfigured from a bad signature.
+            return response()->json([
+                'message' => 'Invalid Telegram init data',
+                'reason' => $this->botPanelService->initDataFailure(),
+            ], 401);
         }
 
         $telegramUser = $panelResponse['user'];

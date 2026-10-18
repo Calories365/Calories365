@@ -7,6 +7,8 @@ import {
 
 const VALID_LOCALES = ["en", "ru", "ua"];
 
+let authFailure = null;
+
 export const webApp = () => window.Telegram?.WebApp ?? null;
 
 let launch = null;
@@ -120,9 +122,18 @@ export const initMiniApp = () => {
 export const authenticateMiniApp = async () => {
     const tg = webApp();
 
-    const { data } = await axios.post("/api/telegram/web-app-auth", {
-        init_data: tg.initData,
-    });
+    let data;
+
+    try {
+        ({ data } = await axios.post("/api/telegram/web-app-auth", {
+            init_data: tg.initData,
+        }));
+    } catch (error) {
+        authFailure =
+            error.response?.data?.reason ??
+            (error.response ? `http_${error.response.status}` : "network");
+        throw error;
+    }
 
     setMiniAppToken(data.token);
 
@@ -138,6 +149,12 @@ export const authenticateMiniApp = async () => {
 
     return data;
 };
+
+/**
+ * Why the sign-in failed, for the person to pass on: the panel's answer or the
+ * HTTP status.
+ */
+export const miniAppAuthFailure = () => authFailure;
 
 export const resetMiniAppSession = () => {
     clearMiniAppToken();

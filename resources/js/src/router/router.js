@@ -42,8 +42,13 @@ router.beforeEach((to, from, next) => {
             if (store.getters[getterTypes.isLoggedIn]) {
                 next();
             } else {
-                const message = i18n.global.t("Notification.Error.NeedAuth");
-                store.dispatch("setError", message, { root: true });
+                // The Mini App shows its own screen of the failed sign-in.
+                if (!miniApp) {
+                    const message = i18n.global.t(
+                        "Notification.Error.NeedAuth"
+                    );
+                    store.dispatch("setError", message, { root: true });
+                }
                 next(miniApp ? false : { name: "login" });
             }
         } else if (to.meta.needNotAuth) {

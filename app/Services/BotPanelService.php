@@ -17,6 +17,12 @@ class BotPanelService
 
     private ?string $host;
 
+    /**
+     * Why the last initData check failed: not_configured, unreachable or
+     * panel_{HTTP status}.
+     */
+    private ?string $initDataFailure = null;
+
     public function __construct()
     {
         $this->url = config('services.bot_panel.url');
@@ -32,8 +38,11 @@ class BotPanelService
      */
     public function validateInitData(string $initData, ?string $bot = null): ?array
     {
+        $this->initDataFailure = null;
+
         if (! $this->isConfigured()) {
             Log::warning('Bot panel URL or API key is not set');
+            $this->initDataFailure = 'not_configured';
 
             return null;
         }
@@ -46,18 +55,27 @@ class BotPanelService
                     'bot' => $bot,
                 ]));
 
-            if ($response->failed()) {
+            $payload = $response->json();
+
+            if ($response->failed() || empty($payload['valid'])) {
+                $this->initDataFailure = 'panel_'.$response->status();
+                Log::warning('Bot panel refused Mini App init data', ['status' => $response->status()]);
+
                 return null;
             }
 
-            $payload = $response->json();
-
-            return ! empty($payload['valid']) ? $payload : null;
+            return $payload;
         } catch (\Throwable $e) {
             Log::error('Error validating Mini App init data: '.$e->getMessage());
+            $this->initDataFailure = 'unreachable';
 
             return null;
         }
+    }
+
+    public function initDataFailure(): ?string
+    {
+        return $this->initDataFailure;
     }
 
     /**
