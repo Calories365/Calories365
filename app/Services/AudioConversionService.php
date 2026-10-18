@@ -19,17 +19,24 @@ class AudioConversionService
     }
 
     /**
-     * Convert any supported format (oga, ogg, m4a, mp4) to mp3.
+     * Convert any supported format (oga, ogg, m4a, mp4, webm) to mp3.
      * Returns an array [relativeConvertedPath, absoluteConvertedPath].
      */
     public function convertToMp3(string $localPath, string $sourceFullPath): array
     {
+        // webm was missing: the target named the source, ffmpeg could not write
+        // over its own input, and the recording went to transcription unconverted.
         $extensionToMp3 = function (string $filename) {
-            return preg_replace('/\.(oga|ogg|m4a|mp4)$/i', '.mp3', $filename);
+            return preg_replace('/\.(oga|ogg|m4a|mp4|webm)$/i', '.mp3', $filename);
         };
 
         $convertedLocalPath = $extensionToMp3($localPath);
         $convertedFullPath = Storage::disk('public')->path($convertedLocalPath);
+
+        // An mp3 or an unknown format would be written over itself, destroying the source.
+        if ($convertedLocalPath === $localPath) {
+            return [null, null];
+        }
 
         try {
             $audioFile = $this->ffmpeg->open($sourceFullPath);
