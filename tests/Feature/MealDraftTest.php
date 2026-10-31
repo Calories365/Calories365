@@ -63,7 +63,7 @@ class MealDraftTest extends TestCase
             ->assertJsonPath('draft.items.1.portion.proteins', 43.5);
 
         $this->assertEquals(436.5, $response->json('draft.total.calories'));
-        Http::assertSent(fn (Request $request) => $request['model'] === 'gpt-6.1-sol'
+        Http::assertSent(fn (Request $request) => $request['model'] === 'gpt-6-luna'
             && str_contains($request['messages'][0]['content'][0]['text'], 'Text: гречка 200 грамм и куриная грудка'));
     }
 
@@ -134,7 +134,8 @@ class MealDraftTest extends TestCase
         $this->assertSame(Product::SOURCE_LABEL, $product->quality_source);
         $this->assertSame(['en' => 'Kefir Olimp 1%', 'ru' => 'Кефир Олимп 1%', 'ua' => 'Кефір Олімп 1%'], $product->translations()->orderBy('locale')->pluck('name', 'locale')->all());
         $this->assertDatabaseHas('product_aliases', ['product_id' => $product->id]);
-        Http::assertSent(fn (Request $request) => str_starts_with($request['messages'][0]['content'][1]['image_url']['url'], 'data:image/jpeg;base64,'));
+        Http::assertSent(fn (Request $request) => $request['model'] === 'gpt-6.1-sol'
+            && str_starts_with($request['messages'][0]['content'][1]['image_url']['url'], 'data:image/jpeg;base64,'));
     }
 
     public function test_the_same_label_photographed_again_finds_the_product_it_made(): void

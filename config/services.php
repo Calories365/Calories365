@@ -53,10 +53,13 @@ return [
             'en' => env('OPENAI_API_KEY_EN'),
         ],
         'models' => [
-            // What the user ate, from speech (photos later), and the diet feedback:
-            // accuracy matters more than price.
+            // What the user ate, from photos of dishes and labels, and the diet
+            // feedback: accuracy matters more than price.
             'meal_analysis' => env('OPENAI_MEAL_ANALYSIS_MODEL', 'gpt-6.1-sol'),
             'feedback' => env('OPENAI_FEEDBACK_MODEL', 'gpt-6.1-sol'),
+            // What the user ate, from words alone: an extraction the cheap model does
+            // as well at a twentieth of the price.
+            'meal_text' => env('OPENAI_MEAL_TEXT_MODEL', 'gpt-6-luna'),
             // Nutrition facts of a product, and of the foods of a meal the database
             // lacks (ProductCatalog): short and frequent.
             'product' => env('OPENAI_PRODUCT_MODEL', 'gpt-6-luna'),

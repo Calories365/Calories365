@@ -105,7 +105,8 @@ class MealDraftCollectTest extends TestCase
         $this->bot()->postJson('/api/caloriesEndPoint/draft/calculate')->assertStatus(202)
             ->assertJsonPath('draft.items.0.grams', 250);
 
-        Http::assertSent(fn (Request $request) => $request['model'] === 'gpt-6.1-sol'
+        Http::assertSent(fn (Request $request) => $this->isMealRequest($request)
+            && $request['model'] === 'gpt-6-luna'
             && str_contains($request['messages'][0]['content'][0]['text'], '1. Гречка варёная — 200 g'));
     }
 
@@ -281,7 +282,7 @@ class MealDraftCollectTest extends TestCase
     private function fakeModel(array $operations, array $quality = []): void
     {
         Http::fake(['api.openai.com/*' => fn (Request $request) => Http::response([
-            'choices' => [['message' => ['content' => json_encode($request['model'] === 'gpt-6.1-sol'
+            'choices' => [['message' => ['content' => json_encode($this->isMealRequest($request)
                 ? ['operations' => $operations, 'labels' => []]
                 : ['items' => $quality])]]],
         ])]);
@@ -292,6 +293,11 @@ class MealDraftCollectTest extends TestCase
      */
     private function mealRequests()
     {
-        return Http::recorded(fn (Request $request) => $request['model'] === 'gpt-6.1-sol');
+        return Http::recorded(fn (Request $request) => $this->isMealRequest($request));
+    }
+
+    private function isMealRequest(Request $request): bool
+    {
+        return $request['response_format']['json_schema']['name'] === 'meal_draft';
     }
 }

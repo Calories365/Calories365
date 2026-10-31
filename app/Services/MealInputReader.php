@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * Reads what a user said, typed or photographed about a meal into changes of
- * the meal draft, in one request to the meal model.
+ * the meal draft, in one request to a meal model: the cheap one for words alone,
+ * the accurate one when a photo has to be read.
  *
  * The model sees the draft, so "гречки было 250" or "убери хлеб" change the item
  * the user means. It gets everything the user sent for the calculation at once,
@@ -41,9 +42,11 @@ class MealInputReader
     public function read(array $draft, array $inputs, string $locale): array
     {
         $content = [['type' => 'text', 'text' => $this->prompt($draft, $inputs, $locale)]];
+        $hasPhoto = false;
 
         foreach ($inputs as $input) {
             if ($input['photo'] !== null) {
+                $hasPhoto = true;
                 $content[] = [
                     'type' => 'image_url',
                     'image_url' => ['url' => 'data:'.$input['photo']['mime'].';base64,'.base64_encode($input['photo']['contents'])],
@@ -57,7 +60,7 @@ class MealInputReader
         $result = Http::timeout(150)
             ->withToken((string) ($keys[$locale] ?? $keys['ru'] ?? ''))
             ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => config('services.openai.models.meal_analysis'),
+                'model' => config($hasPhoto ? 'services.openai.models.meal_analysis' : 'services.openai.models.meal_text'),
                 'reasoning_effort' => config('services.openai.reasoning_effort'),
                 'response_format' => [
                     'type' => 'json_schema',
@@ -156,8 +159,10 @@ class MealInputReader
             .'usual method, "Гречка варёная". No parentheses in names. A soup with sour cream or a salad with its '
             ."dressing is one item.\n\n"
             .'Grams: the amount eaten. Take it from the text; for pieces multiply by the weight of one piece; for '
-            .'drinks 1 ml is 1 g. Without an amount in the text, estimate it from the photo by the plate, the cutlery '
-            ."and the usual portion, or take a usual portion. Never leave grams null for add.\n\n"
+            .'drinks 1 ml is 1 g. An amount told of the dry food ("овсянка, 60 грамм сухой крупы") keeps the name of '
+            .'the dry food, "Крупа овсяная сухая", since its nutrition facts are per 100 g of it. Without an amount in '
+            .'the text, estimate it from the photo by the plate, the cutlery and the usual portion, or take a usual '
+            ."portion. Never leave grams null for add.\n\n"
             .'A photo of a dish: add every food on it with its estimated grams. A photo of a nutrition label: read '
             .'each product whose table of nutrition facts is printed and legible on the photo into "labels" '
             .'("facts_visible" true); a package without a legible table is a food like any other, added by its name, '
