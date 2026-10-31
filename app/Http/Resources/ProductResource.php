@@ -20,6 +20,7 @@ class ProductResource extends JsonResource
             'carbohydrates' => $this->product->carbohydrates,
             'fats' => $this->product->fats,
             'fibers' => $this->product->fibers,
+            'nova' => $this->product->nova,
             'user_id' => $this->product->user_id,
             'name' => $this->name,
         ];

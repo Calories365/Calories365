@@ -9,11 +9,13 @@ import {
 import { mapGetters } from "vuex";
 import CaloriesSlideProductMenu from "@/Components/DairyComponents/CaloriesSlideProductMenu.vue";
 import CaloriesCross from "@/Components/DairyComponents/CaloriesCross.vue";
+import CaloriesProcessingMark from "@/Components/DairyComponents/CaloriesProcessingMark.vue";
 
 export default {
     name: "CaloriesFoodList",
     components: {
         CaloriesCross,
+        CaloriesProcessingMark,
         CaloriesSlideProductMenu,
         CaloriesAddBtn,
         CaloriesIndication,
@@ -72,6 +74,7 @@ export default {
                         />
                     </div>
                     <div class="added-product__title">{{ product.name }}</div>
+                    <calories-processing-mark :nova="product.nova" />
                 </div>
                 <div class="added-product__right">
                     <div class="added-product__calories">
@@ -100,6 +103,7 @@ export default {
                         </div>
                         <div class="added-product__title">
                             {{ product.name }}
+                            <calories-processing-mark :nova="product.nova" />
                         </div>
                     </div>
 

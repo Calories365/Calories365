@@ -30,7 +30,7 @@ class FoodConsumption extends Model
     public static function getMealsWithCurrentDate($date, $userId, $locale, $partOfDay = false): \Illuminate\Database\Eloquent\Collection|array
     {
         return self::with(['product' => function ($query) use ($locale) {
-            $query->select('id', 'calories', 'proteins', 'carbohydrates', 'fats', 'fibers')
+            $query->select('id', 'calories', 'proteins', 'carbohydrates', 'fats', 'fibers', 'nova')
                 ->with(['translations' => function ($query) use ($locale) {
                     $query->where('locale', $locale)
                         ->select('product_id', 'name', 'locale');

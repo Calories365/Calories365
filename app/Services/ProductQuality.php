@@ -49,12 +49,15 @@ class ProductQuality
             ."sugar; 0 for meat, fish, eggs, oil.\n"
             .'- glycemic_index: of the food as eaten, glucose 100, from published GI tables or the closest food in '
             ."them; 0 when the food has under 2 g of carbohydrates per 100 g.\n"
-            .'- nova: the NOVA group. 1: unprocessed or minimally processed, cooked at home (fresh, frozen, dried, '
-            .'boiled, baked; plain milk, kefir, eggs, meat, fish, grains, legumes, nuts). 2: culinary ingredients '
-            .'(oil, butter, sugar, honey, salt, flour). 3: processed foods made from a few of those (cheese, '
-            .'canned vegetables, bread of flour, water and salt, smoked fish). 4: ultra-processed industrial foods '
-            .'(packaged bread and buns, sausages, sweets, cookies, chips, sweet drinks, flavoured yogurts and '
-            .'curd snacks, ready meals, fast food).';
+            .'- nova: the NOVA group of the food as named. Judge by what the name says and do not assume a factory '
+            .'package: bread, a loaf, lavash or a bun, of any flour and any bakery, is group 3 unless the name says '
+            .'toast bread or hamburger bun. 1: unprocessed or minimally processed, cooked at home (fresh, frozen, '
+            .'dried, boiled, baked; plain milk, kefir, cottage cheese, sour cream, cream, eggs, meat, fish, lard, '
+            .'grains, legumes, nuts, and a dish of these cooked at home). 2: culinary ingredients (oil, butter, '
+            .'sugar, honey, salt, flour). 3: processed foods made from a few of those (cheese, canned vegetables, '
+            .'bread and buns, smoked fish). 4: ultra-processed industrial foods (toast bread, hamburger buns, '
+            .'sausages, mayonnaise, ketchup, sweets, cookies, chips, sweet drinks, flavoured yogurts and curd '
+            .'snacks, protein shakes, ready meals, fast food).';
     }
 
     /**

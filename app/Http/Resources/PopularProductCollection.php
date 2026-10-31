@@ -23,6 +23,7 @@ class PopularProductCollection extends ResourceCollection
                 'carbohydrates' => $product->carbohydrates,
                 'fats' => $product->fats,
                 'fibers' => $product->fibers,
+                'nova' => $product->nova,
                 'name' => $translation ? $translation->name : null,
                 'is_popular' => $product->is_popular,
             ];

@@ -133,6 +133,12 @@
 
     },
     "Diary": {
+        "Processing": {
+            "nova1": "natural",
+            "nova2": "ingredient",
+            "nova3": "processed",
+            "nova4": "ultra-processed"
+        },
         "summary": "Total",
         "setLimit": "Work out your daily calorie norm in the calculator",
         "KCAL": "KCAL",

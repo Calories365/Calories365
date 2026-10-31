@@ -29,6 +29,7 @@ class MealCollection extends ResourceCollection
                 'carbohydrates' => $product->carbohydrates,
                 'fats' => $product->fats,
                 'fibers' => $product->fibers,
+                'nova' => $product->nova,
                 'name' => optional($translation)->name ?? 'Без названия',
             ];
         })->toArray();
