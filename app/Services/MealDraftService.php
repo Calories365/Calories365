@@ -344,7 +344,7 @@ class MealDraftService
 
         return [
             'weight' => $weight,
-            'activities' => array_map(fn (array $activity) => $this->body->recordActivity($userId, $date, $activity['title'], $activity['minutes'], $activity['met'])->toPayload(), $activities),
+            'activities' => array_map(fn (array $activity) => $this->body->recordActivity($userId, $date, $activity['title'], $activity['minutes'], $activity['met'], $activity['time'] ?? null)->toPayload(), $activities),
         ];
     }
 

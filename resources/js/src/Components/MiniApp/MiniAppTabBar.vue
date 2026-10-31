@@ -4,6 +4,7 @@ import {
     faBookOpen,
     faCalculator,
     faChartColumn,
+    faChartLine,
     faUser,
     faUtensils,
 } from "@fortawesome/free-solid-svg-icons";
@@ -16,6 +17,7 @@ export default {
             tabs: [
                 { name: "diary", icon: faBookOpen },
                 { name: "stats", icon: faChartColumn },
+                { name: "insulin", icon: faChartLine },
                 { name: "voice", icon: faUtensils },
                 { name: "calculation", icon: faCalculator },
                 { name: "cabinet", icon: faUser },

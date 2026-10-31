@@ -84,6 +84,25 @@ class BodyLogTest extends TestCase
         Http::assertSent(fn (Request $request) => str_contains($request['messages'][0]['content'][0]['text'], 'Compendium of Physical Activities'));
     }
 
+    public function test_the_time_of_an_activity_is_kept_when_it_was_told_and_a_wrong_one_is_not(): void
+    {
+        $this->collect(['text' => 'сходил в магазин в 6 вечера и гулял'])->assertOk();
+        Http::fake(['api.openai.com/*' => Http::response(['choices' => [['message' => ['content' => json_encode([
+            'operations' => [],
+            'labels' => [],
+            'weight_kg' => null,
+            'activities' => [
+                ['title' => 'Магазин', 'minutes' => 30, 'met' => 2.5, 'time' => '18:00'],
+                ['title' => 'Прогулка', 'minutes' => 30, 'met' => 2.5, 'time' => 'вечером'],
+            ],
+        ])]]]])]);
+
+        $this->bot()->postJson('/api/caloriesEndPoint/draft/calculate')->assertStatus(202);
+
+        $this->assertSame('18:00', Activity::where('title', 'Магазин')->sole()->started_at->format('H:i'));
+        $this->assertNull(Activity::where('title', 'Прогулка')->sole()->started_at);
+    }
+
     public function test_an_activity_the_model_cannot_have_meant_is_not_kept(): void
     {
         $this->collect(['text' => 'плавал'])->assertOk();

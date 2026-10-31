@@ -55,7 +55,8 @@
         "voice": "Meal",
         "sorry_error": "Sorry, an error occurred.",
         "buy_premium_for_this_func": "This feature is available in the premium subscription!",
-        "no_products_consumed": "No products consumed"
+        "no_products_consumed": "No products consumed",
+        "insulin": "Insulin"
     },
     "Home": {
         "Title": "Calorie Tracking",
@@ -624,5 +625,49 @@
         "collecting": "I will measure your real expenditure once the diary has {days} days of meals and {weights} weigh-ins over {span} days or more. Weigh yourself in the morning and tell the bot \"I weigh 82.4\".",
         "progress": "Over the last 4 weeks: days of meals — {days}, weigh-ins — {weights}.",
         "unclear": "Cannot measure it: by the diary you eat {intake} kcal on average while your weight changes by {change} kg a week, which no body does. Usually some meals are missing from the diary or the weigh-ins were made in different conditions."
+    },
+    "Insulin": {
+        "title": "Insulin of the day",
+        "note": "An estimate from food, movement and way of life, not a measurement. 100 is the peak after 62 g of glucose.",
+        "failed": "Could not load the chart, reload the page.",
+        "now": "Now",
+        "peak": "Peak of the day, {time}",
+        "level": "Level",
+        "zone": {
+            "low": "low",
+            "medium": "medium",
+            "high": "high"
+        },
+        "parts": {
+            "morning": "Breakfast",
+            "dinner": "Lunch",
+            "supper": "Dinner"
+        },
+        "lifestyle": "Way of life",
+        "lifestyles": {
+            "level1": "Sitting",
+            "level2": "Walk a little",
+            "level3": "Moderately active",
+            "level4": "Active",
+            "level5": "Very active"
+        },
+        "meals": "What lifted it",
+        "noMeals": "No food on this day.",
+        "grams": "g",
+        "minutes": "min",
+        "estimated": "The glycemic index is not known yet for products: {count}. They count as medium for now; it usually appears within 10 minutes.",
+        "movement": "Movement",
+        "movementHint": "Add it here or tell the bot and the \"Meal\" page: \"walked for an hour\", \"went to the shop at 6 pm\".",
+        "effect": "{percent}% less insulin",
+        "activityTitle": "What you did",
+        "activityTime": "When it began",
+        "intensity": {
+            "sitting": "Sitting, driving",
+            "light": "Light: a walk, a shop",
+            "moderate": "Moderate: brisk walk",
+            "hard": "Hard: running, gym"
+        },
+        "add": "Add",
+        "invalidActivity": "Write what you did and how many minutes: from 1 to 600."
     }
 }

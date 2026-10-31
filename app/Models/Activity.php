@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $user_id
  * @property \Illuminate\Support\Carbon $date
+ * @property \Illuminate\Support\Carbon|null $started_at
  * @property string $title
  * @property int $minutes
  * @property float $met
@@ -18,10 +19,11 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Activity extends Model
 {
-    protected $fillable = ['user_id', 'date', 'title', 'minutes', 'met', 'calories'];
+    protected $fillable = ['user_id', 'date', 'started_at', 'title', 'minutes', 'met', 'calories'];
 
     protected $casts = [
         'date' => 'date',
+        'started_at' => 'datetime',
         'met' => 'float',
         'minutes' => 'integer',
         'calories' => 'integer',

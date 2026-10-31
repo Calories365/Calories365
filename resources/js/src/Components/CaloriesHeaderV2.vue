@@ -24,6 +24,7 @@ export default {
                 "diary",
                 "cabinet",
                 "stats",
+                "insulin",
                 "voice",
             ],
         };

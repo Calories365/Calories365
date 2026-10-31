@@ -88,6 +88,14 @@ const routes = [
         },
     },
     {
+        path: "/insulin",
+        component: () => import("@/pages/Insulin.vue"),
+        name: "insulin",
+        meta: {
+            needAuth: true,
+        },
+    },
+    {
         path: "/diary",
         component: () => import("@/pages/Dairy.vue"),
         name: "diary",

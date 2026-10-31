@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreActivityRequest;
 use App\Http\Requests\StoreWeightRequest;
 use App\Models\Activity;
 use App\Services\BodyLog;
@@ -27,6 +28,15 @@ class BodyLogController extends Controller
         $this->body->recordWeight((int) auth()->id(), $request->validated('date'), (float) $request->validated('weight'));
 
         return response()->json($this->body->day((int) auth()->id(), $request->validated('date')));
+    }
+
+    public function storeActivity(StoreActivityRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $this->body->recordActivity((int) auth()->id(), $data['date'], $data['title'], (int) $data['minutes'], BodyLog::INTENSITIES[$data['intensity']], $data['time'] ?? null);
+
+        return response()->json($this->body->day((int) auth()->id(), $data['date']));
     }
 
     public function destroyActivity(int $activity): JsonResponse

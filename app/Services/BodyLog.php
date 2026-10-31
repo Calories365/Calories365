@@ -20,6 +20,13 @@ class BodyLog
     private const WEIGHT = '/^(?:(?:мой\s+|мій\s+)?(?:вес|вага|weight)(?:\s+(?:сегодня|утром|сьогодні|зранку|today))?|вешу|важу|i\s+weigh)\s*[:—-]?\s*(\d{2,3}(?:[.,]\d{1,2})?)\s*(?:кг|kg|килограмм\p{L}*|кілограм\p{L}*)?\.?$|^(\d{2,3}(?:[.,]\d{1,2})?)\s*(?:кг|kg)\.?$/iu';
 
     /**
+     * MET of an activity typed on the page, by the Compendium of Physical
+     * Activities: sitting at a course and driving, a walk or a shop, a brisk walk or
+     * easy cycling, a run or a workout.
+     */
+    public const INTENSITIES = ['sitting' => 1.5, 'light' => 2.5, 'moderate' => 4.0, 'hard' => 7.0];
+
+    /**
      * The weight a text says plainly, or null.
      */
     public static function weightIn(string $text): ?float
@@ -42,15 +49,17 @@ class BodyLog
     }
 
     /**
-     * Keep an activity of the day with the calories it burned above rest.
+     * Keep an activity of the day with the calories it burned above rest; time is
+     * when it began, H:i, when told.
      */
-    public function recordActivity(int $userId, string $date, string $title, int $minutes, float $met): Activity
+    public function recordActivity(int $userId, string $date, string $title, int $minutes, float $met, ?string $time = null): Activity
     {
         $weight = BodyWeight::latestFor($userId, $date) ?? 70.0;
 
         return Activity::create([
             'user_id' => $userId,
             'date' => $date,
+            'started_at' => $time === null ? null : $date.' '.$time,
             'title' => $title,
             'minutes' => $minutes,
             'met' => $met,

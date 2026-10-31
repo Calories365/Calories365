@@ -14,7 +14,11 @@ class FoodConsumption extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id', 'food_id', 'quantity', 'consumed_at', 'part_of_day',
+        'user_id', 'food_id', 'quantity', 'consumed_at', 'eaten_at', 'part_of_day',
+    ];
+
+    protected $casts = [
+        'eaten_at' => 'datetime',
     ];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo

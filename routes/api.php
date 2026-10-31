@@ -63,11 +63,19 @@ Route::middleware('auth:sanctum')->group(function () {
             ->where('date', '\d{4}-\d{2}-\d{2}')
             ->name('body.day');
         Route::post('/body/weight', [\App\Http\Controllers\BodyLogController::class, 'storeWeight'])->name('body.weight.store');
+        Route::post('/body/activities', [\App\Http\Controllers\BodyLogController::class, 'storeActivity'])->name('body.activities.store');
         Route::delete('/body/activities/{activity}', [\App\Http\Controllers\BodyLogController::class, 'destroyActivity'])
             ->whereNumber('activity')
             ->name('body.activities.destroy');
 
         // The real daily expenditure the diary measured.
+        // The estimated insulin curve of a day.
+        Route::get('/insulin/{date}', [\App\Http\Controllers\InsulinController::class, 'show'])
+            ->where('date', '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+            ->name('insulin.show');
+        Route::put('/insulin/lifestyle', [\App\Http\Controllers\InsulinController::class, 'updateLifestyle'])->name('insulin.lifestyle');
+        Route::put('/insulin/meal-time', [\App\Http\Controllers\InsulinController::class, 'updateMealTime'])->name('insulin.mealTime');
+
         Route::get('/energy', [\App\Http\Controllers\EnergyBalanceController::class, 'show'])->name('energy.show');
         Route::post('/energy/apply', [\App\Http\Controllers\EnergyBalanceController::class, 'apply'])->name('energy.apply');
 
