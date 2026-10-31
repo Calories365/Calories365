@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMealTimeRequest;
 use App\Models\FoodConsumption;
+use App\Services\InsulinChartImage;
 use App\Services\InsulinDay;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,9 +17,18 @@ class InsulinController extends Controller
 {
     public function __construct(private InsulinDay $insulin) {}
 
-    public function show(string $date): JsonResponse
+    /**
+     * The day; with chart=1 also its picture as a base64 PNG, which the bot sends.
+     */
+    public function show(Request $request, string $date): JsonResponse
     {
-        return response()->json($this->insulin->forUser(auth()->user(), $date, app()->getLocale()));
+        $day = $this->insulin->forUser($request->user(), $date, app()->getLocale());
+
+        if ($request->boolean('chart')) {
+            $day['chart'] = base64_encode(app(InsulinChartImage::class)->render($day));
+        }
+
+        return response()->json($day);
     }
 
     /**

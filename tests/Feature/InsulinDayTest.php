@@ -166,6 +166,28 @@ class InsulinDayTest extends TestCase
         $this->actingAs($this->user)->postJson('/api/body/activities', ['date' => self::DAY, 'title' => 'x', 'minutes' => 10, 'intensity' => 'extreme'])->assertStatus(422);
     }
 
+    public function test_the_bot_gets_the_day_with_its_chart_and_keeps_the_way_of_life(): void
+    {
+        $this->meal($this->bun(), 'dinner', self::DAY.' 13:00:00');
+        $bot = ['X-Api-Key' => 'testing-bot-key', 'X-Calories-Id' => $this->user->id, 'X-Locale' => 'ru'];
+
+        $day = $this->withHeaders($bot)->getJson('/api/caloriesEndPoint/insulin/'.self::DAY.'?chart=1')->assertOk()->json();
+
+        $this->assertSame('Булка с повидлом', $day['meals'][0]['items'][0]['name']);
+        $this->assertSame(IMAGETYPE_PNG, getimagesizefromstring(base64_decode($day['chart']))[2]);
+
+        $this->withHeaders($bot)->getJson('/api/caloriesEndPoint/insulin/'.self::DAY)->assertOk()->assertJsonMissingPath('chart');
+        $this->withHeaders($bot)->putJson('/api/caloriesEndPoint/insulin/lifestyle', ['date' => self::DAY, 'lifestyle' => 5])
+            ->assertOk()
+            ->assertJsonPath('lifestyle', 5);
+        $this->assertSame(5, (int) $this->user->fresh()->lifestyle);
+    }
+
+    public function test_the_bot_needs_its_key(): void
+    {
+        $this->getJson('/api/caloriesEndPoint/insulin/'.self::DAY, ['X-Calories-Id' => $this->user->id])->assertUnauthorized();
+    }
+
     public function test_the_page_needs_an_account(): void
     {
         $this->getJson('/api/insulin/'.self::DAY)->assertUnauthorized();

@@ -220,6 +220,35 @@ class MealDraftTest extends TestCase
         $this->assertSame(0, MealDraft::count());
     }
 
+    public function test_the_time_told_for_the_meal_goes_with_it_to_the_diary(): void
+    {
+        $this->fakeModel([$this->add('Гречка варёная', 200)], [], '09:15');
+        $this->input(['text' => 'в 9:15 съел гречку 200 грамм'])->assertOk()->assertJsonPath('draft.eaten_time', '09:15');
+
+        $this->bot()->postJson('/api/caloriesEndPoint/draft/save', ['part_of_day' => 'morning', 'consumed_at' => '2026-10-18'])->assertOk();
+
+        $this->assertSame('2026-10-18 09:15', FoodConsumption::sole()->eaten_at->format('Y-m-d H:i'));
+    }
+
+    public function test_a_time_told_alone_moves_the_meal_being_put_together(): void
+    {
+        $this->draftOf(['Хлеб' => 40]);
+        $this->fakeModel([], [], '08:00');
+
+        $this->input(['text' => 'это было в 8 утра'])->assertOk()
+            ->assertJsonPath('understood', true)
+            ->assertJsonPath('draft.eaten_time', '08:00');
+    }
+
+    public function test_a_meal_without_a_time_told_is_saved_without_one(): void
+    {
+        $this->draftOf(['Хлеб' => 40]);
+
+        $this->bot()->postJson('/api/caloriesEndPoint/draft/save', ['part_of_day' => 'morning', 'consumed_at' => '2026-10-18'])->assertOk();
+
+        $this->assertNull(FoodConsumption::sole()->eaten_at);
+    }
+
     public function test_an_abandoned_draft_is_not_continued(): void
     {
         $draft = $this->draftOf(['Хлеб' => 40]);
@@ -288,10 +317,10 @@ class MealDraftTest extends TestCase
      * @param  array<int, array<string, mixed>>  $operations
      * @param  array<int, array<string, mixed>>  $labels
      */
-    private function fakeModel(array $operations, array $labels = []): void
+    private function fakeModel(array $operations, array $labels = [], ?string $mealTime = null): void
     {
         Http::fake(['api.openai.com/*' => Http::response([
-            'choices' => [['message' => ['content' => json_encode(['operations' => $operations, 'labels' => $labels])]]],
+            'choices' => [['message' => ['content' => json_encode(['operations' => $operations, 'labels' => $labels, 'meal_time' => $mealTime])]]],
         ])]);
     }
 

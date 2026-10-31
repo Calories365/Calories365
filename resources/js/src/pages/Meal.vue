@@ -750,6 +750,10 @@ export default {
                     {{ $t("Meal.notFound", { names: notFound.join(", ") }) }}
                 </p>
 
+                <p v-if="draft.eaten_time" class="meal_eaten">
+                    {{ $t("Meal.eatenAt", { time: draft.eaten_time }) }}
+                </p>
+
                 <p class="meal_total">
                     {{
                         $t("Meal.total", {
@@ -820,6 +824,7 @@ export default {
                     <li>{{ $t("Meal.howTo.calculate") }}</li>
                     <li>{{ $t("Meal.howTo.correct") }}</li>
                     <li>{{ $t("Meal.howTo.save") }}</li>
+                    <li>{{ $t("Meal.howTo.insulin") }}</li>
                 </ol>
                 <p>{{ $t("Meal.howTo.bot") }}</p>
             </div>
@@ -1017,6 +1022,12 @@ export default {
     &_not-found {
         margin: 8px 0;
         color: #c62828;
+    }
+
+    &_eaten {
+        margin: 8px 0 0;
+        color: #666;
+        font-size: 14px;
     }
 
     &_total {

@@ -254,15 +254,27 @@ class MealDraftService
             ?? $this->reader->read($items->map(static fn (MealDraftItem $item) => ['name' => $item->name, 'grams' => $item->quantity])->all(), $inputs, $locale);
 
         $recorded = $this->recordBody($userId, $read);
+        $mealTime = $read['meal_time'] ?? null;
 
         if ($read['operations'] === []) {
+            // "это было в 9 утра" about the meal being put together.
+            if ($mealTime !== null && $draft !== null) {
+                $draft->update(['eaten_time' => $mealTime]);
+
+                return ['draft' => $draft->fresh(), 'understood' => true, 'not_found' => [], 'recorded' => $recorded];
+            }
+
             return ['draft' => $draft, 'understood' => $recorded !== null, 'not_found' => [], 'recorded' => $recorded];
         }
 
         $products = $this->products($read, $userId, $locale);
 
-        $notFound = DB::transaction(function () use (&$draft, $items, $read, $products, $userId) {
+        $notFound = DB::transaction(function () use (&$draft, $items, $read, $products, $userId, $mealTime) {
             $draft ??= MealDraft::create(['user_id' => $userId]);
+
+            if ($mealTime !== null) {
+                $draft->update(['eaten_time' => $mealTime]);
+            }
             $notFound = [];
             $removed = [];
 
@@ -365,8 +377,10 @@ class MealDraftService
         }
 
         $total = $draft->toPayload()['total'];
+        // The time told for the meal; without one the insulin curve goes by when it was saved.
+        $eatenAt = $draft->eaten_time === null ? null : $date.' '.substr((string) $draft->eaten_time, 0, 5).':00';
 
-        DB::transaction(function () use ($draft, $userId, $partOfDay, $date) {
+        DB::transaction(function () use ($draft, $userId, $partOfDay, $date, $eatenAt) {
             foreach ($draft->items as $item) {
                 if ($item->product_id !== null && ! $item->edited) {
                     FoodConsumption::createFoodConsumption([
@@ -375,6 +389,7 @@ class MealDraftService
                         'quantity' => $item->quantity,
                         'part_of_day' => $partOfDay,
                         'consumed_at' => $date,
+                        'eaten_at' => $eatenAt,
                     ]);
 
                     continue;
@@ -391,6 +406,7 @@ class MealDraftService
                     'quantity' => $item->quantity,
                     'part_of_day' => $partOfDay,
                     'consumed_at' => $date,
+                    'eaten_at' => $eatenAt,
                 ]);
             }
 

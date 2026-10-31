@@ -517,6 +517,7 @@
         "signInWithEmail": "Sign in with email and password"
     },
     "Meal": {
+        "eatenAt": "Eaten at {time}",
         "title": "Meal",
         "lead": "Send a voice message, photos of the food and its labels, or type what you ate, in as many messages as you like. Then tap \"Calculate\": all of it is read together into one meal. The Telegram bot shows the same draft.",
         "record": "Speak",
@@ -555,6 +556,7 @@
             "photo": "Add a photo of the plate and photos of the labels, several at once if you like. A label with a nutrition table gives the exact values from the package, and a brand from the package or the one you name stays in the product name.",
             "correct": "Correct it if needed: grams and nutrition right in the list, or add in words \"the buckwheat was 250\", \"remove the tea\" and tap \"Recalculate with what is added\".",
             "save": "Press \"To breakfast\", \"To lunch\" or \"To dinner\" to save the meal to the diary.",
+            "insulin": "Say when you ate and how you moved: \"at 9 am I had…\", \"walked for an hour\", \"drove to a course\". It goes to the \"Insulin\" chart.",
             "bot": "The Telegram bot works the same: send it voice messages, photos and text and tap \"Calculate\". The draft is shared.",
             "calculate": "Tap \"Calculate\": the voice messages, photos and text are read together into one meal."
         },

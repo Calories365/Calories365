@@ -194,16 +194,16 @@ class InsulinDay
      */
     private function mealsOfTheDay(Collection $meals, array $moved, int $lifestyle): array
     {
-        $factor = InsulinCurve::LIFESTYLE_FACTORS[$lifestyle];
-
         return $meals
             ->filter(static fn (array $item) => $item['minute'] >= 0)
             ->groupBy('part_of_day')
-            ->map(function (Collection $items, string $part) use ($moved, $lifestyle, $factor) {
+            ->map(function (Collection $items, string $part) use ($moved, $lifestyle) {
                 $minute = (int) $items->min('minute');
-                $foods = $items->map(static fn (array $item) => ['minute' => $item['minute'], 'load' => $item['load'], 'peak_minutes' => $item['peak_minutes']])->values()->all();
+                $food = static fn (array $item) => ['minute' => $item['minute'], 'load' => $item['load'], 'peak_minutes' => $item['peak_minutes']];
                 $moments = range($minute, $minute + 300, self::STEP);
-                $alone = InsulinCurve::levels($foods, $moved, $lifestyle, $moments);
+                $alone = InsulinCurve::levels($items->map($food)->values()->all(), $moved, $lifestyle, $moments);
+                // What each food would lift alone, with the same movement around it.
+                $rise = static fn (array $item) => round(max(0, max(InsulinCurve::levels([$food($item)], $moved, $lifestyle, $moments)) - InsulinCurve::BASE_LEVEL), 1);
 
                 return [
                     'part_of_day' => $part,
@@ -215,7 +215,7 @@ class InsulinDay
                             'id' => $item['id'],
                             'name' => $item['name'],
                             'grams' => $item['grams'],
-                            'rise' => round(InsulinCurve::peakRise($item['load'], $item['peak_minutes']) * $factor, 1),
+                            'rise' => $rise($item),
                             'index_known' => $item['index_known'],
                         ])
                         ->sortByDesc('rise')
@@ -258,6 +258,7 @@ class InsulinDay
                     'effect' => $otherwise > 0 ? (int) round(max(0, $otherwise - $today) / $otherwise * 100) : 0,
                 ];
             })
+            ->sortBy('minute')
             ->values()
             ->all();
     }

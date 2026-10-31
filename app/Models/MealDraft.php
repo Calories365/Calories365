@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property int $id
  * @property int $user_id
+ * @property string|null $eaten_time
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, MealDraftItem> $items
@@ -22,7 +23,7 @@ class MealDraft extends Model
      */
     public const LIFETIME_HOURS = 3;
 
-    protected $fillable = ['user_id'];
+    protected $fillable = ['user_id', 'eaten_time'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<MealDraftItem, $this>
@@ -73,6 +74,10 @@ class MealDraft extends Model
 
         $total['glycemic_load_level'] = $total['glycemic_load'] === null ? null : ProductQuality::mealLoadLevel($total['glycemic_load']);
 
-        return ['items' => $items, 'total' => $total];
+        return [
+            'items' => $items,
+            'total' => $total,
+            'eaten_time' => $this->eaten_time === null ? null : substr((string) $this->eaten_time, 0, 5),
+        ];
     }
 }

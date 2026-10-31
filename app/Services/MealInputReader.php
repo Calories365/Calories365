@@ -26,6 +26,11 @@ class MealInputReader
      */
     private const MAX_GRAMS = 5000;
 
+    /**
+     * A time of the day, "HH:MM".
+     */
+    private const TIME = '/^([01]\d|2[0-3]):[0-5]\d$/';
+
     public function __construct(private ProductMatcher $matcher) {}
 
     /**
@@ -34,7 +39,7 @@ class MealInputReader
      *
      * @param  array<int, array{name: string, grams: int}>  $draft  the items of the draft, numbered from 1 by position
      * @param  array<int, array{kind: string, text: string|null, photo: array{mime: string, contents: string}|null}>  $inputs  in the order the user sent them
-     * @return array{operations: array<int, array{action: string, item: int|null, name: string, brand: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>, weight: float|null, activities: array<int, array{title: string, minutes: int, met: float, time: string|null}>}
+     * @return array{operations: array<int, array{action: string, item: int|null, name: string, brand: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>, weight: float|null, activities: array<int, array{title: string, minutes: int, met: float, time: string|null}>, meal_time: string|null}
      *
      * @throws \Illuminate\Http\Client\RequestException
      * @throws \RuntimeException
@@ -102,12 +107,20 @@ class MealInputReader
                     'title' => mb_substr($title, 0, 150),
                     'minutes' => $minutes,
                     'met' => $met,
-                    'time' => preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $time) ? $time : null,
+                    'time' => preg_match(self::TIME, $time) ? $time : null,
                 ];
             }
         }
 
-        return ['operations' => $operations, 'labels' => $labels, 'weight' => $weight, 'activities' => $activities];
+        $mealTime = trim((string) ($decoded['meal_time'] ?? ''));
+
+        return [
+            'operations' => $operations,
+            'labels' => $labels,
+            'weight' => $weight,
+            'activities' => $activities,
+            'meal_time' => preg_match(self::TIME, $mealTime) ? $mealTime : null,
+        ];
     }
 
     /**
@@ -120,6 +133,12 @@ class MealInputReader
             'ua' => 'Ukrainian',
             'en' => 'English',
             default => 'Russian',
+        };
+        // The cheap model slips into Russian for Ukrainian when the examples are Russian.
+        $example = match ($locale) {
+            'ua' => 'Гречка варена',
+            'en' => 'Buckwheat, boiled',
+            default => 'Гречка варёная',
         };
 
         $lines = [];
@@ -162,8 +181,10 @@ class MealInputReader
             .'the food first, then what describes it, singular, nominative. Keep the cooking method, the sort, the '
             .'fat content, the brand and what was added as the user said or the photo shows them. When the method is '
             .'not said and the food is eaten only cooked (grains, pasta, legumes, potatoes, meat, fish), name its '
-            .'usual method, "Гречка варёная". No parentheses in names. A soup with sour cream or a salad with its '
-            ."dressing is one item.\n\n"
+            .'usual method, "'.$example.'". No parentheses in names. A soup with sour cream or a salad with its '
+            .'dressing is one item. Every name is in '.$language.($locale === 'ua'
+                ? ', even where the user or the draft use Russian words: "Хліб", "Сир твердий", never "Хлеб", "Сыр твёрдый"'
+                : '').".\n\n"
             .'Grams: the amount eaten. Take it from the text; for pieces multiply by the weight of one piece; for '
             .'drinks 1 ml is 1 g. An amount told of the dry food ("овсянка, 60 грамм сухой крупы") keeps the name of '
             .'the dry food, "Крупа овсяная сухая", since its nutrition facts are per 100 g of it. Without an amount in '
@@ -195,8 +216,11 @@ class MealInputReader
             ."in {$language}, short, as said (\"Бег 5 км\"); minutes, estimated from the distance or the steps when not said, "
             .'a usual time when nothing tells it; met, the MET of the activity from the Compendium of Physical Activities, '
             .'about 1.5 when mostly sitting or driving and about 2.5 for going around a shop; time, when it began as "HH:MM" '
-            .'when the user tells it ("в 6 вечера" is "18:00"), otherwise null. An activity planned or done on another day '
+            .'when the user tells it ("в 6 вечера" is "18:00") or it follows from what is told ("в 10 поехал на курсы, '
+            .'полчаса ехал, там два часа сидел": the drive at "10:00", the course at "10:30"), otherwise null. An activity planned or done on another day '
             ."is not given.\n\n"
+            .'meal_time: when the user tells at what time this meal was eaten ("в 9 утра съел", "обедал в 14:30", '
+            .'"это было в 8"), as "HH:MM"; otherwise null. A part of the day alone, "на завтрак", is not a time.'."\n\n"
             .'When the input says nothing about food, return no operations and no labels.';
     }
 
@@ -210,9 +234,10 @@ class MealInputReader
         return [
             'type' => 'object',
             'additionalProperties' => false,
-            'required' => ['operations', 'labels', 'weight_kg', 'activities'],
+            'required' => ['operations', 'labels', 'weight_kg', 'activities', 'meal_time'],
             'properties' => [
                 'weight_kg' => ['type' => ['number', 'null']],
+                'meal_time' => ['type' => ['string', 'null']],
                 'activities' => [
                     'type' => 'array',
                     'items' => [

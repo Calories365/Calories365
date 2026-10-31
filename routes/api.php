@@ -138,6 +138,12 @@ Route::middleware('check.bot.key')->group(function () {
         Route::delete('/caloriesEndPoint/draft', [\App\Http\Controllers\MealDraftController::class, 'destroy'])
             ->name('draft.destroy');
 
+        Route::get('/caloriesEndPoint/insulin/{date}', [\App\Http\Controllers\InsulinController::class, 'show'])
+            ->where('date', '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+            ->name('bot.insulin.show');
+        Route::put('/caloriesEndPoint/insulin/lifestyle', [\App\Http\Controllers\InsulinController::class, 'updateLifestyle'])
+            ->name('bot.insulin.lifestyle');
+
         Route::get('/caloriesEndPoint/showUserStats/{date}/{partOfDay?}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'showUserStats'])
             ->name('calculations.showUserStats');
 
