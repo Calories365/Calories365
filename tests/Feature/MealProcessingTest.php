@@ -57,6 +57,24 @@ class MealProcessingTest extends TestCase
         $this->assertSame([4, Product::SOURCE_LABEL], [$label->fresh()->nova, $label->fresh()->quality_source]);
     }
 
+    public function test_bread_from_a_label_stops_being_ultra_processed_and_keeps_its_source(): void
+    {
+        $bread = $this->product('Хлеб спельтово-ржаной BAGETA', 4, Product::SOURCE_LABEL);
+        $others = array_map(fn (string $name) => $this->product($name, 4, Product::SOURCE_LABEL), [
+            'Хлеб тостовый Harry',
+            'Батончик Рошен с арахисом',
+            'Хлебцы ржаные',
+            'Колбаса варёная',
+        ]);
+
+        (require database_path('migrations/2026_10_31_130000_stop_counting_bread_as_ultra_processed.php'))->up();
+
+        $this->assertSame([3, Product::SOURCE_LABEL], [$bread->fresh()->nova, $bread->fresh()->quality_source]);
+        foreach ($others as $product) {
+            $this->assertSame(4, $product->fresh()->nova);
+        }
+    }
+
     private function product(string $name, ?int $nova, string $qualitySource = Product::SOURCE_AI): Product
     {
         $product = Product::create([
