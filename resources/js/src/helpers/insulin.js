@@ -1,4 +1,4 @@
-// The insulin page counts time in minutes of the day, as the API gives it.
+// The sugar and insulin page counts time in minutes of the day, as the API gives it.
 
 export const timeLabel = (minute) => {
     const inDay = ((Math.round(minute) % 1440) + 1440) % 1440;
@@ -16,8 +16,22 @@ export const zoneOf = (level, zones) => {
     return level >= zones.medium ? "medium" : "low";
 };
 
+// Sugar has the same three zones: normal, above 7.8, above 10 mmol/L.
+export const glucoseZones = (glucose) => ({
+    medium: glucose.high,
+    high: glucose.very_high,
+});
+
 export const ZONE_COLORS = {
     low: "#4f9d55",
     medium: "#d9a400",
     high: "#d0433a",
+};
+
+// 6.1 or 6,1 by the language of the page; not toLocaleString, which some
+// engines without full ICU leave with a dot.
+export const decimal = (value, locale, digits = 1) => {
+    const rounded = String(Number(Number(value).toFixed(digits)));
+
+    return locale === "en" ? rounded : rounded.replace(".", ",");
 };

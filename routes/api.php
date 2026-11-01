@@ -67,6 +67,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/body/activities/{activity}', [\App\Http\Controllers\BodyLogController::class, 'destroyActivity'])
             ->whereNumber('activity')
             ->name('body.activities.destroy');
+        Route::patch('/body/activities/{activity}', [\App\Http\Controllers\BodyLogController::class, 'updateActivity'])
+            ->whereNumber('activity')
+            ->name('body.activities.update');
+        // Movement told in words or by voice, recorded at once.
+        Route::post('/body/activities/say', [\App\Http\Controllers\BodyLogController::class, 'sayActivity'])
+            ->middleware(\App\Http\Middleware\GuardDraftInput::class.':always')
+            ->name('body.activities.say');
+        Route::get('/activity-types', [\App\Http\Controllers\BodyLogController::class, 'types'])->name('activity-types');
 
         // The real daily expenditure the diary measured.
         // The estimated insulin curve of a day.
@@ -143,6 +151,17 @@ Route::middleware('check.bot.key')->group(function () {
             ->name('bot.insulin.show');
         Route::put('/caloriesEndPoint/insulin/lifestyle', [\App\Http\Controllers\InsulinController::class, 'updateLifestyle'])
             ->name('bot.insulin.lifestyle');
+        Route::put('/caloriesEndPoint/insulin/meal-time', [\App\Http\Controllers\InsulinController::class, 'updateMealTime'])
+            ->name('bot.insulin.mealTime');
+        Route::get('/caloriesEndPoint/activity-types', [\App\Http\Controllers\BodyLogController::class, 'types'])
+            ->name('bot.activity-types');
+        Route::post('/caloriesEndPoint/body/activities', [\App\Http\Controllers\BodyLogController::class, 'storeActivity'])
+            ->name('bot.body.activities.store');
+        Route::post('/caloriesEndPoint/body/activities/say', [\App\Http\Controllers\BodyLogController::class, 'sayActivity'])
+            ->name('bot.body.activities.say');
+        Route::delete('/caloriesEndPoint/body/activities/{activity}', [\App\Http\Controllers\BodyLogController::class, 'destroyActivity'])
+            ->whereNumber('activity')
+            ->name('bot.body.activities.destroy');
 
         Route::get('/caloriesEndPoint/showUserStats/{date}/{partOfDay?}', [\App\Http\Controllers\CaloriesAPIBotController::class, 'showUserStats'])
             ->name('calculations.showUserStats');

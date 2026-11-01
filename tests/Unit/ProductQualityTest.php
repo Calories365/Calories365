@@ -14,8 +14,8 @@ class ProductQualityTest extends TestCase
     public function test_values_that_cannot_be_true_are_not_kept(): void
     {
         $this->assertSame(
-            ['sugars' => null, 'glycemic_index' => null, 'nova' => null],
-            ProductQuality::valid(['sugars' => -1, 'glycemic_index' => 140, 'nova' => 5], 40)
+            ['sugars' => null, 'glycemic_index' => null, 'insulin_index' => null, 'nova' => null],
+            ProductQuality::valid(['sugars' => -1, 'glycemic_index' => 140, 'insulin_index' => 400, 'nova' => 5], 40)
         );
     }
 

@@ -39,7 +39,7 @@ class MealInputReader
      *
      * @param  array<int, array{name: string, grams: int}>  $draft  the items of the draft, numbered from 1 by position
      * @param  array<int, array{kind: string, text: string|null, photo: array{mime: string, contents: string}|null}>  $inputs  in the order the user sent them
-     * @return array{operations: array<int, array{action: string, item: int|null, name: string, brand: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>, weight: float|null, activities: array<int, array{title: string, minutes: int, met: float, time: string|null}>, meal_time: string|null}
+     * @return array{operations: array<int, array{action: string, item: int|null, name: string, brand: string, grams: float|null, label: int|null, facts: array<string, float>}>, labels: array<int, array<string, mixed>|null>, weight: float|null, activities: array<int, array{type: string|null, title: string, minutes: int, met: float, time: string|null}>, meal_time: string|null}
      *
      * @throws \Illuminate\Http\Client\RequestException
      * @throws \RuntimeException
@@ -95,22 +95,7 @@ class MealInputReader
         $weight = $decoded['weight_kg'] ?? null;
         $weight = is_numeric($weight) && $weight >= BodyWeight::MIN && $weight <= BodyWeight::MAX ? round((float) $weight, 2) : null;
 
-        $activities = [];
-        foreach ($decoded['activities'] ?? [] as $activity) {
-            $title = is_array($activity) ? trim((string) ($activity['title'] ?? '')) : '';
-            $minutes = (int) round((float) ($activity['minutes'] ?? 0));
-            $met = round((float) ($activity['met'] ?? 0), 1);
-            $time = is_array($activity) ? trim((string) ($activity['time'] ?? '')) : '';
-
-            if ($title !== '' && $minutes >= 1 && $minutes <= 600 && $met >= 1 && $met <= 20) {
-                $activities[] = [
-                    'title' => mb_substr($title, 0, 150),
-                    'minutes' => $minutes,
-                    'met' => $met,
-                    'time' => preg_match(self::TIME, $time) ? $time : null,
-                ];
-            }
-        }
+        $activities = ActivityCatalog::valid($decoded['activities'] ?? []);
 
         $mealTime = trim((string) ($decoded['meal_time'] ?? ''));
 
@@ -163,7 +148,7 @@ class MealInputReader
             $sent[$index] = ($index + 1).'. '.$line;
         }
 
-        return "You keep the draft of a meal in a calorie diary. The user speaks {$language}.\n\n"
+        return "You keep the draft of a meal in a calorie diary. The user speaks {$language}. Now it is ".now()->format('H:i').".\n\n"
             ."The draft now:\n".($lines === [] ? '(empty)' : implode("\n", $lines))."\n\n"
             ."New input from the user, in the order it was sent; the photos are attached in the same order:\n"
             .($sent === [] ? '(none)' : implode("\n", $sent))."\n\n"
@@ -200,7 +185,7 @@ class MealInputReader
             .'serving are converted to 100 g by the serving weight; fibers 0 when not shown); sugars as printed '
             .'("в т.ч. сахара", "of which sugars"), null when not printed; glycemic_index and nova estimated from the '
             .'kind of product and its ingredients; package_grams, the net weight, or null.'
-            ."\nFor sugars, glycemic_index and nova of a label:\n".ProductQuality::instructions()."\n".'Then add each product the user ate, or update the draft item it belongs to, with '
+            ."\nFor sugars, glycemic_index, insulin_index and nova of a label:\n".ProductQuality::instructions()."\n".'Then add each product the user ate, or update the draft item it belongs to, with '
             .'"label" set to its index in "labels"; otherwise "label" is null. A product on a label that the text '
             ."says the user did not eat is not added.\n\n"
             .'Nutrition facts the user tells for a food ("во втором 250 калорий на 100 грамм", "белка 20"): '
@@ -209,18 +194,10 @@ class MealInputReader
             .'Brand: for add and for a changed name, the brand or the maker of the product when the user names one '
             .'or a package or a label on a photo shows it, spelled the same as in the name, which keeps it; "" for a food '
             ."without a brand: a dish, a fruit, a home-made food, a product of no visible make.\n\n"
-            .'Body weight and physical activity are not foods. weight_kg: the body weight the user tells for today '
-            .'("вешу 82,4", "вес утром 82.4"), otherwise null. activities: each physical activity and each stretch of '
-            .'everyday movement the user tells they did today ("пробежал 5 км за 30 минут", "час в зале", "10 тысяч '
-            .'шагов", "час гулял", "сходил в магазин", "съездил на машине на курсы, там два часа, ходил мало"): title '
-            ."in {$language}, short, as said (\"Бег 5 км\"); minutes, estimated from the distance or the steps when not said, "
-            .'a usual time when nothing tells it; met, the MET of the activity from the Compendium of Physical Activities, '
-            .'about 1.5 when mostly sitting or driving and about 2.5 for going around a shop; time, when it began as "HH:MM" '
-            .'when the user tells it ("в 6 вечера" is "18:00") or it follows from what is told ("в 10 поехал на курсы, '
-            .'полчаса ехал, там два часа сидел": the drive at "10:00", the course at "10:30"), otherwise null. An activity planned or done on another day '
-            ."is not given.\n\n"
+            .'Body weight, physical activity and sleep are not foods. weight_kg: the body weight the user tells for today '
+            .'("вешу 82,4", "вес утром 82.4"), otherwise null. '.ActivityCatalog::instructions($language)."\n\n"
             .'meal_time: when the user tells at what time this meal was eaten ("в 9 утра съел", "обедал в 14:30", '
-            .'"это было в 8"), as "HH:MM"; otherwise null. A part of the day alone, "на завтрак", is not a time.'."\n\n"
+            .'"это было в 8", "поел полчаса назад", counted back from now), as "HH:MM"; otherwise null. A part of the day alone, "на завтрак", is not a time.'."\n\n"
             .'When the input says nothing about food, return no operations and no labels.';
     }
 
@@ -238,20 +215,7 @@ class MealInputReader
             'properties' => [
                 'weight_kg' => ['type' => ['number', 'null']],
                 'meal_time' => ['type' => ['string', 'null']],
-                'activities' => [
-                    'type' => 'array',
-                    'items' => [
-                        'type' => 'object',
-                        'additionalProperties' => false,
-                        'required' => ['title', 'minutes', 'met', 'time'],
-                        'properties' => [
-                            'title' => ['type' => 'string'],
-                            'minutes' => ['type' => 'number'],
-                            'met' => ['type' => 'number'],
-                            'time' => ['type' => ['string', 'null']],
-                        ],
-                    ],
-                ],
+                'activities' => ActivityCatalog::schema(),
                 'operations' => [
                     'type' => 'array',
                     'items' => [

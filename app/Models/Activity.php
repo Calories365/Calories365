@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $user_id
  * @property \Illuminate\Support\Carbon $date
  * @property \Illuminate\Support\Carbon|null $started_at
+ * @property string|null $type
  * @property string $title
  * @property int $minutes
  * @property float $met
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Activity extends Model
 {
-    protected $fillable = ['user_id', 'date', 'started_at', 'title', 'minutes', 'met', 'calories'];
+    protected $fillable = ['user_id', 'date', 'started_at', 'type', 'title', 'minutes', 'met', 'calories'];
 
     protected $casts = [
         'date' => 'date',
@@ -30,10 +31,18 @@ class Activity extends Model
     ];
 
     /**
-     * @return array{id: int, title: string, minutes: int, calories: int}
+     * @return array{id: int, type: string|null, title: string, minutes: int, calories: int, time: string|null, date: string}
      */
     public function toPayload(): array
     {
-        return ['id' => $this->id, 'title' => $this->title, 'minutes' => $this->minutes, 'calories' => $this->calories];
+        return [
+            'id' => $this->id,
+            'type' => $this->type,
+            'title' => $this->title,
+            'minutes' => $this->minutes,
+            'calories' => $this->calories,
+            'time' => $this->started_at?->format('H:i'),
+            'date' => $this->date->toDateString(),
+        ];
     }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { timeLabel, zoneOf } from "@/helpers/insulin.js";
+import { decimal, glucoseZones, timeLabel, zoneOf } from "@/helpers/insulin.js";
 
 describe("timeLabel", () => {
     it("writes minutes of the day as a time", () => {
@@ -21,5 +21,23 @@ describe("zoneOf", () => {
         expect(zoneOf(29.9, zones)).toBe("low");
         expect(zoneOf(30, zones)).toBe("medium");
         expect(zoneOf(60, zones)).toBe("high");
+    });
+});
+
+describe("glucoseZones", () => {
+    it("turns the sugar limits of the day into zones", () => {
+        const zones = glucoseZones({ base: 5, high: 7.8, very_high: 10 });
+
+        expect(zoneOf(7.7, zones)).toBe("low");
+        expect(zoneOf(7.8, zones)).toBe("medium");
+        expect(zoneOf(10.2, zones)).toBe("high");
+    });
+});
+
+describe("decimal", () => {
+    it("writes the decimal mark of the language", () => {
+        expect(decimal(6.14, "ru")).toBe("6,1");
+        expect(decimal(6.14, "en")).toBe("6.1");
+        expect(decimal(7, "ua")).toBe("7");
     });
 });

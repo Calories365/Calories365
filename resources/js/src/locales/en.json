@@ -56,7 +56,8 @@
         "sorry_error": "Sorry, an error occurred.",
         "buy_premium_for_this_func": "This feature is available in the premium subscription!",
         "no_products_consumed": "No products consumed",
-        "insulin": "Insulin"
+        "insulin": "Sugar and insulin",
+        "insulinTab": "Sugar"
     },
     "Home": {
         "Title": "Calorie Tracking",
@@ -556,7 +557,7 @@
             "photo": "Add a photo of the plate and photos of the labels, several at once if you like. A label with a nutrition table gives the exact values from the package, and a brand from the package or the one you name stays in the product name.",
             "correct": "Correct it if needed: grams and nutrition right in the list, or add in words \"the buckwheat was 250\", \"remove the tea\" and tap \"Recalculate with what is added\".",
             "save": "Press \"To breakfast\", \"To lunch\" or \"To dinner\" to save the meal to the diary.",
-            "insulin": "Say when you ate and how you moved: \"at 9 am I had…\", \"walked for an hour\", \"drove to a course\". It goes to the \"Insulin\" chart.",
+            "insulin": "Say when you ate and how you moved: \"at 9 am I had…\", \"walked for an hour\", \"drove to a course\". It goes to the \"Sugar and insulin\" chart.",
             "bot": "The Telegram bot works the same: send it voice messages, photos and text and tap \"Calculate\". The draft is shared.",
             "calculate": "Tap \"Calculate\": the voice messages, photos and text are read together into one meal."
         },
@@ -596,7 +597,8 @@
         },
         "loadHint": "The glycemic load shows how much the meal raises blood sugar: it counts both how many carbohydrates there are and how fast they are.",
         "recordedWeight": "Saved the weight {weight} kg.",
-        "recordedActivity": "Saved: {title}, {minutes} min, ≈{calories} kcal."
+        "recordedActivity": "Saved: {title}, {minutes} min, ≈{calories} kcal.",
+        "recordedMealTime": "{meal}: time {time}."
     },
     "Body": {
         "weight": "Weight",
@@ -629,12 +631,22 @@
         "unclear": "Cannot measure it: by the diary you eat {intake} kcal on average while your weight changes by {change} kg a week, which no body does. Usually some meals are missing from the diary or the weigh-ins were made in different conditions."
     },
     "Insulin": {
-        "title": "Insulin of the day",
-        "note": "An estimate from food, movement and way of life, not a measurement. 100 is the peak after 62 g of glucose.",
+        "title": "Sugar and insulin",
+        "note": "An estimate for a healthy adult from food, movement, sleep and way of life, not a measurement. Sugar in mmol/L; insulin as an index where 100 is the peak after 62 g of glucose.",
         "failed": "Could not load the chart, reload the page.",
-        "now": "Now",
-        "peak": "Peak of the day, {time}",
-        "level": "Level",
+        "glucose": "Sugar",
+        "insulin": "Insulin",
+        "mmol": "mmol/L",
+        "level": "Insulin",
+        "glucoseNow": "Sugar now",
+        "glucosePeak": "Sugar peak, {time}",
+        "insulinNow": "Insulin now",
+        "peak": "Insulin peak, {time}",
+        "glucoseZone": {
+            "low": "normal",
+            "medium": "above 7.8",
+            "high": "above 10"
+        },
         "zone": {
             "low": "low",
             "medium": "medium",
@@ -645,6 +657,78 @@
             "dinner": "Lunch",
             "supper": "Dinner"
         },
+        "record": {
+            "title": "Log movement or sleep",
+            "hint": "Say or type it as you like: \"walked for an hour\", \"ran 5 km at 7\", \"went shopping after lunch\", \"slept from 1 to 7\". Or pick below in two taps.",
+            "prompt": "What did you do",
+            "voice": "Say it",
+            "stop": "Done",
+            "send": "Log",
+            "reading": "Logging…",
+            "recorded": "Logged: {list}.",
+            "notUnderstood": "No movement or sleep found here. Say, for example, \"walked for an hour\".",
+            "notRead": "Could not read it, try again.",
+            "other": "Other",
+            "more": "More",
+            "hours": "{hours} h",
+            "minutesShort": "{minutes} min",
+            "startedAt": "Started",
+            "wentToBed": "Went to bed",
+            "endedNow": "no time — just finished",
+            "add": "Log",
+            "cancel": "Cancel"
+        },
+        "tips": "What to change",
+        "summaryTitle": "The day",
+        "summary": {
+            "proteins": "Protein",
+            "proteinsValue": "{grams} g · {perKg} g/kg, at least {target} g",
+            "gramsValue": "{grams} g",
+            "fibers": "Fibre",
+            "fibersValue": "{grams} of {target} g",
+            "fibersUnknown": "Fibre is not known yet for foods: {count}, the total will be higher.",
+            "sugars": "Sugars in food",
+            "load": "Glycemic load",
+            "loadLevel": {
+                "low": "low",
+                "medium": "medium",
+                "high": "high"
+            },
+            "ultra": "Ultra-processed",
+            "ultraValue": "{percent}% of calories",
+            "high": "Sugar above 7.8",
+            "minutesValue": "{minutes} min",
+            "moved": "Movement",
+            "movedValue": "{minutes} min, after meals {after} min",
+            "sleep": "Sleep",
+            "sleepValue": "{hours} h"
+        },
+        "meals": "What lifted it",
+        "noMeals": "No food on this day.",
+        "mealSugar": "sugar up to {level}",
+        "mealInsulin": "insulin +{rise}",
+        "mealFacts": "GL {load} · protein {proteins} g · fibre {fibers} g",
+        "dip": "Around {time} sugar drops to {level}: people tend to get hungry then.",
+        "itemSugar": "+{value} sugar",
+        "itemInsulin": "+{value} ins.",
+        "grams": "g",
+        "minutes": "min",
+        "estimated": "The glycemic index is not known yet for foods: {count}. They count as medium for now; it usually appears within 10 minutes.",
+        "movement": "Movement and sleep",
+        "movementHint": "Nothing yet. Log it above or tell the bot: \"walked for an hour\", \"slept 6 hours\".",
+        "effect": "over the day: sugar −{glucose}%, insulin −{insulin}%",
+        "effectMore": "over the day: sugar +{glucose}%, insulin +{insulin}%",
+        "noEffect": "hardly changes sugar",
+        "activityTitle": "What you did",
+        "activityTime": "When it started",
+        "intensityLabel": "How hard",
+        "intensity": {
+            "sitting": "Sitting, driving",
+            "light": "Light: a walk, shopping",
+            "moderate": "Moderate: brisk walking",
+            "hard": "Hard: running, gym"
+        },
+        "invalidActivity": "Tell what you did and for how many minutes: 1 to 600, sleep up to 960.",
         "lifestyle": "Way of life",
         "lifestyles": {
             "level1": "Sitting",
@@ -653,23 +737,14 @@
             "level4": "Active",
             "level5": "Very active"
         },
-        "meals": "What lifted it",
-        "noMeals": "No food on this day.",
-        "grams": "g",
-        "minutes": "min",
-        "estimated": "The glycemic index is not known yet for products: {count}. They count as medium for now; it usually appears within 10 minutes.",
-        "movement": "Movement",
-        "movementHint": "Add it here or tell the bot and the \"Meal\" page: \"walked for an hour\", \"went to the shop at 6 pm\".",
-        "effect": "{percent}% less insulin",
-        "activityTitle": "What you did",
-        "activityTime": "When it began",
-        "intensity": {
-            "sitting": "Sitting, driving",
-            "light": "Light: a walk, a shop",
-            "moderate": "Moderate: brisk walk",
-            "hard": "Hard: running, gym"
-        },
-        "add": "Add",
-        "invalidActivity": "Write what you did and how many minutes: from 1 to 600."
+        "howTitle": "How it is counted",
+        "how": [
+            "Sugar after a meal rises with its glycemic load: GI × carbohydrates / 100 (Brand-Miller 2003; Bao 2011: the load explained 58% of the difference between meals, carbohydrates alone did not). Over 50 g of carbohydrates give less per gram (Meng 2017).",
+            "Protein in the same meal lowers sugar: 50 g by 25% (Meng 2017); fat about a third as much per gram (Moghaddam 2006). The fibre of the vegetables of a meal counts a little, up to 15%: oat beta-glucan lowers sugar by 23% (meta-analysis, 2021), while 9.6 g of added fibre changed nothing significant (Meng 2017). The fibre of grains is already in their GI.",
+            "The same meal at 8 pm lifts sugar 17% more than at 8 am (Morris 2015). 2–3 hours after a fast meal sugar dips below its usual level, and such dips predict hunger (Wyatt 2021).",
+            "Insulin follows the insulin index of a food (Holt 1997, Bao 2009), or where it is unknown the formula of Bell 2016 from GI, sugars, protein and fat. Milk products lift insulin more than sugar.",
+            "Walking after meals: 28 minutes lowered sugar by 24–30% and insulin by 23% (Dunstan 2012); 10 minutes after each meal lowered sugar by 12%, after dinner by 22% (Reynolds 2016). Exercise raises insulin sensitivity for a day or two. After a 4-hour night sensitivity is about 25% lower (Donga 2010).",
+            "Healthy people spend about 30 minutes a day above 7.8 mmol/L (Shah 2019). This estimate is for a healthy adult: it does not fit diabetes or treatment."
+        ]
     }
 }

@@ -316,6 +316,15 @@ export default {
                 );
             });
 
+            if (recorded.meal_time) {
+                told.push(
+                    this.$t("Meal.recordedMealTime", {
+                        meal: this.$t(`Insulin.parts.${recorded.meal_time.part_of_day}`),
+                        time: recorded.meal_time.time,
+                    })
+                );
+            }
+
             if (told.length) {
                 this.notify("successMessage", told.join(" "));
             }

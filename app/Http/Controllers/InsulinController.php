@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 /**
- * The insulin curve of a day. Every answer is the day as InsulinDay gives it.
+ * Blood sugar and insulin of a day. Every answer is the day as InsulinDay gives it.
  */
 class InsulinController extends Controller
 {
@@ -25,7 +25,7 @@ class InsulinController extends Controller
         $day = $this->insulin->forUser($request->user(), $date, app()->getLocale());
 
         if ($request->boolean('chart')) {
-            $day['chart'] = base64_encode(app(InsulinChartImage::class)->render($day));
+            $day['chart'] = base64_encode(app(InsulinChartImage::class)->render($day, app()->getLocale() === 'en' ? '.' : ','));
         }
 
         return response()->json($day);

@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Gives products of the database their sugars, glycemic index and NOVA group
- * (ProductQuality), asked of the product model for many products at once.
+ * Gives products of the database their sugars, glycemic index, insulin index and
+ * NOVA group (ProductQuality), and their fibre when the database has none, asked
+ * of the product model for many products at once.
  *
  * New products get them when they are made (ProductCatalog, labels); the
  * thousands of older ones get them when somebody eats them: the products of a
@@ -74,7 +75,8 @@ class ProductEnricher
         }
 
         $prompt = "For each food of a calorie diary, with its nutrition facts, give:\n"
-            .ProductQuality::instructions()."\n\n"
+            .ProductQuality::instructions()."\n"
+            ."- fibers (g per 100 g): the dietary fibre of the food as eaten, from food composition tables; 0 for meat, fish, eggs, oil, sugar.\n\n"
             ."Foods:\n".implode("\n", $lines);
 
         $keys = config('services.openai.keys');
@@ -99,8 +101,8 @@ class ProductEnricher
                                     'items' => [
                                         'type' => 'object',
                                         'additionalProperties' => false,
-                                        'required' => ['index', ...ProductQuality::FIELDS],
-                                        'properties' => ['index' => ['type' => 'integer']] + ProductQuality::schema(),
+                                        'required' => ['index', 'fibers', ...ProductQuality::FIELDS],
+                                        'properties' => ['index' => ['type' => 'integer'], 'fibers' => ['type' => ['number', 'null']]] + ProductQuality::schema(),
                                     ],
                                 ],
                             ],
@@ -126,7 +128,13 @@ class ProductEnricher
                 continue;
             }
 
-            $product->update(ProductQuality::valid($item, (float) $product->carbohydrates) + ['quality_source' => Product::SOURCE_AI]);
+            $fibers = $item['fibers'] ?? null;
+            // Fibre the database has came from a table or a label and stays.
+            $fibers = $product->fibers === null && is_numeric($fibers) && $fibers >= 0 && $fibers <= 60
+                ? ['fibers' => round((float) $fibers, 2)]
+                : [];
+
+            $product->update(ProductQuality::valid($item, (float) $product->carbohydrates) + $fibers + ['quality_source' => Product::SOURCE_AI]);
             $done++;
         }
 

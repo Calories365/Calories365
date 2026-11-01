@@ -54,6 +54,11 @@ class MealDraftService
      */
     private const CALCULATION_LIMIT = 200;
 
+    /**
+     * A time told without a draft moves a meal saved this many hours ago at most.
+     */
+    private const MOVABLE_MEAL_HOURS = 12;
+
     public function __construct(
         private MealInputReader $reader,
         private ProductCatalog $catalog,
@@ -264,6 +269,14 @@ class MealDraftService
                 return ['draft' => $draft->fresh(), 'understood' => true, 'not_found' => [], 'recorded' => $recorded];
             }
 
+            // "обедал в 14:00" said after the meal was saved: there is no draft to take it.
+            $moved = $mealTime !== null ? $this->moveLastMeal($userId, $mealTime) : null;
+            if ($moved !== null) {
+                $recorded = ($recorded ?? ['weight' => null, 'activities' => []]) + ['meal_time' => $moved];
+
+                return ['draft' => null, 'understood' => true, 'not_found' => [], 'recorded' => $recorded];
+            }
+
             return ['draft' => $draft, 'understood' => $recorded !== null, 'not_found' => [], 'recorded' => $recorded];
         }
 
@@ -356,8 +369,37 @@ class MealDraftService
 
         return [
             'weight' => $weight,
-            'activities' => array_map(fn (array $activity) => $this->body->recordActivity($userId, $date, $activity['title'], $activity['minutes'], $activity['met'], $activity['time'] ?? null)->toPayload(), $activities),
+            'activities' => array_map(fn (array $activity) => $this->body->recordActivity($userId, $date, $activity['title'], $activity['minutes'], $activity['met'], $activity['time'] ?? null, $activity['type'] ?? null)->toPayload(), $activities),
         ];
+    }
+
+    /**
+     * Move the meal saved last today, all of its part of the day, to the time
+     * told; null when nothing was saved today in the last hours.
+     *
+     * @return array{part_of_day: string, time: string}|null
+     */
+    private function moveLastMeal(int $userId, string $time): ?array
+    {
+        $last = FoodConsumption::query()
+            ->where('user_id', $userId)
+            ->whereDate('consumed_at', today())
+            ->where('created_at', '>=', now()->subHours(self::MOVABLE_MEAL_HOURS))
+            ->latest('created_at')
+            ->latest('id')
+            ->first();
+
+        if ($last === null) {
+            return null;
+        }
+
+        FoodConsumption::query()
+            ->where('user_id', $userId)
+            ->whereDate('consumed_at', today())
+            ->where('part_of_day', $last->part_of_day)
+            ->update(['eaten_at' => today()->toDateString().' '.$time.':00']);
+
+        return ['part_of_day' => (string) $last->part_of_day, 'time' => $time];
     }
 
     /**

@@ -6,8 +6,10 @@ use App\Models\Activity;
 use App\Models\BodyWeight;
 use App\Models\User;
 use App\Services\BodyLog;
+use App\Services\BotPanelService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -27,6 +29,7 @@ class BodyLogTest extends TestCase
 
         Http::preventStrayRequests();
         $this->user = User::factory()->create();
+        $this->withHeader('Accept-Language', 'ru');
     }
 
     public function test_a_weight_said_plainly_is_read_without_the_model(): void
@@ -86,6 +89,7 @@ class BodyLogTest extends TestCase
 
     public function test_the_time_of_an_activity_is_kept_when_it_was_told_and_a_wrong_one_is_not(): void
     {
+        Carbon::setTestNow(today()->setTime(19, 0));
         $this->collect(['text' => 'сходил в магазин в 6 вечера и гулял'])->assertOk();
         Http::fake(['api.openai.com/*' => Http::response(['choices' => [['message' => ['content' => json_encode([
             'operations' => [],
@@ -100,7 +104,106 @@ class BodyLogTest extends TestCase
         $this->bot()->postJson('/api/caloriesEndPoint/draft/calculate')->assertStatus(202);
 
         $this->assertSame('18:00', Activity::where('title', 'Магазин')->sole()->started_at->format('H:i'));
-        $this->assertNull(Activity::where('title', 'Прогулка')->sole()->started_at);
+        // A time that is no time: the walk ended when it was told.
+        $this->assertSame('18:30', Activity::where('title', 'Прогулка')->sole()->started_at->format('H:i'));
+        Carbon::setTestNow();
+    }
+
+    public function test_a_kind_tapped_on_the_page_keeps_its_met_and_ended_when_it_was_tapped(): void
+    {
+        Carbon::setTestNow('2026-11-01 19:00:00');
+
+        $this->actingAs($this->user)->postJson('/api/body/activities', ['date' => '2026-11-01', 'type' => 'walk_brisk', 'minutes' => 30])
+            ->assertOk()
+            ->assertJsonPath('activity.title', 'Быстрая ходьба')
+            ->assertJsonPath('activity.type', 'walk_brisk')
+            ->assertJsonPath('activity.time', '18:30');
+
+        $this->assertSame(4.8, Activity::sole()->met);
+        Carbon::setTestNow();
+    }
+
+    public function test_a_kind_out_of_the_catalogue_or_too_long_is_refused(): void
+    {
+        $this->actingAs($this->user)->postJson('/api/body/activities', ['date' => '2026-11-01', 'type' => 'flying', 'minutes' => 30])->assertUnprocessable();
+        $this->actingAs($this->user)->postJson('/api/body/activities', ['date' => '2026-11-01', 'type' => 'walk', 'minutes' => 700])->assertUnprocessable();
+        $this->actingAs($this->user)->postJson('/api/body/activities', ['date' => '2026-11-01', 'type' => 'sleep', 'minutes' => 700])->assertOk();
+    }
+
+    public function test_movement_said_in_words_is_recorded_at_once(): void
+    {
+        Carbon::setTestNow('2026-11-01 19:00:00');
+        $this->mock(BotPanelService::class, fn ($mock) => $mock->shouldReceive('canTranscribeAudio')->once()->andReturn(true));
+        $this->fakeActivities([
+            ['type' => 'walk', 'title' => 'Прогулка', 'minutes' => 60, 'met' => 3.0, 'time' => null],
+            ['type' => 'run', 'title' => 'Бег 5 км', 'minutes' => 30, 'met' => 1.0, 'time' => '07:00'],
+        ]);
+
+        $this->actingAs($this->user)->postJson('/api/body/activities/say', ['text' => 'час гулял, а утром в 7 пробежал 5 км'])
+            ->assertOk()
+            ->assertJsonPath('understood', true)
+            ->assertJsonPath('recorded.0.title', 'Прогулка')
+            ->assertJsonPath('recorded.0.time', '18:00')
+            ->assertJsonPath('recorded.1.time', '07:00');
+
+        // The MET of a kind of the catalogue is its own, whatever the model said.
+        $this->assertSame(8.0, Activity::where('type', 'run')->sole()->met);
+        Http::assertSent(fn (Request $request) => str_contains($request['messages'][0]['content'], 'Now it is 19:00'));
+        Carbon::setTestNow();
+    }
+
+    public function test_words_without_movement_record_nothing(): void
+    {
+        $this->fakeActivities([]);
+
+        $this->bot()->postJson('/api/caloriesEndPoint/body/activities/say', ['text' => 'съел банан'])
+            ->assertOk()
+            ->assertJsonPath('understood', false)
+            ->assertJsonPath('recorded', []);
+
+        $this->assertSame(0, Activity::count());
+    }
+
+    public function test_last_nights_sleep_told_in_the_morning_belongs_to_this_morning(): void
+    {
+        Carbon::setTestNow('2026-11-01 08:30:00');
+        $this->fakeActivities([['type' => 'sleep', 'title' => 'Сон', 'minutes' => 480, 'met' => 1.0, 'time' => '23:00']]);
+
+        $this->bot()->postJson('/api/caloriesEndPoint/body/activities/say', ['text' => 'спал с 23 до 7'])->assertOk();
+
+        $sleep = Activity::sole();
+        $this->assertSame('2026-10-31 23:00', $sleep->started_at->format('Y-m-d H:i'));
+        $this->assertSame('2026-11-01', $sleep->date->toDateString());
+        $this->assertSame(0, $sleep->calories);
+        Carbon::setTestNow();
+    }
+
+    public function test_the_bot_records_a_tapped_kind_and_removes_it(): void
+    {
+        $this->bot()->getJson('/api/caloriesEndPoint/activity-types')->assertOk()
+            ->assertJsonPath('types.0.type', 'walk')
+            ->assertJsonPath('types.0.title', 'Прогулка');
+
+        $id = $this->bot()->postJson('/api/caloriesEndPoint/body/activities', ['date' => today()->toDateString(), 'type' => 'gym', 'minutes' => 60])
+            ->assertOk()
+            ->assertJsonPath('activity.title', 'Зал, силовая')
+            ->json('activity.id');
+
+        $this->bot()->deleteJson("/api/caloriesEndPoint/body/activities/{$id}")->assertOk();
+        $this->assertSame(0, Activity::count());
+    }
+
+    public function test_the_time_and_minutes_of_an_activity_are_corrected_on_the_page(): void
+    {
+        $activity = app(BodyLog::class)->recordActivity($this->user->id, '2026-10-30', 'Прогулка', 60, 3.0, null, 'walk');
+
+        $this->actingAs($this->user)->patchJson("/api/body/activities/{$activity->id}", ['time' => '17:15', 'minutes' => 30])
+            ->assertOk()
+            ->assertJsonPath('activity.time', '17:15')
+            ->assertJsonPath('activity.minutes', 30);
+
+        $this->assertSame((int) round($activity->calories / 2), $activity->fresh()->calories);
+        $this->actingAs(User::factory()->create())->patchJson("/api/body/activities/{$activity->id}", ['time' => '10:00'])->assertNotFound();
     }
 
     public function test_an_activity_the_model_cannot_have_meant_is_not_kept(): void
@@ -142,6 +245,14 @@ class BodyLogTest extends TestCase
         $this->actingAs(User::factory()->create())->deleteJson("/api/body/activities/{$activity->id}")->assertNotFound();
         $this->actingAs($this->user)->deleteJson("/api/body/activities/{$activity->id}")->assertOk()
             ->assertJsonPath('activities', []);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $activities
+     */
+    private function fakeActivities(array $activities): void
+    {
+        Http::fake(['api.openai.com/*' => Http::response(['choices' => [['message' => ['content' => json_encode(['activities' => $activities])]]]])]);
     }
 
     /**

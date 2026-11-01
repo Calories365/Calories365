@@ -17,7 +17,7 @@ export default {
             tabs: [
                 { name: "diary", icon: faBookOpen },
                 { name: "stats", icon: faChartColumn },
-                { name: "insulin", icon: faChartLine },
+                { name: "insulin", icon: faChartLine, label: "message.insulinTab" },
                 { name: "voice", icon: faUtensils },
                 { name: "calculation", icon: faCalculator },
                 { name: "cabinet", icon: faUser },
@@ -38,7 +38,7 @@ export default {
         >
             <font-awesome-icon :icon="tab.icon" class="mini-app-tab-bar_icon" />
             <span class="mini-app-tab-bar_label">{{
-                $t(`message.${tab.name}`)
+                $t(tab.label ?? `message.${tab.name}`)
             }}</span>
         </router-link>
     </nav>

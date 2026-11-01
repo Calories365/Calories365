@@ -21,6 +21,7 @@ use Meilisearch\Client;
  * @property float|null $fibers
  * @property float|null $sugars
  * @property int|null $glycemic_index
+ * @property int|null $insulin_index
  * @property int|null $nova
  * @property string|null $quality_source
  */
@@ -36,6 +37,7 @@ class Product extends Model
         'fibers',
         'sugars',
         'glycemic_index',
+        'insulin_index',
         'nova',
         'quality_source',
         'is_popular',
@@ -46,6 +48,7 @@ class Product extends Model
     protected $casts = [
         'sugars' => 'float',
         'glycemic_index' => 'integer',
+        'insulin_index' => 'integer',
         'nova' => 'integer',
     ];
 

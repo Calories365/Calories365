@@ -3,8 +3,10 @@
 namespace App\Services;
 
 /**
- * What kind of carbohydrates a food gives and how processed it is: sugars per
- * 100 g, the glycemic index (GI, glucose 100) and the NOVA group. The model
+ * What kind of carbohydrates a food gives, how much insulin it calls for and how
+ * processed it is: sugars per 100 g, the glycemic index (GI, glucose 100), the
+ * food insulin index (white bread 100, as in Holt et al. 1997) and the NOVA
+ * group. The model
  * gives them with the nutrition facts (ProductCatalog, a label, ProductEnricher);
  * the rules of what it is asked and what is kept live here, and so does what
  * the draft shows from them.
@@ -15,7 +17,7 @@ namespace App\Services;
  */
 class ProductQuality
 {
-    public const FIELDS = ['sugars', 'glycemic_index', 'nova'];
+    public const FIELDS = ['sugars', 'glycemic_index', 'insulin_index', 'nova'];
 
     /**
      * NOVA group of ultra-processed foods.
@@ -49,6 +51,11 @@ class ProductQuality
             ."sugar; 0 for meat, fish, eggs, oil.\n"
             .'- glycemic_index: of the food as eaten, glucose 100, from published GI tables or the closest food in '
             ."them; 0 when the food has under 2 g of carbohydrates per 100 g.\n"
+            .'- insulin_index: the food insulin index of the food as eaten: the insulin response to a 1000 kJ '
+            .'portion against 1000 kJ of white bread = 100, from published insulin index tables (Holt et al. 1997, '
+            .'Bao et al. 2009, Bell et al. 2016) or the closest food in them. Milk, kefir, yogurt, ice cream and '
+            .'lean meat or fish raise insulin more than their GI says; hard and soft cheese, nuts, oil and butter '
+            ."raise it little.\n"
             .'- nova: the NOVA group of the food as named. Judge by what the name says and do not assume a factory '
             .'package: bread, a loaf, lavash or a bun, of any flour and any bakery, is group 3 unless the name says '
             .'toast bread or hamburger bun. 1: unprocessed or minimally processed, cooked at home (fresh, frozen, '
@@ -70,6 +77,7 @@ class ProductQuality
         return [
             'sugars' => ['type' => ['number', 'null']],
             'glycemic_index' => ['type' => ['integer', 'null']],
+            'insulin_index' => ['type' => ['integer', 'null']],
             'nova' => ['type' => ['integer', 'null']],
         ];
     }
@@ -79,7 +87,7 @@ class ProductQuality
      * exceed the carbohydrates, and a food almost without them has GI 0.
      *
      * @param  array<string, mixed>  $item
-     * @return array{sugars: float|null, glycemic_index: int|null, nova: int|null}
+     * @return array{sugars: float|null, glycemic_index: int|null, insulin_index: int|null, nova: int|null}
      */
     public static function valid(array $item, float $carbohydrates): array
     {
@@ -92,10 +100,14 @@ class ProductQuality
             $index = 0;
         }
 
+        // The highest measured, jelly beans, is 160 against white bread.
+        $insulin = $item['insulin_index'] ?? null;
+        $insulin = is_numeric($insulin) && $insulin >= 0 && $insulin <= 250 ? (int) round((float) $insulin) : null;
+
         $nova = $item['nova'] ?? null;
         $nova = is_numeric($nova) && in_array((int) $nova, [1, 2, 3, 4], true) ? (int) $nova : null;
 
-        return ['sugars' => $sugars, 'glycemic_index' => $index, 'nova' => $nova];
+        return ['sugars' => $sugars, 'glycemic_index' => $index, 'insulin_index' => $insulin, 'nova' => $nova];
     }
 
     /**

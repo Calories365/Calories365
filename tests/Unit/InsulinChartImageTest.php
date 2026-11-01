@@ -6,7 +6,7 @@ use App\Services\InsulinChartImage;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The picture of the insulin curve the bot sends: a PNG drawn without GD.
+ * The picture of sugar and insulin the bot sends: a PNG drawn without GD.
  */
 class InsulinChartImageTest extends TestCase
 {
@@ -15,7 +15,7 @@ class InsulinChartImageTest extends TestCase
         $png = (new InsulinChartImage)->render($this->day(withMeal: true));
 
         $size = getimagesizefromstring($png);
-        $this->assertSame([1000, 500, IMAGETYPE_PNG], [$size[0], $size[1], $size[2]]);
+        $this->assertSame([1000, 760, IMAGETYPE_PNG], [$size[0], $size[1], $size[2]]);
         $this->assertLessThan(200 * 1024, strlen($png));
     }
 
@@ -33,18 +33,21 @@ class InsulinChartImageTest extends TestCase
      */
     private function day(bool $withMeal): array
     {
+        $wave = static fn (int $minute) => $withMeal && $minute > 780 && $minute < 960 ? sin(($minute - 780) / 180 * M_PI) : 0.0;
         $points = array_map(static fn (int $minute) => [
             'minute' => $minute,
-            'level' => $withMeal && $minute > 780 && $minute < 960 ? 10 + 120 * sin(($minute - 780) / 180 * M_PI) : 10.0,
+            'level' => 10 + 120 * $wave($minute),
+            'glucose' => 5 + 4 * $wave($minute),
         ], range(0, 1440, 5));
 
         return [
             'zones' => ['medium' => 30, 'high' => 60],
+            'glucose' => ['base' => 5.0, 'high' => 7.8, 'very_high' => 10.0, 'peak' => ['minute' => 870, 'level' => $withMeal ? 9.0 : 5.0]],
             'points' => $points,
-            'now' => ['minute' => 1000, 'level' => 10.0],
+            'now' => ['minute' => 1000, 'level' => 10.0, 'glucose' => 5.0],
             'peak' => ['minute' => 870, 'level' => $withMeal ? 130.0 : 10.0],
             'meals' => $withMeal ? [['minute' => 780]] : [],
-            'activities' => [['minute' => 800, 'minutes' => 60]],
+            'activities' => [['minute' => 800, 'minutes' => 60, 'sleep' => false], ['minute' => -60, 'minutes' => 480, 'sleep' => true]],
         ];
     }
 }

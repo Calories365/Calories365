@@ -240,6 +240,19 @@ class MealDraftTest extends TestCase
             ->assertJsonPath('draft.eaten_time', '08:00');
     }
 
+    public function test_a_time_told_after_the_meal_was_saved_moves_that_meal(): void
+    {
+        $this->draftOf(['Хлеб' => 40]);
+        $this->bot()->postJson('/api/caloriesEndPoint/draft/save', ['part_of_day' => 'dinner', 'consumed_at' => today()->toDateString()])->assertOk();
+        $this->fakeModel([], [], '14:00');
+
+        $this->input(['text' => 'обедал в 14:00'])->assertOk()
+            ->assertJsonPath('understood', true)
+            ->assertJsonPath('recorded.meal_time', ['part_of_day' => 'dinner', 'time' => '14:00']);
+
+        $this->assertSame(today()->toDateString().' 14:00', FoodConsumption::sole()->eaten_at->format('Y-m-d H:i'));
+    }
+
     public function test_a_meal_without_a_time_told_is_saved_without_one(): void
     {
         $this->draftOf(['Хлеб' => 40]);

@@ -57,6 +57,13 @@ class InsulinDayTest extends TestCase
         $this->assertSame(510, $this->day()->json('meals.0.minute'));
     }
 
+    public function test_a_lunch_saved_in_the_evening_counts_when_it_was_saved(): void
+    {
+        $this->meal($this->bun(), 'dinner', self::DAY.' 19:28:00');
+
+        $this->assertSame(1168, $this->day()->json('meals.0.minute'));
+    }
+
     public function test_the_time_told_moves_all_the_foods_of_the_meal(): void
     {
         $this->meal($this->bun(), 'dinner', self::DAY.' 13:00:00');
@@ -183,6 +190,65 @@ class InsulinDayTest extends TestCase
         $this->assertSame(5, (int) $this->user->fresh()->lifestyle);
     }
 
+    public function test_the_day_tells_sugar_with_insulin_and_what_changed_each_meal(): void
+    {
+        $this->meal($this->bun(), 'dinner', self::DAY.' 13:00:00');
+        $this->meal($this->product('Курица запечённая', 210, 25, 12, 0, 0, 0), 'dinner', self::DAY.' 13:00:00');
+
+        $day = $this->day()->assertOk()->json();
+        $meal = $day['meals'][0];
+
+        $this->assertEquals(5.0, $day['glucose']['base']);
+        $this->assertGreaterThan(6.5, $meal['glucose_peak']);
+        $this->assertSame($day['glucose']['peak']['level'], max(array_column($day['points'], 'glucose')));
+        $this->assertSame('Булка с повидлом', $meal['items'][0]['name']);
+        $this->assertEqualsWithDelta($meal['glucose_rise'], array_sum(array_column($meal['items'], 'glucose')), 0.11);
+        $this->assertStringStartsWith('белок −', collect($meal['factors'])->firstWhere('key', 'proteins')['label']);
+    }
+
+    public function test_the_summary_counts_protein_fibre_and_the_ultra_processed_share(): void
+    {
+        $this->meal($this->product('Хлеб тостовый', 260, 8, 3, 48, 75, 5, nova: 4, fibers: 3), 'morning', self::DAY.' 09:00:00');
+        $this->meal($this->product('Чечевица варёная', 116, 9, 0.4, 20, 30, 1.8, nova: 1, fibers: 8), 'dinner', self::DAY.' 13:00:00');
+        UserResult::create(['user_id' => $this->user->id, 'gender' => 1, 'birthYear' => 1990, 'weight' => 80, 'height' => 180, 'fat' => 0, 'activity' => 3, 'goal' => 1, 'dailyCalories' => 2500, 'checkboxActive' => 0, 'goalWeight' => 80]);
+
+        $summary = $this->day()->json('summary');
+
+        // 120 g of toast and 200 g of lentils.
+        $this->assertEqualsWithDelta(9.6 + 18, $summary['proteins'], 0.1);
+        $this->assertEqualsWithDelta(3.6 + 16, $summary['fibers'], 0.1);
+        $this->assertSame(66, $this->day()->json('summary.proteins_target'));
+        $this->assertSame((int) round(312 / (312 + 232) * 100), $summary['ultra_processed_share']);
+        $this->assertSame(25, $summary['fibers_target']);
+    }
+
+    public function test_a_sweet_supper_without_a_walk_after_it_gets_the_tips_of_a_walk_and_of_the_dip_to_come(): void
+    {
+        $this->meal($this->bun(), 'supper', self::DAY.' 18:30:00');
+
+        $tips = $this->day()->json('tips');
+
+        $this->assertStringContainsString('Прогулка 10 минут', $tips[0]);
+        $this->assertStringContainsString('опустится ниже обычного', $tips[1]);
+    }
+
+    public function test_a_short_night_and_a_walk_tell_their_share_of_the_day(): void
+    {
+        $this->meal($this->bun(), 'dinner', self::DAY.' 13:00:00');
+        Activity::create(['user_id' => $this->user->id, 'date' => self::DAY, 'started_at' => self::DAY.' 02:00:00', 'type' => 'sleep', 'title' => 'Сон', 'minutes' => 300, 'met' => 1.0, 'calories' => 0]);
+        Activity::create(['user_id' => $this->user->id, 'date' => self::DAY, 'started_at' => self::DAY.' 13:10:00', 'type' => 'walk', 'title' => 'Прогулка', 'minutes' => 20, 'met' => 3.0, 'calories' => 50]);
+
+        $day = $this->day()->json();
+        [$sleep, $walk] = $day['activities'];
+
+        $this->assertTrue($sleep['sleep']);
+        $this->assertLessThan(0, $sleep['glucose_effect']);
+        $this->assertGreaterThan(5, $walk['glucose_effect']);
+        $this->assertEquals(5.0, $day['summary']['sleep_hours']);
+        $this->assertSame(20, $day['summary']['moved_after_meals_minutes']);
+        $this->assertNotNull(collect($day['meals'][0]['factors'])->firstWhere('key', 'walk'));
+    }
+
     public function test_the_bot_needs_its_key(): void
     {
         $this->getJson('/api/caloriesEndPoint/insulin/'.self::DAY, ['X-Calories-Id' => $this->user->id])->assertUnauthorized();
@@ -216,11 +282,11 @@ class InsulinDayTest extends TestCase
         return $this->product('Гречка варёная', 105, 3, 1, 20, 50, 0.5);
     }
 
-    private function product(string $name, float $calories, float $proteins, float $fats, float $carbohydrates, ?int $index, ?float $sugars = null): Product
+    private function product(string $name, float $calories, float $proteins, float $fats, float $carbohydrates, ?int $index, ?float $sugars = null, ?int $nova = null, float $fibers = 0): Product
     {
         $product = Product::create([
-            'calories' => $calories, 'proteins' => $proteins, 'fats' => $fats, 'carbohydrates' => $carbohydrates, 'fibers' => 0,
-            'glycemic_index' => $index, 'sugars' => $sugars,
+            'calories' => $calories, 'proteins' => $proteins, 'fats' => $fats, 'carbohydrates' => $carbohydrates, 'fibers' => $fibers,
+            'glycemic_index' => $index, 'sugars' => $sugars, 'nova' => $nova,
         ]);
         ProductTranslation::create(['product_id' => $product->id, 'locale' => 'ru', 'name' => $name, 'active' => 1, 'verified' => 0]);
 
