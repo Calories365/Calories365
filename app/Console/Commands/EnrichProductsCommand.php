@@ -8,8 +8,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Gives sugars, the glycemic index and the NOVA group to the products people
- * eat that lack them (ProductEnricher): the ones of the diary of the last 30
+ * Gives sugars, the glycemic index, the NOVA group and fibre to the products
+ * people eat that lack them (ProductEnricher): the ones of the diary of the last 30
  * days, the most eaten first, and the popular ones. Scheduled every ten
  * minutes, so a product added to the diary from the site gets them soon; the
  * products of the whole database are never asked about at once.
@@ -26,7 +26,7 @@ class EnrichProductsCommand extends Command
 
         $eaten = DB::table('food_consumptions')
             ->join('products', 'products.id', '=', 'food_consumptions.food_id')
-            ->whereNull('products.quality_source')
+            ->where(static fn ($query) => $query->whereNull('products.quality_source')->orWhereNull('products.fibers'))
             ->where('food_consumptions.created_at', '>=', now()->subDays(30))
             ->groupBy('food_consumptions.food_id')
             ->orderByRaw('count(*) desc')
@@ -35,7 +35,7 @@ class EnrichProductsCommand extends Command
             ->all();
 
         $popular = Product::query()
-            ->whereNull('quality_source')
+            ->where(static fn ($query) => $query->whereNull('quality_source')->orWhereNull('fibers'))
             ->where('is_popular', true)
             ->limit($limit)
             ->pluck('id')

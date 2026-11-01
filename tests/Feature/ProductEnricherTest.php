@@ -80,6 +80,43 @@ class ProductEnricherTest extends TestCase
         $this->assertNull($neverEaten->fresh()->quality_source);
     }
 
+    public function test_a_product_of_a_label_without_fibre_is_asked_for_fibre_alone(): void
+    {
+        $wafer = $this->product('Вафли', 53);
+        $wafer->update(['fibers' => null, 'glycemic_index' => 45, 'nova' => 4, 'quality_source' => 'label']);
+        $this->fakeModel([['index' => 0, 'fibers' => 1.5, 'sugars' => 30, 'glycemic_index' => 70, 'insulin_index' => 90, 'nova' => 1]]);
+
+        $this->assertSame(1, app(ProductEnricher::class)->enrich([$wafer->id]));
+
+        $fresh = $wafer->fresh();
+        $this->assertSame(1.5, $fresh->fibers);
+        $this->assertSame(45, $fresh->glycemic_index);
+        $this->assertSame(4, $fresh->nova);
+        $this->assertSame('label', $fresh->quality_source);
+    }
+
+    public function test_fibre_of_a_table_or_a_label_stays(): void
+    {
+        $bread = $this->product('Хлеб ржаной', 46);
+        $this->fakeModel([['index' => 0, 'fibers' => 7, 'sugars' => 4, 'glycemic_index' => 60, 'nova' => 3]]);
+
+        app(ProductEnricher::class)->enrich([$bread->id]);
+
+        $this->assertEquals(2, $bread->fresh()->fibers);
+    }
+
+    public function test_the_scheduled_command_asks_for_the_fibre_of_what_people_eat(): void
+    {
+        $wafer = $this->product('Вафли', 53);
+        $wafer->update(['fibers' => null, 'quality_source' => 'label']);
+        FoodConsumption::create(['user_id' => User::factory()->create()->id, 'food_id' => $wafer->id, 'quantity' => 40, 'part_of_day' => 'morning', 'consumed_at' => now()]);
+        $this->fakeModel([['index' => 0, 'fibers' => 1.5, 'sugars' => 30, 'glycemic_index' => 70, 'nova' => 4]]);
+
+        $this->artisan('products:enrich')->assertSuccessful();
+
+        $this->assertSame(1.5, $wafer->fresh()->fibers);
+    }
+
     private function product(string $name, float $carbohydrates): Product
     {
         $product = Product::create(['calories' => 250, 'proteins' => 5, 'fats' => 3, 'carbohydrates' => $carbohydrates, 'fibers' => 2]);

@@ -182,7 +182,7 @@ class MealInputReader
             .'English (name_en), product type first, then brand and fat content; "named" is false when neither the '
             .'package nor the text tells what the product is, and the names then say only its kind; calories, '
             .'proteins, fats, carbohydrates and fibers per 100 g (per 100 ml counts as per 100 g; values only per '
-            .'serving are converted to 100 g by the serving weight; fibers 0 when not shown); sugars as printed '
+            .'serving are converted to 100 g by the serving weight; fibers null when not printed, never 0 for that); sugars as printed '
             .'("в т.ч. сахара", "of which sugars"), null when not printed; glycemic_index and nova estimated from the '
             .'kind of product and its ingredients; package_grams, the net weight, or null.'
             ."\nFor sugars, glycemic_index, insulin_index and nova of a label:\n".ProductQuality::instructions()."\n".'Then add each product the user ate, or update the draft item it belongs to, with '
@@ -252,7 +252,7 @@ class MealInputReader
                             'proteins' => $number,
                             'fats' => $number,
                             'carbohydrates' => $number,
-                            'fibers' => $number,
+                            'fibers' => ['type' => ['number', 'null']],
                             'package_grams' => ['type' => ['number', 'null']],
                         ] + ProductQuality::schema(),
                     ],
@@ -314,7 +314,7 @@ class MealInputReader
      * or they cannot be true.
      *
      * @param  array<string, mixed>  $label
-     * @return array{names: array<string, string>, named: bool, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float}|null
+     * @return array{names: array<string, string>, named: bool, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float|null}|null
      */
     private function validLabel(array $label): ?array
     {
@@ -333,13 +333,17 @@ class MealInputReader
         }
 
         $values = [];
-        foreach (['calories', 'proteins', 'fats', 'carbohydrates', 'fibers'] as $field) {
+        foreach (['calories', 'proteins', 'fats', 'carbohydrates'] as $field) {
             $value = $label[$field] ?? null;
             if (! is_numeric($value) || $value < 0 || $value > ($field === 'calories' ? 950 : 100)) {
                 return null;
             }
             $values[$field] = round((float) $value, 2);
         }
+
+        // Labels often print no fibre: unknown, for ProductEnricher to give, not none.
+        $fibers = $label['fibers'] ?? null;
+        $values['fibers'] = is_numeric($fibers) && $fibers >= 0 && $fibers <= 100 ? round((float) $fibers, 2) : null;
 
         if ($values['proteins'] + $values['fats'] + $values['carbohydrates'] > 105
             || ! $this->matcher->plausible(FoodName::parse($names['ru']), $values)) {

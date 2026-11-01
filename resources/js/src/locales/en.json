@@ -91,9 +91,8 @@
         "CancelPremium": "Cancel Premium",
         "TermsOfService2": "Terms of Service",
         "CaloriesDesc": "Demonstration of Calories365",
-        "PaymentUnavailable" : "Payment is temporarily unavailable."
+        "PaymentUnavailable": "Payment is temporarily unavailable."
     },
-
     "calculationResult": {
         "calculatorSectionHeadOne": "Results",
         "calculatorSectionDescriptionOne": "The calorie calculator calculated this result using modern capabilities based on the entered values, basal metabolic rate, and BMI index. This result is only a theoretical value. For a more accurate result, we recommend consulting with a specialist.",
@@ -132,7 +131,6 @@
         "calorieDiaryAppParagraphThree": "A special highlight is our chatbot, designed with convenience in mind. Connect our Telegram bot through your account, and input your meal data in just a few steps. Simply say out loud what you've eaten, and the bot will automatically transcribe your speech to text: it provides a list of products that you can edit right away if needed. If you haven't specified the product's weight, the bot suggests average values, and it can also generate macronutrients (calories, proteins, fats, carbohydrates) via AI if required.",
         "calorieDiaryAppParagraphFour": "After making any final edits, you can save all your data to the 'Calorie Diary' with a single tap. You can also view daily statistics in the bot to stay on top of your progress. Using voice notes in Telegram saves time and eliminates the need to download another app or manually visit a website. All you need to do is open the messenger and dictate your list of foods.",
         "calorieDiaryAppParagraphFive": "If your goal is to count calories quickly, conveniently, and without extra hassle, our bot and the 'Calorie Diary' app are exactly what you need. Record your meals by voice and keep track of your nutrition — achieving results has never been easier!"
-
     },
     "Diary": {
         "Processing": {
@@ -160,7 +158,7 @@
         "supper": "Supper",
         "YourProduct": "Your product",
         "MoreProducts": "More products",
-        "NewProduct":  "new product"
+        "NewProduct": "new product"
     },
     "Notification": {
         "Success": {
@@ -173,7 +171,6 @@
             "PasswordUpdated": "Password updated",
             "Result": "The data is accounted for, your result is below",
             "CanceledSub": "Subscription canceled.\nAccess will remain available until the end of the current period."
-
         },
         "Error": {
             "ProductAdditionFailed": "Failed to add product",
@@ -210,14 +207,13 @@
         "ChangingPassword": "Changing Password",
         "Update": "Update",
         "CaloriesLimit": "Calories limit",
-        "TelegramBot" : "Telegram bot",
-        "Connect" : "Connect",
-        "Connected" : "Connected",
-        "BuyPremium" : "Buy premium",
-        "Premium" : "Premium",
-        "ConfirmEmail" : "Please confirm your email first",
-        "PaymentSuccess" : "Payment success"
-
+        "TelegramBot": "Telegram bot",
+        "Connect": "Connect",
+        "Connected": "Connected",
+        "BuyPremium": "Buy premium",
+        "Premium": "Premium",
+        "ConfirmEmail": "Please confirm your email first",
+        "PaymentSuccess": "Payment success"
     },
     "Recovery": {
         "RecoveryYourPassword": "Recovery your password",
@@ -441,7 +437,6 @@
         "ServiceParagraph2": "As this is digital content, no physical delivery is provided.",
         "SectionRefund": "Refunds"
     },
-
     "Voice": {
         "title": "Voice Input for Products",
         "description": "Click the button and dictate what you ate. For example: «For breakfast I had oatmeal with an apple and a cup of coffee».",
@@ -500,9 +495,9 @@
         }
     },
     "ThankYou": {
-    "Title" : "Thank you for purchase!",
-    "Message" : "Thank you for choosing Premium! Make the most of our service and reach amazing results!",
-    "GoHome" : "Go home"
+        "Title": "Thank you for purchase!",
+        "Message": "Thank you for choosing Premium! Make the most of our service and reach amazing results!",
+        "GoHome": "Go home"
     },
     "CookieBanner": {
         "Cookies": "We use cookies to improve your experience.",
@@ -640,8 +635,8 @@
         "level": "Insulin",
         "glucoseNow": "Sugar now",
         "glucosePeak": "Sugar peak, {time}",
-        "insulinNow": "Insulin now",
-        "peak": "Insulin peak, {time}",
+        "insulinNow": "Insulin from carbohydrates now",
+        "peak": "Peak of insulin from carbohydrates, {time}",
         "glucoseZone": {
             "low": "normal",
             "medium": "above 7.8",
@@ -739,12 +734,20 @@
         },
         "howTitle": "How it is counted",
         "how": [
-            "Sugar after a meal rises with its glycemic load: GI × carbohydrates / 100 (Brand-Miller 2003; Bao 2011: the load explained 58% of the difference between meals, carbohydrates alone did not). Over 50 g of carbohydrates give less per gram (Meng 2017).",
-            "Protein in the same meal lowers sugar: 50 g by 25% (Meng 2017); fat about a third as much per gram (Moghaddam 2006). The fibre of the vegetables of a meal counts a little, up to 15%: oat beta-glucan lowers sugar by 23% (meta-analysis, 2021), while 9.6 g of added fibre changed nothing significant (Meng 2017). The fibre of grains is already in their GI.",
-            "The same meal at 8 pm lifts sugar 17% more than at 8 am (Morris 2015). 2–3 hours after a fast meal sugar dips below its usual level, and such dips predict hunger (Wyatt 2021).",
-            "Insulin follows the insulin index of a food (Holt 1997, Bao 2009), or where it is unknown the formula of Bell 2016 from GI, sugars, protein and fat. Milk products lift insulin more than sugar.",
-            "Walking after meals: 28 minutes lowered sugar by 24–30% and insulin by 23% (Dunstan 2012); 10 minutes after each meal lowered sugar by 12%, after dinner by 22% (Reynolds 2016). Exercise raises insulin sensitivity for a day or two. After a 4-hour night sensitivity is about 25% lower (Donga 2010).",
-            "Healthy people spend about 30 minutes a day above 7.8 mmol/L (Shah 2019). This estimate is for a healthy adult: it does not fit diabetes or treatment."
-        ]
+            "Sugar after a meal rises with its glycemic load: GI × carbohydrates / 100 (Brand-Miller 2003; Bao 2011), but slower than the load: from 25 to 50 g of glucose the rise is 68% higher, from 50 to 100 g 38% (Lee & Wolever 1998).",
+            "The shape of the curve is fitted to continuous sugar readings of healthy people (Freckmann 2007, 2024): 75 g of glucose give +3.7 mmol/L and sugar is back near its base by three hours; an ordinary meal gives about +2.6, peaks at about 50 minutes, then a low tail for 3–4 hours, longer after more carbohydrates and slow ones. The GI of those dishes is our own estimate.",
+            "Protein in the same meal lowers sugar: 50 g by 25% (Meng 2017); fat about a third as much per gram (Moghaddam 2006). The fibre of the vegetables of a meal counts a little, up to 15%: oat beta-glucan lowers sugar by 23% (meta-analysis, 2021), while 9.6 g of added fibre changed nothing significant (Meng 2017). The fibre of grains is already in their GI, so it does not change the rise, but it counts for the fibre of the day.",
+            "The same meal at 8 pm lifts sugar 17% more than at 8 am (Morris 2015). Some hours after a fast meal sugar dips below its usual level (Freckmann 2007), and such dips predict hunger (Wyatt 2021).",
+            "Insulin follows the insulin index of a food (Holt 1997, Bao 2009), or where it is unknown the formula of Bell 2016 from GI, sugars, protein and fat. The terms of that formula split insulin into a part from carbohydrates and a part from protein and fat. The level and the color come from the carbohydrate part only: protein raises insulin along with glucagon, and sugar does not fall (Nuttall & Gannon 2011).",
+            "A walk begun after a meal lowers sugar, while the same effort before the meal hardly changes the sugar of that meal (meta-analysis of Engeroff 2023; Peddie 2013). In Dunstan 2012, two-minute breaks every 20 minutes, 28 minutes over 5 hours, lowered sugar by 24–30% and insulin by 23% in overweight adults. In Reynolds 2016, 10 minutes after each meal lowered sugar by 12% in type 2 diabetes. One walk does less than such breaks, so half of the effect of Dunstan counts here, which is our assumption.",
+            "Movement before a meal raises insulin sensitivity for a day or two: 350 kcal of moderate effort gave +35% the next day in adults with obesity (Newsom 2013). Here it counts for any movement from a light walk up, by how long and how hard: insulin down to −20%, sugar a quarter of that, the size is our assumption. After a 4-hour night sensitivity is about 25% lower (Donga 2010).",
+            "Healthy people spend 30 to 70 minutes a day above 7.8 mmol/L (Shah 2019; Freckmann 2024). This estimate is for a healthy adult: it does not fit diabetes or treatment."
+        ],
+        "peakTotal": "with protein and fat {level}",
+        "insulinLegend": "The colored line is insulin from carbohydrates, which tells the level. The grey band above it is insulin from protein and fat: it comes along with glucagon and does not bring sugar down (Nuttall & Gannon, 2011).",
+        "tooltipCarbohydrates": "From carbohydrates",
+        "tooltipTotal": "With protein and fat",
+        "mealInsulinOfProtein": "and +{rise} from protein and fat",
+        "itemInsulinOfProtein": "+{value} from protein and fat"
     }
 }

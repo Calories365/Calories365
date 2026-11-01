@@ -102,6 +102,9 @@ export default {
         number(value, digits = 1) {
             return decimal(value, this.$i18n.locale, digits);
         },
+        sugar(value) {
+            return decimal(value, this.$i18n.locale, 1, true);
+        },
         sugarZone(level) {
             return zoneOf(level, this.sugarZones);
         },
@@ -294,13 +297,13 @@ export default {
                 <div v-if="day.now" class="insulin_stat">
                     <span class="insulin_stat-label">{{ $t("Insulin.glucoseNow") }}</span>
                     <span class="insulin_stat-value" :class="`insulin_zone-${sugarZone(day.now.glucose)}`">
-                        {{ number(day.now.glucose) }} {{ $t("Insulin.mmol") }}
+                        {{ sugar(day.now.glucose) }} {{ $t("Insulin.mmol") }}
                     </span>
                 </div>
                 <div class="insulin_stat">
                     <span class="insulin_stat-label">{{ $t("Insulin.glucosePeak", { time: timeLabel(day.glucose.peak.minute) }) }}</span>
                     <span class="insulin_stat-value" :class="`insulin_zone-${sugarZone(day.glucose.peak.level)}`">
-                        {{ number(day.glucose.peak.level) }} · {{ $t(`Insulin.glucoseZone.${sugarZone(day.glucose.peak.level)}`) }}
+                        {{ sugar(day.glucose.peak.level) }} · {{ $t(`Insulin.glucoseZone.${sugarZone(day.glucose.peak.level)}`) }}
                     </span>
                 </div>
                 <div v-if="day.now" class="insulin_stat">
@@ -314,6 +317,9 @@ export default {
                     <span class="insulin_stat-value" :class="`insulin_zone-${insulinZone(day.peak.level)}`">
                         {{ Math.round(day.peak.level) }} · {{ $t(`Insulin.zone.${insulinZone(day.peak.level)}`) }}
                     </span>
+                    <small v-if="day.total_peak.level - day.peak.level >= 1" class="insulin_stat-note">
+                        {{ $t("Insulin.peakTotal", { level: Math.round(day.total_peak.level) }) }}
+                    </small>
                 </div>
             </div>
 
@@ -321,6 +327,7 @@ export default {
             <insulin-chart :day="day" :part-names="partNames" series="glucose" />
             <h2 class="insulin_chart-title">{{ $t("Insulin.insulin") }}</h2>
             <insulin-chart :day="day" :part-names="partNames" series="insulin" />
+            <p class="insulin_note">{{ $t("Insulin.insulinLegend") }}</p>
 
             <div class="insulin_card insulin_record">
                 <h2 class="insulin_subhead">{{ $t("Insulin.record.title") }}</h2>
@@ -465,11 +472,14 @@ export default {
                     <input class="insulin_time" type="time" :value="timeLabel(meal.minute)" @change="changeMealTime(meal, $event)" />
                     <span class="insulin_meal-levels">
                         <span class="insulin_rise" :class="`insulin_zone-${sugarZone(meal.glucose_peak)}`">
-                            {{ $t("Insulin.mealSugar", { level: number(meal.glucose_peak) }) }}
+                            {{ $t("Insulin.mealSugar", { level: sugar(meal.glucose_peak) }) }}
                         </span>
                         ·
                         <span class="insulin_rise" :class="`insulin_zone-${insulinZone(meal.rise + day.base)}`">
                             {{ $t("Insulin.mealInsulin", { rise: Math.round(meal.rise) }) }}
+                        </span>
+                        <span v-if="meal.rise_of_protein >= 1" class="insulin_of-protein">
+                            {{ $t("Insulin.mealInsulinOfProtein", { rise: Math.round(meal.rise_of_protein) }) }}
                         </span>
                     </span>
                 </div>
@@ -487,12 +497,16 @@ export default {
                     </span>
                 </div>
                 <p v-if="meal.dip" class="insulin_note">
-                    {{ $t("Insulin.dip", { time: timeLabel(meal.dip.minute), level: number(meal.dip.level) }) }}
+                    {{ $t("Insulin.dip", { time: timeLabel(meal.dip.minute), level: sugar(meal.dip.level) }) }}
                 </p>
                 <div v-for="item in meal.items" :key="item.id" class="insulin_row insulin_item">
                     <span>{{ item.name }}, <span class="insulin_nowrap">{{ item.grams }} {{ $t("Insulin.grams") }}</span></span>
-                    <span class="insulin_rise">{{ $t("Insulin.itemSugar", { value: number(item.glucose) }) }}</span>
-                    <span class="insulin_item-insulin">{{ $t("Insulin.itemInsulin", { value: Math.round(item.rise) }) }}</span>
+                    <span v-if="item.glucose >= 0.1" class="insulin_rise">{{ $t("Insulin.itemSugar", { value: sugar(item.glucose) }) }}</span>
+                    <span class="insulin_item-insulin">
+                        <template v-if="item.rise >= 1 || item.rise_of_protein < 1">{{ $t("Insulin.itemInsulin", { value: Math.round(item.rise) }) }}</template>
+                        <template v-if="item.rise >= 1 && item.rise_of_protein >= 1"> · </template>
+                        <template v-if="item.rise_of_protein >= 1">{{ $t("Insulin.itemInsulinOfProtein", { value: Math.round(item.rise_of_protein) }) }}</template>
+                    </span>
                 </div>
             </div>
             <p v-if="day.estimated_foods" class="insulin_note">
@@ -603,6 +617,17 @@ export default {
     &_stat-value {
         font-size: 17px;
         font-weight: 700;
+    }
+
+    &_stat-note,
+    &_of-protein {
+        color: #606c82;
+        font-size: 13px;
+        font-weight: 400;
+    }
+
+    &_of-protein {
+        margin-left: 4px;
     }
 
     &_zone-low {
@@ -814,7 +839,6 @@ export default {
         color: #777;
         font-size: 13px;
         text-align: right;
-        white-space: nowrap;
     }
 
     &_facts {

@@ -57,11 +57,11 @@ class InsulinCurveTest extends TestCase
         [$buckwheatSugar, $buckwheatInsulin, $buckwheatAt] = $this->peaksOf([self::BUCKWHEAT]);
 
         $this->assertGreaterThan(InsulinCurve::GLUCOSE_HIGH, $bunSugar);
-        $this->assertLessThan(6.5, $buckwheatSugar);
-        $this->assertGreaterThan(3, ($bunSugar - InsulinCurve::GLUCOSE_BASE) / ($buckwheatSugar - InsulinCurve::GLUCOSE_BASE));
+        $this->assertLessThan(7.0, $buckwheatSugar);
+        $this->assertGreaterThan(2, ($bunSugar - InsulinCurve::GLUCOSE_BASE) / ($buckwheatSugar - InsulinCurve::GLUCOSE_BASE));
         $this->assertGreaterThan(InsulinCurve::HIGH_LEVEL, $bunInsulin);
         $this->assertLessThan(InsulinCurve::HIGH_LEVEL, $buckwheatInsulin);
-        $this->assertLessThan($buckwheatAt, $bunAt);
+        $this->assertLessThanOrEqual($buckwheatAt, $bunAt);
     }
 
     public function test_protein_and_vegetables_with_the_bun_take_some_sugar_off(): void
@@ -77,10 +77,10 @@ class InsulinCurveTest extends TestCase
 
     public function test_sugar_of_a_fast_meal_dips_below_the_fasting_level_and_returns(): void
     {
-        $levels = InsulinCurve::levels([$this->eaten([self::BUN_WITH_JAM], 480)], [], self::MODERATE, [470, 640, 1200]);
+        $levels = InsulinCurve::levels([$this->eaten([self::BUN_WITH_JAM], 480)], [], self::MODERATE, [470, 680, 1200]);
 
         $this->assertSame(InsulinCurve::GLUCOSE_BASE, $levels['glucose'][470]);
-        $this->assertLessThan(InsulinCurve::GLUCOSE_BASE - 0.2, $levels['glucose'][640]);
+        $this->assertLessThan(InsulinCurve::GLUCOSE_BASE - 0.2, $levels['glucose'][680]);
         $this->assertEqualsWithDelta(InsulinCurve::GLUCOSE_BASE, $levels['glucose'][1200], 0.05);
         $this->assertEqualsWithDelta(InsulinCurve::BASE_LEVEL, $levels['insulin'][1200], 0.2);
     }
@@ -101,14 +101,88 @@ class InsulinCurveTest extends TestCase
         $this->assertEqualsWithDelta(1.17, ($evening - InsulinCurve::GLUCOSE_BASE) / ($morning - InsulinCurve::GLUCOSE_BASE), 0.02);
     }
 
-    public function test_a_walk_after_the_meal_takes_about_a_quarter_off_what_is_left(): void
+    public function test_a_walk_after_the_meal_takes_about_an_eighth_off_what_is_left(): void
     {
         $meal = [$this->eaten([self::BUN_WITH_JAM], 480)];
         $moments = [600];
         $still = InsulinCurve::levels($meal, [], self::MODERATE, $moments)['insulin'][600] - InsulinCurve::BASE_LEVEL;
         $walked = InsulinCurve::levels($meal, [['minute' => 500, 'minutes' => 28, 'met' => 2.8]], self::MODERATE, $moments)['insulin'][600] - InsulinCurve::BASE_LEVEL;
 
-        $this->assertEqualsWithDelta(0.77, $walked / $still, 0.01);
+        $this->assertEqualsWithDelta(0.885, $walked / $still, 0.01);
+    }
+
+    public function test_a_walk_begun_before_the_meal_is_not_a_walk_after_it_though_it_ended_a_minute_later(): void
+    {
+        $meal = [$this->eaten([self::BUN_WITH_JAM], 1168)];
+        $shop = [['minute' => 1049, 'minutes' => 120, 'met' => 2.5]];
+        $shopThatEndedBefore = [['minute' => 1048, 'minutes' => 120, 'met' => 2.5]];
+
+        $this->assertSame(
+            InsulinCurve::levels($meal, $shopThatEndedBefore, self::MODERATE, [1230])['glucose'][1230],
+            InsulinCurve::levels($meal, $shop, self::MODERATE, [1230])['glucose'][1230]
+        );
+    }
+
+    public function test_a_long_walk_before_the_meal_lowers_insulin_more_than_sugar(): void
+    {
+        $meal = [$this->eaten([self::BUN_WITH_JAM], 1168)];
+        $shop = [['minute' => 1048, 'minutes' => 120, 'met' => 2.5]];
+        $without = InsulinCurve::levels($meal, [], self::MODERATE, [1210]);
+        $with = InsulinCurve::levels($meal, $shop, self::MODERATE, [1210]);
+
+        $sugar = 1 - ($with['glucose'][1210] - InsulinCurve::GLUCOSE_BASE) / ($without['glucose'][1210] - InsulinCurve::GLUCOSE_BASE);
+        $insulin = 1 - ($with['insulin'][1210] - InsulinCurve::BASE_LEVEL) / ($without['insulin'][1210] - InsulinCurve::BASE_LEVEL);
+
+        $this->assertEqualsWithDelta(0.12, $insulin, 0.01);
+        $this->assertEqualsWithDelta(0.03, $sugar, 0.01);
+    }
+
+    public function test_62_grams_of_glucose_peak_within_the_hour_return_and_dip(): void
+    {
+        $glucose = ['grams' => 62.5, 'calories' => 400.0, 'proteins' => 0.0, 'fats' => 0.0, 'carbohydrates' => 100.0, 'fibers' => 0.0, 'sugars' => 100.0, 'glycemic_index' => 100];
+
+        // Eaten in the morning, when the hour adds nothing.
+        $levels = InsulinCurve::levels([$this->eaten([$glucose], 450)], [], self::MODERATE, range(450, 750, 5));
+        $peak = max($levels['glucose']);
+        $peakAt = array_search($peak, $levels['glucose'], true) - 450;
+
+        $this->assertEqualsWithDelta(8.5, $peak, 0.2);
+        $this->assertGreaterThanOrEqual(30, $peakAt);
+        $this->assertLessThanOrEqual(60, $peakAt);
+        $this->assertLessThan(6.0, $levels['glucose'][450 + 120]);
+        $this->assertLessThan(InsulinCurve::GLUCOSE_BASE, $levels['glucose'][450 + 180]);
+        $this->assertEqualsWithDelta(100, max($levels['insulin']) - InsulinCurve::BASE_LEVEL, 5);
+    }
+
+    public function test_an_ordinary_meal_gives_what_healthy_adults_measure(): void
+    {
+        $meal = ['grams' => 100.0, 'calories' => 800.0, 'proteins' => 34.6, 'fats' => 37.6, 'carbohydrates' => 74.0, 'fibers' => 0.0, 'sugars' => 15.0, 'glycemic_index' => 60];
+
+        // The lunch of Freckmann et al. 2007: +2.4 mmol/L at 47 minutes, in plasma terms.
+        $levels = InsulinCurve::levels([$this->eaten([$meal], 750)], [], self::MODERATE, range(750, 1110, 5));
+        $peak = max($levels['glucose']);
+        $peakAt = array_search($peak, $levels['glucose'], true) - 750;
+
+        $this->assertEqualsWithDelta(2.4, $peak - InsulinCurve::GLUCOSE_BASE, 0.4);
+        $this->assertGreaterThanOrEqual(40, $peakAt);
+        $this->assertLessThanOrEqual(60, $peakAt);
+        $this->assertLessThan(InsulinCurve::GLUCOSE_BASE + 0.3, $levels['glucose'][750 + 240]);
+        $this->assertLessThan(InsulinCurve::BASE_LEVEL + 12, $levels['insulin'][750 + 240]);
+    }
+
+    public function test_the_insulin_of_protein_is_told_apart_from_that_of_carbohydrates(): void
+    {
+        $levels = InsulinCurve::levels([$this->eaten([self::CHICKEN], 0)], [], self::MODERATE, range(0, 300, 5));
+
+        $this->assertSame(InsulinCurve::BASE_LEVEL, max($levels['insulin_of_carbohydrates']));
+        $this->assertGreaterThan(InsulinCurve::BASE_LEVEL + 10, max($levels['insulin']));
+        $this->assertSame(InsulinCurve::GLUCOSE_BASE, max($levels['glucose']));
+    }
+
+    public function test_a_food_with_only_carbohydrates_has_no_insulin_of_protein(): void
+    {
+        $this->assertSame(1.0, InsulinCurve::carbohydrateShare(['grams' => 100.0, 'proteins' => 0.0, 'fats' => 0.0, 'carbohydrates' => 50.0, 'sugars' => 50.0, 'glycemic_index' => 65]));
+        $this->assertSame(0.0, InsulinCurve::carbohydrateShare(['grams' => 100.0, 'proteins' => 25.0, 'fats' => 12.0, 'carbohydrates' => 0.0, 'sugars' => 0.0, 'glycemic_index' => 0]));
     }
 
     public function test_sitting_in_a_car_after_the_meal_does_not_count_as_a_walk(): void

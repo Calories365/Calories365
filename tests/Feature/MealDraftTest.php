@@ -138,6 +138,16 @@ class MealDraftTest extends TestCase
             && str_starts_with($request['messages'][0]['content'][1]['image_url']['url'], 'data:image/jpeg;base64,'));
     }
 
+    public function test_a_label_that_prints_no_fibre_leaves_it_unknown(): void
+    {
+        $label = ['fibers' => null] + $this->label(named: true);
+        $this->fakeModel([$this->add('Кефир Олимп 1%', 250, label: 0)], [$label]);
+
+        $this->input(['text' => 'выпил стакан кефира', 'photo' => $this->photo()])->assertOk();
+
+        $this->assertNull(Product::where('source', Product::SOURCE_LABEL)->sole()->fibers);
+    }
+
     public function test_the_same_label_photographed_again_finds_the_product_it_made(): void
     {
         $this->fakeModel([$this->add('Кефир Олимп 1%', 250, label: 0)], [$this->label(named: true)]);

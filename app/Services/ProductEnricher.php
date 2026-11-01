@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Log;
  * New products get them when they are made (ProductCatalog, labels); the
  * thousands of older ones get them when somebody eats them: the products of a
  * calculated meal draft at once, the others by the scheduled products:enrich.
- * A product the model answered about is not asked again.
+ * A product the model answered about is not asked again; one that still has no
+ * fibre, such as a label that printed none, is asked for that alone.
  */
 class ProductEnricher
 {
@@ -25,7 +26,8 @@ class ProductEnricher
     public const BATCH = 25;
 
     /**
-     * Ask about the products among these that were never asked about.
+     * Ask about the products among these that were never asked about or have no
+     * fibre.
      *
      * @param  array<int, int>  $productIds
      * @return int how many products got an answer
@@ -34,7 +36,7 @@ class ProductEnricher
     {
         $products = Product::query()
             ->whereIn('id', array_unique($productIds))
-            ->whereNull('quality_source')
+            ->where(static fn ($query) => $query->whereNull('quality_source')->orWhereNull('fibers'))
             ->with('translations')
             ->get();
 
@@ -102,7 +104,7 @@ class ProductEnricher
                                         'type' => 'object',
                                         'additionalProperties' => false,
                                         'required' => ['index', 'fibers', ...ProductQuality::FIELDS],
-                                        'properties' => ['index' => ['type' => 'integer'], 'fibers' => ['type' => ['number', 'null']]] + ProductQuality::schema(),
+                                        'properties' => ['index' => ['type' => 'integer'], 'fibers' => ['type' => 'number']] + ProductQuality::schema(),
                                     ],
                                 ],
                             ],
@@ -124,18 +126,24 @@ class ProductEnricher
         foreach ($decoded['items'] as $item) {
             $product = is_array($item) ? $products->get((int) ($item['index'] ?? -1)) : null;
 
-            if ($product === null || $product->quality_source !== null) {
+            if ($product === null) {
                 continue;
             }
 
             $fibers = $item['fibers'] ?? null;
             // Fibre the database has came from a table or a label and stays.
-            $fibers = $product->fibers === null && is_numeric($fibers) && $fibers >= 0 && $fibers <= 60
+            $update = $product->fibers === null && is_numeric($fibers) && $fibers >= 0 && $fibers <= 60
                 ? ['fibers' => round((float) $fibers, 2)]
                 : [];
 
-            $product->update(ProductQuality::valid($item, (float) $product->carbohydrates) + $fibers + ['quality_source' => Product::SOURCE_AI]);
-            $done++;
+            if ($product->quality_source === null) {
+                $update += ProductQuality::valid($item, (float) $product->carbohydrates) + ['quality_source' => Product::SOURCE_AI];
+            }
+
+            if ($update !== []) {
+                $product->update($update);
+                $done++;
+            }
         }
 
         return $done;

@@ -9,21 +9,22 @@ namespace App\Services;
  * after 1000 kJ of glucose (about 62 g) in a moderately active person.
  *
  * Sugar. The rise after a meal follows its glycemic load, GI × available
- * carbohydrates / 100: stepped loads gave stepped rises (Brand-Miller et al.
- * 2003), and across composite meals the load explained 58% of the glucose
- * response, carbohydrates alone did not (Bao et al. 2011). Above 50 g the rise
- * grows slower: 50 g more of carbohydrate from bread gave 65% more, not 100%
- * (Meng et al. 2017). The same meal lifts sugar less with protein: 50 g of
- * protein took 25% off (Meng et al. 2017); fat does it about a third as much per
- * gram (Moghaddam et al. 2006) and no significant change was seen up to 22 g in
- * a solid meal. Fibre: viscous oat beta-glucan takes off about 23% (meta-analysis
- * of 2021), 9.6 g of added fibre changed nothing significant (Meng 2017); the
- * fibre of the vegetables of a meal counts here a little, 0.8% a gram, at most 15%,
- * an assumption between those. The fibre of starchy foods is already in their GI.
- * The same meal at 8 pm lifts sugar 17% more than at 8 am (Morris et al. 2015).
- * After a fast meal sugar dips below the fasting level 2 to 3 hours later, and
- * the dips predict hunger and the next meal (Wyatt et al. 2021); their size here
- * is an assumption.
+ * carbohydrates / 100 (Brand-Miller et al. 2003; Bao et al. 2011), and grows
+ * slower than the load: 25 to 50 g of glucose gave 68% more, 50 to 100 g 38% more
+ * (Lee & Wolever 1998). How high and how long is fitted to continuous sugar of
+ * healthy adults (Freckmann et al. 2007, 2024): 75 g of glucose +3.75 mmol/L at 30
+ * to 60 minutes, back by three hours; ordinary meals +2.6 at about 50 minutes,
+ * then a low tail for three to four hours, longer after more carbohydrates and
+ * slow ones. The same meal lifts sugar less with protein: 50 g of protein took
+ * 25% off (Meng et al. 2017); fat does it about a third as much per gram
+ * (Moghaddam et al. 2006). Fibre: viscous oat beta-glucan takes off about 23%
+ * (meta-analysis of 2021), 9.6 g of added fibre changed nothing significant (Meng
+ * 2017); the fibre of the vegetables of a meal counts here a little, 0.8% a gram,
+ * at most 15%, an assumption between those. The fibre of starchy foods is already
+ * in their GI, and still counts for the fibre of the day. The same meal at 8 pm
+ * lifts sugar 17% more than at 8 am (Morris et al. 2015). After a fast meal sugar
+ * dips below the fasting level some hours later (Freckmann 2007), and the dips
+ * predict hunger (Wyatt et al. 2021); their size here is an assumption.
  *
  * Insulin. What a food demands comes from its food insulin index, when the
  * product model gave it (ProductQuality, the white-bread scale of Holt et al.
@@ -32,16 +33,23 @@ namespace App\Services;
  *
  *     FII = -4.2 + 0.9 glucose score + 0.3 sugar + 0.5 protein + 0.4 fat
  *
- * per 1000 kJ; the indexes of the foods of a meal add up (Bao et al. 2009).
+ * per 1000 kJ; the indexes of the foods of a meal add up (Bao et al. 2009). The
+ * terms of that regression split the demand in two: the part of carbohydrates
+ * follows sugar, and the part of protein and fat is drawn apart and comes slower,
+ * since protein raises insulin along with glucagon and sugar stays where it is
+ * (Nuttall & Gannon 2011). Only the first part tells a zone.
  *
- * Moving. Walking after a meal, 28 minutes spread over five hours, lowered
- * glucose by 24% at light and 30% at moderate intensity and insulin by 23%
- * (Dunstan et al. 2012); ten minutes after each meal lowered sugar by 12%, after
- * dinner by 22% (Reynolds et al. 2016). A bout of exercise raises insulin
- * sensitivity for a day or two, gone by about 48 hours (Hawley & Lessard 2008). One night of four
- * hours of sleep lowered insulin sensitivity by about 25% (Donga et al. 2010).
- * The size of the lasting effect of exercise, the fall of insulin while moving
- * and the way of life as a multiplier are this model's assumptions, named below.
+ * Moving. Walking begun after a meal lowers what is left of it (Engeroff et al.
+ * 2023). Dunstan et al. 2012 saw 24% at light and 30% at moderate intensity and
+ * 23% of insulin from 28 minutes in two-minute breaks over five hours, in
+ * overweight adults; one walk does less than such breaks (Peddie et al. 2013) and
+ * this estimate is for a healthy adult, so half of it counts (assumption). Before
+ * a meal movement hardly changes the sugar of that meal (Engeroff 2023; Peddie
+ * 2013) and it does raise insulin sensitivity for a day or two (Newsom et al.
+ * 2013; Hawley & Lessard 2008), by its effort. One night of four hours of sleep
+ * lowered insulin sensitivity by about 25% (Donga et al. 2010). The size of the
+ * lasting effect, the fall of insulin while moving and the way of life as a
+ * multiplier are this model's assumptions, named below.
  */
 class InsulinCurve
 {
@@ -51,7 +59,8 @@ class InsulinCurve
     public const GLUCOSE_BASE = 5.0;
 
     /**
-     * Above it healthy people spend about 30 minutes a day (Shah et al. 2019).
+     * Above it healthy people spend 30 to 70 minutes a day (Shah et al. 2019;
+     * Freckmann et al. 2024).
      */
     public const GLUCOSE_HIGH = 7.8;
 
@@ -79,31 +88,64 @@ class InsulinCurve
     public const DEFAULT_LIFESTYLE = 1;
 
     /**
-     * 50 g of glucose, a load of 50, lifts sugar by about 3 mmol/L at about 30
-     * minutes in a young healthy adult.
+     * How high a load lifts sugar: MAX_RISE × load / (load + HALF_LOAD), so that 75
+     * g of glucose gives +3.75 mmol/L; a slower meal of the same load less, a
+     * faster one more, by the square root of its GI to the middle, up to the limit
+     * (fitted to the meals of Freckmann et al. 2007, 2024; their GIs are estimated).
      */
-    private const REFERENCE_LOAD = 50.0;
+    private const MAX_RISE = 5.33;
 
-    private const REFERENCE_RISE = 3.2;
+    private const HALF_LOAD = 40.0;
 
-    private const REFERENCE_GLUCOSE_PEAK_MINUTES = 30.0;
+    private const MIDDLE_INDEX = 60.0;
 
-    private const LARGE_LOAD_EXPONENT = 0.72;
+    private const FASTEST_INDEX = 70.0;
 
     /**
-     * Minutes to the peak of sugar, by the GI of the meal and slower with fat.
+     * Minutes to the peak of sugar, by the GI of the meal and slower with fat;
+     * healthy adults peak at 43 to 59 minutes after any meal (Freckmann 2007).
      */
-    private const FASTEST_PEAK_MINUTES = 30.0;
+    private const FASTEST_PEAK_MINUTES = 40.0;
 
-    private const SLOWEST_PEAK_MINUTES = 90.0;
+    private const SLOWEST_PEAK_MINUTES = 60.0;
 
     /**
-     * Insulin peaks a little after sugar; 1000 kJ of glucose peaks at 100 above
-     * base at 40 minutes, which scales a demand to a peak.
+     * Food starts to lift sugar a few minutes after the first bite; a sharp peak
+     * on top of a low hump: its height, a share of the peak, grows with more
+     * carbohydrates than 50 g and with a GI under 60; it is over sooner after a
+     * fast meal. Fitted to the same curves.
+     */
+    private const ONSET_MINUTES = 5.0;
+
+    private const FAST_SHAPE = 3.5;
+
+    private const SLOW_SHAPE = 3.0;
+
+    private const SLOW_SHARE = 0.09;
+
+    private const SLOW_SHARE_BY_CARBOHYDRATES = 0.62;
+
+    private const SLOW_SHARE_BY_INDEX = 0.46;
+
+    private const MIN_SLOW_SHARE = 0.05;
+
+    private const MAX_SLOW_SHARE = 0.35;
+
+    private const SLOW_PEAK_MINUTES = 115.0;
+
+    private const SLOW_PEAK_MINUTES_OF_FAST_MEAL = 90.0;
+
+    /**
+     * Insulin peaks a little after sugar; what protein and fat ask for comes later
+     * still and is gone by about four hours (assumptions). 1000 kJ of glucose
+     * peaks at 100 above base, which scales a demand to a peak: the indexes tell
+     * the area of insulin, so a longer curve is a lower one.
      */
     private const INSULIN_LAG_MINUTES = 5.0;
 
-    private const REFERENCE_INSULIN_PEAK_MINUTES = 40.0;
+    private const PROTEIN_INSULIN_LAG_MINUTES = 15.0;
+
+    private const PROTEIN_INSULIN_SHAPE = 3.0;
 
     private const PROTEIN_LOWERS = 0.0067;
 
@@ -122,9 +164,13 @@ class InsulinCurve
     private const EVENING_RISE = 0.17;
 
     /**
-     * Assumption: the dip of a fast meal is at most this share of its rise.
+     * Assumption: the dip of a fast meal is at most this share of its rise, deepest
+     * at five times the minutes to its peak: 75 g of glucose is below the fasting
+     * level at three hours, a toast with honey from three to five (Freckmann 2007).
      */
     private const DIP_SHARE = 0.2;
+
+    private const DIP_AT_PEAKS = 5.0;
 
     private const GLUCOSE_FLOOR = 3.6;
 
@@ -139,37 +185,43 @@ class InsulinCurve
     private const BREAD_TO_GLUCOSE = 0.49;
 
     /**
-     * Walking after a meal (Dunstan et al. 2012): 28 minutes, these shares off.
-     * Only movement from a light walk up counts; the caps are assumptions.
+     * Walking begun after a meal: half of what 28 minutes did in Dunstan et al.
+     * 2012 (see above). Only movement from a light walk up counts; the caps are
+     * assumptions.
      */
     private const WALK_MINUTES = 28.0;
 
-    private const WALK_LOWERS_GLUCOSE = 0.24;
+    private const WALK_LOWERS_GLUCOSE = 0.12;
 
-    private const BRISK_WALK_LOWERS_GLUCOSE = 0.30;
+    private const BRISK_WALK_LOWERS_GLUCOSE = 0.15;
 
-    private const WALK_LOWERS_INSULIN = 0.23;
+    private const WALK_LOWERS_INSULIN = 0.115;
 
-    private const MAX_WALK_LOWERS_GLUCOSE = 0.40;
+    private const MAX_WALK_LOWERS_GLUCOSE = 0.25;
 
-    private const MAX_WALK_LOWERS_INSULIN = 0.35;
+    private const MAX_WALK_LOWERS_INSULIN = 0.20;
 
     private const WALK_MET = 2.5;
 
     private const MODERATE_MET = 3.0;
 
     /**
-     * Movement this long after a meal still counts for it.
+     * Movement begun this long after a meal still counts as after it.
      */
-    private const AFTER_MEAL_MINUTES = 180;
+    public const AFTER_MEAL_MINUTES = 180;
 
     /**
-     * Assumption: a hard hour (about 400 MET-minutes above rest) lowers the
-     * next meals by this share at most, fading over two days.
+     * Movement before a meal, from a light walk up. 350 kcal at half of the peak
+     * oxygen uptake, about 70 minutes, gave 35% more insulin sensitivity the next
+     * day in obese adults (Newsom et al. 2013). Assumption for a healthy adult:
+     * insulin of the next meals at most 20% lower, reached at 300 MET-minutes above
+     * rest, sugar a quarter of that, fading over two days.
      */
-    private const MAX_SENSITIVITY_GAIN = 0.15;
+    private const MAX_SENSITIVITY_GAIN = 0.20;
 
-    private const FULL_GAIN_MET_MINUTES = 400.0;
+    private const GLUCOSE_SHARE_OF_GAIN = 0.25;
+
+    private const FULL_GAIN_MET_MINUTES = 300.0;
 
     private const GAIN_LASTS_MINUTES = 48 * 60;
 
@@ -232,12 +284,29 @@ class InsulinCurve
     }
 
     /**
+     * The share of a food's insulin demand that comes from its carbohydrates, by
+     * the terms of the regression of Bell et al. 2016; the rest is of protein and fat.
+     *
+     * @param  array{grams: float, proteins: float, fats: float, carbohydrates: float, sugars?: float|null, glycemic_index?: int|null}  $food  per 100 g, but grams
+     */
+    public static function carbohydrateShare(array $food): float
+    {
+        $portion = $food['grams'] / 100;
+        $carbohydrates = 0.9 * (($food['glycemic_index'] ?? 55) * $food['carbohydrates'] * $portion / self::GLUCOSE_REFERENCE_GRAMS)
+            + 0.3 * ($food['sugars'] ?? 0) * $portion;
+        $others = (0.5 * $food['proteins'] + 0.4 * $food['fats']) * $portion;
+
+        return $carbohydrates + $others > 0 ? $carbohydrates / ($carbohydrates + $others) : 0.0;
+    }
+
+    /**
      * What a meal does by itself, before the time of day, sleep, movement and
-     * the way of life: how high it lifts sugar and how soon, how much insulin it
-     * asks for, and how much its protein, fat and vegetables took off sugar.
+     * the way of life: how high it lifts sugar and how soon, how much insulin its
+     * carbohydrates and its protein and fat ask for, and how much its protein, fat
+     * and vegetables took off sugar.
      *
      * @param  array<int, array{grams: float, calories: float, proteins: float, fats: float, carbohydrates: float, fibers?: float|null, sugars?: float|null, glycemic_index?: int|null, insulin_index?: int|null}>  $foods
-     * @return array{glycemic_load: float, glycemic_index: int|null, carbohydrates: float, proteins: float, fats: float, fibers: float, sugars: float, calories: float, insulin_load: float, peak_minutes: float, glucose_rise: float, dip: float, lowered: array{proteins: int, fats: int, fibers: int}}
+     * @return array{glycemic_load: float, glycemic_index: int|null, carbohydrates: float, proteins: float, fats: float, fibers: float, sugars: float, calories: float, insulin_load: float, insulin_load_of_carbohydrates: float, peak_minutes: float, slow: float, slow_peak: float, glucose_height: float, insulin_height: float, glucose_rise: float, insulin_of_carbohydrates: float, insulin_of_protein: float, dip: float, lowered: array{proteins: int, fats: int, fibers: int}}
      */
     public static function meal(array $foods): array
     {
@@ -252,12 +321,17 @@ class InsulinCurve
         ));
 
         $index = $carbohydrates > 0 ? $load / $carbohydrates * 100 : 0.0;
-        $peak = max(self::FASTEST_PEAK_MINUTES, min(self::SLOWEST_PEAK_MINUTES, 40 + (70 - $index) * 0.6 + min(20.0, 0.5 * $fats)));
-        $effective = $load <= self::REFERENCE_LOAD ? $load : self::REFERENCE_LOAD * ($load / self::REFERENCE_LOAD) ** self::LARGE_LOAD_EXPONENT;
+        $peak = max(self::FASTEST_PEAK_MINUTES, min(self::SLOWEST_PEAK_MINUTES, 40 + (65 - $index) * 0.3 + min(10.0, 0.15 * $fats)));
+        [$slow, $slowPeak] = self::slowHump($carbohydrates, $index);
 
         $byProtein = 1 / (1 + self::PROTEIN_LOWERS * $proteins);
         $byFat = 1 / (1 + self::FAT_LOWERS * $fats);
         $byFibre = max(1 - self::MAX_FIBRE_LOWERS, 1 / (1 + self::FIBRE_LOWERS * $vegetableFibre));
+        $bySpeed = sqrt(min(self::FASTEST_INDEX, $index) / self::MIDDLE_INDEX);
+
+        $insulinLoad = array_sum(array_map(static fn (array $food) => self::load($food), $foods));
+        $carbohydrateLoad = array_sum(array_map(static fn (array $food) => self::load($food) * self::carbohydrateShare($food), $foods));
+        $insulinPeak = $peak + self::INSULIN_LAG_MINUTES;
 
         return [
             'glycemic_load' => round($load, 1),
@@ -268,9 +342,16 @@ class InsulinCurve
             'fibers' => round($total('fibers'), 1),
             'sugars' => round($total('sugars'), 1),
             'calories' => round($total('calories')),
-            'insulin_load' => round(array_sum(array_map(static fn (array $food) => self::load($food), $foods)), 2),
+            'insulin_load' => round($insulinLoad, 2),
+            'insulin_load_of_carbohydrates' => round($carbohydrateLoad, 2),
             'peak_minutes' => round($peak, 1),
-            'glucose_rise' => round(self::REFERENCE_RISE * $effective / self::REFERENCE_LOAD * self::REFERENCE_GLUCOSE_PEAK_MINUTES / $peak * $byProtein * $byFat * $byFibre, 3),
+            'slow' => round($slow, 3),
+            'slow_peak' => round($slowPeak, 1),
+            'glucose_height' => self::height($peak, $slow, $slowPeak),
+            'insulin_height' => self::height($insulinPeak, $slow, $slowPeak),
+            'glucose_rise' => round(self::MAX_RISE * $load / ($load + self::HALF_LOAD) * $bySpeed * $byProtein * $byFat * $byFibre, 3),
+            'insulin_of_carbohydrates' => round($carbohydrateLoad * self::referenceArea() / self::area($insulinPeak, $slow, $slowPeak), 2),
+            'insulin_of_protein' => round(($insulinLoad - $carbohydrateLoad) * self::referenceArea() / self::proteinArea($peak), 2),
             'dip' => $load >= 10 ? round(self::DIP_SHARE * max(0.0, min(1.0, ($index - 55) / 25)), 3) : 0.0,
             'lowered' => [
                 'proteins' => (int) round((1 - $byProtein) * 100),
@@ -283,20 +364,22 @@ class InsulinCurve
     /**
      * Sugar and insulin at each moment of the span.
      *
-     * @param  array<int, array{minute: int, glucose_rise: float, insulin_load: float, peak_minutes: float, dip: float}>  $meals  minute counted from the start of the span
+     * @param  array<int, array{minute: int, glucose_rise: float, peak_minutes: float, slow: float, slow_peak: float, glucose_height: float, insulin_height: float, insulin_of_carbohydrates: float, insulin_of_protein: float, dip: float}>  $meals  minute counted from the start of the span
      * @param  array<int, array{minute: int, minutes: int, met: float, type?: string|null}>  $activities
      * @param  array<int, int>  $moments
-     * @return array{glucose: array<int, float>, insulin: array<int, float>}
+     * @return array{glucose: array<int, float>, insulin: array<int, float>, insulin_of_carbohydrates: array<int, float>}
      */
     public static function levels(array $meals, array $activities, int $lifestyle, array $moments): array
     {
         $contexts = array_map(static fn (array $meal) => self::context($meal['minute'], $activities, $lifestyle), $meals);
         $glucose = [];
         $insulin = [];
+        $ofCarbohydrates = [];
 
         foreach ($moments as $moment) {
             $sugar = 0.0;
             $demand = 0.0;
+            $proteinDemand = 0.0;
 
             foreach ($meals as $index => $meal) {
                 $since = $moment - $meal['minute'];
@@ -306,21 +389,25 @@ class InsulinCurve
 
                 $peak = $meal['peak_minutes'];
                 $insulinPeak = $peak + self::INSULIN_LAG_MINUTES;
-                $dip = $meal['dip'] * exp(-((($since - 4 * $peak) / $peak) ** 2));
+                $dip = $meal['dip'] * exp(-((($since - self::DIP_AT_PEAKS * $peak) / $peak) ** 2));
+                $lowered = 1 - self::walkLowers($meal['minute'], $moment, $activities, false);
 
                 $sugar += $meal['glucose_rise'] * $contexts[$index]['glucose']
                     * (1 - self::walkLowers($meal['minute'], $moment, $activities, true))
-                    * (self::shape($since / $peak) - $dip);
-                $demand += $meal['insulin_load'] * self::REFERENCE_INSULIN_PEAK_MINUTES / $insulinPeak * $contexts[$index]['insulin']
-                    * (1 - self::walkLowers($meal['minute'], $moment, $activities, false))
-                    * self::shape($since / $insulinPeak);
+                    * (self::curve($since, $peak, $meal['slow'], $meal['slow_peak']) / $meal['glucose_height'] - $dip);
+                $demand += $meal['insulin_of_carbohydrates'] * $contexts[$index]['insulin'] * $lowered
+                    * self::curve($since, $insulinPeak, $meal['slow'], $meal['slow_peak']) / $meal['insulin_height'];
+                $proteinDemand += $meal['insulin_of_protein'] * $contexts[$index]['insulin'] * $lowered
+                    * self::proteinCurve($since, $peak);
             }
 
+            $moving = 1 - self::fallWhileMoving($moment, $activities);
             $glucose[$moment] = round(max(self::GLUCOSE_FLOOR, self::GLUCOSE_BASE + $sugar), 2);
-            $insulin[$moment] = round((self::BASE_LEVEL + $demand) * (1 - self::fallWhileMoving($moment, $activities)), 1);
+            $ofCarbohydrates[$moment] = round((self::BASE_LEVEL + $demand) * $moving, 1);
+            $insulin[$moment] = round((self::BASE_LEVEL + $demand + $proteinDemand) * $moving, 1);
         }
 
-        return ['glucose' => $glucose, 'insulin' => $insulin];
+        return ['glucose' => $glucose, 'insulin' => $insulin, 'insulin_of_carbohydrates' => $ofCarbohydrates];
     }
 
     /**
@@ -334,11 +421,12 @@ class InsulinCurve
     {
         $byLifestyle = self::LIFESTYLE_FACTORS[$lifestyle] ?? self::LIFESTYLE_FACTORS[self::DEFAULT_LIFESTYLE];
         $bySleep = self::sleepFactor($minute, $activities);
-        $byExercise = 1 - self::sensitivityGain($minute, $activities);
+        $gain = self::sensitivityGain($minute, $activities);
+        $byExercise = 1 - $gain;
         $byEvening = 1 + self::EVENING_RISE * self::evening($minute);
 
         return [
-            'glucose' => $byLifestyle * $bySleep * $byExercise * $byEvening,
+            'glucose' => $byLifestyle * $bySleep * (1 - self::GLUCOSE_SHARE_OF_GAIN * $gain) * $byEvening,
             'insulin' => $byLifestyle * $bySleep * $byExercise,
             'lifestyle' => $byLifestyle,
             'sleep' => $bySleep,
@@ -348,11 +436,76 @@ class InsulinCurve
     }
 
     /**
-     * A slow start, the peak at 1, and a tail nearly gone by 4.
+     * A curve with its peak of 1 at phase 1, sharper the higher the power.
      */
-    private static function shape(float $phase): float
+    private static function shape(float $phase, float $power): float
     {
-        return $phase * $phase * exp(2 * (1 - $phase));
+        return $phase <= 0 ? 0.0 : $phase ** $power * exp($power * (1 - $phase));
+    }
+
+    /**
+     * The sharp peak of a meal with the low hump after it.
+     */
+    private static function curve(float $since, float $peak, float $slow, float $slowPeak): float
+    {
+        return self::shape(($since - self::ONSET_MINUTES) / ($peak - self::ONSET_MINUTES), self::FAST_SHAPE)
+            + $slow * self::shape($since / $slowPeak, self::SLOW_SHAPE);
+    }
+
+    private static function proteinCurve(float $since, float $peak): float
+    {
+        return self::shape($since / ($peak + self::PROTEIN_INSULIN_LAG_MINUTES), self::PROTEIN_INSULIN_SHAPE);
+    }
+
+    /**
+     * How high and how long the low hump of a meal is: more than 50 g of
+     * carbohydrates and a GI under 60 raise it.
+     *
+     * @return array{0: float, 1: float} its height, the minutes to its peak
+     */
+    private static function slowHump(float $carbohydrates, float $index): array
+    {
+        $slow = self::SLOW_SHARE
+            + self::SLOW_SHARE_BY_CARBOHYDRATES * max(0.0, min(1.0, ($carbohydrates - 50) / 50))
+            + self::SLOW_SHARE_BY_INDEX * max(0.0, min(1.0, (60 - $index) / 30));
+        $fast = max(0.0, min(1.0, ($index - 55) / 20));
+
+        return [
+            max(self::MIN_SLOW_SHARE, min(self::MAX_SLOW_SHARE, $slow)),
+            self::SLOW_PEAK_MINUTES + (self::SLOW_PEAK_MINUTES_OF_FAST_MEAL - self::SLOW_PEAK_MINUTES) * $fast,
+        ];
+    }
+
+    /**
+     * The highest point of a curve, to bring its peak to 1.
+     */
+    private static function height(float $peak, float $slow, float $slowPeak): float
+    {
+        return max(array_map(static fn (int $since) => self::curve($since, $peak, $slow, $slowPeak), range(5, 300, 5)));
+    }
+
+    /**
+     * The area under a curve brought to a peak of 1.
+     */
+    private static function area(float $peak, float $slow, float $slowPeak): float
+    {
+        return array_sum(array_map(static fn (int $since) => self::curve($since, $peak, $slow, $slowPeak), range(5, 600, 5))) * 5 / self::height($peak, $slow, $slowPeak);
+    }
+
+    private static function proteinArea(float $peak): float
+    {
+        return array_sum(array_map(static fn (int $since) => self::proteinCurve($since, $peak), range(5, 600, 5))) * 5;
+    }
+
+    /**
+     * The area of insulin after 1000 kJ of glucose, whose peak is 100 above base,
+     * for a demand of 1.
+     */
+    private static function referenceArea(): float
+    {
+        [$slow, $slowPeak] = self::slowHump(self::GLUCOSE_REFERENCE_GRAMS, 100.0);
+
+        return self::area(self::FASTEST_PEAK_MINUTES + self::INSULIN_LAG_MINUTES, $slow, $slowPeak);
     }
 
     /**
@@ -371,7 +524,8 @@ class InsulinCurve
     }
 
     /**
-     * Walking since the meal lowers what the meal still does.
+     * Walking begun after the meal lowers what the meal still does. Movement begun
+     * before the meal is movement before it, even if it ended a minute later.
      *
      * @param  array<int, array{minute: int, minutes: int, met: float, type?: string|null}>  $activities
      */
@@ -380,11 +534,11 @@ class InsulinCurve
         $lowered = 0.0;
 
         foreach ($activities as $activity) {
-            if ($activity['met'] < self::WALK_MET) {
+            if (! self::isAfterMeal($activity, $mealMinute)) {
                 continue;
             }
 
-            $start = max($activity['minute'], $mealMinute);
+            $start = $activity['minute'];
             $end = min($activity['minute'] + $activity['minutes'], $moment, $mealMinute + self::AFTER_MEAL_MINUTES);
             if ($end <= $start) {
                 continue;
@@ -400,7 +554,20 @@ class InsulinCurve
     }
 
     /**
-     * Exercise before the meal leaves the body more sensitive for two days.
+     * Whether this movement counts as a walk after the meal.
+     *
+     * @param  array{minute: int, minutes: int, met: float, type?: string|null}  $activity
+     */
+    public static function isAfterMeal(array $activity, int $mealMinute): bool
+    {
+        return $activity['met'] >= self::WALK_MET
+            && $activity['minute'] >= $mealMinute
+            && $activity['minute'] < $mealMinute + self::AFTER_MEAL_MINUTES;
+    }
+
+    /**
+     * Movement before the meal leaves the body more sensitive for two days, by how
+     * long and how hard it was.
      *
      * @param  array<int, array{minute: int, minutes: int, met: float, type?: string|null}>  $activities
      */
@@ -409,8 +576,8 @@ class InsulinCurve
         $gain = 0.0;
 
         foreach ($activities as $activity) {
-            $since = $mealMinute - ($activity['minute'] + $activity['minutes']);
-            if ($activity['met'] < self::MODERATE_MET || $since < 0 || $since > self::GAIN_LASTS_MINUTES) {
+            $since = max(0, $mealMinute - ($activity['minute'] + $activity['minutes']));
+            if ($activity['met'] < self::WALK_MET || $activity['minute'] >= $mealMinute || $since > self::GAIN_LASTS_MINUTES) {
                 continue;
             }
 

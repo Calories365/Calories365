@@ -75,6 +75,20 @@ class InsulinDay
     private const NOTABLE_DIP = 0.3;
 
     /**
+     * A rise of sugar worth a walk, mmol/L: what an ordinary meal gives healthy
+     * adults (Freckmann et al. 2024).
+     */
+    private const NOTABLE_RISE = 2.5;
+
+    /**
+     * Insulin of protein and fat worth explaining: this much, and this part of what
+     * the carbohydrates of the meal gave.
+     */
+    private const NOTABLE_PROTEIN_INSULIN = 20.0;
+
+    private const PROTEIN_INSULIN_SHARE = 0.5;
+
+    /**
      * A meal of fast carbohydrates: a GI from this and a load from that, with
      * less protein than the limit.
      */
@@ -109,7 +123,8 @@ class InsulinDay
 
         $moments = range(0, self::MINUTES_IN_DAY, self::STEP);
         $levels = InsulinCurve::levels($curveMeals, $moved, $lifestyle, $moments);
-        $insulinPeak = array_search(max($levels['insulin']), $levels['insulin'], true);
+        $insulinPeak = array_search(max($levels['insulin_of_carbohydrates']), $levels['insulin_of_carbohydrates'], true);
+        $totalPeak = array_search(max($levels['insulin']), $levels['insulin'], true);
         $glucosePeak = array_search(max($levels['glucose']), $levels['glucose'], true);
         $now = $day->isToday() ? (int) floor($day->diffInMinutes(now())) : null;
         $nowMoment = $now === null ? null : $now - $now % self::STEP;
@@ -128,19 +143,23 @@ class InsulinDay
                 'base' => InsulinCurve::GLUCOSE_BASE,
                 'high' => InsulinCurve::GLUCOSE_HIGH,
                 'very_high' => InsulinCurve::GLUCOSE_VERY_HIGH,
-                'peak' => ['minute' => $glucosePeak, 'level' => $levels['glucose'][$glucosePeak]],
+                'peak' => ['minute' => $glucosePeak, 'level' => round($levels['glucose'][$glucosePeak], 1)],
             ],
             'points' => array_map(static fn (int $minute) => [
                 'minute' => $minute,
-                'level' => $levels['insulin'][$minute],
+                'level' => $levels['insulin_of_carbohydrates'][$minute],
+                'total' => $levels['insulin'][$minute],
                 'glucose' => $levels['glucose'][$minute],
             ], $moments),
             'now' => $nowMoment === null ? null : [
                 'minute' => $now,
-                'level' => $levels['insulin'][$nowMoment],
+                'level' => $levels['insulin_of_carbohydrates'][$nowMoment],
+                'total' => $levels['insulin'][$nowMoment],
                 'glucose' => $levels['glucose'][$nowMoment],
             ],
-            'peak' => ['minute' => $insulinPeak, 'level' => $levels['insulin'][$insulinPeak]],
+            // The insulin of carbohydrates tells the level and its zone; with that of protein and fat it is the total.
+            'peak' => ['minute' => $insulinPeak, 'level' => $levels['insulin_of_carbohydrates'][$insulinPeak]],
+            'total_peak' => ['minute' => $totalPeak, 'level' => $levels['insulin'][$totalPeak]],
             'meals' => $ofTheDay,
             'activities' => $activitiesOfTheDay,
             'summary' => $summary,
@@ -314,7 +333,8 @@ class InsulinDay
             $moments = range($meal['minute'], $meal['minute'] + 360, self::STEP);
             $levels = InsulinCurve::levels($alone, $moved, $lifestyle, $moments);
             $glucosePeak = array_search(max($levels['glucose']), $levels['glucose'], true);
-            $insulinRise = max(0.0, max($levels['insulin']) - InsulinCurve::BASE_LEVEL);
+            $insulinRise = max(0.0, max($levels['insulin_of_carbohydrates']) - InsulinCurve::BASE_LEVEL);
+            $totalRise = max(0.0, max($levels['insulin']) - InsulinCurve::BASE_LEVEL);
             $glucoseRise = max(0.0, $levels['glucose'][$glucosePeak] - InsulinCurve::GLUCOSE_BASE);
 
             // The lowest sugar after the peak: the dip of a fast meal.
@@ -323,7 +343,7 @@ class InsulinDay
             $dip = $lowest === null ? 0.0 : max(0.0, InsulinCurve::GLUCOSE_BASE - $after[$lowest]);
 
             // Movement after the meal, by the peak it would have had without it.
-            $still = array_values(array_filter($moved, static fn (array $activity) => $meal['minute'] >= $activity['minute'] + $activity['minutes'] || $activity['minute'] >= $meal['minute'] + 180));
+            $still = array_values(array_filter($moved, static fn (array $activity) => ! InsulinCurve::isAfterMeal($activity, $meal['minute'])));
             $stillRise = max(InsulinCurve::levels($alone, $still, $lifestyle, $moments)['glucose']) - InsulinCurve::GLUCOSE_BASE;
             $context = InsulinCurve::context($meal['minute'], $moved, $lifestyle);
 
@@ -338,13 +358,15 @@ class InsulinDay
             ];
 
             $totalLoad = max(0.001, $response['glycemic_load']);
-            $totalInsulin = max(0.001, $response['insulin_load']);
+            $carbohydrateLoad = max(0.001, $response['insulin_load_of_carbohydrates']);
+            $proteinLoad = max(0.001, $response['insulin_load'] - $response['insulin_load_of_carbohydrates']);
 
             return [
                 'part_of_day' => $meal['part_of_day'],
                 'minute' => $meal['minute'],
                 'time_told' => $meal['time_told'],
                 'rise' => round($insulinRise, 1),
+                'rise_of_protein' => round(max(0.0, $totalRise - $insulinRise), 1),
                 'glucose_peak' => round($levels['glucose'][$glucosePeak], 1),
                 'glucose_peak_minute' => $glucosePeak,
                 'glucose_rise' => round($glucoseRise, 1),
@@ -368,8 +390,10 @@ class InsulinDay
                     ->values()
                     ->all(),
                 'items' => collect($meal['items'])
-                    ->map(static function (array $item) use ($glucoseRise, $insulinRise, $totalLoad, $totalInsulin) {
+                    ->map(static function (array $item) use ($glucoseRise, $insulinRise, $totalRise, $totalLoad, $carbohydrateLoad, $proteinLoad) {
                         $load = InsulinCurve::glycemicLoad($item['food']);
+                        $insulin = InsulinCurve::load($item['food']);
+                        $share = InsulinCurve::carbohydrateShare($item['food']);
 
                         return [
                             'id' => $item['id'],
@@ -377,7 +401,8 @@ class InsulinDay
                             'grams' => $item['grams'],
                             'glycemic_load' => round($load, 1),
                             'glucose' => round($glucoseRise * $load / $totalLoad, 1),
-                            'rise' => round($insulinRise * InsulinCurve::load($item['food']) / $totalInsulin, 1),
+                            'rise' => round($insulinRise * $insulin * $share / $carbohydrateLoad, 1),
+                            'rise_of_protein' => round(max(0.0, $totalRise - $insulinRise) * $insulin * (1 - $share) / $proteinLoad, 1),
                             'calories' => round($item['food']['calories'] * $item['grams'] / 100),
                             'proteins' => round($item['food']['proteins'] * $item['grams'] / 100, 1),
                             'fibers' => $item['food']['fibers'] === null ? null : round($item['food']['fibers'] * $item['grams'] / 100, 1),
@@ -458,13 +483,12 @@ class InsulinDay
 
         $glucose = array_slice($levels['glucose'], 0, -1, true);
         $movement = collect($activities)->reject(static fn (array $activity) => $activity['sleep']);
-        $afterMeals = 0;
-        foreach (range(0, self::MINUTES_IN_DAY - 1) as $minute) {
-            $moving = $movement->contains(static fn (array $activity) => $activity['met'] >= 2.5 && $minute >= $activity['minute'] && $minute < $activity['minute'] + $activity['minutes']);
-            if ($moving && $meals->contains(static fn (array $meal) => $minute >= $meal['minute'] && $minute < $meal['minute'] + 180)) {
-                $afterMeals++;
-            }
-        }
+        // Movement begun after a meal, in the hours it still counts for it.
+        $afterMeals = (int) $movement->sum(static function (array $activity) use ($meals) {
+            $meal = $meals->filter(static fn (array $meal) => InsulinCurve::isAfterMeal($activity, $meal['minute']))->sortBy('minute')->first();
+
+            return $meal === null ? 0 : min($activity['minutes'], $meal['minute'] + InsulinCurve::AFTER_MEAL_MINUTES - $activity['minute']);
+        });
         $night = collect($activities)->filter(static fn (array $activity) => $activity['sleep'] && $activity['minutes'] >= 180)->max('minutes');
 
         return [
@@ -512,7 +536,7 @@ class InsulinDay
 
         $highest = $meals->sortByDesc('glucose_rise')->first();
         $walked = collect($highest['factors'])->contains('key', 'walk');
-        if ($highest['glucose_rise'] >= 1.5 && ! $walked && ($now === null || $now >= $highest['minute'])) {
+        if ($highest['glucose_rise'] >= self::NOTABLE_RISE && ! $walked && ($now === null || $now >= $highest['minute'])) {
             $tips[] = __('insulin.tips.walk', ['meal' => $name($highest)]);
         }
 
@@ -526,6 +550,10 @@ class InsulinDay
             && $meal['proteins'] < self::FAST_MEAL_PROTEIN);
         if ($fast !== null) {
             $tips[] = __('insulin.tips.fast_meal', ['meal' => $name($fast)]);
+        }
+
+        if ($meals->contains(static fn (array $meal) => $meal['rise_of_protein'] >= self::NOTABLE_PROTEIN_INSULIN && $meal['rise_of_protein'] >= $meal['rise'] * self::PROTEIN_INSULIN_SHARE)) {
+            $tips[] = __('insulin.tips.protein_insulin');
         }
 
         if ($meals->contains(static fn (array $meal) => $meal['minute'] >= self::LATE_MEAL_MINUTE && $meal['glycemic_load'] >= self::FAST_MEAL_LOAD)) {

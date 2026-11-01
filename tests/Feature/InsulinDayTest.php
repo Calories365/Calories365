@@ -207,7 +207,8 @@ class InsulinDayTest extends TestCase
 
         $this->assertEquals(5.0, $day['glucose']['base']);
         $this->assertGreaterThan(6.5, $meal['glucose_peak']);
-        $this->assertSame($day['glucose']['peak']['level'], max(array_column($day['points'], 'glucose')));
+        $this->assertEqualsWithDelta($day['glucose']['peak']['level'], max(array_column($day['points'], 'glucose')), 0.05);
+        $this->assertSame(round($day['glucose']['peak']['level'], 1), $day['glucose']['peak']['level']);
         $this->assertSame('Булка с повидлом', $meal['items'][0]['name']);
         $this->assertEqualsWithDelta($meal['glucose_rise'], array_sum(array_column($meal['items'], 'glucose')), 0.11);
         $this->assertStringStartsWith('белок −', collect($meal['factors'])->firstWhere('key', 'proteins')['label']);
@@ -254,6 +255,60 @@ class InsulinDayTest extends TestCase
         $this->assertEquals(5.0, $day['summary']['sleep_hours']);
         $this->assertSame(20, $day['summary']['moved_after_meals_minutes']);
         $this->assertNotNull(collect($day['meals'][0]['factors'])->firstWhere('key', 'walk'));
+    }
+
+    public function test_a_shop_that_ended_as_the_supper_began_counts_before_it_not_after_it(): void
+    {
+        $this->meal($this->bun(), 'supper', self::DAY.' 19:28:00');
+        Activity::create(['user_id' => $this->user->id, 'date' => self::DAY, 'started_at' => self::DAY.' 17:29:00', 'title' => 'Ходил в магазин', 'minutes' => 120, 'met' => 2.5, 'calories' => 300]);
+
+        $day = $this->day()->json();
+        $meal = $day['meals'][0];
+
+        $this->assertSame(0, $day['summary']['moved_after_meals_minutes']);
+        $this->assertNull(collect($meal['factors'])->firstWhere('key', 'walk'));
+        $this->assertSame('движение до еды: инсулин −12%', collect($meal['factors'])->firstWhere('key', 'exercise')['label']);
+        $this->assertGreaterThanOrEqual(10, $day['activities'][0]['effect']);
+        $this->assertGreaterThan(0, $day['activities'][0]['glucose_effect']);
+    }
+
+    public function test_a_walk_counts_after_the_meal_for_the_minutes_it_still_counts(): void
+    {
+        $this->meal($this->bun(), 'dinner', self::DAY.' 13:00:00');
+        Activity::create(['user_id' => $this->user->id, 'date' => self::DAY, 'started_at' => self::DAY.' 15:30:00', 'type' => 'walk', 'title' => 'Прогулка', 'minutes' => 60, 'met' => 3.0, 'calories' => 150]);
+
+        $this->assertSame(30, $this->day()->json('summary.moved_after_meals_minutes'));
+    }
+
+    public function test_chicken_lifts_the_total_of_insulin_and_not_the_level_that_tells_the_zone(): void
+    {
+        $this->meal($this->buckwheat(), 'dinner', self::DAY.' 13:00:00');
+        $thigh = $this->product('Курица запечённая', 210, 26, 11, 0, 0, 0);
+        $this->meal($thigh, 'dinner', self::DAY.' 13:00:00');
+        $this->meal($thigh, 'dinner', self::DAY.' 13:00:00');
+
+        $day = $this->day()->assertOk()->json();
+        $meal = $day['meals'][0];
+        $chicken = collect($meal['items'])->firstWhere('name', 'Курица запечённая');
+
+        $this->assertLessThan($day['total_peak']['level'], $day['peak']['level']);
+        $this->assertLessThan($day['zones']['high'], $day['peak']['level']);
+        $this->assertGreaterThan(0, $meal['rise_of_protein']);
+        $this->assertSame(0, (int) $chicken['rise']);
+        $this->assertGreaterThan(5, $chicken['rise_of_protein']);
+        $this->assertGreaterThanOrEqual($day['points'][170]['level'], $day['points'][170]['total']);
+        $this->assertNotEmpty(collect($day['tips'])->filter(static fn (string $tip) => str_contains($tip, 'от белка и жира')));
+    }
+
+    public function test_the_fibre_of_grains_counts_for_the_day_and_not_for_the_rise(): void
+    {
+        $this->meal($this->product('Гречка варёная', 105, 3.6, 1, 20, 50, 0.5, fibers: 2.7), 'dinner', self::DAY.' 13:00:00');
+
+        $meal = $this->day()->json('meals.0');
+
+        $this->assertEqualsWithDelta(5.4, $meal['fibers'], 0.05);
+        $this->assertNull(collect($meal['factors'])->firstWhere('key', 'fibers'));
+        $this->assertEqualsWithDelta(5.4, $this->day()->json('summary.fibers'), 0.05);
     }
 
     public function test_the_bot_needs_its_key(): void

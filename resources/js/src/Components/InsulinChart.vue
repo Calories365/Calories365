@@ -16,11 +16,15 @@ const ZONE_BACKGROUNDS = {
 
 const ACTIVITY_BAND = "rgba(66, 133, 244, 0.22)";
 const SLEEP_BAND = "rgba(110, 110, 140, 0.16)";
+const PROTEIN_BAND = "rgba(96, 108, 130, 0.28)";
+const PROTEIN_LINE = "rgba(96, 108, 130, 0.65)";
 
 /**
  * One line of the day, sugar in mmol/L or insulin as an index: its color tells
  * the zone, the part after now is dashed, a dashed mark shows each meal, a blue
- * band each activity and a grey one sleep.
+ * band each activity and a grey one sleep. Insulin has a line of carbohydrates,
+ * which tells the zone, and a neutral band over it up to the total with protein
+ * and fat.
  */
 export default {
     name: "InsulinChart",
@@ -64,7 +68,7 @@ export default {
                     max: Math.max(zones.high - 0.5, Math.ceil((day.glucose.peak.level + 0.6) * 2) / 2),
                     ticks: [day.glucose.base, zones.medium, zones.high],
                     now: day.now?.glucose,
-                    label: (value) => `${decimal(value, this.$i18n.locale)} ${this.$t("Insulin.mmol")}`,
+                    label: (value) => `${decimal(value, this.$i18n.locale, 1, true)} ${this.$t("Insulin.mmol")}`,
                 };
             }
 
@@ -72,10 +76,10 @@ export default {
                 key: "level",
                 zones: day.zones,
                 min: 0,
-                max: Math.max(100, Math.ceil(day.peak.level * 1.15)),
+                max: Math.max(100, Math.ceil(day.total_peak.level * 1.15)),
                 ticks: [day.zones.medium, day.zones.high, 100],
                 now: day.now?.level,
-                label: (value) => `${this.$t("Insulin.level")}: ${Math.round(value)}`,
+                label: (value) => `${this.$t("Insulin.tooltipCarbohydrates")}: ${Math.round(value)}`,
             };
         },
         draw() {
@@ -85,11 +89,25 @@ export default {
             const scale = this.scale();
             const now = day.now?.minute ?? null;
             const showMeals = this.series === "glucose";
+            const dashedAfterNow = (context) =>
+                now !== null && context.p0.parsed.x >= now ? [6, 5] : undefined;
+            const totalDataset = {
+                data: day.points.map((point) => ({ x: point.minute, y: point.total })),
+                borderWidth: 1.5,
+                borderColor: PROTEIN_LINE,
+                backgroundColor: PROTEIN_BAND,
+                fill: "+1",
+                pointRadius: 0,
+                pointHitRadius: 12,
+                tension: 0.25,
+                segment: { borderDash: dashedAfterNow },
+            };
 
             this.chart = new Chart(this.$refs.canvas, {
                 type: "line",
                 data: {
                     datasets: [
+                        ...(this.series === "insulin" ? [totalDataset] : []),
                         {
                             data: day.points.map((point) => ({
                                 x: point.minute,
@@ -102,10 +120,7 @@ export default {
                             segment: {
                                 borderColor: (context) =>
                                     ZONE_COLORS[zoneOf(context.p1.parsed.y, scale.zones)],
-                                borderDash: (context) =>
-                                    now !== null && context.p0.parsed.x >= now
-                                        ? [6, 5]
-                                        : undefined,
+                                borderDash: dashedAfterNow,
                             },
                         },
                     ],
@@ -114,7 +129,7 @@ export default {
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: false,
-                    interaction: { mode: "nearest", axis: "x", intersect: false },
+                    interaction: { mode: "index", axis: "x", intersect: false },
                     scales: {
                         x: {
                             type: "linear",
@@ -151,9 +166,11 @@ export default {
                             callbacks: {
                                 title: (items) => timeLabel(items[0].parsed.x),
                                 label: (item) =>
-                                    `${scale.label(item.parsed.y)} · ${this.$t(
-                                        `Insulin.${this.series === "glucose" ? "glucoseZone" : "zone"}.${zoneOf(item.parsed.y, scale.zones)}`
-                                    )}`,
+                                    this.series === "insulin" && item.datasetIndex === 0
+                                        ? `${this.$t("Insulin.tooltipTotal")}: ${Math.round(item.parsed.y)}`
+                                        : `${scale.label(item.parsed.y)} · ${this.$t(
+                                              `Insulin.${this.series === "glucose" ? "glucoseZone" : "zone"}.${zoneOf(item.parsed.y, scale.zones)}`
+                                          )}`,
                             },
                         },
                     },

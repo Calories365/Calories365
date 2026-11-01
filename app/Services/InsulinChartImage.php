@@ -5,8 +5,10 @@ namespace App\Services;
 /**
  * The sugar and insulin of a day as a PNG, for the bot: the same picture as the
  * page. Above, blood sugar in mmol/L, the line colored by its zone (normal, above
- * 7.8, above 10); below, insulin, colored by its zones; both dashed after now. A
- * meal is a dashed mark with its time, movement a blue band, sleep a grey one.
+ * 7.8, above 10); below, the insulin of carbohydrates, colored by its zones, with
+ * a grey band over it for that of protein and fat, which tells no zone; both
+ * dashed after now. A meal is a dashed mark with its time, movement a blue band,
+ * sleep a grey one.
  *
  * Drawn in PHP and packed with zlib, since the images of the diary have no GD:
  * lines are anti-aliased by their distance to each pixel, and the only text, the
@@ -38,6 +40,8 @@ class InsulinChartImage
     private const ACTIVITY = [[66, 133, 244], 0.22];
 
     private const SLEEP = [[110, 110, 140], 0.16];
+
+    private const PROTEIN_INSULIN = [[96, 108, 130], 0.32];
 
     private const TEXT = [102, 102, 102];
 
@@ -95,12 +99,13 @@ class InsulinChartImage
         }
 
         // Insulin.
-        $this->panel(self::INSULIN_PANEL, 0, max(100.0, ceil($day['peak']['level'] * 1.15)));
+        $this->panel(self::INSULIN_PANEL, 0, max(100.0, ceil($day['total_peak']['level'] * 1.15)));
         $this->zones($day['zones']);
         $this->marks($day);
         foreach (array_unique([$day['zones']['medium'], $day['zones']['high'], 100]) as $level) {
             $this->level($level, (string) (int) $level);
         }
+        $this->proteinInsulin($day['points']);
         $this->curve(array_map(static fn (array $point) => ['minute' => $point['minute'], 'value' => $point['level']], $day['points']), $day['zones'], $now);
         if ($day['now'] !== null) {
             $this->now($now, $day['now']['level'], $day['zones']);
@@ -177,6 +182,32 @@ class InsulinChartImage
             $label = sprintf('%02d:%02d', intdiv($meal['minute'], 60) % 24, $meal['minute'] % 60);
             $left = max(self::LEFT, min(self::RIGHT - $this->textWidth($label), $x - $this->textWidth($label) / 2));
             $this->text($label, $left, $this->panel['top'] + 2, [68, 68, 68]);
+        }
+    }
+
+    /**
+     * The insulin of protein and fat: a band from that of carbohydrates to the total.
+     *
+     * @param  array<int, array{minute: int, level: float, total: float}>  $points
+     */
+    private function proteinInsulin(array $points): void
+    {
+        [$color, $alpha] = self::PROTEIN_INSULIN;
+
+        for ($i = 1, $count = count($points); $i < $count; $i++) {
+            [$before, $after] = [$points[$i - 1], $points[$i]];
+            $left = (int) round($this->x($before['minute']));
+            $right = (int) round($this->x($after['minute']));
+
+            for ($x = $left; $x < $right; $x++) {
+                $along = ($x - $left) / max(1, $right - $left);
+                $level = $before['level'] + ($after['level'] - $before['level']) * $along;
+                $total = $before['total'] + ($after['total'] - $before['total']) * $along;
+
+                if ($total - $level >= 0.5) {
+                    $this->blendRect($x, (int) round($this->y($total)), $x + 1, (int) round($this->y($level)), $color, $alpha);
+                }
+            }
         }
     }
 

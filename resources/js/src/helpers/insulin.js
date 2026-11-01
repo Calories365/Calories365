@@ -30,8 +30,9 @@ export const ZONE_COLORS = {
 
 // 6.1 or 6,1 by the language of the page; not toLocaleString, which some
 // engines without full ICU leave with a dot.
-export const decimal = (value, locale, digits = 1) => {
-    const rounded = String(Number(Number(value).toFixed(digits)));
+export const decimal = (value, locale, digits = 1, keepZero = false) => {
+    const fixed = Number(value).toFixed(digits);
+    const rounded = keepZero ? fixed : String(Number(fixed));
 
     return locale === "en" ? rounded : rounded.replace(".", ",");
 };

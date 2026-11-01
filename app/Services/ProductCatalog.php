@@ -403,7 +403,7 @@ class ProductCatalog
      * A label without the product's name makes the user's own product: a shared
      * "Продукт с этикетки" would match nothing anyone says.
      *
-     * @param  array{names: array<string, string>, named: bool, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float, sugars?: float|null, glycemic_index?: int|null, nova?: int|null}  $label
+     * @param  array{names: array<string, string>, named: bool, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float|null, sugars?: float|null, glycemic_index?: int|null, nova?: int|null}  $label
      * @return array<string, mixed> the hit of the translation in the locale
      */
     public function addFromLabel(array $label, string $locale, int $userId): array
@@ -418,6 +418,11 @@ class ProductCatalog
         $knownProduct = $known?->product;
         if ($knownProduct instanceof Product && $knownProduct->quality_source === null) {
             $knownProduct->update(array_filter(array_intersect_key($label, array_flip(ProductQuality::FIELDS)), static fn ($value) => $value !== null) + ['quality_source' => Product::SOURCE_LABEL]);
+        }
+
+        // Fibre an earlier photo did not show.
+        if ($knownProduct instanceof Product && $knownProduct->fibers === null && $label['fibers'] !== null) {
+            $knownProduct->update(['fibers' => $label['fibers']]);
         }
 
         $hit = $known ? self::hit($known) : $this->store($label, $locale, Product::SOURCE_LABEL);
@@ -460,7 +465,7 @@ class ProductCatalog
      * Store the food as a product with a translation per language: shared, or
      * the owner's own.
      *
-     * @param  array{names: array<string, string>, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float, sugars?: float|null, glycemic_index?: int|null, nova?: int|null}  $facts
+     * @param  array{names: array<string, string>, calories: float, proteins: float, fats: float, carbohydrates: float, fibers: float|null, sugars?: float|null, glycemic_index?: int|null, nova?: int|null}  $facts
      * @return array<string, mixed> the hit of the translation in the locale
      */
     private function store(array $facts, string $locale, string $source = Product::SOURCE_AI, ?int $ownerId = null): array

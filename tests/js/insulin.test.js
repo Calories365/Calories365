@@ -40,4 +40,9 @@ describe("decimal", () => {
         expect(decimal(6.14, "en")).toBe("6.1");
         expect(decimal(7, "ua")).toBe("7");
     });
+
+    it("keeps the digit of a sugar level", () => {
+        expect(decimal(6, "ru", 1, true)).toBe("6,0");
+        expect(decimal(6.14, "en", 1, true)).toBe("6.1");
+    });
 });

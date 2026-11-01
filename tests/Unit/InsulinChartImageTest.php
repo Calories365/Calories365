@@ -36,7 +36,8 @@ class InsulinChartImageTest extends TestCase
         $wave = static fn (int $minute) => $withMeal && $minute > 780 && $minute < 960 ? sin(($minute - 780) / 180 * M_PI) : 0.0;
         $points = array_map(static fn (int $minute) => [
             'minute' => $minute,
-            'level' => 10 + 120 * $wave($minute),
+            'level' => 10 + 60 * $wave($minute),
+            'total' => 10 + 120 * $wave($minute),
             'glucose' => 5 + 4 * $wave($minute),
         ], range(0, 1440, 5));
 
@@ -45,7 +46,8 @@ class InsulinChartImageTest extends TestCase
             'glucose' => ['base' => 5.0, 'high' => 7.8, 'very_high' => 10.0, 'peak' => ['minute' => 870, 'level' => $withMeal ? 9.0 : 5.0]],
             'points' => $points,
             'now' => ['minute' => 1000, 'level' => 10.0, 'glucose' => 5.0],
-            'peak' => ['minute' => 870, 'level' => $withMeal ? 130.0 : 10.0],
+            'peak' => ['minute' => 870, 'level' => $withMeal ? 70.0 : 10.0],
+            'total_peak' => ['minute' => 870, 'level' => $withMeal ? 130.0 : 10.0],
             'meals' => $withMeal ? [['minute' => 780]] : [],
             'activities' => [['minute' => 800, 'minutes' => 60, 'sleep' => false], ['minute' => -60, 'minutes' => 480, 'sleep' => true]],
         ];
