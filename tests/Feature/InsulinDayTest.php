@@ -52,9 +52,16 @@ class InsulinDayTest extends TestCase
 
     public function test_a_breakfast_saved_in_the_afternoon_counts_in_the_morning(): void
     {
-        $this->meal($this->bun(), 'morning', self::DAY.' 16:30:00');
+        $this->meal($this->bun(), 'morning', self::DAY.' 14:52:00');
 
         $this->assertSame(510, $this->day()->json('meals.0.minute'));
+    }
+
+    public function test_a_late_breakfast_saved_before_one_counts_when_it_was_saved(): void
+    {
+        $this->meal($this->bun(), 'morning', self::DAY.' 12:40:00');
+
+        $this->assertSame(760, $this->day()->json('meals.0.minute'));
     }
 
     public function test_a_lunch_saved_in_the_evening_counts_when_it_was_saved(): void

@@ -16,9 +16,10 @@ use Illuminate\Support\Collection;
  * matter for them and what to change.
  *
  * A meal counts at the time told for it; otherwise at the time it was saved,
- * when that falls in its part of the day or within four hours after it, since a
- * lunch is often eaten late and saved right away; otherwise at the usual time of
- * the part, since a breakfast saved in the evening was eaten in the morning. An
+ * when that falls in its part of the day or a little later (a breakfast until
+ * 13:00, a lunch until 20:00, a dinner until 4 at night), since a meal is often
+ * eaten late and saved right away; otherwise at the usual time of the part, since
+ * a breakfast saved in the afternoon was eaten in the morning. An
  * activity without a time told ended when it was saved. The days before count
  * too: a late supper goes on after midnight, and a run of yesterday still helps.
  */
@@ -32,18 +33,15 @@ class InsulinDay
     private const MINUTES_IN_DAY = 1440;
 
     /**
-     * Each part of the day: from, to, its usual time, in minutes of the day.
+     * Each part of the day: from, the latest saving that still tells when it was
+     * eaten, its usual time, in minutes of the day. A lunch saved at half past
+     * seven was eaten late; a breakfast saved at three was eaten in the morning.
      */
     public const PARTS = [
-        'morning' => [300, 660, 510],
-        'dinner' => [660, 960, 810],
-        'supper' => [960, 1440, 1170],
+        'morning' => [300, 780, 510],
+        'dinner' => [660, 1200, 810],
+        'supper' => [960, 1680, 1170],
     ];
-
-    /**
-     * A meal saved this long after the end of its part was still eaten then.
-     */
-    private const SAVED_LATE_MINUTES = 240;
 
     /**
      * When nothing tells the time of an activity of a past day.
@@ -256,9 +254,9 @@ class InsulinDay
         }
 
         $date = Carbon::parse($meal->consumed_at)->startOfDay();
-        [$from, $to, $usual] = self::PARTS[$meal->part_of_day] ?? self::PARTS['dinner'];
+        [$from, $latest, $usual] = self::PARTS[$meal->part_of_day] ?? self::PARTS['dinner'];
         $saved = $meal->created_at !== null ? (int) $date->diffInMinutes($meal->created_at, false) : -1;
-        $minute = $saved >= $from && $saved < $to + self::SAVED_LATE_MINUTES ? $saved : $usual;
+        $minute = $saved >= $from && $saved < $latest ? $saved : $usual;
 
         return $minute + (int) round($day->diffInMinutes($date, false));
     }
