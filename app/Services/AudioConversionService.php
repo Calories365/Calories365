@@ -13,8 +13,8 @@ class AudioConversionService
     public function __construct()
     {
         $this->ffmpeg = FFMpeg::create([
-            'ffmpeg.binaries' => '/usr/bin/ffmpeg',
-            'ffprobe.binaries' => '/usr/bin/ffprobe',
+            'ffmpeg.binaries' => config('services.ffmpeg.binaries'),
+            'ffprobe.binaries' => config('services.ffmpeg.ffprobe'),
         ]);
     }
 
