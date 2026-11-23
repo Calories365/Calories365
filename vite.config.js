@@ -16,7 +16,9 @@ export default ({mode}) => {
             },
             port: 5174,
             watch: {
-                usePolling: true
+                // Polling is what a Docker bind mount needs; on the host it keeps a CPU
+                // core busy while idle, so it is on only with VITE_USE_POLLING=true.
+                usePolling: process.env.VITE_USE_POLLING === 'true'
             }
         },
         plugins: [
