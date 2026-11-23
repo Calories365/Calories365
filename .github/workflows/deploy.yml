@@ -22,7 +22,12 @@ jobs:
           DOCKER_BUILDKIT: "1"
         run: |
           set -euo pipefail
-          docker compose up -d --build --force-recreate --remove-orphans
+          # A plain build reuses whatever base images the server has cached: nginx 1.27.3
+          # from 2024 survived until 23.11.2026. Pull the service images (mysql, redis,
+          # meilisearch) and the base images (php, node, nginx) before building.
+          docker compose pull --ignore-buildable
+          docker compose build --pull
+          docker compose up -d --force-recreate --remove-orphans
           docker builder prune --filter "until=168h" --force
 
       - name: Laravel migrate --force
